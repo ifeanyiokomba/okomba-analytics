@@ -507,16 +507,16 @@ const FontLoader = () => (
       font-size:20px; flex-shrink:0;
     }
 
-    /* ─── FOOTER ─── */
     .footer {
-      background:var(--bg-dark); border-top:1px solid var(--bg-border);
-      padding:64px 0 32px;
+      background: var(--bg-dark); border-top: 1px solid var(--bg-border);
+      padding: 80px 0 40px;
     }
     .footer-grid {
-      display:grid; grid-template-columns:1fr;
-      gap:40px; margin-bottom:48px;
+      display: grid; grid-template-columns: 1fr;
+      gap: 48px; margin-bottom: 56px;
     }
-    @media(min-width:640px) { .footer-grid { grid-template-columns:1fr 1fr; } }
+    @media(min-width:640px)  { .footer-grid { grid-template-columns: 1fr 1fr; } }
+    @media(min-width:1024px) { .footer-grid { grid-template-columns: 2fr 1fr 1fr 1fr; } } 1fr; } }
     @media(min-width:1024px) { .footer-grid { grid-template-columns:2fr 1fr 1fr 1fr; } }
 
     .footer-link {
@@ -690,11 +690,166 @@ const FontLoader = () => (
     }
     .trust-item .dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; }
 
-    @media(prefers-reduced-motion:reduce) {
-      *, *::before, *::after { animation-duration:0.001ms !important; transition-duration:0.001ms !important; }
+    /* ─── PHASE 6: UI PROFESSIONALIZATION ─── */
+
+    /* Elevated card hover */
+    .card:hover {
+      border-color: rgba(240,165,0,0.25);
+      box-shadow: 0 24px 64px rgba(0,0,0,0.5), 0 0 0 1px rgba(240,165,0,0.1), inset 0 1px 0 rgba(255,255,255,0.04);
+      transform: translateY(-4px);
     }
 
-    /* ─── MOBILE FIXES ─── */
+    /* Premium section divider line */
+    .section-divider {
+      width: 48px; height: 3px; border-radius: 2px;
+      background: linear-gradient(90deg, var(--gold), var(--gold-light));
+      margin: 16px 0 0;
+    }
+    .section-divider.centered { margin: 16px auto 0; }
+
+    /* Upgraded eyebrow */
+    .section-eyebrow {
+      font-size: 11px; font-family: 'DM Mono', monospace;
+      letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--gold); margin-bottom: 12px; display: flex;
+      align-items: center; gap: 10px;
+    }
+    .section-eyebrow::before {
+      content: ''; display: inline-block; width: 24px; height: 1px;
+      background: linear-gradient(90deg, var(--gold), transparent);
+    }
+
+    /* Glow button */
+    .pulse-btn {
+      animation: glow-pulse 3s ease-in-out infinite;
+    }
+
+    /* Stat card upgrade */
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--bg-border);
+      border-radius: var(--radius-lg);
+      padding: 32px 24px; text-align: center;
+      position: relative; overflow: hidden;
+      transition: var(--transition);
+    }
+    .stat-card::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse at top, rgba(240,165,0,0.05) 0%, transparent 70%);
+      opacity: 0; transition: opacity 0.4s;
+    }
+    .stat-card:hover::before { opacity: 1; }
+    .stat-card:hover {
+      border-color: rgba(240,165,0,0.2);
+      transform: translateY(-3px);
+      box-shadow: 0 16px 40px rgba(0,0,0,0.4);
+    }
+
+    /* Process card upgrade */
+    .process-card {
+      display: flex; gap: 24px; padding: 28px;
+      background: var(--bg-card); border: 1px solid var(--bg-border);
+      border-radius: var(--radius-lg); align-items: flex-start;
+      transition: var(--transition); position: relative; overflow: hidden;
+    }
+    .process-card::after {
+      content: ''; position: absolute; left: 0; top: 0; bottom: 0;
+      width: 3px; border-radius: 3px 0 0 3px;
+      background: var(--accent-color, var(--gold));
+      opacity: 0; transition: opacity 0.3s;
+    }
+    .process-card:hover::after { opacity: 1; }
+    .process-card:hover {
+      border-color: rgba(240,165,0,0.15);
+      box-shadow: 0 12px 36px rgba(0,0,0,0.35);
+      transform: translateX(4px);
+    }
+
+    /* Contact method upgrade */
+    .contact-method {
+      display: flex; align-items: center; gap: 14px; padding: 18px 20px;
+      background: var(--bg-card); border: 1px solid var(--bg-border);
+      border-radius: var(--radius); cursor: pointer;
+      transition: var(--transition); text-decoration: none;
+      color: var(--text-1); position: relative; overflow: hidden;
+    }
+    .contact-method::before {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(240,165,0,0.03) 0%, transparent 60%);
+      opacity: 0; transition: opacity 0.3s;
+    }
+    .contact-method:hover::before { opacity: 1; }
+    .contact-method:hover {
+      border-color: rgba(240,165,0,0.3);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+      transform: translateX(6px);
+    }
+
+    /* Footer link upgrade */
+    .footer-link {
+      display: block; color: var(--text-3); font-size: 14px;
+      text-decoration: none; padding: 5px 0;
+      transition: var(--transition); position: relative;
+    }
+    .footer-link::before {
+      content: ''; position: absolute; left: 0; bottom: 3px;
+      width: 0; height: 1px; background: var(--gold);
+      transition: width 0.3s ease;
+    }
+    .footer-link:hover { color: var(--text-1); padding-left: 8px; }
+    .footer-link:hover::before { width: 100%; }
+
+    /* Progress bar upgrade */
+    .progress-bar {
+      height: 5px; background: rgba(255,255,255,0.05);
+      border-radius: 4px; overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%; border-radius: 4px;
+      transition: width 1.2s cubic-bezier(0.4,0,0.2,1);
+      position: relative; overflow: hidden;
+    }
+    .progress-fill::after {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      animation: shimmer 2s infinite;
+    }
+
+    /* Ticker upgrade */
+    .ticker-wrap {
+      overflow: hidden; background: rgba(0,0,0,0.4);
+      border-top: 1px solid var(--bg-border);
+      backdrop-filter: blur(10px);
+    }
+    .ticker-track {
+      display: flex; width: max-content;
+      animation: ticker-scroll 35s linear infinite;
+    }
+    @keyframes ticker-scroll {
+      from { transform: translateX(0); }
+      to   { transform: translateX(-50%); }
+    }
+    .ticker-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 12px 28px; font-size: 12px; font-weight: 500;
+      color: var(--text-3); white-space: nowrap;
+      font-family: 'DM Mono', monospace; letter-spacing: 0.04em;
+      transition: color 0.2s;
+    }
+    .ticker-item:hover { color: var(--gold); }
+    .ticker-dot {
+      width: 4px; height: 4px; border-radius: 50%;
+      background: var(--gold); opacity: 0.6; flex-shrink: 0;
+    }
+
+    /* Filter scroll upgrade */
+    .filter-scroll {
+      display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px;
+      scrollbar-width: none; -ms-overflow-style: none;
+    }
+    .filter-scroll::-webkit-scrollbar { display: none; }
+
+    /* Mobile improvements */
     @media(max-width:480px) {
       .section { padding: 60px 0; }
       .section-title { font-size: clamp(24px, 7vw, 36px); }
@@ -704,11 +859,15 @@ const FontLoader = () => (
       .service-card { padding: 20px; }
       .footer { padding: 48px 0 24px; }
       .modal-box form { padding: 16px 16px 20px; }
-      .modal-box > div:first-child { padding: 20px 16px 0; }
+      .process-card { padding: 20px; gap: 16px; }
     }
     @media(max-width:360px) {
       .container { padding: 0 14px; }
       .nav-logo-text { font-size: 14px; }
+    }
+
+    @media(prefers-reduced-motion:reduce) {
+      *, *::before, *::after { animation-duration:0.001ms !important; transition-duration:0.001ms !important; }
     }
   `}</style>
 );
@@ -1041,7 +1200,7 @@ const Hero = ({ onRequestService }) => (
         <h1 style={{ fontSize:"clamp(36px,6vw,72px)", fontWeight:800, lineHeight:1.08, marginBottom:"24px", animation:"fadeUp 0.6s 0.2s both", letterSpacing:"-0.03em" }}>
           Premium Digital<br/>
           <span className="gradient-text">Services &amp; Solutions</span><br/>
-          <span style={{ color:"var(--text-2)", fontWeight:600, fontSize:"clamp(24px,4vw,52px)" }}>Built for Growth</span>
+          <span style={{ color:"var(--text-2)", fontWeight:500, fontSize:"clamp(22px,3.5vw,48px)" }}>Built for Growth</span>
         </h1>
         {/* Subtitle */}
         <p style={{ fontSize:"clamp(16px,2vw,20px)", color:"var(--text-2)", lineHeight:1.7, maxWidth:"600px", marginBottom:"36px", animation:"fadeUp 0.6s 0.3s both" }}>
@@ -1325,8 +1484,8 @@ const ProcessSection = () => (
           { step:"03", title:"Expert Execution", desc:"Premium execution with regular progress updates, quality checks, and iterative refinement to exceed expectations.", icon:"zap", color:"var(--teal)" },
           { step:"04", title:"Delivery & Support", desc:"Professional delivery with thorough documentation, handover support, and ongoing assistance to ensure long-term success.", icon:"shield", color:"#8B5CF6" },
         ].map((p,i) => (
-          <div key={i} className={`reveal reveal-delay-${i+1}`}
-            style={{ display:"flex", gap:"24px", padding:"28px", background:"var(--bg-card)", border:"1px solid var(--bg-border)", borderRadius:"var(--radius-lg)", alignItems:"flex-start", transition:"var(--transition)" }}>
+          <div key={i} className={`process-card reveal reveal-delay-${i+1}`}
+            style={{ "--accent-color": p.color }}>
             <div style={{ background:p.color+"18", border:`1px solid ${p.color}30`, borderRadius:"14px", padding:"12px", flexShrink:0 }}>
               <Icon name={p.icon} size={22} color={p.color}/>
             </div>
