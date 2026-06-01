@@ -284,6 +284,10 @@ const FontLoader = () => (
       box-shadow: 0 32px 80px rgba(0,0,0,0.7), 0 0 0 1px rgba(240,165,0,0.05);
       animation: slide-in-up 0.35s cubic-bezier(0.4,0,0.2,1);
     }
+    @media(max-width:480px) {
+      .modal-overlay { padding: 8px; align-items: flex-end; }
+      .modal-box { max-height: 95vh; border-radius: 20px 20px 0 0; }
+    }
 
     /* ─── TOAST ─── */
     .toast {
@@ -381,6 +385,10 @@ const FontLoader = () => (
     .hero-orb {
       position:absolute; border-radius:50%; filter:blur(120px); opacity:0.18;
       animation: float 10s ease-in-out infinite;
+      max-width: 100vw; max-height: 100vw;
+    }
+    @media(max-width:640px) {
+      .hero-orb { opacity: 0.10; filter: blur(80px); }
     }
     .hero-grid {
       position:absolute; inset:0;
@@ -451,7 +459,7 @@ const FontLoader = () => (
       border: 1px solid var(--bg-border);
       border-radius:var(--radius-lg); padding:28px 24px; text-align:center;
     }
-    .stat-number { font-size:42px; font-weight:800; font-family:'Syne',sans-serif; line-height:1; margin-bottom:6px; }
+    .stat-number { font-size:clamp(28px,8vw,42px); font-weight:800; font-family:'Syne',sans-serif; line-height:1; margin-bottom:6px; }
     .stat-label  { font-size:13px; color:var(--text-2); font-weight:500; }
 
     /* ─── SECTION HEADERS ─── */
@@ -547,8 +555,9 @@ const FontLoader = () => (
       background:var(--bg-card); border:1px solid var(--bg-border);
       border-radius:var(--radius-lg); padding:24px;
     }
+    @media(max-width:480px) { .admin-metric { padding: 16px; } }
     .admin-table {
-      width:100%; border-collapse:collapse;
+      width:100%; border-collapse:collapse; min-width: 500px;
     }
     .admin-table th {
       padding:12px 16px; text-align:left; font-size:12px; font-weight:600;
@@ -658,24 +667,48 @@ const FontLoader = () => (
     .filter-btn {
       padding:8px 16px; border-radius:8px; font-size:13px; font-weight:500;
       cursor:pointer; transition:var(--transition); border:1px solid var(--bg-border);
-      background:transparent; color:var(--text-2); white-space:nowrap;
+      background:transparent; color:var(--text-2); white-space:nowrap; flex-shrink:0;
     }
     .filter-btn:hover { color:var(--text-1); border-color:rgba(255,255,255,0.12); }
     .filter-btn.active { background:var(--gold-dim); color:var(--gold); border-color:rgba(240,165,0,0.3); }
+    .filter-scroll {
+      display:flex; gap:8px; overflow-x:auto; padding-bottom:4px;
+      scrollbar-width:none; -ms-overflow-style:none;
+      justify-content:flex-start;
+    }
+    .filter-scroll::-webkit-scrollbar { display:none; }
 
     /* Trust badges row */
     .trust-row {
-      display:flex; flex-wrap:wrap; gap:12px; align-items:center; justify-content:center;
+      display:flex; flex-wrap:wrap; gap:8px; align-items:center; justify-content:center;
     }
     .trust-item {
-      display:flex; align-items:center; gap:8px; padding:8px 16px;
+      display:flex; align-items:center; gap:6px; padding:6px 12px;
       background:rgba(255,255,255,0.03); border:1px solid var(--bg-border);
-      border-radius:999px; font-size:13px; color:var(--text-2);
+      border-radius:999px; font-size:12px; color:var(--text-2);
+      white-space: nowrap;
     }
-    .trust-item .dot { width:6px; height:6px; border-radius:50%; }
+    .trust-item .dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; }
 
     @media(prefers-reduced-motion:reduce) {
       *, *::before, *::after { animation-duration:0.001ms !important; transition-duration:0.001ms !important; }
+    }
+
+    /* ─── MOBILE FIXES ─── */
+    @media(max-width:480px) {
+      .section { padding: 60px 0; }
+      .section-title { font-size: clamp(24px, 7vw, 36px); }
+      .btn-lg { padding: 14px 24px; font-size: 15px; }
+      .hero { padding-top: 68px; min-height: auto; padding-bottom: 80px; }
+      .stat-card { padding: 20px 16px; }
+      .service-card { padding: 20px; }
+      .footer { padding: 48px 0 24px; }
+      .modal-box form { padding: 16px 16px 20px; }
+      .modal-box > div:first-child { padding: 20px 16px 0; }
+    }
+    @media(max-width:360px) {
+      .container { padding: 0 14px; }
+      .nav-logo-text { font-size: 14px; }
     }
   `}</style>
 );
@@ -936,7 +969,6 @@ const Navbar = ({ onNavigate, currentPage, onRequestService }) => {
             ))}
           </div>
           <div className="nav-actions">
-            <button className="btn btn-primary btn-sm" onClick={() => onRequestService(null)} style={{display:"none"}} aria-label="Get Started">Get Started</button>
             <button className="btn btn-primary btn-sm" onClick={() => onRequestService(null)} style={{ fontSize:"13px" }}>Get Started</button>
             <button className={`hamburger${menuOpen?" open":""}`} onClick={() => setMenuOpen(!menuOpen)} aria-label="Toggle menu" aria-expanded={menuOpen}>
               <span/><span/><span/>
@@ -944,6 +976,8 @@ const Navbar = ({ onNavigate, currentPage, onRequestService }) => {
           </div>
         </div>
       </nav>
+      {/* Mobile Menu Overlay */}
+      {menuOpen && <div onClick={() => setMenuOpen(false)} style={{ position:"fixed", inset:0, top:68, zIndex:849, background:"rgba(0,0,0,0.5)" }} aria-hidden="true"/>}
       {/* Mobile Menu */}
       <div className={`mobile-menu${menuOpen?" open":""}`} role="dialog" aria-label="Mobile navigation" aria-modal="true">
         <div style={{ display:"flex", alignItems:"center", justifyContent:"center", marginBottom:"32px" }}>
@@ -1016,14 +1050,14 @@ const Hero = ({ onRequestService }) => (
         </p>
         {/* CTAs */}
         <div style={{ display:"flex", flexWrap:"wrap", gap:"12px", marginBottom:"48px", animation:"fadeUp 0.6s 0.4s both" }}>
-          <button className="btn btn-primary btn-lg pulse-btn" onClick={() => onRequestService(null)}>
+          <button className="btn btn-primary btn-lg pulse-btn" onClick={() => onRequestService(null)} style={{ flex:"1 1 auto", minWidth:"200px" }}>
             Start Your Project <Icon name="arrow_right" size={18}/>
           </button>
           <a href="#services" onClick={e => { e.preventDefault(); document.getElementById("services")?.scrollIntoView({behavior:"smooth"}); }}
-             className="btn btn-secondary btn-lg">
+             className="btn btn-secondary btn-lg" style={{ flex:"1 1 auto", minWidth:"160px", justifyContent:"center" }}>
             Explore Services
           </a>
-          <a href="https://wa.me/2348088948657" target="_blank" rel="noopener noreferrer" className="btn btn-ghost btn-lg" style={{ color:"var(--teal)" }}>
+          <a href="https://wa.me/2348088948657" target="_blank" rel="noopener noreferrer" className="btn btn-ghost btn-lg" style={{ color:"var(--teal)", flex:"1 1 auto", minWidth:"140px", justifyContent:"center" }}>
             <Icon name="whatsapp" size={18} color="var(--teal)"/> WhatsApp
           </a>
         </div>
@@ -1126,7 +1160,7 @@ const ServicesSection = ({ onRequestService }) => {
           </p>
         </div>
         {/* Filter */}
-        <div style={{ display:"flex", flexWrap:"wrap", gap:"8px", marginBottom:"36px", justifyContent:"center" }} role="group" aria-label="Service category filter">
+        <div className="filter-scroll" style={{ marginBottom:"36px" }} role="group" aria-label="Service category filter">
           {CATEGORIES.map(cat => (
             <button key={cat} className={`filter-btn${active===cat?" active":""}`} onClick={() => setActive(cat)} aria-pressed={active===cat}>
               {cat}
@@ -1492,8 +1526,30 @@ const InquiryModal = ({ service, onClose, onSubmit }) => {
     e.preventDefault();
     if (!validate()) return;
     setLoading(true);
-    await new Promise(r => setTimeout(r, 1400));
+
+    // Always save to localStorage as immediate backup
     saveInquiry(form);
+
+    // Send to Google Sheets webhook if configured
+    const webhookUrl = import.meta.env.VITE_SHEETS_WEBHOOK_URL;
+    if (webhookUrl) {
+      try {
+        await fetch(webhookUrl, {
+          method: "POST",
+          mode: "no-cors",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            ...form,
+            timestamp: new Date().toISOString(),
+            source: window.location.hostname,
+          }),
+        });
+      } catch {
+        // Webhook failed — data is still in localStorage, not lost
+        console.warn("Webhook unavailable — inquiry saved locally.");
+      }
+    }
+
     setLoading(false);
     setSuccess(true);
     onSubmit(form);
@@ -1895,10 +1951,10 @@ const AdminDashboard = ({ onLogout }) => {
                 {[
                   { label:"Platform", val:"OKOMBA ANALYTICS" },
                   { label:"Admin Email", val:"support@okomba.com" },
-                  { label:"Data Storage", val:"LocalStorage (Session)" },
-                  { label:"Google Sheets", val:"Ready for Integration" },
-                  { label:"Email Automation", val:"Architecture Prepared" },
-                  { label:"Cloudflare Pages", val:"Deployment Ready" },
+                  { label:"Local Storage", val:"Active — browser backup" },
+                  { label:"Google Sheets", val: import.meta.env.VITE_SHEETS_WEBHOOK_URL ? "✅ Connected" : "⚠️ Not configured" },
+                  { label:"Email Alerts", val: import.meta.env.VITE_SHEETS_WEBHOOK_URL ? "✅ Via Apps Script" : "⚠️ Set webhook to enable" },
+                  { label:"Cloudflare Pages", val:"✅ Deployed" },
                 ].map(item => (
                   <div key={item.label} style={{ display:"flex", justifyContent:"space-between", padding:"10px 0", borderBottom:"1px solid var(--bg-border)" }}>
                     <span style={{ fontSize:"13px", color:"var(--text-3)" }}>{item.label}</span>
@@ -2031,11 +2087,6 @@ export default function App() {
         <HomePage onRequestService={handleRequestService}/>
       </main>
       <Footer onNavigate={handleNavigate} onRequestService={handleRequestService}/>
-      {/* Admin link — hidden, discoverable only via URL */}
-      <button onClick={() => setPage("admin")} aria-label="Admin portal"
-        style={{ position:"fixed", bottom:16, right:16, width:36, height:36, background:"rgba(255,255,255,0.03)", border:"1px solid var(--bg-border)", borderRadius:"50%", cursor:"pointer", opacity:0.3, display:"flex", alignItems:"center", justifyContent:"center" }}>
-        <Icon name="lock" size={14} color="var(--text-3)"/>
-      </button>
       {modalOpen && (
         <InquiryModal service={modalService} onClose={handleModalClose} onSubmit={handleSubmit}/>
       )}
