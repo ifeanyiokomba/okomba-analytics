@@ -56,12 +56,21 @@ export const metadata: Metadata = {
     siteName: "Okomba Analytics",
     type: "website",
     locale: "en_NG",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1344,
+        height: 768,
+        alt: "Okomba Analytics — Digital Products, Systems & Experiences",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "Okomba Analytics — Digital Products, Systems & Experiences",
     description:
       "Web development, fintech solutions, payment systems, automation and digital operations — engineered to move your business forward.",
+    images: ["/og-image.png"],
   },
   robots: {
     index: true,

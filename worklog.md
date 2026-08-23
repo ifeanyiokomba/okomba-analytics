@@ -157,3 +157,31 @@ Stage Summary:
   4. Maybe: inquiry search/filter in admin table
   5. Consider sitemap.xml + robots.txt polish for SEO
 - RISKS: none blocking; login + inquiry rate limiters remain in-memory (reset on restart, acceptable)
+
+---
+Task ID: R3 (cron review round 3)
+Agent: webDevReview cron (15-min cycle)
+Task: QA regression + admin search/filter + subscriber list panel + SEO assets (OG image, sitemap, robots)
+
+Work Log:
+- QA regression: server 200, no console errors, desktop/mobile overflow-CLEAN, seeded 3 test inquiries + 2 subscribers for development verification
+- NEW FEATURE — Admin inquiry search: live client-side search box (Search icon input) across name/email/service/phone/whatsapp/message; counter shows "N of total" when filtered; verified: "chinedu"→1 row, "payment"→1 row (service match), no-match→SearchX empty state w/ "Clear filters" button (restores 3 rows)
+- NEW FEATURE — Admin status filter chips: All/New/Contacted/In Progress/Closed pill buttons w/ aria-pressed; verified end-to-end incl. changing Seyi's status to "contacted" then Contacted filter → exactly 1 row
+- NEW FEATURE — Admin subscribers panel (src/app/api/subscribers/route.ts + UI): admin-guarded GET returns subscriber list newest-first; dashboard panel w/ Users icon, responsive email chip grid (sm:2/lg:3 cols), mailto links, max-h-64 scroll; verified showing both seeded emails
+- NEW FEATURE (SEO) — OG share image: AI-generated 1344x768 premium dark/gold banner (public/og-image.png, 111KB) with Okomba wordmark; wired into openGraph.images + twitter.images in layout.tsx; VLM QA: "Okomba clearly readable, premium dark navy+gold"
+- NEW FEATURE (SEO) — sitemap.ts + robots.ts MetadataRoutes (replaced static robots.txt): sitemap.xml serves homepage entry w/ lastModified; robots.txt allows /, disallows /api/, links sitemap; both verified via curl (200 + correct XML)
+- BUG FIX (mobile) — Admin header action buttons overflowed at 375px (Refresh/Site/Logout row = 451px wide); fixed w/ responsive icon-only buttons below sm breakpoint (labels hidden, aria-labels added); admin mobile now 375/375 CLEAN
+- Fixed stray-character typo in Clear filters button caught during edit review
+- Final verification: lint clean, site desktop 1440 CLEAN, admin mobile CLEAN, VLM admin dashboard QA PASS (all 7 cards + bars + table w/ search+chips + 3 rows + subscribers panel present)
+- Test data cleaned from DB (inquiries + subscribers back to 0)
+
+Stage Summary:
+- PROJECT STATUS: Stable & feature-complete admin. Marketing site + admin portal both polished, SEO foundation now full (metadata, OG image, sitemap, robots, JSON-LD FAQ)
+- VERIFIED: search/filter chips, subscriber panel, status-change→filter integration, SEO routes, mobile fixes
+- UNRESOLVED/NEXT ROUND priorities:
+  1. Tag-filtered insights view + additional blog posts (content expansion)
+  2. Admin table CSV export (easy win for data portability)
+  3. Testimonial/hero imagery refresh (AI-generated visuals per section)
+  4. Performance: consider lazy-loading admin portal + dialogs
+  5. Optional: email notification stub on new inquiry (webhook-ready)
+- RISKS: none blocking; refs in agent-browser shift on re-render (use semantic find for reliability)

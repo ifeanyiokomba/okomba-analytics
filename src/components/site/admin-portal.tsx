@@ -12,6 +12,8 @@ import {
   LogOut,
   Mail,
   RefreshCw,
+  Search,
+  SearchX,
   TrendingUp,
   User,
   Users,
@@ -202,25 +204,38 @@ function AdminLogin({ onLogin, onExit }: { onLogin: () => void; onExit: () => vo
 }
 
 /* ── Dashboard ─────────────────────────────────────────────── */
+type Subscriber = { id: string; email: string; createdAt: string };
+
 function AdminDashboard({ onLogout, onExit }: { onLogout: () => void; onExit: () => void }) {
   const [inquiries, setInquiries] = useState<Inquiry[]>([]);
+  const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
 
+  // table controls
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+
   const load = useCallback(async () => {
     setError(null);
     try {
-      const [listRes, statsRes] = await Promise.all([
+      const [listRes, statsRes, subsRes] = await Promise.all([
         fetch("/api/inquiries"),
         fetch("/api/inquiries?stats=1"),
+        fetch("/api/subscribers"),
       ]);
       if (!listRes.ok || !statsRes.ok) throw new Error("Failed to load data — session may have expired");
       const list = await listRes.json();
       const s = await statsRes.json();
       setInquiries(list.inquiries ?? []);
       setStats(s.stats ?? null);
+      // subscribers is non-fatal — only admins with valid session get it
+      if (subsRes.ok) {
+        const subs = await subsRes.json();
+        setSubscribers(subs.subscribers ?? []);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load");
     } finally {
@@ -272,6 +287,22 @@ function AdminDashboard({ onLogout, onExit }: { onLogout: () => void; onExit: ()
 
   const maxServiceCount = stats?.byService?.[0]?.count ?? 1;
 
+  // Filtered inquiries for the table (client-side search + status filter)
+  const filteredInquiries = inquiries.filter((i) => {
+    const matchesStatus = statusFilter === "all" || i.status === statusFilter;
+    if (!matchesStatus) return false;
+    if (!search.trim()) return true;
+    const q = search.trim().toLowerCase();
+    return (
+      i.name.toLowerCase().includes(q) ||
+      i.email.toLowerCase().includes(q) ||
+      i.service.toLowerCase().includes(q) ||
+      (i.phone ?? "").toLowerCase().includes(q) ||
+      (i.whatsapp ?? "").toLowerCase().includes(q) ||
+      i.message.toLowerCase().includes(q)
+    );
+  });
+
   return (
     <div className="min-h-screen bg-background">
       {/* Admin header */}
@@ -283,24 +314,27 @@ function AdminDashboard({ onLogout, onExit }: { onLogout: () => void; onExit: ()
               ADMIN
             </span>
           </div>
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-1.5 sm:gap-2.5">
             <button
               onClick={load}
-              className="inline-flex items-center gap-2 rounded-lg border border-white/[0.09] bg-white/[0.03] px-3.5 py-2 text-[12.5px] font-medium text-muted-foreground transition-colors hover:border-gold/40 hover:text-gold"
+              aria-label="Refresh data"
+              className="inline-flex items-center gap-2 rounded-lg border border-white/[0.09] bg-white/[0.03] px-2.5 py-2 text-[12.5px] font-medium text-muted-foreground transition-colors hover:border-gold/40 hover:text-gold sm:px-3.5"
             >
-              <RefreshCw size={13} aria-hidden="true" /> Refresh
+              <RefreshCw size={13} aria-hidden="true" /> <span className="hidden sm:inline">Refresh</span>
             </button>
             <button
               onClick={onExit}
-              className="inline-flex items-center gap-2 rounded-lg border border-white/[0.09] bg-white/[0.03] px-3.5 py-2 text-[12.5px] font-medium text-muted-foreground transition-colors hover:text-foreground"
+              aria-label="Back to website"
+              className="inline-flex items-center gap-2 rounded-lg border border-white/[0.09] bg-white/[0.03] px-2.5 py-2 text-[12.5px] font-medium text-muted-foreground transition-colors hover:text-foreground sm:px-3.5"
             >
-              <ArrowLeft size={13} aria-hidden="true" /> Site
+              <ArrowLeft size={13} aria-hidden="true" /> <span className="hidden sm:inline">Site</span>
             </button>
             <button
               onClick={logout}
-              className="inline-flex items-center gap-2 rounded-lg border border-red-500/25 bg-red-500/[0.08] px-3.5 py-2 text-[12.5px] font-medium text-red-300 transition-colors hover:bg-red-500/15"
+              aria-label="Log out"
+              className="inline-flex items-center gap-2 rounded-lg border border-red-500/25 bg-red-500/[0.08] px-2.5 py-2 text-[12.5px] font-medium text-red-300 transition-colors hover:bg-red-500/15 sm:px-3.5"
             >
-              <LogOut size={13} aria-hidden="true" /> Logout
+              <LogOut size={13} aria-hidden="true" /> <span className="hidden sm:inline">Logout</span>
             </button>
           </div>
         </div>
@@ -354,10 +388,49 @@ function AdminDashboard({ onLogout, onExit }: { onLogout: () => void; onExit: ()
 
         {/* Inquiries table */}
         <div className="surface-card mt-4 overflow-hidden">
-          <div className="flex items-center justify-between border-b border-white/[0.06] px-6 py-5">
+          <div className="flex flex-col gap-4 border-b border-white/[0.06] px-6 py-5 md:flex-row md:items-center md:justify-between">
             <h2 className="text-[14.5px] font-semibold text-foreground">
-              All inquiries <span className="ml-1.5 font-mono text-[11px] font-normal text-muted-foreground">({inquiries.length})</span>
+              All inquiries{" "}
+              <span className="ml-1.5 font-mono text-[11px] font-normal text-muted-foreground">
+                ({filteredInquiries.length}{filteredInquiries.length !== inquiries.length ? ` of ${inquiries.length}` : ""})
+              </span>
             </h2>
+
+            {/* Search + status filter controls */}
+            <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center">
+              <div className="relative">
+                <Search
+                  size={14}
+                  className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground/60"
+                  aria-hidden="true"
+                />
+                <input
+                  type="search"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Search name, email, service…"
+                  aria-label="Search inquiries"
+                  className="w-full rounded-xl border border-white/[0.09] bg-white/[0.03] py-2.5 pl-9 pr-3.5 text-[12.5px] text-foreground outline-none transition-colors placeholder:text-muted-foreground/60 focus:border-gold/60 sm:w-64"
+                />
+              </div>
+              <div className="flex flex-wrap gap-1.5" role="group" aria-label="Filter by status">
+                {["all", ...STATUSES].map((s) => (
+                  <button
+                    key={s}
+                    onClick={() => setStatusFilter(s)}
+                    aria-pressed={statusFilter === s}
+                    className={cn(
+                      "rounded-full border px-3 py-1.5 font-mono text-[10.5px] font-medium capitalize transition-colors",
+                      statusFilter === s
+                        ? "border-gold/50 bg-gold-dim text-gold"
+                        : "border-white/[0.08] bg-white/[0.03] text-muted-foreground hover:border-white/20 hover:text-foreground"
+                    )}
+                  >
+                    {s === "all" ? "All" : s.replace("_", " ")}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
 
           {loading ? (
@@ -368,6 +441,20 @@ function AdminDashboard({ onLogout, onExit }: { onLogout: () => void; onExit: ()
             <div className="flex flex-col items-center gap-3 py-16 text-center">
               <Inbox size={30} className="text-muted-foreground/40" aria-hidden="true" />
               <p className="text-[13.5px] text-muted-foreground">No inquiries yet — they&apos;ll appear here the moment someone submits the form.</p>
+            </div>
+          ) : filteredInquiries.length === 0 ? (
+            <div className="flex flex-col items-center gap-3 py-14 text-center">
+              <SearchX size={26} className="text-muted-foreground/40" aria-hidden="true" />
+              <p className="text-[13.5px] text-muted-foreground">No inquiries match your search or filter.</p>
+              <button
+                onClick={() => {
+                  setSearch("");
+                  setStatusFilter("all");
+                }}
+                className="rounded-lg border border-gold/30 bg-gold-dim px-3.5 py-1.5 text-[12px] font-medium text-gold transition-colors hover:bg-gold/20"
+              >
+                Clear filters
+              </button>
             </div>
           ) : (
             <div className="max-h-[560px] overflow-auto">
@@ -382,7 +469,7 @@ function AdminDashboard({ onLogout, onExit }: { onLogout: () => void; onExit: ()
                   </tr>
                 </thead>
                 <tbody>
-                  {inquiries.map((i) => (
+                  {filteredInquiries.map((i) => (
                     <tr key={i.id} className="border-b border-white/[0.04] transition-colors hover:bg-white/[0.02]">
                       <td className="px-6 py-4">
                         <p className="text-[13.5px] font-semibold text-foreground">{i.name}</p>
@@ -424,6 +511,47 @@ function AdminDashboard({ onLogout, onExit }: { onLogout: () => void; onExit: ()
                   ))}
                 </tbody>
               </table>
+            </div>
+          )}
+        </div>
+        {/* Subscribers panel */}
+        <div className="surface-card mt-4 overflow-hidden">
+          <div className="flex items-center justify-between border-b border-white/[0.06] px-6 py-5">
+            <h2 className="flex items-center gap-2.5 text-[14.5px] font-semibold text-foreground">
+              <Users size={16} className="text-teal" aria-hidden="true" />
+              Newsletter subscribers
+              <span className="ml-1 font-mono text-[11px] font-normal text-muted-foreground">({subscribers.length})</span>
+            </h2>
+          </div>
+
+          {loading ? (
+            <div className="flex items-center justify-center py-10">
+              <Loader2 size={20} className="animate-spin text-teal" aria-label="Loading subscribers" />
+            </div>
+          ) : subscribers.length === 0 ? (
+            <p className="px-6 py-10 text-center text-[13px] text-muted-foreground">
+              No subscribers yet — newsletter signups from the website will appear here.
+            </p>
+          ) : (
+            <div className="max-h-64 overflow-y-auto px-6 py-4">
+              <ul className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                {subscribers.map((s) => (
+                  <li
+                    key={s.id}
+                    className="flex items-center justify-between gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3"
+                  >
+                    <a
+                      href={`mailto:${s.email}`}
+                      className="truncate text-[12.5px] font-medium text-foreground transition-colors hover:text-gold"
+                    >
+                      {s.email}
+                    </a>
+                    <span className="shrink-0 font-mono text-[10px] text-muted-foreground/70">
+                      {new Date(s.createdAt).toLocaleDateString("en-NG", { day: "numeric", month: "short" })}
+                    </span>
+                  </li>
+                ))}
+              </ul>
             </div>
           )}
         </div>
