@@ -22,6 +22,7 @@ import { InquiryModal } from "@/components/site/inquiry-modal";
 import { AdminPortal } from "@/components/site/admin-portal";
 import { LoadingScreen } from "@/components/site/loading-screen";
 import { ScrollProgress } from "@/components/site/scroll-progress";
+import { BackToTop } from "@/components/site/back-to-top";
 
 type ToastData = { msg: string };
 
@@ -91,6 +92,7 @@ export default function Home() {
 
       <Navbar onGetStarted={() => openInquiry(null)} />
       <ScrollProgress />
+      <BackToTop />
 
       <main id="main" className="flex-1">
         <Hero onGetStarted={() => openInquiry(null)} />

@@ -132,3 +132,28 @@ Stage Summary:
   4. Admin login attempt rate limiting (currently only inquiry POST is rate-limited)
   5. Add subscriber count to admin dashboard (GET stats extension)
 - RISKS: none blocking; in-memory rate limiters reset on server restart (acceptable scale)
+
+---
+Task ID: R2 (cron review round 2)
+Agent: webDevReview cron (15-min cycle)
+Task: QA regression + admin subscriber stats, login rate limiting, case study detail dialogs, back-to-top button
+
+Work Log:
+- QA regression: server 200, no console errors, desktop 1280 & mobile 375 overflow-CLEAN, all sections render (11 section ids)
+- NEW FEATURE — Admin subscribers stat: GET /api/inquiries?stats=1 now returns `subscribers` count (db.subscriber.count in Promise.all); admin dashboard shows 7th stat card (Users icon, teal); stat grid → md:grid-cols-4 lg:grid-cols-7; verified via UI ("0=Total inquiries | ... | 0=Subscribers")
+- NEW FEATURE (security) — Admin login rate limiting: 5 failed attempts/IP/15min → 429 "Too many failed attempts. Try again in 15 minutes."; successful login resets counter; lockout check happens before delay/credential check; verified with synthetic X-Forwarded-For IPs (5×401 → 429 even with correct creds → different IP still 200)
+- NEW FEATURE — Case study detail dialogs (case-study-dialog.tsx): full-story modal per case study (TechStartNG/EduBridge/FinFlow) with summary, timeline, team size, engagement highlights checklist, metrics grid, stack chips, quote card; card click + "Read full story" CTA row (with 01/03 counter); Escape/overlay/X close; verified content renders (1257 chars, highlights/timeline/team all present) + VLM verdict "Flawless execution"
+- STYLING — BackToTop floating button (back-to-top.tsx): appears after 600px scroll, gold-bordered glass square w/ arrow, smooth scroll-to-top verified (scrollY→0), z-index below toasts
+- Fixed JSX nesting bug in case-studies-section.tsx (missing closing div in button wrapper) caught by lint
+- Verified: lint clean, tsc clean (only pre-existing example/skill folder errors), mobile 375 CLEAN, Escape-close works, admin login via UI works, logout 200
+
+Stage Summary:
+- PROJECT STATUS: Stable & further hardened. 2 feature additions (subscriber analytics in admin, case study deep-dives), 1 security hardening (login brute-force lockout), 1 UX polish (floating back-to-top)
+- VERIFIED: all new + existing APIs, dialogs, admin UI, mobile overflow, lint, console clean
+- UNRESOLVED/NEXT ROUND priorities:
+  1. OG/social share image asset (static og-image.png for link previews)
+  2. Tag-filtered insights view + additional blog posts
+  3. Subscriber list view in admin (currently count only)
+  4. Maybe: inquiry search/filter in admin table
+  5. Consider sitemap.xml + robots.txt polish for SEO
+- RISKS: none blocking; login + inquiry rate limiters remain in-memory (reset on restart, acceptable)

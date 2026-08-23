@@ -699,3 +699,51 @@ export const FAQS = [
     a: "A short conversation about your goal, your timeline and your budget range. From there we handle discovery, planning and execution — you stay involved at decision points without being buried in technical detail.",
   },
 ];
+
+/* ── Case study dialog extras ─────────────────────────────── */
+export type CaseStudyDetail = {
+  id: string;
+  summary: string;
+  timeline: string;
+  teamSize: string;
+  highlights: string[];
+};
+
+export const CASE_STUDY_DETAILS: Record<string, CaseStudyDetail> = {
+  "cs-techstart": {
+    id: "cs-techstart",
+    summary:
+      "TechStartNG needed to launch a customer-facing web application on a startup timeline — without an in-house engineering team. We took them from concept to a production deployment, including an admin layer their non-technical staff operate daily.",
+    timeline: "6 weeks · concept → launch",
+    teamSize: "2 engineers + 1 designer",
+    highlights: [
+      "Production-grade web application delivered on schedule",
+      "Admin dashboard the internal team runs without developers",
+      "Scalable architecture ready for the next funding stage",
+    ],
+  },
+  "cs-edubridge": {
+    id: "cs-edubridge",
+    summary:
+      "EduBridge Foundation's virtual summit had one shot at flawless execution: hundreds of registrations, presenter coordination and certificates — all handled digitally. We ran the entire operation and it shipped without a single incident.",
+    timeline: "4 weeks · prep → certificates",
+    teamSize: "1 ops lead + 1 support engineer",
+    highlights: [
+      "Automated registration system for hundreds of participants",
+      "Presenter & logistics coordination end-to-end",
+      "100% certificate distribution after the event",
+    ],
+  },
+  "cs-finflow": {
+    id: "cs-finflow",
+    summary:
+      "FinFlow Nigeria's transaction operations were stalling on complex Remita and gateway setups with manual reconciliation. We engineered the full payment integration and automated the pipeline — turning their bottleneck into a non-event.",
+    timeline: "5 weeks · audit → automation",
+    teamSize: "2 engineers + 1 fintech ops specialist",
+    highlights: [
+      "Remita + gateway integration handled end-to-end",
+      "Transaction processing fully automated",
+      "Reconciliation friction reduced to near zero",
+    ],
+  },
+};

@@ -14,6 +14,7 @@ import {
   RefreshCw,
   TrendingUp,
   User,
+  Users,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { OkombaNavLogo } from "./logo";
@@ -43,6 +44,7 @@ type Stats = {
   in_progress: number;
   closed: number;
   last7Days: number;
+  subscribers: number;
   byService: { service: string; count: number }[];
 };
 
@@ -264,6 +266,7 @@ function AdminDashboard({ onLogout, onExit }: { onLogout: () => void; onExit: ()
         { label: "In progress", value: stats.in_progress, icon: Clock3, accent: "text-purple-300", bg: "border-purple-400/25 bg-purple-400/10" },
         { label: "Closed", value: stats.closed, icon: CheckCircle2, accent: "text-teal", bg: "border-teal/25 bg-teal-dim" },
         { label: "Last 7 days", value: stats.last7Days, icon: TrendingUp, accent: "text-gold-light", bg: "border-gold-light/25 bg-gold-light/10" },
+        { label: "Subscribers", value: stats.subscribers, icon: Users, accent: "text-teal", bg: "border-teal/25 bg-teal-dim" },
       ]
     : [];
 
@@ -316,7 +319,7 @@ function AdminDashboard({ onLogout, onExit }: { onLogout: () => void; onExit: ()
         )}
 
         {/* Stat cards */}
-        <div className="mt-8 grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">
+        <div className="mt-8 grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-7">
           {statCards.map((c) => (
             <div key={c.label} className="surface-card p-5">
               <span className={`inline-flex h-9 w-9 items-center justify-center rounded-xl border ${c.bg} ${c.accent}`}>

@@ -167,6 +167,7 @@ export async function GET(req: Request) {
         closed,
         last7Days,
         groupedByService,
+        subscribers,
       ] = await Promise.all([
         db.inquiry.count(),
         db.inquiry.count({ where: { status: "new" } }),
@@ -178,6 +179,7 @@ export async function GET(req: Request) {
           by: ["service"],
           _count: { _all: true },
         }),
+        db.subscriber.count(),
       ]);
 
       const byService = groupedByService
@@ -194,6 +196,7 @@ export async function GET(req: Request) {
           closed,
           last7Days,
           byService,
+          subscribers,
         },
       });
     }

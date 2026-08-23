@@ -16,12 +16,69 @@ const loginSchema = z.object({
   password: z.string().min(1),
 });
 
+/* ------------------------------------------------------------------ */
+/* In-memory brute-force protection:                                   */
+/* 5 failed attempts per IP per 15 min → 429 lockout. Successful       */
+/* logins reset the counter. Resets on server restart (dev-acceptable).*/
+/* ------------------------------------------------------------------ */
+const LOGIN_ATTEMPT_LIMIT = 5;
+const LOGIN_WINDOW_MS = 15 * 60 * 1000;
+
+const loginAttempts = new Map<string, { failures: number; lastAttempt: number }>();
+
+function getClientIp(req: Request): string {
+  const forwarded = req.headers.get("x-forwarded-for");
+  if (forwarded) {
+    const first = forwarded.split(",")[0]?.trim();
+    if (first) return first;
+  }
+  return req.headers.get("x-real-ip")?.trim() || "unknown";
+}
+
+function isLockedOut(ip: string): boolean {
+  const entry = loginAttempts.get(ip);
+  if (!entry) return false;
+  // Window expired → clear stale entry
+  if (Date.now() - entry.lastAttempt > LOGIN_WINDOW_MS) {
+    loginAttempts.delete(ip);
+    return false;
+  }
+  return entry.failures >= LOGIN_ATTEMPT_LIMIT;
+}
+
+function recordFailure(ip: string): void {
+  const entry = loginAttempts.get(ip);
+  if (entry && Date.now() - entry.lastAttempt <= LOGIN_WINDOW_MS) {
+    entry.failures += 1;
+    entry.lastAttempt = Date.now();
+  } else {
+    loginAttempts.set(ip, { failures: 1, lastAttempt: Date.now() });
+  }
+}
+
+function resetAttempts(ip: string): void {
+  loginAttempts.delete(ip);
+}
+
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 export async function POST(req: Request) {
   try {
+    const ip = getClientIp(req);
+
+    // Lockout check before burning cycles on the attempt
+    if (isLockedOut(ip)) {
+      return NextResponse.json(
+        {
+          ok: false,
+          error: "Too many failed attempts. Try again in 15 minutes.",
+        },
+        { status: 429 }
+      );
+    }
+
     // Small artificial delay to slow down brute-force attempts.
     await sleep(BRUTE_FORCE_DELAY_MS);
 
@@ -40,6 +97,7 @@ export async function POST(req: Request) {
 
     const parsed = loginSchema.safeParse(body);
     if (!parsed.success) {
+      recordFailure(ip);
       return NextResponse.json(
         { ok: false, error: "Invalid credentials" },
         { status: 401 }
@@ -51,6 +109,7 @@ export async function POST(req: Request) {
     const passwordMatches = parsed.data.password === adminPassword;
 
     if (!emailMatches || !passwordMatches) {
+      recordFailure(ip);
       return NextResponse.json(
         { ok: false, error: "Invalid credentials" },
         { status: 401 }
@@ -59,6 +118,8 @@ export async function POST(req: Request) {
 
     const token = crypto.randomUUID();
     const expiresAt = new Date(Date.now() + SESSION_TTL_MS);
+
+    resetAttempts(ip);
 
     await db.adminSession.create({
       data: { token, expiresAt },

@@ -1,11 +1,14 @@
 "use client";
 
-import { BadgeCheck, Quote } from "lucide-react";
-import { CASE_STUDIES } from "@/lib/content";
+import { useState } from "react";
+import { ArrowUpRight, BadgeCheck, Quote } from "lucide-react";
+import { CASE_STUDIES, type CaseStudy } from "@/lib/content";
 import { SectionHeading } from "./section-heading";
 import { Reveal } from "./reveal";
+import { CaseStudyDialog } from "./case-study-dialog";
 
 export function CaseStudiesSection() {
+  const [openCase, setOpenCase] = useState<CaseStudy | null>(null);
   return (
     <section id="work" className="section-pad relative scroll-mt-20" aria-label="Featured work">
       <div className="pointer-events-none absolute left-0 top-1/3 h-[320px] w-[320px] rounded-full bg-[#5b9eff]/[0.05] blur-[110px]" aria-hidden="true" />
@@ -32,6 +35,12 @@ export function CaseStudiesSection() {
                 >
                   {String(i + 1).padStart(2, "0")}
                 </span>
+
+                <button
+                  onClick={() => setOpenCase(cs)}
+                  className="w-full cursor-pointer text-left focus-visible:outline-2 focus-visible:outline-gold"
+                  aria-label={`Read full ${cs.client} case study`}
+                >
 
                 <div className="grid grid-cols-1 gap-8 p-7 md:grid-cols-[1.25fr_0.75fr] md:gap-10 md:p-10">
                   {/* Story column */}
@@ -85,6 +94,21 @@ export function CaseStudiesSection() {
                     </div>
                   </div>
                 </div>
+                </button>
+
+                {/* Read-full CTA row (outside button to keep card padding) */}
+                <div className="flex items-center justify-between border-t border-white/[0.06] px-7 py-4 md:px-10">
+                  <span className="font-mono text-[10px] text-muted-foreground/60">
+                    Case study {String(i + 1).padStart(2, "0")} / {String(CASE_STUDIES.length).padStart(2, "0")}
+                  </span>
+                  <button
+                    onClick={() => setOpenCase(cs)}
+                    className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-foreground transition-colors hover:text-gold"
+                  >
+                    Read full story
+                    <ArrowUpRight size={14} className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" aria-hidden="true" />
+                  </button>
+                </div>
               </article>
             </Reveal>
           ))}
@@ -104,6 +128,8 @@ export function CaseStudiesSection() {
           </figure>
         </Reveal>
       </div>
+
+      <CaseStudyDialog caseStudy={openCase} onClose={() => setOpenCase(null)} />
     </section>
   );
 }
