@@ -667,3 +667,35 @@ export const TICKER_ITEMS = [
   "Business Consulting",
   "Client Acquisition",
 ];
+
+/* ── FAQ ──────────────────────────────────────────────────── */
+export const FAQS = [
+  {
+    q: "How quickly can we start a project?",
+    a: "Most engagements begin within 3–5 working days of an accepted proposal. For urgent needs — payment outages, event registrations with deadlines — we keep an express lane and can often start the same week.",
+  },
+  {
+    q: "How much does a typical project cost?",
+    a: "Scope drives price. A business website starts smaller; a custom web application or payment integration is engineered to your requirements. We quote fixed, phased budgets after a free discovery call — no open-ended billing surprises.",
+  },
+  {
+    q: "Do you work with clients outside Nigeria?",
+    a: "Yes. While we're based in Nigeria and deeply familiar with local rails (Remita, Quickteller, Paystack, Flutterwave), we serve clients globally over WhatsApp, email and video calls — with overlap hours arranged for your timezone.",
+  },
+  {
+    q: "What happens after launch — do you disappear?",
+    a: "No. Every project ships with a support window, and most clients keep us on a maintenance retainer. We monitor, fix, improve and grow what we build — delivery is the beginning of the relationship, not the end.",
+  },
+  {
+    q: "Can you take over a project another team started?",
+    a: "Yes — it's a common engagement. We start with a technical audit of the existing code and infrastructure, give you an honest assessment of what's salvageable, then plan the path forward. You keep full ownership of everything.",
+  },
+  {
+    q: "How is my data and payment information handled?",
+    a: "We follow professional security standards: encrypted communication, secure gateway integrations, least-privilege access and strict confidentiality. We never share client data, and payment processing runs through certified providers — never through us.",
+  },
+  {
+    q: "What do you need from me to get started?",
+    a: "A short conversation about your goal, your timeline and your budget range. From there we handle discovery, planning and execution — you stay involved at decision points without being buried in technical detail.",
+  },
+];

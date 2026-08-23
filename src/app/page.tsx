@@ -14,11 +14,14 @@ import { ProcessSection } from "@/components/site/process-section";
 import { TestimonialsSection } from "@/components/site/testimonials-section";
 import { InsightsSection } from "@/components/site/insights-section";
 import { AboutSection } from "@/components/site/about-section";
+import { FaqSection } from "@/components/site/faq-section";
+import { NewsletterSection } from "@/components/site/newsletter-section";
 import { ContactSection } from "@/components/site/contact-section";
 import { Footer } from "@/components/site/footer";
 import { InquiryModal } from "@/components/site/inquiry-modal";
 import { AdminPortal } from "@/components/site/admin-portal";
 import { LoadingScreen } from "@/components/site/loading-screen";
+import { ScrollProgress } from "@/components/site/scroll-progress";
 
 type ToastData = { msg: string };
 
@@ -87,6 +90,7 @@ export default function Home() {
       </a>
 
       <Navbar onGetStarted={() => openInquiry(null)} />
+      <ScrollProgress />
 
       <main id="main" className="flex-1">
         <Hero onGetStarted={() => openInquiry(null)} />
@@ -99,7 +103,9 @@ export default function Home() {
         <ProcessSection onGetStarted={() => openInquiry(null)} />
         <TestimonialsSection />
         <InsightsSection />
+        <NewsletterSection />
         <AboutSection />
+        <FaqSection />
         <ContactSection onGetStarted={() => openInquiry(null)} />
       </main>
 

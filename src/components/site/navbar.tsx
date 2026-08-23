@@ -12,7 +12,7 @@ const NAV_LINKS = [
   { label: "Work", id: "work" },
   { label: "Process", id: "process" },
   { label: "About", id: "about" },
-  { label: "Insights", id: "insights" },
+  { label: "FAQ", id: "faq" },
 ];
 
 type NavbarProps = {
@@ -22,12 +22,37 @@ type NavbarProps = {
 export function Navbar({ onGetStarted }: NavbarProps) {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
+  const [activeSection, setActiveSection] = useState<string | null>(null);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  // Track which section is currently in view for link highlighting
+  useEffect(() => {
+    const sectionIds = NAV_LINKS.map((l) => l.id);
+    const sections = sectionIds
+      .map((id) => document.getElementById(id))
+      .filter((el): el is HTMLElement => el !== null);
+    if (sections.length === 0) return;
+
+    const obs = new IntersectionObserver(
+      (entries) => {
+        // Pick the most visible intersecting entry
+        const visible = entries
+          .filter((e) => e.isIntersecting)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+        if (visible) {
+          setActiveSection(visible.target.id);
+        }
+      },
+      { rootMargin: "-30% 0px -55% 0px", threshold: [0, 0.1, 0.25, 0.5, 1] }
+    );
+    sections.forEach((s) => obs.observe(s));
+    return () => obs.disconnect();
   }, []);
 
   // Lock body scroll when mobile menu is open
@@ -69,17 +94,34 @@ export function Navbar({ onGetStarted }: NavbarProps) {
 
           {/* Desktop links */}
           <ul className="hidden items-center gap-1 lg:flex" role="menubar">
-            {NAV_LINKS.map((l) => (
-              <li key={l.id} role="none">
-                <button
-                  role="menuitem"
-                  onClick={() => scrollTo(l.id)}
-                  className="rounded-lg px-3.5 py-2 text-[14px] font-medium text-muted-foreground transition-colors hover:bg-white/[0.05] hover:text-foreground focus-visible:outline-2 focus-visible:outline-gold"
-                >
-                  {l.label}
-                </button>
-              </li>
-            ))}
+            {NAV_LINKS.map((l) => {
+              const isActive = activeSection === l.id;
+              return (
+                <li key={l.id} role="none">
+                  <button
+                    role="menuitem"
+                    onClick={() => scrollTo(l.id)}
+                    aria-current={isActive ? "true" : undefined}
+                    className={cn(
+                      "relative rounded-lg px-3.5 py-2 text-[14px] font-medium transition-colors focus-visible:outline-2 focus-visible:outline-gold",
+                      isActive
+                        ? "text-gold"
+                        : "text-muted-foreground hover:bg-white/[0.05] hover:text-foreground"
+                    )}
+                  >
+                    {l.label}
+                    {/* active underline dot */}
+                    <span
+                      className={cn(
+                        "absolute inset-x-1/2 bottom-0.5 h-1 w-1 -translate-x-1/2 rounded-full bg-gold transition-all duration-300",
+                        isActive ? "scale-100 opacity-100" : "scale-0 opacity-0"
+                      )}
+                      aria-hidden="true"
+                    />
+                  </button>
+                </li>
+              );
+            })}
           </ul>
 
           <div className="flex items-center gap-3">
@@ -134,12 +176,15 @@ export function Navbar({ onGetStarted }: NavbarProps) {
                   onClick={() => scrollTo(l.id)}
                   style={{ transitionDelay: open ? `${i * 45 + 80}ms` : "0ms" }}
                   className={cn(
-                    "flex w-full items-center justify-between rounded-2xl border border-white/[0.06] bg-white/[0.03] px-5 py-4 text-left text-[17px] font-medium text-foreground transition-all duration-300 hover:border-gold/30 hover:bg-gold-dim",
+                    "flex w-full items-center justify-between rounded-2xl border px-5 py-4 text-left text-[17px] font-medium transition-all duration-300",
+                    activeSection === l.id
+                      ? "border-gold/40 bg-gold-dim text-gold"
+                      : "border-white/[0.06] bg-white/[0.03] text-foreground hover:border-gold/30 hover:bg-gold-dim",
                     open ? "translate-y-0 opacity-100" : "translate-y-3 opacity-0"
                   )}
                 >
                   {l.label}
-                  <ArrowRight size={17} className="text-gold" aria-hidden="true" />
+                  <ArrowRight size={17} className={activeSection === l.id ? "text-gold" : "text-gold/70"} aria-hidden="true" />
                 </button>
               </li>
             ))}

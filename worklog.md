@@ -106,3 +106,29 @@ Stage Summary:
   5. Persist admin session check hardening (rate limit login attempts)
   6. Consider FAQ section with structured data (SEO)
 - RISKS: none blocking; rate limiter is in-memory (resets on server restart — acceptable for this scale)
+
+---
+Task ID: R1 (cron review round 1)
+Agent: webDevReview cron (15-min cycle)
+Task: QA regression pass + new features (FAQ, newsletter) + styling upgrades (scroll progress, active nav)
+
+Work Log:
+- QA regression: home 200, no console errors, desktop 1280 & mobile 375 both overflow-CLEAN, inquiry modal opens/closes fine
+- NEW FEATURE — FAQ section (src/components/site/faq-section.tsx): 7 client-relevant Q&As, shadcn Accordion in numbered surface cards, sticky heading column + WhatsApp CTA, JSON-LD FAQPage structured data verified in DOM (7 questions); added FAQ to navbar + footer links
+- NEW FEATURE — Newsletter (src/components/site/newsletter-section.tsx + src/app/api/subscribe/route.ts + Subscriber Prisma model): gradient gold band with dot-matrix decor, inline validation, loading/success/error states, POST /api/subscribe (zod validation, per-IP rate limit 5/10min, upsert = idempotent), verified end-to-end via UI (201 → "Subscribed" state) and curl (400 on invalid, 201 idempotent retry); DB row verified then cleaned
+- STYLING — ScrollProgress (src/components/site/scroll-progress.tsx): thin gold gradient bar pinned under navbar, glow shadow, verified width tracks scroll %
+- STYLING — Active navbar section highlighting: IntersectionObserver tracks sections, active link turns gold + animated underline dot on desktop, gold border/bg state on mobile menu links, aria-current set; verified "Work" highlights when viewing case studies
+- BUG FIX (critical dev-infra): new Subscriber model wasn't available in running dev server (Turbopack doesn't re-read regenerated node_modules + globalThis prisma singleton kept stale instance). Permanently fixed by moving prisma client output to src/generated/prisma (schema generator output = "../src/generated/prisma", imported in db.ts via "@/generated/prisma") + cache-key versioning in db.ts singleton; eslint ignores src/generated/**
+- Post-fix regression: POST /api/inquiries 201, admin login 200, stats 200, logout 200 — all existing APIs intact
+- Contrast polish: FAQ item numbers gold/70→gold semibold (VLM nit); mobile 375 re-verified CLEAN with new sections; lint clean; VLM verdict on FAQ: "production-grade, consistent with premium gold/navy brand"
+
+Stage Summary:
+- PROJECT STATUS: Stable & enhanced. 3 new features shipped (FAQ+SEO structured data, newsletter+DB capture, scroll progress), 2 styling upgrades (active nav, contrast), 1 critical dev-infra fix (prisma client generation path — future schema changes will now hot-reload correctly)
+- VERIFIED: all APIs, UI flows, mobile overflow, JSON-LD, lint, no console errors
+- UNRESOLVED/NEXT ROUND priorities:
+  1. OG/social share image (static asset for richer link previews)
+  2. Case study detail dialogs with richer metrics/charts
+  3. Tag-filtered insights view + more posts
+  4. Admin login attempt rate limiting (currently only inquiry POST is rate-limited)
+  5. Add subscriber count to admin dashboard (GET stats extension)
+- RISKS: none blocking; in-memory rate limiters reset on server restart (acceptable scale)

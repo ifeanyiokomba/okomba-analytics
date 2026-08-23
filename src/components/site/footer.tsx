@@ -19,6 +19,7 @@ export function Footer({ onNavigate, onGetStarted }: FooterProps) {
     { label: "Process", id: "process" },
     { label: "About", id: "about" },
     { label: "Insights", id: "insights" },
+    { label: "FAQ", id: "faq" },
     { label: "Contact", id: "contact" },
   ];
 
