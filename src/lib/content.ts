@@ -641,6 +641,93 @@ OKOMBA ANALYTICS can handle the entire payment integration process for you — f
     readTime: "6 min read",
     author: "OKOMBA ANALYTICS",
   },
+  {
+    id: "bp4",
+    title: "Automating Business Workflows: Where Nigerian SMEs Should Start",
+    slug: "automating-business-workflows-nigerian-smes",
+    excerpt:
+      "Automation pays for itself fastest where manual work repeats daily. A practical starting sequence for small teams.",
+    content: `## Start Where the Repetition Hurts
+
+Most SMEs don't need automation everywhere — they need it in the two or three places where the same manual task repeats every single day. Finding those places takes one week of honest observation.
+
+## The Starting Sequence
+
+**1. Customer follow-ups**
+Every lead that goes cold is revenue walking away. Automated email and WhatsApp sequences ensure nobody is forgotten while your team sleeps. This is usually the fastest payback of any automation investment.
+
+**2. Payment collection and reconciliation**
+If someone on your team manually confirms transfers or matches payments to customers, that's hours lost daily and errors waiting to happen. Gateway integration with automated reconciliation removes both.
+
+**3. Registration and onboarding forms**
+Collecting customer information over phone calls and chat messages produces messy data. Structured forms feeding a database produce clean, actionable records.
+
+**4. Reports and dashboards**
+Once your data flows through systems rather than inboxes, dashboards become almost free. Decision-making improves because you finally see the business in real time.
+
+## What NOT to Automate First
+
+Avoid automating processes that are broken or undocumented. Automating chaos gives you faster chaos. Map the process on paper, remove the pointless steps, then automate what remains.
+
+## The Realistic Budget
+
+A focused automation project — forms, follow-ups, one integration — typically costs a fraction of what the manual work costs in salaries over a year. The math is rarely close.
+
+OKOMBA ANALYTICS helps SMEs identify their highest-ROI automation targets and implements them end-to-end. Start with a discovery conversation.`,
+    category: "Operations",
+    tags: ["Automation", "SMEs", "Workflow", "Nigeria"],
+    date: "2025-02-10",
+    readTime: "5 min read",
+    author: "OKOMBA ANALYTICS",
+  },
+  {
+    id: "bp5",
+    title: "A Founder's Guide to Specifying a Web Application That Gets Built Right",
+    slug: "founders-guide-specifying-web-application",
+    excerpt:
+      "The gap between what founders imagine and what developers build is where projects fail. Close it with a better brief.",
+    content: `## Most Project Failures Are Specification Failures
+
+When a web project disappoints, the code is rarely the culprit. The brief was vague, the priorities were unstated, and success was never defined. Here's how to prevent that.
+
+## The Six Things Every Brief Needs
+
+**1. The business outcome — not the feature list**
+"I need a booking system" is a feature. "I need to cut appointment no-shows by half" is an outcome. Good engineers design differently when they know what success actually measures.
+
+**2. The users, described precisely**
+Not "customers" — but who they are, what device they use, how tech-savvy they are, and what they're doing the minute before they touch your product.
+
+**3. The three flows that matter**
+List the three user journeys that must work perfectly on day one. Everything else can iterate. This single discipline prevents scope explosion.
+
+**4. Honest constraints**
+Budget, deadline, existing systems, compliance needs — state them upfront. Constraints stated early are design inputs; constraints revealed late are change orders.
+
+**5. What you explicitly don't want**
+"I don't need an app, a responsive web app is fine" saves weeks. Negative scope is as valuable as positive scope.
+
+**6. Your definition of "done"**
+Is it launch? Is it 100 users? Is it the first payment processed? Agree on it in writing.
+
+## Red Flags in Your Own Brief
+
+- Every feature is "critical"
+- No user description exists
+- The timeline was set before the scope
+- Nobody can state the one metric that proves the project worked
+
+## Working With a Technical Partner
+
+Share the brief, then let the engineering team respond with a proposed architecture, phased plan and honest trade-offs. A partner who only says yes to everything is telling you something.
+
+OKOMBA ANALYTICS runs structured discovery on every engagement — because the brief is the product.`,
+    category: "Technology",
+    tags: ["Web Development", "Startups", "Product", "Founders"],
+    date: "2025-02-24",
+    readTime: "6 min read",
+    author: "OKOMBA ANALYTICS",
+  },
 ];
 
 /* ── Contact info (from original repository) ──────────────── */

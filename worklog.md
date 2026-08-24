@@ -185,3 +185,27 @@ Stage Summary:
   4. Performance: consider lazy-loading admin portal + dialogs
   5. Optional: email notification stub on new inquiry (webhook-ready)
 - RISKS: none blocking; refs in agent-browser shift on re-render (use semantic find for reliability)
+
+---
+Task ID: R4 (cron review round 4)
+Agent: webDevReview cron (15-min cycle)
+Task: QA regression + admin CSV exports + insights category filtering + 2 new blog posts
+
+Work Log:
+- QA regression: server 200, no console errors, desktop 1280 & mobile 375 overflow-CLEAN
+- NEW FEATURE — Admin CSV export (src/lib/csv-export.ts): client-side RFC 4180-compliant CSV generation (field escaping, newline collapsing, UTF-8 BOM for Excel); "Export CSV" buttons on inquiries panel (exports the FILTERED set — respects search/status filter) and subscribers panel (teal hover); both disabled when empty; VERIFIED: both files actually downloaded (~Downloads/okomba-{inquiries,subscribers}-YYYY-MM-DD.csv) w/ correct headers + data rows; no console errors
+- NEW FEATURE — Insights category filtering: derived categories from BLOG_POSTS (All/Business/Education/Finance/Operations/Technology) w/ count badges, active gold chip styling, framer-motion popLayout grid transitions, adaptive grid (3-col when ≥3 posts, 2-col when filtered smaller); verified Business filter → 1 article, All → 5 articles in 3-col grid
+- NEW CONTENT — 2 new blog posts: "Automating Business Workflows: Where Nigerian SMEs Should Start" (Operations, 5 min) + "A Founder's Guide to Specifying a Web Application That Gets Built Right" (Technology, 6 min); full markdown bodies w/ structured sections; new post dialog verified (1811 chars rendered)
+- VLM QA verdict: "High-quality, polished UI with no visual defects" (chips consistent, cards clean, dialog readable)
+- Final: lint clean, mobile 375 CLEAN w/ 5-post grid, test data cleaned from DB + Downloads
+
+Stage Summary:
+- PROJECT STATUS: Stable, content-rich, admin feature-complete. CSV portability shipped, insights now filterable with 5 articles
+- VERIFIED: CSV downloads (real files w/ correct content), category filter counts + transitions, new article rendering, mobile overflow
+- UNRESOLVED/NEXT ROUND priorities:
+  1. Section imagery refresh (AI-generated visuals for case studies/about)
+  2. Performance: lazy-load admin portal + article dialogs (next/dynamic)
+  3. Admin table pagination for large datasets (currently max-h scroll only)
+  4. Email notification stub on new inquiry (webhook-ready integration point)
+  5. Copy deck review (hero A/B variants could be tested)
+- RISKS: none blocking; CSV export runs client-side on loaded data only (no new attack surface)

@@ -6,6 +6,7 @@ import {
   CheckCircle2,
   CircleDot,
   Clock3,
+  Download,
   Inbox,
   Loader2,
   Lock,
@@ -19,6 +20,7 @@ import {
   Users,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { exportInquiriesCsv, exportSubscribersCsv } from "@/lib/csv-export";
 import { OkombaNavLogo } from "./logo";
 
 /* ─────────────────────────────────────────────────────────────
@@ -396,6 +398,17 @@ function AdminDashboard({ onLogout, onExit }: { onLogout: () => void; onExit: ()
               </span>
             </h2>
 
+            <button
+              onClick={() => exportInquiriesCsv(filteredInquiries)}
+              disabled={filteredInquiries.length === 0}
+              aria-label="Export visible inquiries as CSV"
+              title="Export visible inquiries as CSV"
+              className="inline-flex shrink-0 items-center gap-2 self-start rounded-lg border border-white/[0.09] bg-white/[0.03] px-3.5 py-2 text-[12.5px] font-medium text-muted-foreground transition-colors hover:border-gold/40 hover:text-gold disabled:pointer-events-none disabled:opacity-40"
+            >
+              <Download size={13} aria-hidden="true" />
+              <span className="hidden sm:inline">Export CSV</span>
+            </button>
+
             {/* Search + status filter controls */}
             <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center">
               <div className="relative">
@@ -516,12 +529,22 @@ function AdminDashboard({ onLogout, onExit }: { onLogout: () => void; onExit: ()
         </div>
         {/* Subscribers panel */}
         <div className="surface-card mt-4 overflow-hidden">
-          <div className="flex items-center justify-between border-b border-white/[0.06] px-6 py-5">
+          <div className="flex items-center justify-between gap-3 border-b border-white/[0.06] px-6 py-5">
             <h2 className="flex items-center gap-2.5 text-[14.5px] font-semibold text-foreground">
               <Users size={16} className="text-teal" aria-hidden="true" />
               Newsletter subscribers
               <span className="ml-1 font-mono text-[11px] font-normal text-muted-foreground">({subscribers.length})</span>
             </h2>
+            <button
+              onClick={() => exportSubscribersCsv(subscribers)}
+              disabled={subscribers.length === 0}
+              aria-label="Export subscribers as CSV"
+              title="Export subscribers as CSV"
+              className="inline-flex shrink-0 items-center gap-2 rounded-lg border border-white/[0.09] bg-white/[0.03] px-3.5 py-2 text-[12.5px] font-medium text-muted-foreground transition-colors hover:border-teal/40 hover:text-teal disabled:pointer-events-none disabled:opacity-40"
+            >
+              <Download size={13} aria-hidden="true" />
+              <span className="hidden sm:inline">Export CSV</span>
+            </button>
           </div>
 
           {loading ? (
