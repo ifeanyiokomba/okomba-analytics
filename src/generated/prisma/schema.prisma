@@ -39,4 +39,41 @@ model Subscriber {
   confirmedAt      DateTime?
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
+
+  @@index([status])
+}
+
+model Post {
+  id           String    @id @default(cuid())
+  title        String
+  slug         String    @unique
+  excerpt      String
+  content      String
+  category     String
+  tags         String    @default("[]") // JSON-serialized string array
+  author       String    @default("OKOMBA ANALYTICS")
+  status       String    @default("draft") // draft | published
+  publishedAt  DateTime?
+  notifySentAt DateTime? // when subscriber email blast was sent
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([status])
+  @@index([publishedAt])
+}
+
+model EmailLog {
+  id             String   @id @default(cuid())
+  type           String // post.published | subscriber.welcome | broadcast | inquiry.receipt
+  recipientEmail String
+  subject        String
+  postId         String?
+  subscriberId   String?
+  status         String   @default("sent") // queued | sent | failed
+  error          String?
+  sentAt         DateTime @default(now())
+
+  @@index([postId])
+  @@index([subscriberId])
+  @@index([sentAt])
 }

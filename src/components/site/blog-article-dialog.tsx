@@ -3,12 +3,19 @@
 import { useEffect } from "react";
 import { CalendarDays, Clock, Tag, X } from "lucide-react";
 import ReactMarkdown from "react-markdown";
-import type { BlogPost } from "@/lib/content";
+import type { Post } from "@/lib/posts";
 
 type BlogArticleDialogProps = {
-  post: BlogPost | null;
+  post: Post | null;
   onClose: () => void;
 };
+
+/** Estimate reading time from content length (≈200 wpm). */
+function readTimeFor(content: string): string {
+  const words = content.trim().split(/\s+/).length;
+  const mins = Math.max(1, Math.round(words / 200));
+  return `${mins} min read`;
+}
 
 /** Accessible full-article reading dialog for insight posts. */
 export function BlogArticleDialog({ post, onClose }: BlogArticleDialogProps) {
@@ -24,6 +31,10 @@ export function BlogArticleDialog({ post, onClose }: BlogArticleDialogProps) {
   }, [post, onClose]);
 
   if (!post) return null;
+
+  const dateLabel = post.publishedAt
+    ? new Date(post.publishedAt).toLocaleDateString("en-NG", { day: "numeric", month: "long", year: "numeric" })
+    : new Date(post.createdAt).toLocaleDateString("en-NG", { day: "numeric", month: "long", year: "numeric" });
 
   return (
     <div
@@ -43,10 +54,10 @@ export function BlogArticleDialog({ post, onClose }: BlogArticleDialogProps) {
               </span>
               <span className="flex items-center gap-1.5 font-mono text-[10.5px] text-muted-foreground">
                 <CalendarDays size={11} aria-hidden="true" />
-                {new Date(post.date).toLocaleDateString("en-NG", { day: "numeric", month: "long", year: "numeric" })}
+                {dateLabel}
               </span>
               <span className="flex items-center gap-1.5 font-mono text-[10.5px] text-muted-foreground">
-                <Clock size={11} aria-hidden="true" /> {post.readTime}
+                <Clock size={11} aria-hidden="true" /> {readTimeFor(post.content)}
               </span>
             </div>
             <h2 className="mt-3.5 text-balance font-display text-xl font-bold leading-snug text-foreground md:text-[26px]">

@@ -151,6 +151,34 @@ exports.Prisma.SubscriberScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.PostScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  slug: 'slug',
+  excerpt: 'excerpt',
+  content: 'content',
+  category: 'category',
+  tags: 'tags',
+  author: 'author',
+  status: 'status',
+  publishedAt: 'publishedAt',
+  notifySentAt: 'notifySentAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.EmailLogScalarFieldEnum = {
+  id: 'id',
+  type: 'type',
+  recipientEmail: 'recipientEmail',
+  subject: 'subject',
+  postId: 'postId',
+  subscriberId: 'subscriberId',
+  status: 'status',
+  error: 'error',
+  sentAt: 'sentAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -165,7 +193,9 @@ exports.Prisma.NullsOrder = {
 exports.Prisma.ModelName = {
   Inquiry: 'Inquiry',
   AdminSession: 'AdminSession',
-  Subscriber: 'Subscriber'
+  Subscriber: 'Subscriber',
+  Post: 'Post',
+  EmailLog: 'EmailLog'
 };
 
 /**

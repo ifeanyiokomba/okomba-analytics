@@ -1,0 +1,1060 @@
+     1→"use client";
+     2→
+     3→import { useCallback, useEffect, useState } from "react";
+     4→import {
+     5→  ArrowLeft,
+     6→  ArrowUpDown,
+     7→  CheckCircle2,
+     8→  ChevronDown,
+     9→  ChevronLeft,
+    10→  ChevronRight,
+    11→  ChevronUp,
+    12→  CircleDot,
+    13→  Clock3,
+    14→  Download,
+    15→  Inbox,
+    16→  Loader2,
+    17→  Lock,
+    18→  LogOut,
+    19→  Mail,
+    20→  RefreshCw,
+    21→  Search,
+    22→  SearchX,
+    23→  TrendingUp,
+    24→  User,
+    25→  Users,
+    26→  ExternalLink,
+    27→  X,
+    28→} from "lucide-react";
+    29→import { cn } from "@/lib/utils";
+    30→import { exportInquiriesCsv, exportSubscribersCsv } from "@/lib/csv-export";
+    31→import { SERVICES, type Service } from "@/lib/content";
+    32→import { OkombaNavLogo } from "./logo";
+    33→
+    34→/* ─────────────────────────────────────────────────────────────
+    35→   Admin portal — preserves the original /#/admin workflow.
+    36→   Login → dashboard with inquiry stats + requests (now DB-backed).
+    37→   ───────────────────────────────────────────────────────────── */
+    38→
+    39→type Inquiry = {
+    40→  id: string;
+    41→  name: string;
+    42→  email: string;
+    43→  phone?: string | null;
+    44→  whatsapp?: string | null;
+    45→  service: string;
+    46→  addlService?: string | null;
+    47→  budget?: string | null;
+    48→  message: string;
+    49→  status: string;
+    50→  createdAt: string;
+    51→};
+    52→
+    53→type Stats = {
+    54→  total: number;
+    55→  new: number;
+    56→  contacted: number;
+    57→  in_progress: number;
+    58→  closed: number;
+    59→  last7Days: number;
+    60→  subscribers: number;
+    61→  byService: { service: string; count: number }[];
+    62→  byBudget: { budget: string; count: number }[];
+    63→};
+    64→
+    65→const STATUSES = ["new", "contacted", "in_progress", "closed"] as const;
+    66→
+    67→const STATUS_STYLES: Record<string, string> = {
+    68→  new: "border-gold/35 bg-gold-dim text-gold",
+    69→  contacted: "border-[#5b9eff]/35 bg-[#5b9eff]/10 text-[#5b9eff]",
+    70→  in_progress: "border-purple-400/35 bg-purple-400/10 text-purple-300",
+    71→  closed: "border-teal/35 bg-teal-dim text-teal",
+    72→};
+    73→
+    74→export function AdminPortal({ onExit }: { onExit: () => void }) {
+    75→  const [loggedIn, setLoggedIn] = useState(false);
+    76→  const [checking, setChecking] = useState(true);
+    77→
+    78→  // Restore session on mount
+    79→  useEffect(() => {
+    80→    (async () => {
+    81→      try {
+    82→        const res = await fetch("/api/inquiries?stats=1");
+    83→        setLoggedIn(res.ok);
+    84→      } catch {
+    85→        setLoggedIn(false);
+    86→      } finally {
+    87→        setChecking(false);
+    88→      }
+    89→    })();
+    90→  }, []);
+    91→
+    92→  if (checking) {
+    93→    return (
+    94→      <div className="flex min-h-screen items-center justify-center bg-background">
+    95→        <Loader2 size={28} className="animate-spin text-gold" aria-label="Checking session" />
+    96→      </div>
+    97→    );
+    98→  }
+    99→
+   100→  return loggedIn ? (
+   101→    <AdminDashboard onLogout={() => setLoggedIn(false)} onExit={onExit} />
+   102→  ) : (
+   103→    <AdminLogin onLogin={() => setLoggedIn(true)} onExit={onExit} />
+   104→  );
+   105→}
+   106→
+   107→/* ── Login ─────────────────────────────────────────────────── */
+   108→function AdminLogin({ onLogin, onExit }: { onLogin: () => void; onExit: () => void }) {
+   109→  const [email, setEmail] = useState("");
+   110→  const [password, setPassword] = useState("");
+   111→  const [error, setError] = useState<string | null>(null);
+   112→  const [busy, setBusy] = useState(false);
+   113→
+   114→  const submit = async (e: React.FormEvent) => {
+   115→    e.preventDefault();
+   116→    setError(null);
+   117→    setBusy(true);
+   118→    try {
+   119→      const res = await fetch("/api/admin/login", {
+   120→        method: "POST",
+   121→        headers: { "Content-Type": "application/json" },
+   122→        body: JSON.stringify({ email, password }),
+   123→      });
+   124→      if (!res.ok) throw new Error((await res.json())?.error ?? "Invalid credentials");
+   125→      onLogin();
+   126→    } catch (err) {
+   127→      setError(err instanceof Error ? err.message : "Login failed");
+   128→    } finally {
+   129→      setBusy(false);
+   130→    }
+   131→  };
+   132→
+   133→  return (
+   134→    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-background px-5">
+   135→      <div className="bg-grid mask-fade-y pointer-events-none absolute inset-0" aria-hidden="true" />
+   136→      <div className="pointer-events-none absolute left-1/2 top-0 h-[300px] w-[560px] -translate-x-1/2 rounded-full bg-gold/[0.08] blur-[110px]" aria-hidden="true" />
+   137→
+   138→      <div className="relative w-full max-w-sm">
+   139→        <button
+   140→          onClick={onExit}
+   141→          className="mb-8 inline-flex items-center gap-2 text-[13px] font-medium text-muted-foreground transition-colors hover:text-foreground"
+   142→        >
+   143→          <ArrowLeft size={15} aria-hidden="true" /> Back to website
+   144→        </button>
+   145→
+   146→        <div className="surface-card p-8">
+   147→          <span className="flex h-12 w-12 items-center justify-center rounded-2xl border border-gold/25 bg-gold-dim text-gold">
+   148→            <Lock size={20} aria-hidden="true" />
+   149→          </span>
+   150→          <h1 className="mt-5 font-display text-[21px] font-bold text-foreground">Admin portal</h1>
+   151→          <p className="mt-1.5 text-[13px] text-muted-foreground">
+   152→            Sign in to view inquiries and dashboard statistics.
+   153→          </p>
+   154→
+   155→          <form onSubmit={submit} className="mt-7 space-y-4">
+   156→            <div>
+   157→              <label htmlFor="admin-email" className="mb-1.5 block text-[12.5px] font-medium text-muted-foreground">
+   158→                Email
+   159→              </label>
+   160→              <div className="relative">
+   161→                <Mail size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground/60" aria-hidden="true" />
+   162→                <input
+   163→                  id="admin-email"
+   164→                  type="email"
+   165→                  required
+   166→                  autoComplete="email"
+   167→                  value={email}
+   168→                  onChange={(e) => setEmail(e.target.value)}
+   169→                  placeholder="admin@okomba.com"
+   170→                  className="w-full rounded-xl border border-white/[0.09] bg-white/[0.03] py-3 pl-10 pr-4 text-[14px] text-foreground outline-none transition-colors placeholder:text-muted-foreground/60 focus:border-gold/60"
+   171→                />
+   172→              </div>
+   173→            </div>
+   174→            <div>
+   175→              <label htmlFor="admin-pass" className="mb-1.5 block text-[12.5px] font-medium text-muted-foreground">
+   176→                Password
+   177→              </label>
+   178→              <div className="relative">
+   179→                <User size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground/60" aria-hidden="true" />
+   180→                <input
+   181→                  id="admin-pass"
+   182→                  type="password"
+   183→                  required
+   184→                  autoComplete="current-password"
+   185→                  value={password}
+   186→                  onChange={(e) => setPassword(e.target.value)}
+   187→                  placeholder="••••••••••••"
+   188→                  className="w-full rounded-xl border border-white/[0.09] bg-white/[0.03] py-3 pl-10 pr-4 text-[14px] text-foreground outline-none transition-colors placeholder:text-muted-foreground/60 focus:border-gold/60"
+   189→                />
+   190→              </div>
+   191→            </div>
+   192→
+   193→            {error && (
+   194→              <p role="alert" className="rounded-lg border border-red-500/25 bg-red-500/[0.08] px-3.5 py-2.5 text-[12.5px] text-red-300">
+   195→                {error}
+   196→              </p>
+   197→            )}
+   198→
+   199→            <button
+   200→              type="submit"
+   201→              disabled={busy}
+   202→              className="btn-shine inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-gold-light to-gold px-6 py-3.5 text-[14px] font-semibold text-ink shadow-gold transition-transform hover:-translate-y-0.5 disabled:opacity-60"
+   203→            >
+   204→              {busy ? <Loader2 size={15} className="animate-spin" aria-hidden="true" /> : <Lock size={14} aria-hidden="true" />}
+   205→              {busy ? "Signing in…" : "Sign in"}
+   206→            </button>
+   207→          </form>
+   208→        </div>
+   209→
+   210→        <p className="mt-6 text-center font-mono text-[10px] text-muted-foreground/60">
+   211→          Okomba Analytics · Internal use only
+   212→        </p>
+   213→      </div>
+   214→    </div>
+   215→  );
+   216→}
+   217→
+   218→/* ── Dashboard ─────────────────────────────────────────────── */
+   219→type Subscriber = {
+   220→  id: string;
+   221→  email: string;
+   222→  status: string;
+   223→  confirmedAt: string | null;
+   224→  createdAt: string;
+   225→};
+   226→
+   227→function AdminDashboard({ onLogout, onExit }: { onLogout: () => void; onExit: () => void }) {
+   228→  const [inquiries, setInquiries] = useState<Inquiry[]>([]);
+   229→  const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
+   230→  const [stats, setStats] = useState<Stats | null>(null);
+   231→  const [loading, setLoading] = useState(true);
+   232→  const [error, setError] = useState<string | null>(null);
+   233→  const [updatingId, setUpdatingId] = useState<string | null>(null);
+   234→  const [detailService, setDetailService] = useState<Service | null>(null);
+   235→  const [detailInquiry, setDetailInquiry] = useState<Inquiry | null>(null);
+   236→
+   237→  // table controls
+   238→  const [search, setSearch] = useState("");
+   239→  const [statusFilter, setStatusFilter] = useState<string>("all");
+   240→  const [budgetFilter, setBudgetFilter] = useState<string>("all");
+   241→  const [page, setPage] = useState(1);
+   242→  const [sortKey, setSortKey] = useState<"createdAt" | "name" | "service">("createdAt");
+   243→  const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
+   244→  const PAGE_SIZE = 10;
+   245→
+   246→  const toggleSort = (key: "createdAt" | "name" | "service") => {
+   247→    if (sortKey === key) {
+   248→      setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+   249→    } else {
+   250→      setSortKey(key);
+   251→      setSortDir(key === "createdAt" ? "desc" : "asc");
+   252→    }
+   253→  };
+   254→
+   255→  const load = useCallback(async () => {
+   256→    setError(null);
+   257→    try {
+   258→      const [listRes, statsRes, subsRes] = await Promise.all([
+   259→        fetch("/api/inquiries"),
+   260→        fetch("/api/inquiries?stats=1"),
+   261→        fetch("/api/subscribers"),
+   262→      ]);
+   263→      if (!listRes.ok || !statsRes.ok) throw new Error("Failed to load data — session may have expired");
+   264→      const list = await listRes.json();
+   265→      const s = await statsRes.json();
+   266→      setInquiries(list.inquiries ?? []);
+   267→      setStats(s.stats ?? null);
+   268→      // subscribers is non-fatal — only admins with valid session get it
+   269→      if (subsRes.ok) {
+   270→        const subs = await subsRes.json();
+   271→        setSubscribers(subs.subscribers ?? []);
+   272→      }
+   273→    } catch (err) {
+   274→      setError(err instanceof Error ? err.message : "Failed to load");
+   275→    } finally {
+   276→      setLoading(false);
+   277→    }
+   278→  }, []);
+   279→
+   280→  useEffect(() => {
+   281→    load();
+   282→  }, [load]);
+   283→
+   284→  // Reset to first page whenever filters change
+   285→  useEffect(() => {
+   286→    setPage(1);
+   287→  }, [search, statusFilter, budgetFilter, sortKey, sortDir]);
+   288→
+   289→  const updateStatus = async (id: string, status: string) => {
+   290→    setUpdatingId(id);
+   291→    try {
+   292→      const res = await fetch("/api/inquiries", {
+   293→        method: "PATCH",
+   294→        headers: { "Content-Type": "application/json" },
+   295→        body: JSON.stringify({ id, status }),
+   296→      });
+   297→      if (!res.ok) throw new Error("Update failed");
+   298→      await load(); // refresh stats + list from server (single source of truth)
+   299→    } catch {
+   300→      setError("Could not update status. Please refresh.");
+   301→    } finally {
+   302→      setUpdatingId(null);
+   303→    }
+   304→  };
+   305→
+   306→  const logout = async () => {
+   307→    try {
+   308→      await fetch("/api/admin/logout", { method: "POST" });
+   309→    } catch {
+   310→      /* ignore */
+   311→    }
+   312→    onLogout();
+   313→  };
+   314→
+   315→  const statCards = stats
+   316→    ? [
+   317→        { label: "Total inquiries", value: stats.total, icon: Inbox, accent: "text-gold", bg: "border-gold/25 bg-gold-dim" },
+   318→        { label: "New", value: stats.new, icon: CircleDot, accent: "text-gold", bg: "border-gold/25 bg-gold-dim" },
+   319→        { label: "Contacted", value: stats.contacted, icon: Mail, accent: "text-[#5b9eff]", bg: "border-[#5b9eff]/25 bg-[#5b9eff]/10" },
+   320→        { label: "In progress", value: stats.in_progress, icon: Clock3, accent: "text-purple-300", bg: "border-purple-400/25 bg-purple-400/10" },
+   321→        { label: "Closed", value: stats.closed, icon: CheckCircle2, accent: "text-teal", bg: "border-teal/25 bg-teal-dim" },
+   322→        { label: "Last 7 days", value: stats.last7Days, icon: TrendingUp, accent: "text-gold-light", bg: "border-gold-light/25 bg-gold-light/10" },
+   323→        { label: "Subscribers", value: stats.subscribers, icon: Users, accent: "text-teal", bg: "border-teal/25 bg-teal-dim" },
+   324→      ]
+   325→    : [];
+   326→
+   327→  const maxServiceCount = stats?.byService?.[0]?.count ?? 1;
+   328→  const maxBudgetCount = stats?.byBudget?.[0]?.count ?? 1;
+   329→
+   330→  // Filtered inquiries for the table (client-side search + status + budget filters)
+   331→  const filteredInquiries = inquiries
+   332→    .filter((i) => {
+   333→      const matchesStatus = statusFilter === "all" || i.status === statusFilter;
+   334→      const matchesBudget =
+   335→        budgetFilter === "all" ||
+   336→        (budgetFilter === "none" ? !i.budget : i.budget === budgetFilter);
+   337→      if (!matchesStatus || !matchesBudget) return false;
+   338→      if (!search.trim()) return true;
+   339→      const q = search.trim().toLowerCase();
+   340→      return (
+   341→        i.name.toLowerCase().includes(q) ||
+   342→        i.email.toLowerCase().includes(q) ||
+   343→        i.service.toLowerCase().includes(q) ||
+   344→        (i.phone ?? "").toLowerCase().includes(q) ||
+   345→        (i.whatsapp ?? "").toLowerCase().includes(q) ||
+   346→        i.message.toLowerCase().includes(q)
+   347→      );
+   348→    })
+   349→    .sort((a, b) => {
+   350→      let cmp = 0;
+   351→      if (sortKey === "name") cmp = a.name.localeCompare(b.name);
+   352→      else if (sortKey === "service") cmp = a.service.localeCompare(b.service);
+   353→      else cmp = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+   354→      return sortDir === "asc" ? cmp : -cmp;
+   355→    });
+   356→
+   357→  // Pagination slice
+   358→  const totalPages = Math.max(Math.ceil(filteredInquiries.length / PAGE_SIZE), 1);
+   359→  const safePage = Math.min(page, totalPages);
+   360→  const paginatedInquiries = filteredInquiries.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
+   361→
+   362→  return (
+   363→    <div className="section-dark min-h-screen bg-background">
+   364→      {/* Admin header */}
+   365→      <header className="sticky top-0 z-40 border-b border-white/[0.07] bg-[#05070d]/88 backdrop-blur-xl">
+   366→        <div className="container-xl flex h-16 items-center justify-between gap-4">
+   367→          <div className="flex items-center gap-3.5">
+   368→            <OkombaNavLogo />
+   369→            <span className="hidden rounded-full border border-gold/30 bg-gold-dim px-3 py-1 font-mono text-[10px] text-gold sm:inline-block">
+   370→              ADMIN
+   371→            </span>
+   372→          </div>
+   373→          <div className="flex items-center gap-1.5 sm:gap-2.5">
+   374→            <button
+   375→              onClick={load}
+   376→              aria-label="Refresh data"
+   377→              className="inline-flex items-center gap-2 rounded-lg border border-white/[0.09] bg-white/[0.03] px-2.5 py-2 text-[12.5px] font-medium text-muted-foreground transition-colors hover:border-gold/40 hover:text-gold sm:px-3.5"
+   378→            >
+   379→              <RefreshCw size={13} aria-hidden="true" /> <span className="hidden sm:inline">Refresh</span>
+   380→            </button>
+   381→            <button
+   382→              onClick={onExit}
+   383→              aria-label="Back to website"
+   384→              className="inline-flex items-center gap-2 rounded-lg border border-white/[0.09] bg-white/[0.03] px-2.5 py-2 text-[12.5px] font-medium text-muted-foreground transition-colors hover:text-foreground sm:px-3.5"
+   385→            >
+   386→              <ArrowLeft size={13} aria-hidden="true" /> <span className="hidden sm:inline">Site</span>
+   387→            </button>
+   388→            <button
+   389→              onClick={logout}
+   390→              aria-label="Log out"
+   391→              className="inline-flex items-center gap-2 rounded-lg border border-red-500/25 bg-red-500/[0.08] px-2.5 py-2 text-[12.5px] font-medium text-red-300 transition-colors hover:bg-red-500/15 sm:px-3.5"
+   392→            >
+   393→              <LogOut size={13} aria-hidden="true" /> <span className="hidden sm:inline">Logout</span>
+   394→            </button>
+   395→          </div>
+   396→        </div>
+   397→      </header>
+   398→
+   399→      <main className="container-xl py-10">
+   400→        <h1 className="font-display text-2xl font-bold text-foreground">Inquiry dashboard</h1>
+   401→        <p className="mt-1.5 text-[13.5px] text-muted-foreground">
+   402→          Live service requests submitted through the website.
+   403→        </p>
+   404→
+   405→        {error && (
+   406→          <p role="alert" className="mt-6 rounded-xl border border-red-500/25 bg-red-500/[0.08] px-4 py-3 text-[13px] text-red-300">
+   407→            {error}
+   408→          </p>
+   409→        )}
+   410→
+   411→        {/* Stat cards */}
+   412→        <div className="mt-8 grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-7">
+   413→          {statCards.map((c) => (
+   414→            <div key={c.label} className="surface-card p-5">
+   415→              <span className={`inline-flex h-9 w-9 items-center justify-center rounded-xl border ${c.bg} ${c.accent}`}>
+   416→                <c.icon size={16} aria-hidden="true" />
+   417→              </span>
+   418→              <p className="mt-3.5 font-display text-[26px] font-bold leading-none text-foreground">{c.value}</p>
+   419→              <p className="mt-1.5 text-[11.5px] font-medium text-muted-foreground">{c.label}</p>
+   420→            </div>
+   421→          ))}
+   422→        </div>
+   423→
+   424→        {/* Top services */}
+   425→        {stats && stats.byService.length > 0 && (
+   426→          <div className="surface-card mt-4 p-6">
+   427→            <h2 className="text-[14.5px] font-semibold text-foreground">Most requested services</h2>
+   428→            <div className="mt-5 space-y-3.5">
+   429→              {stats.byService.slice(0, 6).map((s) => (
+   430→                <div key={s.service} className="flex items-center gap-4">
+   431→                  <span className="w-40 shrink-0 truncate text-[12.5px] text-muted-foreground md:w-56">{s.service}</span>
+   432→                  <div className="h-2 flex-1 overflow-hidden rounded-full bg-white/[0.06]">
+   433→                    <div
+   434→                      className="h-full rounded-full bg-gradient-to-r from-gold-light to-gold transition-[width] duration-700"
+   435→                      style={{ width: `${Math.max((s.count / maxServiceCount) * 100, 4)}%` }}
+   436→                    />
+   437→                  </div>
+   438→                  <span className="w-7 shrink-0 text-right font-mono text-[12px] font-semibold text-gold">{s.count}</span>
+   439→                </div>
+   440→              ))}
+   441→            </div>
+   442→          </div>
+   443→        )}
+   444→
+   445→        {/* Budget distribution */}
+   446→        {stats && stats.byBudget.length > 0 && (
+   447→          <div className="surface-card mt-4 p-6">
+   448→            <h2 className="text-[14.5px] font-semibold text-foreground">Budget distribution</h2>
+   449→            <p className="mt-1 text-[11.5px] text-muted-foreground">From inquiries that shared a budget range</p>
+   450→            <div className="mt-5 space-y-3.5">
+   451→              {stats.byBudget.map((b) => (
+   452→                <div key={b.budget} className="flex items-center gap-4">
+   453→                  <span className="w-40 shrink-0 truncate text-[12.5px] text-muted-foreground md:w-56">{b.budget}</span>
+   454→                  <div className="h-2 flex-1 overflow-hidden rounded-full bg-white/[0.06]">
+   455→                    <div
+   456→                      className="h-full rounded-full bg-gradient-to-r from-teal to-[#00e0c0] transition-[width] duration-700"
+   457→                      style={{ width: `${Math.max((b.count / maxBudgetCount) * 100, 4)}%` }}
+   458→                    />
+   459→                  </div>
+   460→                  <span className="w-7 shrink-0 text-right font-mono text-[12px] font-semibold text-teal">{b.count}</span>
+   461→                </div>
+   462→              ))}
+   463→            </div>
+   464→          </div>
+   465→        )}
+   466→
+   467→        {/* Inquiries table */}
+   468→        <div className="surface-card mt-4 overflow-hidden">
+   469→          <div className="flex flex-col gap-4 border-b border-white/[0.06] px-6 py-5 md:flex-row md:items-center md:justify-between">
+   470→            <h2 className="text-[14.5px] font-semibold text-foreground">
+   471→              All inquiries{" "}
+   472→              <span className="ml-1.5 font-mono text-[11px] font-normal text-muted-foreground">
+   473→                ({filteredInquiries.length}{filteredInquiries.length !== inquiries.length ? ` of ${inquiries.length}` : ""})
+   474→              </span>
+   475→            </h2>
+   476→
+   477→            <button
+   478→              onClick={() => exportInquiriesCsv(filteredInquiries)}
+   479→              disabled={filteredInquiries.length === 0}
+   480→              aria-label="Export visible inquiries as CSV"
+   481→              title="Export visible inquiries as CSV"
+   482→              className="inline-flex shrink-0 items-center gap-2 self-start rounded-lg border border-white/[0.09] bg-white/[0.03] px-3.5 py-2 text-[12.5px] font-medium text-muted-foreground transition-colors hover:border-gold/40 hover:text-gold disabled:pointer-events-none disabled:opacity-40"
+   483→            >
+   484→              <Download size={13} aria-hidden="true" />
+   485→              <span className="hidden sm:inline">Export CSV</span>
+   486→            </button>
+   487→
+   488→            {/* Search + status filter controls */}
+   489→            <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center">
+   490→              <div className="relative">
+   491→                <Search
+   492→                  size={14}
+   493→                  className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground/60"
+   494→                  aria-hidden="true"
+   495→                />
+   496→                <input
+   497→                  type="search"
+   498→                  value={search}
+   499→                  onChange={(e) => setSearch(e.target.value)}
+   500→                  placeholder="Search name, email, service…"
+   501→                  aria-label="Search inquiries"
+   502→                  className="w-full rounded-xl border border-white/[0.09] bg-white/[0.03] py-2.5 pl-9 pr-3.5 text-[12.5px] text-foreground outline-none transition-colors placeholder:text-muted-foreground/60 focus:border-gold/60 sm:w-64"
+   503→                />
+   504→              </div>
+   505→              <div className="flex flex-wrap gap-1.5" role="group" aria-label="Filter by status">
+   506→                {["all", ...STATUSES].map((s) => (
+   507→                  <button
+   508→                    key={s}
+   509→                    onClick={() => setStatusFilter(s)}
+   510→                    aria-pressed={statusFilter === s}
+   511→                    className={cn(
+   512→                      "rounded-full border px-3 py-1.5 font-mono text-[10.5px] font-medium capitalize transition-colors",
+   513→                      statusFilter === s
+   514→                        ? "border-gold/50 bg-gold-dim text-gold"
+   515→                        : "border-white/[0.08] bg-white/[0.03] text-muted-foreground hover:border-white/20 hover:text-foreground"
+   516→                    )}
+   517→                  >
+   518→                    {s === "all" ? "All" : s.replace("_", " ")}
+   519→                  </button>
+   520→                ))}
+   521→              </div>
+   522→            </div>
+   523→
+   524→            {/* Budget filter chips (derived from data) */}
+   525→            {Array.from(new Set(inquiries.map((i) => i.budget).filter(Boolean))).length > 0 && (
+   526→              <div className="flex flex-wrap items-center gap-1.5">
+   527→                <span className="mr-1 font-mono text-[9.5px] uppercase tracking-wider text-muted-foreground/70">Budget</span>
+   528→                {["all", "none", ...Array.from(new Set(inquiries.map((i) => i.budget).filter((b): b is string => !!b)))].map((b) => (
+   529→                  <button
+   530→                    key={b}
+   531→                    onClick={() => setBudgetFilter(b)}
+   532→                    aria-pressed={budgetFilter === b}
+   533→                    className={cn(
+   534→                      "rounded-full border px-3 py-1.5 font-mono text-[10.5px] font-medium transition-colors",
+   535→                      budgetFilter === b
+   536→                        ? "border-teal/50 bg-teal-dim text-teal"
+   537→                        : "border-white/[0.08] bg-white/[0.03] text-muted-foreground hover:border-white/20 hover:text-foreground"
+   538→                    )}
+   539→                  >
+   540→                    {b === "all" ? "All" : b === "none" ? "No budget" : b}
+   541→                  </button>
+   542→                ))}
+   543→              </div>
+   544→            )}
+   545→          </div>
+   546→
+   547→          {loading ? (
+   548→            <div className="flex items-center justify-center py-16">
+   549→              <Loader2 size={24} className="animate-spin text-gold" aria-label="Loading inquiries" />
+   550→            </div>
+   551→          ) : inquiries.length === 0 ? (
+   552→            <div className="flex flex-col items-center gap-3 py-16 text-center">
+   553→              <Inbox size={30} className="text-muted-foreground/40" aria-hidden="true" />
+   554→              <p className="text-[13.5px] text-muted-foreground">No inquiries yet — they&apos;ll appear here the moment someone submits the form.</p>
+   555→            </div>
+   556→          ) : filteredInquiries.length === 0 ? (
+   557→            <div className="flex flex-col items-center gap-3 py-14 text-center">
+   558→              <SearchX size={26} className="text-muted-foreground/40" aria-hidden="true" />
+   559→              <p className="text-[13.5px] text-muted-foreground">No inquiries match your search or filter.</p>
+   560→              <button
+   561→                onClick={() => {
+   562→                  setSearch("");
+   563→                  setStatusFilter("all");
+   564→                  setBudgetFilter("all");
+   565→                }}
+   566→                className="rounded-lg border border-gold/30 bg-gold-dim px-3.5 py-1.5 text-[12px] font-medium text-gold transition-colors hover:bg-gold/20"
+   567→              >
+   568→                Clear filters
+   569→              </button>
+   570→            </div>
+   571→          ) : (
+   572→            <div className="max-h-[560px] overflow-auto">
+   573→              <table className="w-full min-w-[720px] text-left">
+   574→                <thead>
+   575→                  <tr className="border-b border-white/[0.06] bg-white/[0.02]">
+   576→                    {([
+   577→                      { label: "Client", key: "name" as const },
+   578→                      { label: "Service", key: "service" as const },
+   579→                      { label: "Message", key: null },
+   580→                      { label: "Received", key: "createdAt" as const },
+   581→                      { label: "Status", key: null },
+   582→                    ] as const).map((h) => {
+   583→                      const isSortable = h.key !== null;
+   584→                      const isActive = isSortable && sortKey === h.key;
+   585→                      return (
+   586→                        <th key={h.label} className="px-6 py-3.5 text-left">
+   587→                          {isSortable ? (
+   588→                            <button
+   589→                              onClick={() => toggleSort(h.key!)}
+   590→                              aria-label={`Sort by ${h.label}`}
+   591→                              className={cn(
+   592→                                "inline-flex items-center gap-1.5 text-[10.5px] font-semibold uppercase tracking-wider transition-colors",
+   593→                                isActive ? "text-gold" : "text-muted-foreground hover:text-foreground"
+   594→                              )}
+   595→                            >
+   596→                              {h.label}
+   597→                              {isActive ? (
+   598→                                sortDir === "asc" ? (
+   599→                                  <ChevronUp size={12} aria-hidden="true" />
+   600→                                ) : (
+   601→                                  <ChevronDown size={12} aria-hidden="true" />
+   602→                                )
+   603→                              ) : (
+   604→                                <ArrowUpDown size={11} className="opacity-40" aria-hidden="true" />
+   605→                              )}
+   606→                            </button>
+   607→                          ) : (
+   608→                            <span className="text-[10.5px] font-semibold uppercase tracking-wider text-muted-foreground">{h.label}</span>
+   609→                          )}
+   610→                        </th>
+   611→                      );
+   612→                    })}
+   613→                  </tr>
+   614→                </thead>
+   615→                <tbody>
+   616→                  {paginatedInquiries.map((i) => (
+   617→                    <tr key={i.id} className="group/row border-b border-white/[0.04] transition-colors hover:bg-white/[0.025]">
+   618→                      <td className="px-6 py-4">
+   619→                        <button
+   620→                          onClick={() => setDetailInquiry(i)}
+   621→                          title="View inquiry details"
+   622→                          className="inline-flex max-w-[200px] items-center gap-1.5 text-left text-[13.5px] font-semibold text-foreground transition-colors hover:text-gold"
+   623→                        >
+   624→                          <span className="truncate">{i.name}</span>
+   625→                          <ExternalLink
+   626→                            size={11}
+   627→                            className="shrink-0 text-gold/0 transition-colors group-hover/row:text-gold/70"
+   628→                            aria-hidden="true"
+   629→                          />
+   630→                        </button>
+   631→                        <p className="mt-0.5 text-[11.5px] text-muted-foreground">{i.email}</p>
+   632→                        {i.whatsapp && <p className="text-[11px] text-muted-foreground/70">WA: {i.whatsapp}</p>}
+   633→                      </td>
+   634→                      <td className="px-6 py-4">
+   635→                        <button
+   636→                          onClick={() => {
+   637→                            const svc = SERVICES.find((s) => s.title === i.service) ?? null;
+   638→                            setDetailService(svc);
+   639→                          }}
+   640→                          disabled={!SERVICES.some((s) => s.title === i.service)}
+   641→                          title={SERVICES.some((s) => s.title === i.service) ? `View ${i.service} details` : undefined}
+   642→                          className="max-w-[180px] text-left text-[12.5px] text-foreground/90 transition-colors hover:text-gold disabled:cursor-default disabled:hover:text-foreground/90"
+   643→                        >
+   644→                          {i.service}
+   645→                        </button>
+   646→                        {i.addlService && <p className="mt-0.5 max-w-[180px] text-[11px] text-muted-foreground">+ {i.addlService}</p>}
+   647→                        {i.budget && (
+   648→                          <span className="mt-1.5 inline-block rounded-md bg-gold/10 px-2 py-0.5 font-mono text-[10px] font-medium text-gold">
+   649→                            {i.budget}
+   650→                          </span>
+   651→                        )}
+   652→                      </td>
+   653→                      <td className="max-w-[260px] px-6 py-4">
+   654→                        <p className="line-clamp-2 text-[12.5px] leading-relaxed text-muted-foreground">{i.message}</p>
+   655→                      </td>
+   656→                      <td className="whitespace-nowrap px-6 py-4 text-[11.5px] text-muted-foreground">
+   657→                        {new Date(i.createdAt).toLocaleDateString("en-NG", { day: "numeric", month: "short" })}
+   658→                        <span className="block text-muted-foreground/60">
+   659→                          {new Date(i.createdAt).toLocaleTimeString("en-NG", { hour: "2-digit", minute: "2-digit" })}
+   660→                        </span>
+   661→                      </td>
+   662→                      <td className="px-6 py-4">
+   663→                        <select
+   664→                          value={i.status}
+   665→                          disabled={updatingId === i.id}
+   666→                          onChange={(e) => updateStatus(i.id, e.target.value)}
+   667→                          aria-label={`Status for ${i.name}`}
+   668→                          className={cn(
+   669→                            "cursor-pointer appearance-none rounded-full border px-3.5 py-1.5 text-[11px] font-semibold outline-none transition-colors",
+   670→                            STATUS_STYLES[i.status] ?? STATUS_STYLES.new
+   671→                          )}
+   672→                        >
+   673→                          {STATUSES.map((s) => (
+   674→                            <option key={s} value={s} className="bg-[#0b101c] text-foreground">
+   675→                              {s.replace("_", " ")}
+   676→                            </option>
+   677→                          ))}
+   678→                        </select>
+   679→                      </td>
+   680→                    </tr>
+   681→                  ))}
+   682→                </tbody>
+   683→              </table>
+   684→            </div>
+   685→          )}
+   686→
+   687→          {/* Pagination controls */}
+   688→          {filteredInquiries.length > PAGE_SIZE && (
+   689→            <nav
+   690→              aria-label="Inquiry pagination"
+   691→              className="flex items-center justify-between gap-4 border-t border-white/[0.06] px-6 py-4"
+   692→            >
+   693→              <p className="font-mono text-[11px] text-muted-foreground">
+   694→                Page {safePage} of {totalPages} · {filteredInquiries.length} inquiries
+   695→              </p>
+   696→              <div className="flex items-center gap-2">
+   697→                <button
+   698→                  onClick={() => setPage((p) => Math.max(p - 1, 1))}
+   699→                  disabled={safePage === 1}
+   700→                  aria-label="Previous page"
+   701→                  className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-white/[0.09] bg-white/[0.03] text-muted-foreground transition-colors hover:border-gold/40 hover:text-gold disabled:pointer-events-none disabled:opacity-35"
+   702→                >
+   703→                  <ChevronLeft size={14} aria-hidden="true" />
+   704→                </button>
+   705→                {Array.from({ length: totalPages }, (_, idx) => idx + 1)
+   706→                  .slice(Math.max(safePage - 2, 0), Math.max(safePage - 2, 0) + 5)
+   707→                  .map((p) => (
+   708→                    <button
+   709→                      key={p}
+   710→                      onClick={() => setPage(p)}
+   711→                      aria-current={p === safePage ? "page" : undefined}
+   712→                      className={cn(
+   713→                        "h-8 min-w-8 rounded-lg border px-2 font-mono text-[11.5px] transition-colors",
+   714→                        p === safePage
+   715→                          ? "border-gold/50 bg-gold-dim font-semibold text-gold"
+   716→                          : "border-white/[0.09] bg-white/[0.03] text-muted-foreground hover:border-white/25 hover:text-foreground"
+   717→                      )}
+   718→                    >
+   719→                      {p}
+   720→                    </button>
+   721→                  ))}
+   722→                <button
+   723→                  onClick={() => setPage((p) => Math.min(p + 1, totalPages))}
+   724→                  disabled={safePage === totalPages}
+   725→                  aria-label="Next page"
+   726→                  className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-white/[0.09] bg-white/[0.03] text-muted-foreground transition-colors hover:border-gold/40 hover:text-gold disabled:pointer-events-none disabled:opacity-35"
+   727→                >
+   728→                  <ChevronRight size={14} aria-hidden="true" />
+   729→                </button>
+   730→              </div>
+   731→            </nav>
+   732→          )}
+   733→        </div>
+   734→        {/* Subscribers panel */}
+   735→        <div className="surface-card mt-4 overflow-hidden">
+   736→          <div className="flex items-center justify-between gap-3 border-b border-white/[0.06] px-6 py-5">
+   737→            <h2 className="flex items-center gap-2.5 text-[14.5px] font-semibold text-foreground">
+   738→              <Users size={16} className="text-teal" aria-hidden="true" />
+   739→              Newsletter subscribers
+   740→              <span className="ml-1 font-mono text-[11px] font-normal text-muted-foreground">({subscribers.length})</span>
+   741→            </h2>
+   742→            <button
+   743→              onClick={() => exportSubscribersCsv(subscribers)}
+   744→              disabled={subscribers.length === 0}
+   745→              aria-label="Export subscribers as CSV"
+   746→              title="Export subscribers as CSV"
+   747→              className="inline-flex shrink-0 items-center gap-2 rounded-lg border border-white/[0.09] bg-white/[0.03] px-3.5 py-2 text-[12.5px] font-medium text-muted-foreground transition-colors hover:border-teal/40 hover:text-teal disabled:pointer-events-none disabled:opacity-40"
+   748→            >
+   749→              <Download size={13} aria-hidden="true" />
+   750→              <span className="hidden sm:inline">Export CSV</span>
+   751→            </button>
+   752→          </div>
+   753→
+   754→          {loading ? (
+   755→            <div className="flex items-center justify-center py-10">
+   756→              <Loader2 size={20} className="animate-spin text-teal" aria-label="Loading subscribers" />
+   757→            </div>
+   758→          ) : subscribers.length === 0 ? (
+   759→            <p className="px-6 py-10 text-center text-[13px] text-muted-foreground">
+   760→              No subscribers yet — newsletter signups from the website will appear here.
+   761→            </p>
+   762→          ) : (
+   763→            <div className="max-h-64 overflow-y-auto px-6 py-4">
+   764→              <ul className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+   765→                {subscribers.map((s) => (
+   766→                  <li
+   767→                    key={s.id}
+   768→                    className="flex items-center justify-between gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3"
+   769→                  >
+   770→                    <div className="flex min-w-0 items-center gap-2.5">
+   771→                      <a
+   772→                        href={`mailto:${s.email}`}
+   773→                        className="truncate text-[12.5px] font-medium text-foreground transition-colors hover:text-gold"
+   774→                      >
+   775→                        {s.email}
+   776→                      </a>
+   777→                      <span
+   778→                        title={
+   779→                          s.status === "confirmed"
+   780→                            ? "Confirmed subscriber"
+   781→                            : s.status === "unsubscribed"
+   782→                              ? "Unsubscribed"
+   783→                              : "Awaiting confirmation"
+   784→                        }
+   785→                        className={cn(
+   786→                          "shrink-0 rounded-full px-2 py-0.5 font-mono text-[9px] font-semibold",
+   787→                          s.status === "confirmed"
+   788→                            ? "bg-teal/15 text-teal"
+   789→                            : s.status === "unsubscribed"
+   790→                              ? "bg-red-500/15 text-red-400"
+   791→                              : "bg-gold/15 text-gold/80"
+   792→                        )}
+   793→                      >
+   794→                        {s.status === "confirmed" ? "CONFIRMED" : s.status === "unsubscribed" ? "UNSUBSCRIBED" : "PENDING"}
+   795→                      </span>
+   796→                    </div>
+   797→                    <span className="shrink-0 font-mono text-[10px] text-muted-foreground/70">
+   798→                      {new Date(s.confirmedAt ?? s.createdAt).toLocaleDateString("en-NG", { day: "numeric", month: "short" })}
+   799→                    </span>
+   800→                  </li>
+   801→                ))}
+   802→              </ul>
+   803→            </div>
+   804→          )}
+   805→        </div>
+   806→      </main>
+   807→
+   808→      {/* Service drilldown dialog */}
+   809→      <ServiceDetailDialog service={detailService} onClose={() => setDetailService(null)} />
+   810→
+   811→      {/* Inquiry detail dialog */}
+   812→      <InquiryDetailDialog
+   813→        inquiry={detailInquiry}
+   814→        onClose={() => setDetailInquiry(null)}
+   815→        onOpenService={(svc) => {
+   816→          setDetailInquiry(null);
+   817→          setDetailService(svc);
+   818→        }}
+   819→      />
+   820→    </div>
+   821→  );
+   822→}
+   823→
+   824→/* ── Service detail drilldown ─────────────────────────────── */
+   825→function ServiceDetailDialog({ service, onClose }: { service: Service | null; onClose: () => void }) {
+   826→  useEffect(() => {
+   827→    if (!service) return;
+   828→    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+   829→    document.addEventListener("keydown", onKey);
+   830→    document.body.style.overflow = "hidden";
+   831→    return () => {
+   832→      document.removeEventListener("keydown", onKey);
+   833→      document.body.style.overflow = "";
+   834→    };
+   835→  }, [service, onClose]);
+   836→
+   837→  if (!service) return null;
+   838→
+   839→  return (
+   840→    <div
+   841→      className="fixed inset-0 z-[100] flex items-end justify-center bg-[#03050a]/85 backdrop-blur-md sm:items-center sm:p-6"
+   842→      role="dialog"
+   843→      aria-modal="true"
+   844→      aria-label={`Service details: ${service.title}`}
+   845→      onClick={(e) => e.target === e.currentTarget && onClose()}
+   846→    >
+   847→      <div className="relative flex max-h-[92vh] w-full max-w-lg flex-col overflow-hidden rounded-t-3xl border border-white/[0.09] bg-[#0b101c] shadow-float sm:rounded-3xl [animation:slide-in-up_0.35s_cubic-bezier(0.22,1,0.36,1)]">
+   848→        <header className="relative border-b border-white/[0.06] p-6 md:p-8">
+   849→          <div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-gold/[0.1] blur-2xl" aria-hidden="true" />
+   850→          <div className="relative flex items-start justify-between gap-4">
+   851→            <div>
+   852→              <span className="eyebrow rounded-full border border-gold/25 bg-gold-dim px-3 py-1 text-[9px] text-gold">
+   853→                {service.category}
+   854→              </span>
+   855→              <h2 className="mt-3.5 font-display text-[21px] font-bold leading-snug text-foreground">{service.title}</h2>
+   856→              <p className="mt-1.5 text-[13px] text-muted-foreground">{service.desc}</p>
+   857→            </div>
+   858→            <button
+   859→              onClick={onClose}
+   860→              aria-label="Close service details"
+   861→              className="shrink-0 rounded-xl border border-white/[0.09] bg-white/[0.04] p-2.5 text-muted-foreground transition-colors hover:border-gold/40 hover:text-gold"
+   862→            >
+   863→              <X size={17} aria-hidden="true" />
+   864→            </button>
+   865→          </div>
+   866→        </header>
+   867→
+   868→        <div className="overflow-y-auto px-6 py-7 md:px-8" style={{ display: "grid", gap: "1.15rem" }}>
+   869→          <div>
+   870→            <p className="eyebrow mb-2.5 text-[9px] text-gold">Capabilities</p>
+   871→            <ul className="grid gap-1.5">
+   872→              {service.subs.map((s) => (
+   873→                <li key={s} className="flex items-start gap-2 text-[12.5px] text-muted-foreground">
+   874→                  <span className="mt-[7px] h-1 w-1 shrink-0 rounded-full bg-teal" aria-hidden="true" />
+   875→                  {s}
+   876→                </li>
+   877→              ))}
+   878→            </ul>
+   879→          </div>
+   880→
+   881→          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+   882→            <div>
+   883→              <p className="eyebrow mb-2.5 text-[9px] text-gold">Benefits</p>
+   884→              <ul className="space-y-1.5">
+   885→                {service.benefits.map((b) => (
+   886→                  <li key={b} className="text-[12.5px] text-muted-foreground">
+   887→                    <span className="text-teal">✓</span> {b}
+   888→                  </li>
+   889→                ))}
+   890→              </ul>
+   891→            </div>
+   892→            <div>
+   893→              <p className="eyebrow mb-2.5 text-[9px] text-gold">Ideal for</p>
+   894→              <div className="flex flex-wrap gap-1.5">
+   895→                {service.idealFor.map((t) => (
+   896→                  <span key={t} className="rounded-md bg-white/[0.05] px-2 py-1 text-[11px] text-muted-foreground">
+   897→                    {t}
+   898→                  </span>
+   899→                ))}
+   900→              </div>
+   901→            </div>
+   902→          </div>
+   903→        </div>
+   904→      </div>
+   905→    </div>
+   906→  );
+   907→}
+   908→
+   909→/* ── Inquiry detail dialog ────────────────────────────────── */
+   910→function InquiryDetailDialog({
+   911→  inquiry,
+   912→  onClose,
+   913→  onOpenService,
+   914→}: {
+   915→  inquiry: Inquiry | null;
+   916→  onClose: () => void;
+   917→  onOpenService: (svc: Service) => void;
+   918→}) {
+   919→  useEffect(() => {
+   920→    if (!inquiry) return;
+   921→    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+   922→    document.addEventListener("keydown", onKey);
+   923→    document.body.style.overflow = "hidden";
+   924→    return () => {
+   925→      document.removeEventListener("keydown", onKey);
+   926→      document.body.style.overflow = "";
+   927→    };
+   928→  }, [inquiry, onClose]);
+   929→
+   930→  if (!inquiry) return null;
+   931→
+   932→  const matchedService = SERVICES.find((s) => s.title === inquiry.service) ?? null;
+   933→  const mailto = `mailto:${inquiry.email}?subject=${encodeURIComponent(
+   934→    `Re: your ${inquiry.service} inquiry — Okomba Analytics`
+   935→  )}`;
+   936→
+   937→  return (
+   938→    <div
+   939→      className="fixed inset-0 z-[100] flex items-end justify-center bg-[#03050a]/85 backdrop-blur-md sm:items-center sm:p-6"
+   940→      role="dialog"
+   941→      aria-modal="true"
+   942→      aria-label={`Inquiry from ${inquiry.name}`}
+   943→      onClick={(e) => e.target === e.currentTarget && onClose()}
+   944→    >
+   945→      <article className="relative flex max-h-[92vh] w-full max-w-xl flex-col overflow-hidden rounded-t-3xl border border-white/[0.09] bg-[#0b101c] shadow-float sm:rounded-3xl [animation:slide-in-up_0.35s_cubic-bezier(0.22,1,0.36,1)]">
+   946→        {/* Header */}
+   947→        <header className="relative border-b border-white/[0.06] p-6 md:p-8">
+   948→          <div className="pointer-events-none absolute -right-10 -top-10 h-36 w-36 rounded-full bg-gold/[0.09] blur-2xl" aria-hidden="true" />
+   949→          <div className="relative flex items-start justify-between gap-4">
+   950→            <div>
+   951→              <span
+   952→                className={cn(
+   953→                  "inline-block rounded-full border px-3 py-1 font-mono text-[9.5px] font-semibold uppercase tracking-wider",
+   954→                  STATUS_STYLES[inquiry.status] ?? STATUS_STYLES.new
+   955→                )}
+   956→              >
+   957→                {inquiry.status.replace("_", " ")}
+   958→              </span>
+   959→              <h2 className="mt-3 font-display text-[22px] font-bold text-foreground">{inquiry.name}</h2>
+   960→              <p className="mt-1 text-[12.5px] text-muted-foreground">
+   961→                {new Date(inquiry.createdAt).toLocaleString("en-NG", {
+   962→                  day: "numeric",
+   963→                  month: "long",
+   964→                  year: "numeric",
+   965→                  hour: "2-digit",
+   966→                  minute: "2-digit",
+   967→                })}
+   968→              </p>
+   969→            </div>
+   970→            <button
+   971→              onClick={onClose}
+   972→              aria-label="Close inquiry details"
+   973→              className="shrink-0 rounded-xl border border-white/[0.09] bg-white/[0.04] p-2.5 text-muted-foreground transition-colors hover:border-gold/40 hover:text-gold"
+   974→            >
+   975→              <X size={17} aria-hidden="true" />
+   976→            </button>
+   977→          </div>
+   978→        </header>
+   979→
+   980→        {/* Body */}
+   981→        <div className="overflow-y-auto px-6 py-7 md:px-8" style={{ display: "grid", gap: "1.15rem" }}>
+   982→          {/* Contact grid */}
+   983→          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+   984→            {[
+   985→              { label: "Email", value: inquiry.email, href: mailto },
+   986→              { label: "Phone", value: inquiry.phone },
+   987→              { label: "WhatsApp", value: inquiry.whatsapp },
+   988→              { label: "Budget", value: inquiry.budget },
+   989→            ]
+   990→              .filter((f) => f.value)
+   991→              .map((f) => (
+   992→                <div key={f.label} className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3.5">
+   993→                  <p className="eyebrow text-[9px] text-muted-foreground">{f.label}</p>
+   994→                  {f.href ? (
+   995→                    <a href={f.href} className="mt-1.5 block truncate text-[13px] font-medium text-foreground transition-colors hover:text-gold">
+   996→                      {f.value}
+   997→                    </a>
+   998→                  ) : (
+   999→                    <p className="mt-1.5 truncate text-[13px] font-medium text-foreground">{f.value}</p>
+  1000→                  )}
+  1001→                </div>
+  1002→              ))}
+  1003→          </div>
+  1004→
+  1005→          {/* Services */}
+  1006→          <div className="rounded-xl border border-gold/15 bg-gold/[0.05] p-4.5 px-5 py-4">
+  1007→            <p className="eyebrow mb-2 text-[9px] text-gold">Requested services</p>
+  1008→            <div className="flex flex-wrap items-center gap-2">
+  1009→              {matchedService ? (
+  1010→                <button
+  1011→                  onClick={() => onOpenService(matchedService)}
+  1012→                  className="rounded-lg border border-gold/30 bg-gold-dim px-3 py-1.5 text-[12px] font-medium text-gold transition-colors hover:bg-gold/20"
+  1013→                >
+  1014→                  {inquiry.service} →
+  1015→                </button>
+  1016→              ) : (
+  1017→                <span className="text-[12.5px] text-foreground">{inquiry.service}</span>
+  1018→              )}
+  1019→              {inquiry.addlService && (
+  1020→                <span className="rounded-lg bg-white/[0.05] px-3 py-1.5 text-[11.5px] text-muted-foreground">
+  1021→                  + {inquiry.addlService}
+  1022→                </span>
+  1023→              )}
+  1024→            </div>
+  1025→          </div>
+  1026→
+  1027→          {/* Full message */}
+  1028→          <div>
+  1029→            <p className="eyebrow mb-2 text-[9px] text-muted-foreground">Message</p>
+  1030→            <p className="whitespace-pre-wrap rounded-xl border border-white/[0.06] bg-white/[0.02] p-4.5 p-5 text-[13.5px] leading-relaxed text-foreground/90">
+  1031→              {inquiry.message}
+  1032→            </p>
+  1033→          </div>
+  1034→        </div>
+  1035→
+  1036→        {/* Footer actions */}
+  1037→        <footer className="flex flex-col gap-2.5 border-t border-white/[0.06] bg-white/[0.015] px-6 py-5 sm:flex-row md:px-8">
+  1038→          <a
+  1039→            href={mailto}
+  1040→            className="btn-shine inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-gold-light to-gold px-5 py-3 text-[13px] font-semibold text-ink shadow-gold transition-transform hover:-translate-y-0.5"
+  1041→          >
+  1042→            <Mail size={14} aria-hidden="true" />
+  1043→            Reply by email
+  1044→          </a>
+  1045→          {inquiry.whatsapp && (
+  1046→            <a
+  1047→              href={`https://wa.me/${inquiry.whatsapp.replace(/[^0-9]/g, "")}`}
+  1048→              target="_blank"
+  1049→              rel="noopener noreferrer"
+  1050→              className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl border border-teal/30 bg-teal-dim px-5 py-3 text-[13px] font-medium text-teal transition-colors hover:bg-teal/15"
+  1051→            >
+  1052→              Reply on WhatsApp
+  1053→            </a>
+  1054→          )}
+  1055→        </footer>
+  1056→      </article>
+  1057→    </div>
+  1058→  );
+  1059→}
+  1060→

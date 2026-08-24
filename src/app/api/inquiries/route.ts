@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { Prisma } from "@prisma/client";
+import { Prisma } from "@/generated/prisma";
 import { z } from "zod";
 import { db } from "@/lib/db";
 import { isAdminAuthorized } from "@/lib/admin-auth";
@@ -187,6 +187,12 @@ export async function GET(req: Request) {
         groupedByService,
         subscribers,
         groupedByBudget,
+        confirmedSubscribers,
+        postsTotal,
+        postsPublished,
+        postsDraft,
+        emailsSent,
+        emailsLast7Days,
       ] = await Promise.all([
         db.inquiry.count(),
         db.inquiry.count({ where: { status: "new" } }),
@@ -204,6 +210,12 @@ export async function GET(req: Request) {
           _count: { _all: true },
           where: { budget: { not: null } },
         }),
+        db.subscriber.count({ where: { status: "confirmed" } }),
+        db.post.count(),
+        db.post.count({ where: { status: "published" } }),
+        db.post.count({ where: { status: "draft" } }),
+        db.emailLog.count(),
+        db.emailLog.count({ where: { sentAt: { gte: sevenDaysAgo } } }),
       ]);
 
       const byService = groupedByService
@@ -226,6 +238,12 @@ export async function GET(req: Request) {
           byService,
           byBudget,
           subscribers,
+          confirmedSubscribers,
+          postsTotal,
+          postsPublished,
+          postsDraft,
+          emailsSent,
+          emailsLast7Days,
         },
       });
     }
