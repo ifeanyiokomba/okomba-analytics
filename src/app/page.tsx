@@ -19,7 +19,6 @@ import { FaqSection } from "@/components/site/faq-section";
 import { NewsletterSection } from "@/components/site/newsletter-section";
 import { ContactSection } from "@/components/site/contact-section";
 import { Footer } from "@/components/site/footer";
-import { LoadingScreen } from "@/components/site/loading-screen";
 import { ScrollProgress } from "@/components/site/scroll-progress";
 import { BackToTop } from "@/components/site/back-to-top";
 import { CookieConsent } from "@/components/site/cookie-consent";
@@ -37,7 +36,6 @@ const AdminPortal = dynamic(
 type ToastData = { msg: string };
 
 export default function Home() {
-  const [loading, setLoading] = useState(true);
   const [route, setRoute] = useState<"home" | "admin">("home");
   const [modalService, setModalService] = useState<Service | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
@@ -80,10 +78,6 @@ export default function Home() {
       document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   }, [route]);
-
-  if (loading) {
-    return <LoadingScreen onDone={() => setLoading(false)} />;
-  }
 
   // ── Admin portal view ──
   if (route === "admin") {

@@ -432,3 +432,23 @@ Stage Summary:
 - Site is now WHITE-background first (logo badge fully visible everywhere), with dark anchor surfaces: hero container, footer, dialogs, admin — premium light/dark contrast pattern
 - Real products + projects power the carousel and work sections, with live links to votewise.com.ng and turbopay.okomba.com
 - NEXT ROUND candidates: hero social proof position tweak, services/why/testimonials visual polish on white, newsletter band accent, OG image refresh to white theme
+
+---
+Task ID: U4 (user-requested — remove loading screen + expand hero)
+Agent: main
+Task: Remove entrance load screen entirely; remove hero container card + floating dashboard cards; expand hero copy full-width, mobile-first
+
+Work Log:
+- LOADING SCREEN REMOVED: deleted src/components/site/loading-screen.tsx; page.tsx no longer imports it, removed `loading` state + the `if (loading) return <LoadingScreen/>` early return — page now renders immediately, no entrance gate
+- HERO REWRITTEN (hero.tsx): removed the dark rounded-[28px] container card wrapper + removed the HeroVisual (floating dashboard cards) column entirely; new full-width centered editorial layout — eyebrow badge → large responsive headline (2.5rem mobile → 5rem desktop, text-balance, gold "built to move" accent) → supporting paragraph (max-w-2xl) → stacked full-width CTAs on mobile / inline from sm (gold "Start a Project" w/ white text on gold gradient + white "Explore Services" outline) → social proof row (3 client portrait avatars + gold "50+" badge in white rings + "Trusted by 50+ clients across 200+ projects" + teal checkmark proofs w/ divider); kept ambience (grid mask, gold radial top glow, teal bottom-left counterweight, gold right glow) but NO card; deleted hero-visual.tsx (unused)
+- CTA text color fix: gold gradient buttons now use text-white (was text-ink which read dark-gold-on-gold poorly on the new white hero); secondary CTA white bg w/ black/12 border + shadow-sm hover gold
+- Mobile-first verified: 375px overflow CLEAN, h1 40px, CTA full-width 335px (viewport 375), proof avatars present, centered stack
+
+QA VERIFIED:
+- ✅ No loading screen (DOM: loadingScreenPresent false), no container card (containerCardPresent false), 0 floating dashboard cards
+- ✅ All hero content present + visible: headline (ink rgb(20,25,38)), paragraph opacity 1, 2 CTAs ("Start a Project"/"Explore Services"), proof avatars, 5/5 reveals visible
+- ✅ Mobile 375 overflow CLEAN; lint clean; no console errors
+- ✅ VLM clean (cookie dismissed): desktop 9/10 layout + 10/10 content accuracy; "full-width centered editorial layout achieved, no container card or floating dashboard elements present"
+
+Stage Summary:
+- Site loads instantly (no entrance gate); hero is now a clean, expanded, full-width centered editorial layout with the headline + supporting copy + CTAs + social proof — no card wrappers, no floating dashboard, fully mobile-fitted
