@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { db } from "@/lib/db";
+import { notifyNewSubscriber } from "@/lib/notify";
 
 export const runtime = "nodejs";
 
@@ -60,11 +61,13 @@ export async function POST(req: Request) {
     const { email } = parsed.data;
 
     // Upsert-style: silently succeed if already subscribed
-    await db.subscriber.upsert({
-      where: { email },
-      update: {},
-      create: { email },
-    });
+    const existing = await db.subscriber.findUnique({ where: { email } });
+
+    if (!existing) {
+      await db.subscriber.create({ data: { email } });
+      // Fire-and-forget notification (never blocks the response)
+      notifyNewSubscriber(email).catch(() => undefined);
+    }
 
     return NextResponse.json({ ok: true }, { status: 201 });
   } catch (err) {

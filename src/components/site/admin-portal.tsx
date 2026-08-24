@@ -4,6 +4,8 @@ import { useCallback, useEffect, useState } from "react";
 import {
   ArrowLeft,
   CheckCircle2,
+  ChevronLeft,
+  ChevronRight,
   CircleDot,
   Clock3,
   Download,
@@ -219,6 +221,8 @@ function AdminDashboard({ onLogout, onExit }: { onLogout: () => void; onExit: ()
   // table controls
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [page, setPage] = useState(1);
+  const PAGE_SIZE = 10;
 
   const load = useCallback(async () => {
     setError(null);
@@ -248,6 +252,11 @@ function AdminDashboard({ onLogout, onExit }: { onLogout: () => void; onExit: ()
   useEffect(() => {
     load();
   }, [load]);
+
+  // Reset to first page whenever filters change
+  useEffect(() => {
+    setPage(1);
+  }, [search, statusFilter]);
 
   const updateStatus = async (id: string, status: string) => {
     setUpdatingId(id);
@@ -304,6 +313,11 @@ function AdminDashboard({ onLogout, onExit }: { onLogout: () => void; onExit: ()
       i.message.toLowerCase().includes(q)
     );
   });
+
+  // Pagination slice
+  const totalPages = Math.max(Math.ceil(filteredInquiries.length / PAGE_SIZE), 1);
+  const safePage = Math.min(page, totalPages);
+  const paginatedInquiries = filteredInquiries.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
 
   return (
     <div className="min-h-screen bg-background">
@@ -482,7 +496,7 @@ function AdminDashboard({ onLogout, onExit }: { onLogout: () => void; onExit: ()
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredInquiries.map((i) => (
+                  {paginatedInquiries.map((i) => (
                     <tr key={i.id} className="border-b border-white/[0.04] transition-colors hover:bg-white/[0.02]">
                       <td className="px-6 py-4">
                         <p className="text-[13.5px] font-semibold text-foreground">{i.name}</p>
@@ -525,6 +539,53 @@ function AdminDashboard({ onLogout, onExit }: { onLogout: () => void; onExit: ()
                 </tbody>
               </table>
             </div>
+          )}
+
+          {/* Pagination controls */}
+          {filteredInquiries.length > PAGE_SIZE && (
+            <nav
+              aria-label="Inquiry pagination"
+              className="flex items-center justify-between gap-4 border-t border-white/[0.06] px-6 py-4"
+            >
+              <p className="font-mono text-[11px] text-muted-foreground">
+                Page {safePage} of {totalPages} · {filteredInquiries.length} inquiries
+              </p>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setPage((p) => Math.max(p - 1, 1))}
+                  disabled={safePage === 1}
+                  aria-label="Previous page"
+                  className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-white/[0.09] bg-white/[0.03] text-muted-foreground transition-colors hover:border-gold/40 hover:text-gold disabled:pointer-events-none disabled:opacity-35"
+                >
+                  <ChevronLeft size={14} aria-hidden="true" />
+                </button>
+                {Array.from({ length: totalPages }, (_, idx) => idx + 1)
+                  .slice(Math.max(safePage - 2, 0), Math.max(safePage - 2, 0) + 5)
+                  .map((p) => (
+                    <button
+                      key={p}
+                      onClick={() => setPage(p)}
+                      aria-current={p === safePage ? "page" : undefined}
+                      className={cn(
+                        "h-8 min-w-8 rounded-lg border px-2 font-mono text-[11.5px] transition-colors",
+                        p === safePage
+                          ? "border-gold/50 bg-gold-dim font-semibold text-gold"
+                          : "border-white/[0.09] bg-white/[0.03] text-muted-foreground hover:border-white/25 hover:text-foreground"
+                      )}
+                    >
+                      {p}
+                    </button>
+                  ))}
+                <button
+                  onClick={() => setPage((p) => Math.min(p + 1, totalPages))}
+                  disabled={safePage === totalPages}
+                  aria-label="Next page"
+                  className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-white/[0.09] bg-white/[0.03] text-muted-foreground transition-colors hover:border-gold/40 hover:text-gold disabled:pointer-events-none disabled:opacity-35"
+                >
+                  <ChevronRight size={14} aria-hidden="true" />
+                </button>
+              </div>
+            </nav>
           )}
         </div>
         {/* Subscribers panel */}

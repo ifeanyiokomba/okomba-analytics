@@ -3,6 +3,7 @@ import { Prisma } from "@prisma/client";
 import { z } from "zod";
 import { db } from "@/lib/db";
 import { isAdminAuthorized } from "@/lib/admin-auth";
+import { notifyNewInquiry } from "@/lib/notify";
 
 export const runtime = "nodejs";
 
@@ -133,6 +134,18 @@ export async function POST(req: Request) {
         status: "new",
       },
     });
+
+    // Fire-and-forget notification (never blocks or fails the response)
+    notifyNewInquiry({
+      id: inquiry.id,
+      name: inquiry.name,
+      email: inquiry.email,
+      phone: inquiry.phone,
+      whatsapp: inquiry.whatsapp,
+      service: inquiry.service,
+      addlService: inquiry.addlService,
+      message: inquiry.message,
+    }).catch(() => undefined);
 
     return NextResponse.json({ ok: true, id: inquiry.id }, { status: 201 });
   } catch (err) {

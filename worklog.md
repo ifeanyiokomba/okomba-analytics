@@ -209,3 +209,27 @@ Stage Summary:
   4. Email notification stub on new inquiry (webhook-ready integration point)
   5. Copy deck review (hero A/B variants could be tested)
 - RISKS: none blocking; CSV export runs client-side on loaded data only (no new attack surface)
+
+---
+Task ID: R5 (cron review round 5)
+Agent: webDevReview cron (15-min cycle)
+Task: QA regression + performance lazy-loading + admin pagination + notification webhook stub
+
+Work Log:
+- QA regression: server 200, no console errors, desktop 1280 & mobile 375 overflow-CLEAN
+- NEW FEATURE (performance) — Lazy-loading via next/dynamic: InquiryModal (ssr:false) and AdminPortal (ssr:false + branded gold spinner loading state) now load as separate chunks only when opened, trimming initial JS on the marketing page; verified lazy modal renders correctly on open (7 form fields present) and admin portal loads via #/admin
+- NEW FEATURE — Admin table pagination: PAGE_SIZE=10, page state w/ auto-reset on search/filter change; pagination bar below table (Page X of Y · N inquiries, numbered buttons w/ sliding 5-button window, gold active page, prev/next chevrons w/ disabled states, aria-current/labels); only renders when >10 rows; VERIFIED by seeding 15 inquiries: page 1 = 10 rows, page 2 = 5 rows (starts "Pagination User 4"), prev/next both work; export still exports ALL filtered rows across pages
+- NEW FEATURE (integration) — Notification service (src/lib/notify.ts): fire-and-forget notifyNewInquiry + notifyNewSubscriber hooked into POST /api/inquiries and POST /api/subscribe; structured JSON payload logging (email-stub channel) + optional NOTIFY_WEBHOOK_URL forwarding w/ 5s timeout + try/catch isolation (never breaks user requests); NOTIFICATIONS_ENABLED=false kill switch; subscribe route now findUnique-then-create so notifications only fire on genuinely new subscribers; VERIFIED: stub logged inquiry.created payload (full JSON w/ id/name/email/…) and subscriber.created in dev.log after real API calls
+- Fixed edit-order bug where updateStatus function declaration was clipped (restored)
+- Final: lint clean, mobile CLEAN, no console errors, test data (15 inquiries + 1 subscriber) cleaned from DB
+
+Stage Summary:
+- PROJECT STATUS: Stable, production-grade. Performance improved (code-split admin + modal), admin handles large datasets (pagination), integration point ready for email/webhook provider
+- VERIFIED: lazy modal (7 fields), admin lazy load, pagination page 1/2 + prev/next, notification payloads in logs, mobile overflow
+- UNRESOLVED/NEXT ROUND priorities:
+  1. Section imagery refresh (AI-generated visuals for case studies/about/hero background)
+  2. Real email provider integration when credentials available (swap deliver() body — one function)
+  3. Newsletter double-opt-in flow (confirmation email)
+  4. Admin: sort by column (received date/name)
+  5. Copy deck refinement / hero A/B variants
+- RISKS: notification webhook is fire-and-forget w/ error isolation (safe); in-memory rate limiters remain (acceptable)

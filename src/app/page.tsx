@@ -1,5 +1,6 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useCallback, useEffect, useState } from "react";
 import { CheckCircle2 } from "lucide-react";
 import type { Service } from "@/lib/content";
@@ -18,11 +19,19 @@ import { FaqSection } from "@/components/site/faq-section";
 import { NewsletterSection } from "@/components/site/newsletter-section";
 import { ContactSection } from "@/components/site/contact-section";
 import { Footer } from "@/components/site/footer";
-import { InquiryModal } from "@/components/site/inquiry-modal";
-import { AdminPortal } from "@/components/site/admin-portal";
 import { LoadingScreen } from "@/components/site/loading-screen";
 import { ScrollProgress } from "@/components/site/scroll-progress";
 import { BackToTop } from "@/components/site/back-to-top";
+
+/* ── Lazy-loaded: only fetched when actually opened ── */
+const InquiryModal = dynamic(
+  () => import("@/components/site/inquiry-modal").then((m) => m.InquiryModal),
+  { ssr: false }
+);
+const AdminPortal = dynamic(
+  () => import("@/components/site/admin-portal").then((m) => m.AdminPortal),
+  { ssr: false, loading: () => <div className="flex min-h-screen items-center justify-center bg-background" aria-label="Loading admin portal"><div className="h-8 w-8 animate-spin rounded-full border-2 border-gold border-t-transparent" /></div> }
+);
 
 type ToastData = { msg: string };
 
