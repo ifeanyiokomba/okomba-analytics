@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import Image from "next/image";
 import { BadgeCheck, CalendarClock, Quote, Users2, X } from "lucide-react";
 import { CASE_STUDIES, CASE_STUDY_DETAILS, type CaseStudy } from "@/lib/content";
 import { ServiceIcon } from "./service-icon";
@@ -36,6 +37,28 @@ export function CaseStudyDialog({ caseStudy, onClose }: CaseStudyDialogProps) {
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
       <article className="relative flex max-h-[92vh] w-full max-w-2xl flex-col overflow-hidden rounded-t-3xl border border-white/[0.08] bg-[#0b101c] shadow-float sm:rounded-3xl [animation:slide-in-up_0.35s_cubic-bezier(0.22,1,0.36,1)]">
+        {/* Cover visual */}
+        {caseStudy.image && (
+          <div className="relative h-40 w-full shrink-0 sm:h-48">
+            <Image
+              src={caseStudy.image}
+              alt={`${caseStudy.client} — engagement visual`}
+              fill
+              sizes="(min-width: 640px) 672px, 100vw"
+              className="object-cover"
+              priority
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#0b101c] via-[#0b101c]/40 to-transparent" aria-hidden="true" />
+            <button
+              onClick={onClose}
+              aria-label="Close case study"
+              className="absolute right-4 top-4 rounded-xl border border-white/[0.12] bg-[#05070d]/75 p-2.5 text-muted-foreground backdrop-blur-md transition-colors hover:border-gold/40 hover:text-gold"
+            >
+              <X size={17} aria-hidden="true" />
+            </button>
+          </div>
+        )}
+
         {/* Header */}
         <header className="relative border-b border-white/[0.06] p-6 md:p-8">
           <div className="pointer-events-none absolute -right-10 -top-10 h-36 w-36 rounded-full bg-gold/[0.09] blur-2xl" aria-hidden="true" />
@@ -53,13 +76,15 @@ export function CaseStudyDialog({ caseStudy, onClose }: CaseStudyDialogProps) {
               </div>
               <h2 className="mt-3.5 font-display text-2xl font-bold text-foreground">{caseStudy.client}</h2>
             </div>
-            <button
-              onClick={onClose}
-              aria-label="Close case study"
-              className="shrink-0 rounded-xl border border-white/[0.09] bg-white/[0.04] p-2.5 text-muted-foreground transition-colors hover:border-gold/40 hover:text-gold"
-            >
-              <X size={17} aria-hidden="true" />
-            </button>
+            {!caseStudy.image && (
+              <button
+                onClick={onClose}
+                aria-label="Close case study"
+                className="shrink-0 rounded-xl border border-white/[0.09] bg-white/[0.04] p-2.5 text-muted-foreground transition-colors hover:border-gold/40 hover:text-gold"
+              >
+                <X size={17} aria-hidden="true" />
+              </button>
+            )}
           </div>
         </header>
 

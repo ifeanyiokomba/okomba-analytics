@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { ArrowUpRight, BadgeCheck, Quote } from "lucide-react";
 import { CASE_STUDIES, type CaseStudy } from "@/lib/content";
 import { SectionHeading } from "./section-heading";
@@ -41,6 +42,25 @@ export function CaseStudiesSection() {
                   className="w-full cursor-pointer text-left focus-visible:outline-2 focus-visible:outline-gold"
                   aria-label={`Read full ${cs.client} case study`}
                 >
+                {/* Visual banner */}
+                {cs.image && (
+                  <div className="relative h-44 w-full overflow-hidden sm:h-52">
+                    <Image
+                      src={cs.image}
+                      alt={`${cs.client} — engagement visual`}
+                      fill
+                      sizes="(min-width: 768px) 100vw, 100vw"
+                      className="object-cover transition-transform duration-700 group-hover:scale-[1.04]"
+                    />
+                    {/* gradient scrim for text-free bottom blend */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#0b101c] via-[#0b101c]/25 to-transparent" aria-hidden="true" />
+                    {/* client badge over image */}
+                    <span className="absolute bottom-3.5 left-6 flex items-center gap-2 rounded-full border border-gold/30 bg-[#05070d]/80 px-3.5 py-1.5 backdrop-blur-md">
+                      <span className="h-1.5 w-1.5 rounded-full bg-gold animate-pulse-dot" aria-hidden="true" />
+                      <span className="eyebrow text-[9px] text-gold">Case study {String(i + 1).padStart(2, "0")}</span>
+                    </span>
+                  </div>
+                )}
 
                 <div className="grid grid-cols-1 gap-8 p-7 md:grid-cols-[1.25fr_0.75fr] md:gap-10 md:p-10">
                   {/* Story column */}

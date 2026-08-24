@@ -327,6 +327,7 @@ export type CaseStudy = {
   id: string;
   client: string;
   industry: string;
+  image?: string;
   challenge: string;
   solution: string;
   stack: string[];
@@ -339,6 +340,7 @@ export const CASE_STUDIES: CaseStudy[] = [
     id: "cs-techstart",
     client: "TechStartNG",
     industry: "Startup — Technology",
+    image: "/images/case-techstart.png",
     challenge:
       "A fast-moving startup needed a production-grade web application to serve their customers, but had no internal engineering team and couldn't afford a slow agency cycle.",
     solution:
@@ -356,6 +358,7 @@ export const CASE_STUDIES: CaseStudy[] = [
     id: "cs-edubridge",
     client: "EduBridge Foundation",
     industry: "NGO — Education",
+    image: "/images/case-edubridge.png",
     challenge:
       "The foundation's virtual summit required registration for hundreds of participants, coordination of presenters, and certificate distribution — with zero room for error.",
     solution:
@@ -373,6 +376,7 @@ export const CASE_STUDIES: CaseStudy[] = [
     id: "cs-finflow",
     client: "FinFlow Nigeria",
     industry: "Fintech — Payments",
+    image: "/images/case-finflow.png",
     challenge:
       "Complex Remita and payment gateway setups were stalling their transaction operations, with manual reconciliation slowing the business down.",
     solution:

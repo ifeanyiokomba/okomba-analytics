@@ -3,9 +3,12 @@
 import { useCallback, useEffect, useState } from "react";
 import {
   ArrowLeft,
+  ArrowUpDown,
   CheckCircle2,
+  ChevronDown,
   ChevronLeft,
   ChevronRight,
+  ChevronUp,
   CircleDot,
   Clock3,
   Download,
@@ -222,7 +225,18 @@ function AdminDashboard({ onLogout, onExit }: { onLogout: () => void; onExit: ()
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [page, setPage] = useState(1);
+  const [sortKey, setSortKey] = useState<"createdAt" | "name" | "service">("createdAt");
+  const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
   const PAGE_SIZE = 10;
+
+  const toggleSort = (key: "createdAt" | "name" | "service") => {
+    if (sortKey === key) {
+      setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+    } else {
+      setSortKey(key);
+      setSortDir(key === "createdAt" ? "desc" : "asc");
+    }
+  };
 
   const load = useCallback(async () => {
     setError(null);
@@ -256,7 +270,7 @@ function AdminDashboard({ onLogout, onExit }: { onLogout: () => void; onExit: ()
   // Reset to first page whenever filters change
   useEffect(() => {
     setPage(1);
-  }, [search, statusFilter]);
+  }, [search, statusFilter, sortKey, sortDir]);
 
   const updateStatus = async (id: string, status: string) => {
     setUpdatingId(id);
@@ -299,20 +313,28 @@ function AdminDashboard({ onLogout, onExit }: { onLogout: () => void; onExit: ()
   const maxServiceCount = stats?.byService?.[0]?.count ?? 1;
 
   // Filtered inquiries for the table (client-side search + status filter)
-  const filteredInquiries = inquiries.filter((i) => {
-    const matchesStatus = statusFilter === "all" || i.status === statusFilter;
-    if (!matchesStatus) return false;
-    if (!search.trim()) return true;
-    const q = search.trim().toLowerCase();
-    return (
-      i.name.toLowerCase().includes(q) ||
-      i.email.toLowerCase().includes(q) ||
-      i.service.toLowerCase().includes(q) ||
-      (i.phone ?? "").toLowerCase().includes(q) ||
-      (i.whatsapp ?? "").toLowerCase().includes(q) ||
-      i.message.toLowerCase().includes(q)
-    );
-  });
+  const filteredInquiries = inquiries
+    .filter((i) => {
+      const matchesStatus = statusFilter === "all" || i.status === statusFilter;
+      if (!matchesStatus) return false;
+      if (!search.trim()) return true;
+      const q = search.trim().toLowerCase();
+      return (
+        i.name.toLowerCase().includes(q) ||
+        i.email.toLowerCase().includes(q) ||
+        i.service.toLowerCase().includes(q) ||
+        (i.phone ?? "").toLowerCase().includes(q) ||
+        (i.whatsapp ?? "").toLowerCase().includes(q) ||
+        i.message.toLowerCase().includes(q)
+      );
+    })
+    .sort((a, b) => {
+      let cmp = 0;
+      if (sortKey === "name") cmp = a.name.localeCompare(b.name);
+      else if (sortKey === "service") cmp = a.service.localeCompare(b.service);
+      else cmp = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+      return sortDir === "asc" ? cmp : -cmp;
+    });
 
   // Pagination slice
   const totalPages = Math.max(Math.ceil(filteredInquiries.length / PAGE_SIZE), 1);
@@ -488,11 +510,43 @@ function AdminDashboard({ onLogout, onExit }: { onLogout: () => void; onExit: ()
               <table className="w-full min-w-[720px] text-left">
                 <thead>
                   <tr className="border-b border-white/[0.06] bg-white/[0.02]">
-                    {["Client", "Service", "Message", "Received", "Status"].map((h) => (
-                      <th key={h} className="px-6 py-3.5 text-[10.5px] font-semibold uppercase tracking-wider text-muted-foreground">
-                        {h}
-                      </th>
-                    ))}
+                    {([
+                      { label: "Client", key: "name" as const },
+                      { label: "Service", key: "service" as const },
+                      { label: "Message", key: null },
+                      { label: "Received", key: "createdAt" as const },
+                      { label: "Status", key: null },
+                    ] as const).map((h) => {
+                      const isSortable = h.key !== null;
+                      const isActive = isSortable && sortKey === h.key;
+                      return (
+                        <th key={h.label} className="px-6 py-3.5 text-left">
+                          {isSortable ? (
+                            <button
+                              onClick={() => toggleSort(h.key!)}
+                              aria-label={`Sort by ${h.label}`}
+                              className={cn(
+                                "inline-flex items-center gap-1.5 text-[10.5px] font-semibold uppercase tracking-wider transition-colors",
+                                isActive ? "text-gold" : "text-muted-foreground hover:text-foreground"
+                              )}
+                            >
+                              {h.label}
+                              {isActive ? (
+                                sortDir === "asc" ? (
+                                  <ChevronUp size={12} aria-hidden="true" />
+                                ) : (
+                                  <ChevronDown size={12} aria-hidden="true" />
+                                )
+                              ) : (
+                                <ArrowUpDown size={11} className="opacity-40" aria-hidden="true" />
+                              )}
+                            </button>
+                          ) : (
+                            <span className="text-[10.5px] font-semibold uppercase tracking-wider text-muted-foreground">{h.label}</span>
+                          )}
+                        </th>
+                      );
+                    })}
                   </tr>
                 </thead>
                 <tbody>

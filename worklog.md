@@ -233,3 +233,27 @@ Stage Summary:
   4. Admin: sort by column (received date/name)
   5. Copy deck refinement / hero A/B variants
 - RISKS: notification webhook is fire-and-forget w/ error isolation (safe); in-memory rate limiters remain (acceptable)
+
+---
+Task ID: R6 (cron review round 6)
+Agent: webDevReview cron (15-min cycle)
+Task: QA regression + AI-generated section imagery (case studies, about) + admin sortable columns
+
+Work Log:
+- QA regression: server 200, no console errors, desktop 1280 & mobile 375 overflow-CLEAN
+- NEW FEATURE (visual) — Case study imagery: 3 AI-generated visuals (public/images/case-techstart.png logistics booking dashboard, case-edubridge.png event registration platform, case-finflow.png fintech payment network, 1344x768 each); integrated via next/image (fill, object-cover, hover scale 1.04) as card banner headers w/ gradient scrim + animated "Case study 01" gold badge overlay; dialog gained matching cover image (h-40/48) w/ scrim + relocated glass close button; all 3 card images + dialog cover verified LOADED in browser
+- NEW FEATURE (visual) — About visual panel: AI-generated golden data constellation (public/images/about-visual.png) in rounded panel below capability strip w/ gradient scrim + floating glass badge ("Systems built to last" + ShieldCheck, animate-float-med), hidden on xs mobile; verified LOADED
+- NEW FEATURE — Admin sortable columns: Client/Service/Received headers now sortable buttons (sortKey + sortDir state, toggle asc/desc, localeCompare for text, timestamp for dates); active sort = gold header w/ ChevronUp/Down, inactive = ArrowUpDown hint icon; sorting resets pagination to page 1; VERIFIED with seeded rows: default date-desc → "Mary Okon | Adebayo | Zainab", name asc → "Adebayo | Mary | Zainab", name desc reversed
+- VLM QA: case cards "High-quality execution… no defects", about "Strong layout & branding consistency", dialog "Polished modal design"
+- Final: lint clean, mobile 375 CLEAN w/ new images, no console errors, test rows cleaned from DB
+
+Stage Summary:
+- PROJECT STATUS: Visually enriched & admin-ergonomic. Case studies now lead with imagery, about section has visual anchor, admin table fully sortable
+- VERIFIED: 4 AI images generated + integrated (all loading), sort asc/desc/name/date, dialog cover, mobile overflow
+- UNRESOLVED/NEXT ROUND priorities:
+  1. Real email provider integration when credentials available (swap deliver() in notify.ts)
+  2. Newsletter double-opt-in flow
+  3. Testimonials imagery (client avatars) + hero background texture variant
+  4. Admin: service-detail drilldown (inquiry → related service info)
+  5. Copy deck refinement / hero A/B variants
+- RISKS: none blocking; images are static public assets (cached, no runtime cost)

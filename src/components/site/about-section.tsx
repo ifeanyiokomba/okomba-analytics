@@ -1,6 +1,7 @@
 "use client";
 
-import { Compass, Eye, HeartHandshake } from "lucide-react";
+import Image from "next/image";
+import { Compass, Eye, HeartHandshake, ShieldCheck } from "lucide-react";
 import { SectionHeading } from "./section-heading";
 import { Reveal } from "./reveal";
 
@@ -63,6 +64,29 @@ export function AboutSection() {
                     <p className="mt-1.5 text-[13.5px] font-semibold text-foreground">{f.v}</p>
                   </div>
                 ))}
+              </div>
+
+              {/* Visual panel with floating badge */}
+              <div className="relative mt-8 hidden overflow-hidden rounded-2xl border border-white/[0.07] sm:block">
+                <div className="relative h-52 w-full">
+                  <Image
+                    src="/images/about-visual.png"
+                    alt="Okomba Analytics — connected systems visual"
+                    fill
+                    sizes="(min-width: 1024px) 384px, 100vw"
+                    className="object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#0b101c] via-transparent to-transparent" aria-hidden="true" />
+                </div>
+                <div className="surface-glass absolute bottom-4 left-4 flex items-center gap-3 rounded-2xl px-4 py-3 shadow-float animate-float-med">
+                  <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-teal-dim text-teal">
+                    <ShieldCheck size={17} aria-hidden="true" />
+                  </span>
+                  <div>
+                    <p className="text-[12.5px] font-semibold text-foreground">Systems built to last</p>
+                    <p className="text-[10.5px] text-muted-foreground">Security &amp; support included</p>
+                  </div>
+                </div>
               </div>
             </div>
           </Reveal>
