@@ -1,49 +1,73 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { OkombaLogoFull } from "./logo";
+import { OkombaLogo } from "./logo";
 
-/** Brief brand-reveal loading screen — polished version of the original. */
+/**
+ * Entrance load screen — brief, professional brand reveal.
+ * Logo scale-fades in with a gold sweep shimmer, then hands off.
+ * Total duration ≈ 1.15s (kept deliberately short for snappy UX).
+ */
 export function LoadingScreen({ onDone }: { onDone: () => void }) {
-  const [progress, setProgress] = useState(0);
   const [fading, setFading] = useState(false);
 
   useEffect(() => {
-    let p = 0;
-    const timer = setInterval(() => {
-      p = Math.min(p + Math.random() * 22 + 10, 100);
-      setProgress(Math.floor(p));
-      if (p >= 100) {
-        clearInterval(timer);
-        setTimeout(() => setFading(true), 250);
-        setTimeout(onDone, 750);
-      }
-    }, 160);
-    return () => clearInterval(timer);
+    const fadeTimer = setTimeout(() => setFading(true), 900);
+    const doneTimer = setTimeout(onDone, 1250);
+    return () => {
+      clearTimeout(fadeTimer);
+      clearTimeout(doneTimer);
+    };
   }, [onDone]);
 
   return (
     <div
       aria-label="Loading Okomba Analytics"
-      className={`fixed inset-0 z-[200] flex flex-col items-center justify-center bg-[#05070d] transition-opacity duration-500 ${
+      className={`fixed inset-0 z-[200] flex flex-col items-center justify-center bg-[#05070d] transition-opacity duration-350 ${
         fading ? "opacity-0" : "opacity-100"
       }`}
     >
-      <div className="bg-grid pointer-events-none absolute inset-0 opacity-60 [mask-image:radial-gradient(45%_45%_at_50%_50%,black,transparent)]" aria-hidden="true" />
-      <div className="pointer-events-none absolute left-1/2 top-1/2 h-[260px] w-[260px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-gold/[0.09] blur-[90px]" aria-hidden="true" />
+      {/* ambient backdrop */}
+      <div className="bg-grid pointer-events-none absolute inset-0 opacity-50 [mask-image:radial-gradient(40%_40%_at_50%_50%,black,transparent)]" aria-hidden="true" />
+      <div
+        className="pointer-events-none absolute left-1/2 top-1/2 h-[300px] w-[300px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-gold/[0.08] blur-[90px]"
+        style={{ animation: "glow-breathe 1.8s ease-in-out infinite" }}
+        aria-hidden="true"
+      />
 
-      <div className="relative flex flex-col items-center" style={{ animation: "float-med 4s ease-in-out infinite" }}>
-        <OkombaLogoFull height={46} />
+      {/* logo reveal: rise + settle + soft glow pulse */}
+      <div className="relative" style={{ animation: "logo-reveal 0.7s cubic-bezier(0.22,1,0.36,1) both" }}>
+        <OkombaLogo height={52} priority />
+        {/* gold sweep across the badge */}
+        <span
+          className="pointer-events-none absolute inset-0 overflow-hidden rounded-[22%/100%]"
+          aria-hidden="true"
+        >
+          <span
+            className="absolute inset-y-0 w-1/3 bg-gradient-to-r from-transparent via-gold/25 to-transparent"
+            style={{ animation: "sweep-across 0.9s 0.25s ease-in-out both" }}
+          />
+        </span>
       </div>
-      <p className="eyebrow mt-7 text-[10px] text-muted-foreground/80">Digital services ecosystem</p>
 
-      <div className="relative mt-8 h-[3px] w-52 overflow-hidden rounded-full bg-white/[0.07]">
-        <div
-          className="h-full rounded-full bg-gradient-to-r from-gold to-gold-light transition-[width] duration-200 ease-out"
-          style={{ width: `${progress}%` }}
+      {/* tagline + progress hairline */}
+      <p
+        className="eyebrow relative mt-6 text-[10px] tracking-[0.28em] text-muted-foreground/80"
+        style={{ animation: "fade-up-soft 0.5s 0.35s ease-out both" }}
+      >
+        Digital Services &amp; Technology
+      </p>
+      <div
+        className="relative mt-6 h-[2px] w-40 overflow-hidden rounded-full bg-white/[0.07]"
+        style={{ animation: "fade-up-soft 0.5s 0.45s ease-out both" }}
+        role="progressbar"
+        aria-label="Loading"
+      >
+        <span
+          className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-gold-light to-gold"
+          style={{ animation: "fill-bar 0.85s 0.15s cubic-bezier(0.4,0,0.2,1) both" }}
         />
       </div>
-      <p className="mt-3.5 font-mono text-[10.5px] text-muted-foreground/60">{progress}%</p>
     </div>
   );
 }

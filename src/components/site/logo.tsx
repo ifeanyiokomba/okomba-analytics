@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 
 /**
@@ -36,75 +37,45 @@ export function OkombaMark({ size = 38, className }: { size?: number; className?
 }
 
 /**
- * Full horizontal logo lockup — official black pill wordmark
- * (Georgia serif "Okomba" + italic "Analytics"), preserved from the brand asset.
+ * Official logo — the real brand asset (black squircle badge with white
+ * "Okomba" serif wordmark + italic "Analytics"). Transparent PNG, 1308×428.
+ * Hairline ring keeps the black badge defined on dark backgrounds.
  */
-export function OkombaLogoFull({ height = 34, className }: { height?: number; className?: string }) {
-  const width = Math.round(height * 3.28);
+export function OkombaLogo({
+  height = 34,
+  className,
+  priority = false,
+}: {
+  height?: number;
+  className?: string;
+  priority?: boolean;
+}) {
+  const width = Math.round(height * (1308 / 428));
   return (
-    <svg
-      width={width}
-      height={height}
-      viewBox="190 50 420 128"
-      xmlns="http://www.w3.org/2000/svg"
-      className={className}
-      role="img"
-      aria-label="Okomba Analytics"
+    <span
+      className={cn("inline-flex overflow-hidden rounded-[22%/100%] ring-1 ring-white/15", className)}
+      style={{ boxShadow: "0 2px 14px rgba(240,165,0,0.14)" }}
     >
-      <rect x="195" y="55" width="410" height="118" rx="22" fill="#000000" />
-      <rect
-        x="195"
-        y="55"
-        width="410"
-        height="118"
-        rx="22"
-        fill="none"
-        stroke="rgba(240,165,0,0.25)"
-        strokeWidth="1"
+      <Image
+        src="/images/logo.png"
+        alt="Okomba Analytics"
+        width={width}
+        height={height}
+        priority={priority}
+        className="block h-auto w-auto"
+        sizes={`${width}px`}
       />
-      <text
-        x="400"
-        y="135"
-        textAnchor="middle"
-        fontFamily="Georgia, 'Times New Roman', Times, serif"
-        fontSize="96"
-        fontWeight="700"
-        fill="#FFFFFF"
-        letterSpacing="-1"
-      >
-        Okomba
-      </text>
-      <text
-        x="585"
-        y="162"
-        fontFamily="Georgia, 'Times New Roman', Times, serif"
-        fontSize="22"
-        fontStyle="italic"
-        fill="#F0A500"
-        textAnchor="end"
-      >
-        Analytics
-      </text>
-    </svg>
+    </span>
   );
 }
 
 /**
- * Navbar lockup — mark + compact wordmark text. Crisp at small sizes.
+ * Navbar lockup — official logo at small nav size. Crisp, branded, compact.
  */
 export function OkombaNavLogo({ className }: { className?: string }) {
   return (
     <span className={cn("flex items-center gap-2.5", className)}>
-      <OkombaMark size={36} />
-      <span className="flex flex-col leading-none">
-        <span
-          className="text-[19px] font-bold text-foreground"
-          style={{ fontFamily: "Georgia, 'Times New Roman', serif", letterSpacing: "-0.02em" }}
-        >
-          Okomba
-        </span>
-        <span className="eyebrow mt-1 text-[9px] text-gold">Analytics</span>
-      </span>
+      <OkombaLogo height={34} priority />
     </span>
   );
 }

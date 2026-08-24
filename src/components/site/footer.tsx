@@ -2,7 +2,7 @@
 
 import { ArrowUp, Mail, MapPin, Phone } from "lucide-react";
 import { CONTACT, PRODUCTS, SERVICES } from "@/lib/content";
-import { OkombaLogoFull, OkombaMark } from "./logo";
+import { OkombaLogo, OkombaMark } from "./logo";
 
 type FooterProps = {
   onNavigate: (id: string) => void;
@@ -33,7 +33,7 @@ export function Footer({ onNavigate, onGetStarted }: FooterProps) {
         <div className="grid grid-cols-1 gap-12 py-16 md:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1.2fr] lg:py-20">
           {/* Brand column */}
           <div>
-            <OkombaLogoFull height={32} />
+            <OkombaLogo height={36} />
             <p className="mt-6 max-w-xs text-[13.5px] leading-relaxed text-muted-foreground">
               A professional digital services &amp; technology company building web applications,
               payment systems and digital operations that move businesses forward.

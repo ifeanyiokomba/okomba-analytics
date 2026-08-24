@@ -280,6 +280,23 @@
   from { transform: translateY(24px); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }
 }
+@keyframes logo-reveal {
+  0% { transform: translateY(14px) scale(0.94); opacity: 0; }
+  60% { transform: translateY(0) scale(1.02); opacity: 1; }
+  100% { transform: translateY(0) scale(1); opacity: 1; }
+}
+@keyframes sweep-across {
+  from { transform: translateX(-220%); }
+  to { transform: translateX(420%); }
+}
+@keyframes fade-up-soft {
+  from { transform: translateY(8px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+@keyframes fill-bar {
+  from { width: 0%; }
+  to { width: 100%; }
+}
 
 .animate-float-slow { animation: float-slow 7s ease-in-out infinite; }
 .animate-float-med { animation: float-med 5.5s ease-in-out infinite; }
