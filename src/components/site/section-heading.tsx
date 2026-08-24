@@ -29,7 +29,7 @@ export function SectionHeading({ eyebrow, title, desc, align = "center", classNa
         <span className="h-1.5 w-1.5 rounded-full bg-gold animate-pulse-dot" aria-hidden="true" />
         {eyebrow}
       </span>
-      <h2 className="max-w-2xl text-balance text-3xl font-bold leading-[1.12] text-foreground sm:text-4xl md:text-[2.75rem]">
+      <h2 className="display-section max-w-2xl font-display text-balance text-foreground">
         {title}
       </h2>
       {desc ? (

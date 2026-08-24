@@ -79,7 +79,7 @@ export function ProductsSection() {
     <section id="solutions" className="section-light scroll-mt-20 overflow-hidden bg-background" aria-label="Solutions">
       <div className="relative">
         {/* soft warm radial decor */}
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(60%_45%_at_50%_0%,rgba(160,110,0,0.07),transparent)]" aria-hidden="true" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(60%_45%_at_50%_0%,rgba(201,145,10,0.08),transparent)]" aria-hidden="true" />
 
         <div className="container-xl relative">
           <SectionHeading
@@ -117,7 +117,7 @@ export function ProductsSection() {
           <Reveal delay={100} className="mt-6 flex justify-center">
             <button
               onClick={scrollToServices}
-              className="inline-flex items-center gap-2 rounded-2xl border border-[#a06e00]/35 bg-white px-6 py-3.5 text-[14px] font-semibold text-[#a06e00] shadow-[0_10px_30px_-14px_rgba(160,110,0,0.4)] transition-all hover:-translate-y-0.5 hover:border-[#a06e00]/60"
+              className="inline-flex items-center gap-2 rounded-2xl border border-gold/40 bg-white px-6 py-3.5 text-[14px] font-semibold text-gold shadow-gold transition-all hover:-translate-y-0.5 hover:border-gold/70 hover:shadow-gold-lg"
             >
               Explore all services
               <ArrowUpRight size={15} aria-hidden="true" />

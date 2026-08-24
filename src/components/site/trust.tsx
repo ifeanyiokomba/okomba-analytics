@@ -52,10 +52,10 @@ export function StatsBand() {
       label: "Satisfied clients",
       icon: Star,
       // gold-tinted card (accent piece)
-      card: "bg-[#f3e8cf] border-[#a06e00]/25",
-      numColor: "text-[#7a5400]",
-      labelColor: "text-[#7a5400]/70",
-      iconBox: "bg-[#a06e00]/15 text-[#a06e00]",
+      card: "bg-[#fdf3d7] border-[#C9910A]/30",
+      numColor: "text-[#8a5e00]",
+      labelColor: "text-[#8a5e00]/70",
+      iconBox: "bg-[#C9910A]/15 text-[#8a5e00]",
     },
     {
       num: "5+",

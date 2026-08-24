@@ -1,6 +1,29 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
-  <rect width="100" height="100" rx="22" fill="#0B0F1A"/>
-  <rect width="100" height="100" rx="22" fill="none" stroke="rgba(240,165,0,0.35)" stroke-width="2"/>
-  <text x="50" y="54" text-anchor="middle" dominant-baseline="central" font-family="Georgia, 'Times New Roman', serif" font-size="62" font-weight="700" fill="#FFFFFF">O</text>
-  <circle cx="78" cy="26" r="5" fill="#F0A500"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" width="96" height="96">
+  <defs>
+    <linearGradient id="g" x1="12" y1="8" x2="84" y2="88" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFE5A8"/>
+      <stop offset="0.42" stop-color="#F5C451"/>
+      <stop offset="1" stop-color="#C98F0F"/>
+    </linearGradient>
+    <linearGradient id="gs" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FFD580"/>
+      <stop offset="1" stop-color="#D4A017"/>
+    </linearGradient>
+    <linearGradient id="b" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#151C30"/>
+      <stop offset="0.55" stop-color="#0B101F"/>
+      <stop offset="1" stop-color="#060910"/>
+    </linearGradient>
+    <linearGradient id="sh" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.14"/>
+      <stop offset="0.5" stop-color="#FFFFFF" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <rect width="96" height="96" rx="27" fill="url(#b)"/>
+  <rect width="96" height="96" rx="27" fill="url(#sh)"/>
+  <rect x="1.25" y="1.25" width="93.5" height="93.5" rx="25.9" stroke="url(#gs)" stroke-width="1.6" opacity="0.65" fill="none"/>
+  <text x="45" y="52" text-anchor="middle" dominant-baseline="central" font-family="Georgia, 'Times New Roman', serif" font-size="56" font-weight="700" fill="#FFFFFF">O</text>
+  <rect x="26" y="66" width="38" height="2.6" rx="1.3" fill="url(#g)" opacity="0.9"/>
+  <path d="M74.5 12.5 L77.3 21.2 L86 24 L77.3 26.8 L74.5 35.5 L71.7 26.8 L63 24 L71.7 21.2 Z" fill="url(#g)"/>
+  <circle cx="74.5" cy="24" r="12.5" stroke="url(#gs)" stroke-width="1.1" opacity="0.35" fill="none"/>
 </svg>

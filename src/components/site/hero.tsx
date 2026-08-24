@@ -56,7 +56,7 @@ export function Hero({ onGetStarted }: HeroProps) {
     >
       {/* ambience */}
       <div className="bg-grid mask-fade-y pointer-events-none absolute inset-0 opacity-50" aria-hidden="true" />
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-[460px] bg-[radial-gradient(75%_100%_at_50%_0%,rgba(160,110,0,0.08),transparent)]" aria-hidden="true" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-[460px] bg-[radial-gradient(75%_100%_at_50%_0%,rgba(201,145,10,0.09),transparent)]" aria-hidden="true" />
       <div className="pointer-events-none absolute -bottom-32 -left-24 h-[340px] w-[340px] rounded-full bg-teal/[0.06] blur-[110px]" aria-hidden="true" />
       <div className="pointer-events-none absolute -top-24 right-1/4 h-[260px] w-[260px] rounded-full bg-gold/[0.07] blur-[100px]" aria-hidden="true" />
 
@@ -70,14 +70,14 @@ export function Hero({ onGetStarted }: HeroProps) {
           </Reveal>
 
           <Reveal delay={90}>
-            <h1 className="mt-6 text-balance font-display text-[2.5rem] font-bold leading-[1.05] tracking-tight text-foreground sm:text-5xl md:text-[4.25rem] lg:text-[5rem]">
+            <h1 className="display-hero mt-6 font-display text-balance text-foreground">
               Digital products, systems &amp; experiences{" "}
               <span className="text-gradient-gold">built to move</span> your business forward.
             </h1>
           </Reveal>
 
           <Reveal delay={180}>
-            <p className="mx-auto mt-6 max-w-2xl text-balance text-[15px] leading-relaxed text-muted-foreground md:text-lg md:leading-relaxed">
+            <p className="lead-body mx-auto mt-6 max-w-2xl text-balance text-muted-foreground">
               Okomba Analytics designs, engineers and operates the technology behind ambitious
               organizations — web applications, payment systems, automation and digital
               operations, delivered end-to-end.
@@ -89,7 +89,7 @@ export function Hero({ onGetStarted }: HeroProps) {
             <div className="mt-9 flex flex-col items-stretch justify-center gap-3.5 sm:flex-row sm:items-center">
               <button
                 onClick={onGetStarted}
-                className="btn-shine group inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-gold-light to-gold px-8 py-4 text-[15px] font-semibold text-white shadow-gold-lg transition-transform hover:-translate-y-0.5 active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold sm:w-auto"
+                className="btn-shine group inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-gold-light to-gold px-8 py-4 text-[15px] font-semibold text-ink shadow-gold-lg transition-transform hover:-translate-y-0.5 active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold sm:w-auto"
               >
                 Start a Project
                 <ArrowRight

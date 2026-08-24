@@ -27,7 +27,7 @@ export function FaqSection() {
                 <span className="h-1.5 w-1.5 rounded-full bg-gold animate-pulse-dot" aria-hidden="true" />
                 FAQ
               </span>
-              <h2 className="mt-6 text-balance font-display text-3xl font-bold leading-[1.12] text-foreground sm:text-4xl">
+              <h2 className="display-section mt-6 font-display text-balance text-foreground">
                 Answers before <span className="text-gradient-gold">you even ask</span>
               </h2>
               <p className="mt-5 max-w-sm text-[15px] leading-relaxed text-muted-foreground">

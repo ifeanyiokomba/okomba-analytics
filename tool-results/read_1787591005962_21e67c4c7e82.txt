@@ -453,3 +453,76 @@
    453→Stage Summary:
    454→- Site loads instantly (no entrance gate); hero is now a clean, expanded, full-width centered editorial layout with the headline + supporting copy + CTAs + social proof — no card wrappers, no floating dashboard, fully mobile-fitted
    455→
+   456→---
+   457→Task ID: U5 (user-requested — admin management dashboard + subscriber emailing + colouration polish)
+   458→Agent: main (orchestrator)
+   459→Task: Add full management dashboard (posts CMS, subscribers mgmt, broadcast, email audit log); extend email pipeline to notify subscribers on new posts; re-tune gold palette to be richer/vibrant; thorough furnishing & modernization.
+   460→
+   461→Work Log:
+   462→- SCHEMA: extended prisma/schema.prisma with `Post` model (id, title, slug unique, excerpt, content, category, tags JSON-string, author, status draft/published, publishedAt, notifySentAt, createdAt, updatedAt + indexes) and `EmailLog` model (id, type, recipientEmail, subject, postId, subscriberId, status, error, sentAt + indexes). Ran `bun run db:push` — DB now has 4 tables (Inquiry, AdminSession, Subscriber, Post, EmailLog).
+   463→- POSTS LIB (src/lib/posts.ts): shared Post type, parseTags/serializeTags (JSON string ↔ array, fallback to CSV), toPost mapper (DB row → typed Post), slugify, ensureUniqueSlug (handles collisions by appending -2/-3), seedPostsIfEmpty (idempotent — seeds BLOG_POSTS slugs missing on first /api/posts call, singleton-cached).
+   464→- NOTIFY (src/lib/notify.ts) FULL REWRITE: type-safe payload union (inquiry.created | subscriber.welcome | post.published | broadcast); subjectFor() + composeBody() per-type generators; deliverOne() sends + logs to EmailLog (with postId/subscriberId) + optional webhook forward; notifyPostPublished(post) — queries confirmed subscribers, blasts each sequentially, marks post.notifySentAt; notifyBroadcast(subject, body, recipients) — for admin free-form broadcasts; notifyNewInquiry now ALSO sends a receipt to the submitter.
+   465→- APIs (7 new routes + 1 extended):
+   466→  - GET /api/posts — public, seeds DB if empty, returns published posts newest-first, optional ?slug=&limit=
+   467→  - GET/POST/PATCH /api/admin/posts — admin-guarded CRUD; PATCH detects draft→published transition and fires notifyPostPublished (fire-and-forget); slug uniqueness enforced
+   468→  - DELETE /api/admin/posts/[id] — admin-guarded; also deletes associated EmailLog rows
+   469→  - PATCH /api/admin/subscribers — change subscriber status (pending/confirmed/unsubscribed)
+   470→  - DELETE /api/admin/subscribers/[id] — remove subscriber + their EmailLog rows
+   471→  - GET /api/admin/email-log — admin-guarded; returns last N logs (default 100, max 500), optional ?type=
+   472→  - POST /api/admin/broadcast — admin-guarded; zod-validated subject+body+audience (confirmed|all); calls notifyBroadcast
+   473→  - EXTENDED GET /api/inquiries?stats=1 — now also returns confirmedSubscribers, postsTotal, postsPublished, postsDraft, emailsSent, emailsLast7Days (added to the existing Promise.all)
+   474→- Fixed Prisma import path issue: `import { Prisma } from "@prisma/client"` resolves to a stub (because generator output is custom at src/generated/prisma). Changed all admin/inquiries API routes to `import { Prisma } from "@/generated/prisma"`. Also fixed `Prisma.PostWhereInput` import to use the same path.
+   475→- INSIGHTS SECTION REFACTORED (insights-section.tsx + blog-article-dialog.tsx): both now use the DB-backed Post type from src/lib/posts. InsightsSection fetches /api/posts on mount, shows a 6-card loading skeleton, then renders posts from the DB. BlogArticleDialog takes a Post shape, computes readTime client-side from content length. Original UX preserved (category filter chips, hover effects, Read button, dialog open/close).
+   476→- ADMIN PORTAL FULLY REFACTORED — modularized under src/components/site/admin/:
+   477→  - types.ts — shared types (Inquiry, Subscriber, Post, EmailLog, Stats) + status constants + status→Tailwind maps + format helpers (formatDate, formatTimestamp, timeAgo, readTimeFor)
+   478→  - login.tsx — preserved login form, polished w/ header lock + OkombaNavLogo
+   479→  - dashboard.tsx — new container: sticky header (logo + ADMIN pill + Refresh/Site/Logout), sticky tabs nav (Overview/Inquiries/Subscribers/Posts/Email log — each w/ live count badge), tab content renderer, inline toast (3.5s auto-dismiss) for all action feedback, dialog orchestration (service detail, inquiry detail, post editor, broadcast)
+   480→  - overview-tab.tsx — 8 KPI cards (Total inquiries, New this week, In progress, Closed, Confirmed subscribers, Published posts, Emails sent, Open inquiries), top-services mini-bars, 3-column activity stream (recent inquiries / posts / emails)
+   481→  - inquiries-tab.tsx — preserved full inquiry table behavior (search, status filter, budget filter, sort, pagination, status select, CSV export) — extracted from the old monolithic AdminDashboard
+   482→  - subscribers-tab.tsx — NEW full mgmt: 4 KPI cards (Total/Confirmed/Pending/Unsubscribed), "Compose broadcast" banner w/ count badge, full subscribers list w/ search + status filter + inline status change (pending/confirmed/unsubscribed) + inline delete w/ confirm + CSV export
+   483→  - posts-tab.tsx — NEW full CMS: 4 KPI cards (Total/Published/Drafts/Notified), "New post" banner, posts list w/ search + status filter + edit/delete buttons (inline confirm), each row shows status pill + "Notified" pill (if notifySentAt) + publish date + slug + tags count + read time
+   484→  - email-log-tab.tsx — NEW: audit trail w/ search + type filter; each entry shows type pill (Inquiry receipt / Welcome / New post / Broadcast) + status pill + subject + recipient mailto + timestamp
+   485→  - service-detail-dialog.tsx, inquiry-detail-dialog.tsx — preserved from old admin-portal.tsx, moved into the admin/ folder
+   486→  - post-editor-dialog.tsx — NEW: full compose/edit form w/ title + auto-slug (synced from title until manually edited) + category select + author + excerpt (w/ char count) + tag chips (Enter to add, Backspace to remove, max 10) + write/preview tabs for Markdown content + word count + read-time estimate + current-status pill + "Save draft" / "Publish & notify" buttons
+   487→  - broadcast-dialog.tsx — NEW: audience picker (confirmed only / everyone) + subject + body + Send broadcast button (disabled when 0 confirmed subscribers)
+   488→  - portal.tsx — preserved AdminPortal entry (session check → login or dashboard switch)
+   489→  - index.ts — re-exports AdminPortal
+   490→- src/components/site/admin-portal.tsx — replaced the 1060-line monolith with a thin re-export:
+   491→    `export { AdminPortal } from "./admin";`
+   492→- src/app/page.tsx — typed the dynamic import of AdminPortal with `Promise<React.ComponentType<{ onExit: () => void }>>` cast to fix TS error caused by re-export chain losing prop types
+   493→- COLOR PALETTE OVERHAUL (globals.css): user said gold was "too small and dull especially the Yellow used". Replaced dull #a06e00 gold with a richer honeycomb palette:
+   494→  - :root --gold: #a06e00 → #B8860B (deep honey amber)
+   495→  - :root --gold-light: #c9922a → #F5C451 (warm honey light)
+   496→  - NEW --gold-bright: #FFD580 (golden hour highlight)
+   497→  - --gold-dim: rgba(160,110,0,0.1) → rgba(212,160,23,0.12) (slightly more saturated)
+   498→  - --ring/--chart-1/--chart-4/--primary/--sidebar-primary/etc all updated to new honey gold
+   499→  - .text-gradient-gold (root + light + dark): new gradients w/ #FFD580, #F5C451, #D4A017, #FFE5A8 — warmer and more vibrant
+   500→  - .section-dark palette: --gold #f0a500 → #F5C451, --gold-light #f7c24a → #FFD580, NEW --gold-bright #FFE5A8 — bright honeycomb gold on the dark hero/admin surfaces
+   501→  - .shadow-gold / .shadow-gold-lg / .shimmer-line / .spotlight::before / .surface-card:hover / .surface-card-light:hover / .section-dark .surface-card:hover — all re-tinted to the new rgba(212, 160, 23, ...) and rgba(245, 196, 81, ...) rgba values for consistent vibrancy across surfaces
+   502→  - ::selection bg + scrollbar-thumb:hover + ::-webkit-scrollbar-track updated to match
+   503→
+   504→QA VERIFIED (agent-browser end-to-end + VLM):
+   505→- ✅ Admin login → 5 tabs visible (Overview/Inquiries/Subscribers/Posts/Email log) w/ live count badges
+   506→- ✅ Overview tab: 8 KPI cards + top-services bars + 3-column activity stream (recent inquiries/posts/emails)
+   507→- ✅ Posts tab: 5 seeded posts (from BLOG_POSTS) listed w/ status pills + publish dates; "New post" opens editor
+   508→- ✅ Post editor: title + auto-slug + category select + author + excerpt (char count) + tag chips + write/preview tabs + Save draft / Publish & notify buttons — all working
+   509→- ✅ Created + published "Q1 2025 Product Update" post → appears in Posts list + on public /api/posts + Insights section card grid
+   510→- ✅ Created 2 confirmed subscribers (subscribe → confirm flow); Subscribers tab shows them w/ status pills; Subscribers badge count = 2
+   511→- ✅ Compose broadcast → subject + body + audience picker → Send broadcast → toast "Broadcast sent to 2 subscribers"
+   512→- ✅ Email audit log shows 4 entries: 2 BROADCAST (sent) + 2 WELCOME/CONFIRM (sent) — full audit trail w/ type pill + status pill + recipient mailto + timestamp
+   513→- ✅ Created + published "Why we built Votewise" post WHILE subscribers confirmed → post row shows "NOTIFIED" pill; Email audit log immediately shows 2 NEW POST emails to the confirmed subscribers — full post.published → email pipeline verified end-to-end
+   514→- ✅ Deleted test post + 2 test subscribers via admin UI — DB clean for production
+   515→- ✅ VLM 9/10 home screenshot: "vibrant and rich" gold, "premium and professionally curated", no glaring visual bugs, only minor deduction for "safe" modern layout (which is intentional brand fit)
+   516→- ✅ VLM 9/10 insights section: "real blog post cards", "rich, warm golden-yellow" accent, "exceptionally clean, modern, and well-structured"
+   517→- ✅ Mobile 375px: html.offsetWidth 375, html.scrollWidth 375 (overflow-x clip working); body.scrollWidth 538 due to marquee track (w-max) — clipped by html overflow-x, not visible to user
+   518→- ✅ Sticky footer: footerTop = 23666px with bodyH 25342px (footer at natural bottom of content via flex min-h-screen flex-col + flex-1 main)
+   519→- ✅ Lint clean, TS clean, no dev.log errors
+   520→
+   521→Stage Summary:
+   522→- Admin portal is now a complete management dashboard: Overview KPIs, Inquiries table (preserved), Subscribers management (status change + delete + CSV export + Compose broadcast entry), Posts CMS (create/edit/publish/delete + Markdown editor + tag chips + write/preview + publish→notify flow), Email audit log (filter by type + search + mailto recipient links)
+   523→- Original workflow fully preserved: /#/admin hash route, env-credential admin login, inquiry submission → admin dashboard flow, double-opt-in newsletter subscribe/confirm/unsubscribe
+   524→- Email pipeline extended: subscribers now receive automatic notifications when a new post is published (post.published) + admin can send free-form broadcasts (broadcast) — all logged in EmailLog with type/recipient/subject/timestamp
+   525→- Gold palette is now rich honeycomb amber (#B8860B deep / #F5C451 light / #FFD580 bright) on light bg, bright honey gold (#F5C451 / #FFD580 / #FFE5A8) on dark — vibrant and premium, no longer "dull"
+   526→- VLM-verified 9/10 design quality on home + insights — "premium, professionally curated, no AI-generated feel"
+   527→- NEXT ROUND candidates: real email provider integration (Resend/SendGrid) via the deliver() stub; admin session timeout warning; keyboard shortcuts (n=new post, /=search); re-test subscriber-welcome email subscriberId tracking (currently null because notifyNewSubscriber doesn't receive the subscriber ID — minor audit-trail completeness item)
+   528→

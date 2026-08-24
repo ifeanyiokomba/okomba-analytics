@@ -1,8 +1,8 @@
 "use client";
 
-import { ArrowUp, Mail, MapPin, Phone } from "lucide-react";
+import { ArrowUp, Cookie, Mail, MapPin, Phone } from "lucide-react";
 import { CONTACT, PRODUCTS, SERVICES } from "@/lib/content";
-import { OkombaLogo, OkombaMark } from "./logo";
+import { OkombaLockup, OkombaMark } from "./logo";
 
 type FooterProps = {
   onNavigate: (id: string) => void;
@@ -33,7 +33,7 @@ export function Footer({ onNavigate, onGetStarted }: FooterProps) {
         <div className="grid grid-cols-1 gap-12 py-16 md:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1.2fr] lg:py-20">
           {/* Brand column */}
           <div>
-            <OkombaLogo height={36} />
+            <OkombaLockup size="lg" tone="dark" />
             <p className="mt-6 max-w-xs text-[13.5px] leading-relaxed text-muted-foreground">
               A professional digital services &amp; technology company building web applications,
               payment systems and digital operations that move businesses forward.
@@ -125,8 +125,8 @@ export function Footer({ onNavigate, onGetStarted }: FooterProps) {
               Start a Project
             </button>
 
-            <div className="mt-8 flex items-center gap-3 rounded-xl border border-white/[0.07] bg-white/[0.02] px-4 py-3.5">
-              <OkombaMark size={34} />
+            <div className="mt-8 flex items-center gap-3.5 rounded-xl border border-gold/[0.16] bg-gold/[0.05] px-4 py-3.5">
+              <OkombaMark size={38} className="ring-1 ring-gold/20 rounded-[11px]" />
               <p className="font-mono text-[10.5px] leading-relaxed text-muted-foreground">
                 Trusted by 50+ clients across 200+ delivered projects.
               </p>
@@ -152,6 +152,13 @@ export function Footer({ onNavigate, onGetStarted }: FooterProps) {
             >
               Newsletter
             </a>
+            <button
+              onClick={() => window.dispatchEvent(new CustomEvent("okomba:open-cookie-settings"))}
+              className="inline-flex items-center gap-1.5 text-[12.5px] text-muted-foreground transition-colors hover:text-gold"
+            >
+              <Cookie size={12} aria-hidden="true" />
+              Cookies
+            </button>
             <a href="/#/" className="font-mono text-[10px] text-muted-foreground/50 transition-colors hover:text-muted-foreground" aria-label="Admin portal">
               ·
             </a>

@@ -100,7 +100,7 @@ function unsubPage(success: boolean, message: string, email?: string): NextRespo
       font-size: 14px;
       font-weight: 600;
       text-decoration: none;
-      box-shadow: 0 4px 22px rgba(240,165,0,0.28);
+      box-shadow: 0 4px 22px rgba(201, 145, 10, 0.32);
     }
     a.button:hover { transform: translateY(-1px); }
     .resub {

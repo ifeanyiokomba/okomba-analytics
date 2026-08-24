@@ -9,32 +9,37 @@ import {
   Loader2,
   LogOut,
   Mail,
+  MessageSquareQuote,
   RefreshCw,
   Send,
   Users,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { OkombaNavLogo } from "../logo";
+import { OkombaLockup } from "../logo";
 import type { Post } from "@/lib/posts";
+import type { Testimonial } from "@/lib/testimonials";
 import type { Service } from "@/lib/content";
 import { ServiceDetailDialog } from "./service-detail-dialog";
 import { InquiryDetailDialog } from "./inquiry-detail-dialog";
 import { PostEditorDialog } from "./post-editor-dialog";
+import { TestimonialEditorDialog } from "./testimonial-editor-dialog";
 import { BroadcastDialog } from "./broadcast-dialog";
 import { OverviewTab } from "./overview-tab";
 import { InquiriesTab } from "./inquiries-tab";
 import { SubscribersTab } from "./subscribers-tab";
 import { PostsTab } from "./posts-tab";
+import { TestimonialsTab } from "./testimonials-tab";
 import { EmailLogTab } from "./email-log-tab";
 import type { EmailLog, Inquiry, Stats, Subscriber } from "./types";
 
-type Tab = "overview" | "inquiries" | "subscribers" | "posts" | "email";
+type Tab = "overview" | "inquiries" | "subscribers" | "posts" | "testimonials" | "email";
 
 const TABS: { id: Tab; label: string; icon: typeof Inbox }[] = [
   { id: "overview", label: "Overview", icon: LayoutDashboard },
   { id: "inquiries", label: "Inquiries", icon: Inbox },
   { id: "subscribers", label: "Subscribers", icon: Users },
   { id: "posts", label: "Posts", icon: FileText },
+  { id: "testimonials", label: "Testimonials", icon: MessageSquareQuote },
   { id: "email", label: "Email log", icon: Mail },
 ];
 
@@ -51,6 +56,7 @@ export function AdminDashboard({
   const [inquiries, setInquiries] = useState<Inquiry[]>([]);
   const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
   const [posts, setPosts] = useState<Post[]>([]);
+  const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
   const [emailLogs, setEmailLogs] = useState<EmailLog[]>([]);
   const [stats, setStats] = useState<Stats | null>(null);
 
@@ -60,11 +66,15 @@ export function AdminDashboard({
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [deletingPostId, setDeletingPostId] = useState<string | null>(null);
   const [savingPost, setSavingPost] = useState<null | "draft" | "published">(null);
+  const [deletingTestimonialId, setDeletingTestimonialId] = useState<string | null>(null);
 
   // Dialogs
   const [detailService, setDetailService] = useState<Service | null>(null);
   const [detailInquiry, setDetailInquiry] = useState<Inquiry | null>(null);
   const [editingPost, setEditingPost] = useState<{ post: Post | null; mode: "create" | "edit" } | null>(null);
+  const [editingTestimonial, setEditingTestimonial] = useState<
+    { testimonial: Testimonial | null; mode: "create" | "edit" } | null
+  >(null);
   const [showBroadcast, setShowBroadcast] = useState(false);
 
   // Toast (simple inline notification for action feedback)
@@ -79,12 +89,13 @@ export function AdminDashboard({
   const load = useCallback(async () => {
     setError(null);
     try {
-      const [listRes, statsRes, subsRes, postsRes, logRes] = await Promise.all([
+      const [listRes, statsRes, subsRes, postsRes, logRes, testimonialsRes] = await Promise.all([
         fetch("/api/inquiries"),
         fetch("/api/inquiries?stats=1"),
         fetch("/api/subscribers"),
         fetch("/api/admin/posts"),
         fetch("/api/admin/email-log?limit=50"),
+        fetch("/api/admin/testimonials"),
       ]);
       if (!listRes.ok || !statsRes.ok) throw new Error("Failed to load data — session may have expired");
       const list = await listRes.json();
@@ -103,6 +114,10 @@ export function AdminDashboard({
       if (logRes.ok) {
         const l = await logRes.json();
         setEmailLogs(l.logs ?? []);
+      }
+      if (testimonialsRes.ok) {
+        const tm = await testimonialsRes.json();
+        setTestimonials(tm.testimonials ?? []);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load");
@@ -240,6 +255,69 @@ export function AdminDashboard({
     [load]
   );
 
+  const saveTestimonial = useCallback(
+    async (data: {
+      id?: string;
+      name: string;
+      role: string;
+      service: string;
+      text: string;
+      rating: number;
+      avatar?: string;
+      status: "draft" | "published";
+    }): Promise<void> => {
+      try {
+        const isEdit = !!data.id;
+        // Keep the existing position when editing; append after the last row on create
+        const sortOrder = isEdit
+          ? testimonials.find((t) => t.id === data.id)?.sortOrder ?? 0
+          : testimonials.reduce((max, t) => Math.max(max, t.sortOrder), 0) + 1;
+        const res = await fetch(
+          isEdit ? `/api/admin/testimonials/${data.id}` : "/api/admin/testimonials",
+          {
+            method: isEdit ? "PATCH" : "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ ...data, sortOrder }),
+          }
+        );
+        if (!res.ok) {
+          const j = await res.json().catch(() => null);
+          throw new Error(j?.error ?? "Save failed");
+        }
+        if (data.status === "published") {
+          setToast({ text: isEdit ? "Testimonial updated & published" : "Testimonial published", type: "ok" });
+        } else {
+          setToast({ text: isEdit ? "Testimonial updated" : "Draft saved", type: "ok" });
+        }
+        await load();
+      } catch (err) {
+        setToast({
+          text: err instanceof Error ? err.message : "Save failed",
+          type: "err",
+        });
+        throw err;
+      }
+    },
+    [load, testimonials]
+  );
+
+  const deleteTestimonial = useCallback(
+    async (testimonial: Testimonial) => {
+      setDeletingTestimonialId(testimonial.id);
+      try {
+        const res = await fetch(`/api/admin/testimonials/${testimonial.id}`, { method: "DELETE" });
+        if (!res.ok) throw new Error("Delete failed");
+        setToast({ text: "Testimonial deleted", type: "ok" });
+        await load();
+      } catch {
+        setToast({ text: "Delete failed", type: "err" });
+      } finally {
+        setDeletingTestimonialId(null);
+      }
+    },
+    [load]
+  );
+
   const logout = async () => {
     try {
       await fetch("/api/admin/logout", { method: "POST" });
@@ -299,7 +377,7 @@ export function AdminDashboard({
       <header className="sticky top-0 z-40 border-b border-white/[0.07] bg-[#05070d]/88 backdrop-blur-xl">
         <div className="container-xl flex h-16 items-center justify-between gap-4">
           <div className="flex items-center gap-3.5">
-            <OkombaNavLogo />
+            <OkombaLockup size="sm" tone="dark" />
             <span className="hidden rounded-full border border-gold/30 bg-gold-dim px-3 py-1 font-mono text-[10px] text-gold sm:inline-block">
               ADMIN
             </span>
@@ -343,7 +421,9 @@ export function AdminDashboard({
                   ? confirmedSubs
                   : t.id === "posts"
                     ? posts.filter((p) => p.status === "draft").length
-                    : undefined;
+                    : t.id === "testimonials"
+                      ? testimonials.filter((t2) => t2.status === "draft").length
+                      : undefined;
             return (
               <button
                 key={t.id}
@@ -443,6 +523,16 @@ export function AdminDashboard({
                 deletingId={deletingPostId}
               />
             )}
+            {tab === "testimonials" && (
+              <TestimonialsTab
+                testimonials={testimonials}
+                loading={false}
+                onCreateNew={() => setEditingTestimonial({ testimonial: null, mode: "create" })}
+                onEdit={(t) => setEditingTestimonial({ testimonial: t, mode: "edit" })}
+                onDelete={deleteTestimonial}
+                deletingId={deletingTestimonialId}
+              />
+            )}
             {tab === "email" && (
               <EmailLogTab logs={emailLogs} loading={false} total={emailLogs.length} />
             )}
@@ -466,6 +556,14 @@ export function AdminDashboard({
           mode={editingPost.mode}
           onClose={() => setEditingPost(null)}
           onSave={savePost}
+        />
+      )}
+      {editingTestimonial && (
+        <TestimonialEditorDialog
+          testimonial={editingTestimonial.testimonial}
+          mode={editingTestimonial.mode}
+          onClose={() => setEditingTestimonial(null)}
+          onSave={saveTestimonial}
         />
       )}
       {showBroadcast && (

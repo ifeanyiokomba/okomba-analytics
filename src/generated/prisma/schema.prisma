@@ -62,6 +62,22 @@ model Post {
   @@index([publishedAt])
 }
 
+model Testimonial {
+  id        String   @id @default(cuid())
+  name      String
+  role      String // e.g. "Founder, TechStartNG"
+  service   String // e.g. "Web Development"
+  text      String // the quote
+  rating    Int      @default(5) // 1-5 stars
+  avatar    String? // optional image path like /images/avatar-x.png
+  status    String   @default("published") // draft | published
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+}
+
 model EmailLog {
   id             String   @id @default(cuid())
   type           String // post.published | subscriber.welcome | broadcast | inquiry.receipt

@@ -34,6 +34,11 @@ export type Subscriber = $Result.DefaultSelection<Prisma.$SubscriberPayload>
  */
 export type Post = $Result.DefaultSelection<Prisma.$PostPayload>
 /**
+ * Model Testimonial
+ * 
+ */
+export type Testimonial = $Result.DefaultSelection<Prisma.$TestimonialPayload>
+/**
  * Model EmailLog
  * 
  */
@@ -196,6 +201,16 @@ export class PrismaClient<
     * ```
     */
   get post(): Prisma.PostDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.testimonial`: Exposes CRUD operations for the **Testimonial** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more Testimonials
+    * const testimonials = await prisma.testimonial.findMany()
+    * ```
+    */
+  get testimonial(): Prisma.TestimonialDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.emailLog`: Exposes CRUD operations for the **EmailLog** model.
@@ -651,6 +666,7 @@ export namespace Prisma {
     AdminSession: 'AdminSession',
     Subscriber: 'Subscriber',
     Post: 'Post',
+    Testimonial: 'Testimonial',
     EmailLog: 'EmailLog'
   };
 
@@ -670,7 +686,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "inquiry" | "adminSession" | "subscriber" | "post" | "emailLog"
+      modelProps: "inquiry" | "adminSession" | "subscriber" | "post" | "testimonial" | "emailLog"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -970,6 +986,80 @@ export namespace Prisma {
           }
         }
       }
+      Testimonial: {
+        payload: Prisma.$TestimonialPayload<ExtArgs>
+        fields: Prisma.TestimonialFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.TestimonialFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TestimonialPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.TestimonialFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TestimonialPayload>
+          }
+          findFirst: {
+            args: Prisma.TestimonialFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TestimonialPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.TestimonialFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TestimonialPayload>
+          }
+          findMany: {
+            args: Prisma.TestimonialFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TestimonialPayload>[]
+          }
+          create: {
+            args: Prisma.TestimonialCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TestimonialPayload>
+          }
+          createMany: {
+            args: Prisma.TestimonialCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.TestimonialCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TestimonialPayload>[]
+          }
+          delete: {
+            args: Prisma.TestimonialDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TestimonialPayload>
+          }
+          update: {
+            args: Prisma.TestimonialUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TestimonialPayload>
+          }
+          deleteMany: {
+            args: Prisma.TestimonialDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.TestimonialUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.TestimonialUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TestimonialPayload>[]
+          }
+          upsert: {
+            args: Prisma.TestimonialUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TestimonialPayload>
+          }
+          aggregate: {
+            args: Prisma.TestimonialAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateTestimonial>
+          }
+          groupBy: {
+            args: Prisma.TestimonialGroupByArgs<ExtArgs>
+            result: $Utils.Optional<TestimonialGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.TestimonialCountArgs<ExtArgs>
+            result: $Utils.Optional<TestimonialCountAggregateOutputType> | number
+          }
+        }
+      }
       EmailLog: {
         payload: Prisma.$EmailLogPayload<ExtArgs>
         fields: Prisma.EmailLogFieldRefs
@@ -1144,6 +1234,7 @@ export namespace Prisma {
     adminSession?: AdminSessionOmit
     subscriber?: SubscriberOmit
     post?: PostOmit
+    testimonial?: TestimonialOmit
     emailLog?: EmailLogOmit
   }
 
@@ -5419,6 +5510,1115 @@ export namespace Prisma {
 
 
   /**
+   * Model Testimonial
+   */
+
+  export type AggregateTestimonial = {
+    _count: TestimonialCountAggregateOutputType | null
+    _avg: TestimonialAvgAggregateOutputType | null
+    _sum: TestimonialSumAggregateOutputType | null
+    _min: TestimonialMinAggregateOutputType | null
+    _max: TestimonialMaxAggregateOutputType | null
+  }
+
+  export type TestimonialAvgAggregateOutputType = {
+    rating: number | null
+    sortOrder: number | null
+  }
+
+  export type TestimonialSumAggregateOutputType = {
+    rating: number | null
+    sortOrder: number | null
+  }
+
+  export type TestimonialMinAggregateOutputType = {
+    id: string | null
+    name: string | null
+    role: string | null
+    service: string | null
+    text: string | null
+    rating: number | null
+    avatar: string | null
+    status: string | null
+    sortOrder: number | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type TestimonialMaxAggregateOutputType = {
+    id: string | null
+    name: string | null
+    role: string | null
+    service: string | null
+    text: string | null
+    rating: number | null
+    avatar: string | null
+    status: string | null
+    sortOrder: number | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type TestimonialCountAggregateOutputType = {
+    id: number
+    name: number
+    role: number
+    service: number
+    text: number
+    rating: number
+    avatar: number
+    status: number
+    sortOrder: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type TestimonialAvgAggregateInputType = {
+    rating?: true
+    sortOrder?: true
+  }
+
+  export type TestimonialSumAggregateInputType = {
+    rating?: true
+    sortOrder?: true
+  }
+
+  export type TestimonialMinAggregateInputType = {
+    id?: true
+    name?: true
+    role?: true
+    service?: true
+    text?: true
+    rating?: true
+    avatar?: true
+    status?: true
+    sortOrder?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type TestimonialMaxAggregateInputType = {
+    id?: true
+    name?: true
+    role?: true
+    service?: true
+    text?: true
+    rating?: true
+    avatar?: true
+    status?: true
+    sortOrder?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type TestimonialCountAggregateInputType = {
+    id?: true
+    name?: true
+    role?: true
+    service?: true
+    text?: true
+    rating?: true
+    avatar?: true
+    status?: true
+    sortOrder?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type TestimonialAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Testimonial to aggregate.
+     */
+    where?: TestimonialWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Testimonials to fetch.
+     */
+    orderBy?: TestimonialOrderByWithRelationInput | TestimonialOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: TestimonialWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Testimonials from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Testimonials.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned Testimonials
+    **/
+    _count?: true | TestimonialCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: TestimonialAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: TestimonialSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: TestimonialMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: TestimonialMaxAggregateInputType
+  }
+
+  export type GetTestimonialAggregateType<T extends TestimonialAggregateArgs> = {
+        [P in keyof T & keyof AggregateTestimonial]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateTestimonial[P]>
+      : GetScalarType<T[P], AggregateTestimonial[P]>
+  }
+
+
+
+
+  export type TestimonialGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: TestimonialWhereInput
+    orderBy?: TestimonialOrderByWithAggregationInput | TestimonialOrderByWithAggregationInput[]
+    by: TestimonialScalarFieldEnum[] | TestimonialScalarFieldEnum
+    having?: TestimonialScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: TestimonialCountAggregateInputType | true
+    _avg?: TestimonialAvgAggregateInputType
+    _sum?: TestimonialSumAggregateInputType
+    _min?: TestimonialMinAggregateInputType
+    _max?: TestimonialMaxAggregateInputType
+  }
+
+  export type TestimonialGroupByOutputType = {
+    id: string
+    name: string
+    role: string
+    service: string
+    text: string
+    rating: number
+    avatar: string | null
+    status: string
+    sortOrder: number
+    createdAt: Date
+    updatedAt: Date
+    _count: TestimonialCountAggregateOutputType | null
+    _avg: TestimonialAvgAggregateOutputType | null
+    _sum: TestimonialSumAggregateOutputType | null
+    _min: TestimonialMinAggregateOutputType | null
+    _max: TestimonialMaxAggregateOutputType | null
+  }
+
+  type GetTestimonialGroupByPayload<T extends TestimonialGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<TestimonialGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof TestimonialGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], TestimonialGroupByOutputType[P]>
+            : GetScalarType<T[P], TestimonialGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type TestimonialSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    name?: boolean
+    role?: boolean
+    service?: boolean
+    text?: boolean
+    rating?: boolean
+    avatar?: boolean
+    status?: boolean
+    sortOrder?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["testimonial"]>
+
+  export type TestimonialSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    name?: boolean
+    role?: boolean
+    service?: boolean
+    text?: boolean
+    rating?: boolean
+    avatar?: boolean
+    status?: boolean
+    sortOrder?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["testimonial"]>
+
+  export type TestimonialSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    name?: boolean
+    role?: boolean
+    service?: boolean
+    text?: boolean
+    rating?: boolean
+    avatar?: boolean
+    status?: boolean
+    sortOrder?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["testimonial"]>
+
+  export type TestimonialSelectScalar = {
+    id?: boolean
+    name?: boolean
+    role?: boolean
+    service?: boolean
+    text?: boolean
+    rating?: boolean
+    avatar?: boolean
+    status?: boolean
+    sortOrder?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type TestimonialOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "role" | "service" | "text" | "rating" | "avatar" | "status" | "sortOrder" | "createdAt" | "updatedAt", ExtArgs["result"]["testimonial"]>
+
+  export type $TestimonialPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "Testimonial"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      name: string
+      role: string
+      service: string
+      text: string
+      rating: number
+      avatar: string | null
+      status: string
+      sortOrder: number
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["testimonial"]>
+    composites: {}
+  }
+
+  type TestimonialGetPayload<S extends boolean | null | undefined | TestimonialDefaultArgs> = $Result.GetResult<Prisma.$TestimonialPayload, S>
+
+  type TestimonialCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<TestimonialFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: TestimonialCountAggregateInputType | true
+    }
+
+  export interface TestimonialDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['Testimonial'], meta: { name: 'Testimonial' } }
+    /**
+     * Find zero or one Testimonial that matches the filter.
+     * @param {TestimonialFindUniqueArgs} args - Arguments to find a Testimonial
+     * @example
+     * // Get one Testimonial
+     * const testimonial = await prisma.testimonial.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends TestimonialFindUniqueArgs>(args: SelectSubset<T, TestimonialFindUniqueArgs<ExtArgs>>): Prisma__TestimonialClient<$Result.GetResult<Prisma.$TestimonialPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one Testimonial that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {TestimonialFindUniqueOrThrowArgs} args - Arguments to find a Testimonial
+     * @example
+     * // Get one Testimonial
+     * const testimonial = await prisma.testimonial.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends TestimonialFindUniqueOrThrowArgs>(args: SelectSubset<T, TestimonialFindUniqueOrThrowArgs<ExtArgs>>): Prisma__TestimonialClient<$Result.GetResult<Prisma.$TestimonialPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Testimonial that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TestimonialFindFirstArgs} args - Arguments to find a Testimonial
+     * @example
+     * // Get one Testimonial
+     * const testimonial = await prisma.testimonial.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends TestimonialFindFirstArgs>(args?: SelectSubset<T, TestimonialFindFirstArgs<ExtArgs>>): Prisma__TestimonialClient<$Result.GetResult<Prisma.$TestimonialPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Testimonial that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TestimonialFindFirstOrThrowArgs} args - Arguments to find a Testimonial
+     * @example
+     * // Get one Testimonial
+     * const testimonial = await prisma.testimonial.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends TestimonialFindFirstOrThrowArgs>(args?: SelectSubset<T, TestimonialFindFirstOrThrowArgs<ExtArgs>>): Prisma__TestimonialClient<$Result.GetResult<Prisma.$TestimonialPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more Testimonials that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TestimonialFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all Testimonials
+     * const testimonials = await prisma.testimonial.findMany()
+     * 
+     * // Get first 10 Testimonials
+     * const testimonials = await prisma.testimonial.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const testimonialWithIdOnly = await prisma.testimonial.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends TestimonialFindManyArgs>(args?: SelectSubset<T, TestimonialFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TestimonialPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a Testimonial.
+     * @param {TestimonialCreateArgs} args - Arguments to create a Testimonial.
+     * @example
+     * // Create one Testimonial
+     * const Testimonial = await prisma.testimonial.create({
+     *   data: {
+     *     // ... data to create a Testimonial
+     *   }
+     * })
+     * 
+     */
+    create<T extends TestimonialCreateArgs>(args: SelectSubset<T, TestimonialCreateArgs<ExtArgs>>): Prisma__TestimonialClient<$Result.GetResult<Prisma.$TestimonialPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many Testimonials.
+     * @param {TestimonialCreateManyArgs} args - Arguments to create many Testimonials.
+     * @example
+     * // Create many Testimonials
+     * const testimonial = await prisma.testimonial.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends TestimonialCreateManyArgs>(args?: SelectSubset<T, TestimonialCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many Testimonials and returns the data saved in the database.
+     * @param {TestimonialCreateManyAndReturnArgs} args - Arguments to create many Testimonials.
+     * @example
+     * // Create many Testimonials
+     * const testimonial = await prisma.testimonial.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many Testimonials and only return the `id`
+     * const testimonialWithIdOnly = await prisma.testimonial.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends TestimonialCreateManyAndReturnArgs>(args?: SelectSubset<T, TestimonialCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TestimonialPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a Testimonial.
+     * @param {TestimonialDeleteArgs} args - Arguments to delete one Testimonial.
+     * @example
+     * // Delete one Testimonial
+     * const Testimonial = await prisma.testimonial.delete({
+     *   where: {
+     *     // ... filter to delete one Testimonial
+     *   }
+     * })
+     * 
+     */
+    delete<T extends TestimonialDeleteArgs>(args: SelectSubset<T, TestimonialDeleteArgs<ExtArgs>>): Prisma__TestimonialClient<$Result.GetResult<Prisma.$TestimonialPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one Testimonial.
+     * @param {TestimonialUpdateArgs} args - Arguments to update one Testimonial.
+     * @example
+     * // Update one Testimonial
+     * const testimonial = await prisma.testimonial.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends TestimonialUpdateArgs>(args: SelectSubset<T, TestimonialUpdateArgs<ExtArgs>>): Prisma__TestimonialClient<$Result.GetResult<Prisma.$TestimonialPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more Testimonials.
+     * @param {TestimonialDeleteManyArgs} args - Arguments to filter Testimonials to delete.
+     * @example
+     * // Delete a few Testimonials
+     * const { count } = await prisma.testimonial.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends TestimonialDeleteManyArgs>(args?: SelectSubset<T, TestimonialDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Testimonials.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TestimonialUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many Testimonials
+     * const testimonial = await prisma.testimonial.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends TestimonialUpdateManyArgs>(args: SelectSubset<T, TestimonialUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Testimonials and returns the data updated in the database.
+     * @param {TestimonialUpdateManyAndReturnArgs} args - Arguments to update many Testimonials.
+     * @example
+     * // Update many Testimonials
+     * const testimonial = await prisma.testimonial.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more Testimonials and only return the `id`
+     * const testimonialWithIdOnly = await prisma.testimonial.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends TestimonialUpdateManyAndReturnArgs>(args: SelectSubset<T, TestimonialUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TestimonialPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one Testimonial.
+     * @param {TestimonialUpsertArgs} args - Arguments to update or create a Testimonial.
+     * @example
+     * // Update or create a Testimonial
+     * const testimonial = await prisma.testimonial.upsert({
+     *   create: {
+     *     // ... data to create a Testimonial
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the Testimonial we want to update
+     *   }
+     * })
+     */
+    upsert<T extends TestimonialUpsertArgs>(args: SelectSubset<T, TestimonialUpsertArgs<ExtArgs>>): Prisma__TestimonialClient<$Result.GetResult<Prisma.$TestimonialPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of Testimonials.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TestimonialCountArgs} args - Arguments to filter Testimonials to count.
+     * @example
+     * // Count the number of Testimonials
+     * const count = await prisma.testimonial.count({
+     *   where: {
+     *     // ... the filter for the Testimonials we want to count
+     *   }
+     * })
+    **/
+    count<T extends TestimonialCountArgs>(
+      args?: Subset<T, TestimonialCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], TestimonialCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a Testimonial.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TestimonialAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends TestimonialAggregateArgs>(args: Subset<T, TestimonialAggregateArgs>): Prisma.PrismaPromise<GetTestimonialAggregateType<T>>
+
+    /**
+     * Group by Testimonial.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TestimonialGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends TestimonialGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: TestimonialGroupByArgs['orderBy'] }
+        : { orderBy?: TestimonialGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, TestimonialGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetTestimonialGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the Testimonial model
+   */
+  readonly fields: TestimonialFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for Testimonial.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__TestimonialClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the Testimonial model
+   */
+  interface TestimonialFieldRefs {
+    readonly id: FieldRef<"Testimonial", 'String'>
+    readonly name: FieldRef<"Testimonial", 'String'>
+    readonly role: FieldRef<"Testimonial", 'String'>
+    readonly service: FieldRef<"Testimonial", 'String'>
+    readonly text: FieldRef<"Testimonial", 'String'>
+    readonly rating: FieldRef<"Testimonial", 'Int'>
+    readonly avatar: FieldRef<"Testimonial", 'String'>
+    readonly status: FieldRef<"Testimonial", 'String'>
+    readonly sortOrder: FieldRef<"Testimonial", 'Int'>
+    readonly createdAt: FieldRef<"Testimonial", 'DateTime'>
+    readonly updatedAt: FieldRef<"Testimonial", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * Testimonial findUnique
+   */
+  export type TestimonialFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Testimonial
+     */
+    select?: TestimonialSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Testimonial
+     */
+    omit?: TestimonialOmit<ExtArgs> | null
+    /**
+     * Filter, which Testimonial to fetch.
+     */
+    where: TestimonialWhereUniqueInput
+  }
+
+  /**
+   * Testimonial findUniqueOrThrow
+   */
+  export type TestimonialFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Testimonial
+     */
+    select?: TestimonialSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Testimonial
+     */
+    omit?: TestimonialOmit<ExtArgs> | null
+    /**
+     * Filter, which Testimonial to fetch.
+     */
+    where: TestimonialWhereUniqueInput
+  }
+
+  /**
+   * Testimonial findFirst
+   */
+  export type TestimonialFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Testimonial
+     */
+    select?: TestimonialSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Testimonial
+     */
+    omit?: TestimonialOmit<ExtArgs> | null
+    /**
+     * Filter, which Testimonial to fetch.
+     */
+    where?: TestimonialWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Testimonials to fetch.
+     */
+    orderBy?: TestimonialOrderByWithRelationInput | TestimonialOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Testimonials.
+     */
+    cursor?: TestimonialWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Testimonials from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Testimonials.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Testimonials.
+     */
+    distinct?: TestimonialScalarFieldEnum | TestimonialScalarFieldEnum[]
+  }
+
+  /**
+   * Testimonial findFirstOrThrow
+   */
+  export type TestimonialFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Testimonial
+     */
+    select?: TestimonialSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Testimonial
+     */
+    omit?: TestimonialOmit<ExtArgs> | null
+    /**
+     * Filter, which Testimonial to fetch.
+     */
+    where?: TestimonialWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Testimonials to fetch.
+     */
+    orderBy?: TestimonialOrderByWithRelationInput | TestimonialOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Testimonials.
+     */
+    cursor?: TestimonialWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Testimonials from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Testimonials.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Testimonials.
+     */
+    distinct?: TestimonialScalarFieldEnum | TestimonialScalarFieldEnum[]
+  }
+
+  /**
+   * Testimonial findMany
+   */
+  export type TestimonialFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Testimonial
+     */
+    select?: TestimonialSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Testimonial
+     */
+    omit?: TestimonialOmit<ExtArgs> | null
+    /**
+     * Filter, which Testimonials to fetch.
+     */
+    where?: TestimonialWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Testimonials to fetch.
+     */
+    orderBy?: TestimonialOrderByWithRelationInput | TestimonialOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing Testimonials.
+     */
+    cursor?: TestimonialWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Testimonials from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Testimonials.
+     */
+    skip?: number
+    distinct?: TestimonialScalarFieldEnum | TestimonialScalarFieldEnum[]
+  }
+
+  /**
+   * Testimonial create
+   */
+  export type TestimonialCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Testimonial
+     */
+    select?: TestimonialSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Testimonial
+     */
+    omit?: TestimonialOmit<ExtArgs> | null
+    /**
+     * The data needed to create a Testimonial.
+     */
+    data: XOR<TestimonialCreateInput, TestimonialUncheckedCreateInput>
+  }
+
+  /**
+   * Testimonial createMany
+   */
+  export type TestimonialCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many Testimonials.
+     */
+    data: TestimonialCreateManyInput | TestimonialCreateManyInput[]
+  }
+
+  /**
+   * Testimonial createManyAndReturn
+   */
+  export type TestimonialCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Testimonial
+     */
+    select?: TestimonialSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Testimonial
+     */
+    omit?: TestimonialOmit<ExtArgs> | null
+    /**
+     * The data used to create many Testimonials.
+     */
+    data: TestimonialCreateManyInput | TestimonialCreateManyInput[]
+  }
+
+  /**
+   * Testimonial update
+   */
+  export type TestimonialUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Testimonial
+     */
+    select?: TestimonialSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Testimonial
+     */
+    omit?: TestimonialOmit<ExtArgs> | null
+    /**
+     * The data needed to update a Testimonial.
+     */
+    data: XOR<TestimonialUpdateInput, TestimonialUncheckedUpdateInput>
+    /**
+     * Choose, which Testimonial to update.
+     */
+    where: TestimonialWhereUniqueInput
+  }
+
+  /**
+   * Testimonial updateMany
+   */
+  export type TestimonialUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update Testimonials.
+     */
+    data: XOR<TestimonialUpdateManyMutationInput, TestimonialUncheckedUpdateManyInput>
+    /**
+     * Filter which Testimonials to update
+     */
+    where?: TestimonialWhereInput
+    /**
+     * Limit how many Testimonials to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * Testimonial updateManyAndReturn
+   */
+  export type TestimonialUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Testimonial
+     */
+    select?: TestimonialSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Testimonial
+     */
+    omit?: TestimonialOmit<ExtArgs> | null
+    /**
+     * The data used to update Testimonials.
+     */
+    data: XOR<TestimonialUpdateManyMutationInput, TestimonialUncheckedUpdateManyInput>
+    /**
+     * Filter which Testimonials to update
+     */
+    where?: TestimonialWhereInput
+    /**
+     * Limit how many Testimonials to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * Testimonial upsert
+   */
+  export type TestimonialUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Testimonial
+     */
+    select?: TestimonialSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Testimonial
+     */
+    omit?: TestimonialOmit<ExtArgs> | null
+    /**
+     * The filter to search for the Testimonial to update in case it exists.
+     */
+    where: TestimonialWhereUniqueInput
+    /**
+     * In case the Testimonial found by the `where` argument doesn't exist, create a new Testimonial with this data.
+     */
+    create: XOR<TestimonialCreateInput, TestimonialUncheckedCreateInput>
+    /**
+     * In case the Testimonial was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<TestimonialUpdateInput, TestimonialUncheckedUpdateInput>
+  }
+
+  /**
+   * Testimonial delete
+   */
+  export type TestimonialDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Testimonial
+     */
+    select?: TestimonialSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Testimonial
+     */
+    omit?: TestimonialOmit<ExtArgs> | null
+    /**
+     * Filter which Testimonial to delete.
+     */
+    where: TestimonialWhereUniqueInput
+  }
+
+  /**
+   * Testimonial deleteMany
+   */
+  export type TestimonialDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Testimonials to delete
+     */
+    where?: TestimonialWhereInput
+    /**
+     * Limit how many Testimonials to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * Testimonial without action
+   */
+  export type TestimonialDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Testimonial
+     */
+    select?: TestimonialSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Testimonial
+     */
+    omit?: TestimonialOmit<ExtArgs> | null
+  }
+
+
+  /**
    * Model EmailLog
    */
 
@@ -6535,6 +7735,23 @@ export namespace Prisma {
   export type PostScalarFieldEnum = (typeof PostScalarFieldEnum)[keyof typeof PostScalarFieldEnum]
 
 
+  export const TestimonialScalarFieldEnum: {
+    id: 'id',
+    name: 'name',
+    role: 'role',
+    service: 'service',
+    text: 'text',
+    rating: 'rating',
+    avatar: 'avatar',
+    status: 'status',
+    sortOrder: 'sortOrder',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type TestimonialScalarFieldEnum = (typeof TestimonialScalarFieldEnum)[keyof typeof TestimonialScalarFieldEnum]
+
+
   export const EmailLogScalarFieldEnum: {
     id: 'id',
     type: 'type',
@@ -6589,6 +7806,13 @@ export namespace Prisma {
    * Reference to a field of type 'Int'
    */
   export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int'>
+    
+
+
+  /**
+   * Reference to a field of type 'Float'
+   */
+  export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
     
   /**
    * Deep Input Types
@@ -6886,6 +8110,90 @@ export namespace Prisma {
     notifySentAt?: DateTimeNullableWithAggregatesFilter<"Post"> | Date | string | null
     createdAt?: DateTimeWithAggregatesFilter<"Post"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Post"> | Date | string
+  }
+
+  export type TestimonialWhereInput = {
+    AND?: TestimonialWhereInput | TestimonialWhereInput[]
+    OR?: TestimonialWhereInput[]
+    NOT?: TestimonialWhereInput | TestimonialWhereInput[]
+    id?: StringFilter<"Testimonial"> | string
+    name?: StringFilter<"Testimonial"> | string
+    role?: StringFilter<"Testimonial"> | string
+    service?: StringFilter<"Testimonial"> | string
+    text?: StringFilter<"Testimonial"> | string
+    rating?: IntFilter<"Testimonial"> | number
+    avatar?: StringNullableFilter<"Testimonial"> | string | null
+    status?: StringFilter<"Testimonial"> | string
+    sortOrder?: IntFilter<"Testimonial"> | number
+    createdAt?: DateTimeFilter<"Testimonial"> | Date | string
+    updatedAt?: DateTimeFilter<"Testimonial"> | Date | string
+  }
+
+  export type TestimonialOrderByWithRelationInput = {
+    id?: SortOrder
+    name?: SortOrder
+    role?: SortOrder
+    service?: SortOrder
+    text?: SortOrder
+    rating?: SortOrder
+    avatar?: SortOrderInput | SortOrder
+    status?: SortOrder
+    sortOrder?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type TestimonialWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: TestimonialWhereInput | TestimonialWhereInput[]
+    OR?: TestimonialWhereInput[]
+    NOT?: TestimonialWhereInput | TestimonialWhereInput[]
+    name?: StringFilter<"Testimonial"> | string
+    role?: StringFilter<"Testimonial"> | string
+    service?: StringFilter<"Testimonial"> | string
+    text?: StringFilter<"Testimonial"> | string
+    rating?: IntFilter<"Testimonial"> | number
+    avatar?: StringNullableFilter<"Testimonial"> | string | null
+    status?: StringFilter<"Testimonial"> | string
+    sortOrder?: IntFilter<"Testimonial"> | number
+    createdAt?: DateTimeFilter<"Testimonial"> | Date | string
+    updatedAt?: DateTimeFilter<"Testimonial"> | Date | string
+  }, "id">
+
+  export type TestimonialOrderByWithAggregationInput = {
+    id?: SortOrder
+    name?: SortOrder
+    role?: SortOrder
+    service?: SortOrder
+    text?: SortOrder
+    rating?: SortOrder
+    avatar?: SortOrderInput | SortOrder
+    status?: SortOrder
+    sortOrder?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: TestimonialCountOrderByAggregateInput
+    _avg?: TestimonialAvgOrderByAggregateInput
+    _max?: TestimonialMaxOrderByAggregateInput
+    _min?: TestimonialMinOrderByAggregateInput
+    _sum?: TestimonialSumOrderByAggregateInput
+  }
+
+  export type TestimonialScalarWhereWithAggregatesInput = {
+    AND?: TestimonialScalarWhereWithAggregatesInput | TestimonialScalarWhereWithAggregatesInput[]
+    OR?: TestimonialScalarWhereWithAggregatesInput[]
+    NOT?: TestimonialScalarWhereWithAggregatesInput | TestimonialScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"Testimonial"> | string
+    name?: StringWithAggregatesFilter<"Testimonial"> | string
+    role?: StringWithAggregatesFilter<"Testimonial"> | string
+    service?: StringWithAggregatesFilter<"Testimonial"> | string
+    text?: StringWithAggregatesFilter<"Testimonial"> | string
+    rating?: IntWithAggregatesFilter<"Testimonial"> | number
+    avatar?: StringNullableWithAggregatesFilter<"Testimonial"> | string | null
+    status?: StringWithAggregatesFilter<"Testimonial"> | string
+    sortOrder?: IntWithAggregatesFilter<"Testimonial"> | number
+    createdAt?: DateTimeWithAggregatesFilter<"Testimonial"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"Testimonial"> | Date | string
   }
 
   export type EmailLogWhereInput = {
@@ -7303,6 +8611,104 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type TestimonialCreateInput = {
+    id?: string
+    name: string
+    role: string
+    service: string
+    text: string
+    rating?: number
+    avatar?: string | null
+    status?: string
+    sortOrder?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type TestimonialUncheckedCreateInput = {
+    id?: string
+    name: string
+    role: string
+    service: string
+    text: string
+    rating?: number
+    avatar?: string | null
+    status?: string
+    sortOrder?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type TestimonialUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    role?: StringFieldUpdateOperationsInput | string
+    service?: StringFieldUpdateOperationsInput | string
+    text?: StringFieldUpdateOperationsInput | string
+    rating?: IntFieldUpdateOperationsInput | number
+    avatar?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type TestimonialUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    role?: StringFieldUpdateOperationsInput | string
+    service?: StringFieldUpdateOperationsInput | string
+    text?: StringFieldUpdateOperationsInput | string
+    rating?: IntFieldUpdateOperationsInput | number
+    avatar?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type TestimonialCreateManyInput = {
+    id?: string
+    name: string
+    role: string
+    service: string
+    text: string
+    rating?: number
+    avatar?: string | null
+    status?: string
+    sortOrder?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type TestimonialUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    role?: StringFieldUpdateOperationsInput | string
+    service?: StringFieldUpdateOperationsInput | string
+    text?: StringFieldUpdateOperationsInput | string
+    rating?: IntFieldUpdateOperationsInput | number
+    avatar?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type TestimonialUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    role?: StringFieldUpdateOperationsInput | string
+    service?: StringFieldUpdateOperationsInput | string
+    text?: StringFieldUpdateOperationsInput | string
+    rating?: IntFieldUpdateOperationsInput | number
+    avatar?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    sortOrder?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type EmailLogCreateInput = {
     id?: string
     type: string
@@ -7651,6 +9057,85 @@ export namespace Prisma {
     updatedAt?: SortOrder
   }
 
+  export type IntFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel>
+    in?: number[]
+    notIn?: number[]
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntFilter<$PrismaModel> | number
+  }
+
+  export type TestimonialCountOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+    role?: SortOrder
+    service?: SortOrder
+    text?: SortOrder
+    rating?: SortOrder
+    avatar?: SortOrder
+    status?: SortOrder
+    sortOrder?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type TestimonialAvgOrderByAggregateInput = {
+    rating?: SortOrder
+    sortOrder?: SortOrder
+  }
+
+  export type TestimonialMaxOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+    role?: SortOrder
+    service?: SortOrder
+    text?: SortOrder
+    rating?: SortOrder
+    avatar?: SortOrder
+    status?: SortOrder
+    sortOrder?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type TestimonialMinOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+    role?: SortOrder
+    service?: SortOrder
+    text?: SortOrder
+    rating?: SortOrder
+    avatar?: SortOrder
+    status?: SortOrder
+    sortOrder?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type TestimonialSumOrderByAggregateInput = {
+    rating?: SortOrder
+    sortOrder?: SortOrder
+  }
+
+  export type IntWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel>
+    in?: number[]
+    notIn?: number[]
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntWithAggregatesFilter<$PrismaModel> | number
+    _count?: NestedIntFilter<$PrismaModel>
+    _avg?: NestedFloatFilter<$PrismaModel>
+    _sum?: NestedIntFilter<$PrismaModel>
+    _min?: NestedIntFilter<$PrismaModel>
+    _max?: NestedIntFilter<$PrismaModel>
+  }
+
   export type EmailLogCountOrderByAggregateInput = {
     id?: SortOrder
     type?: SortOrder
@@ -7701,6 +9186,14 @@ export namespace Prisma {
 
   export type NullableDateTimeFieldUpdateOperationsInput = {
     set?: Date | string | null
+  }
+
+  export type IntFieldUpdateOperationsInput = {
+    set?: number
+    increment?: number
+    decrement?: number
+    multiply?: number
+    divide?: number
   }
 
   export type NestedStringFilter<$PrismaModel = never> = {
@@ -7835,6 +9328,33 @@ export namespace Prisma {
     _count?: NestedIntNullableFilter<$PrismaModel>
     _min?: NestedDateTimeNullableFilter<$PrismaModel>
     _max?: NestedDateTimeNullableFilter<$PrismaModel>
+  }
+
+  export type NestedIntWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel>
+    in?: number[]
+    notIn?: number[]
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntWithAggregatesFilter<$PrismaModel> | number
+    _count?: NestedIntFilter<$PrismaModel>
+    _avg?: NestedFloatFilter<$PrismaModel>
+    _sum?: NestedIntFilter<$PrismaModel>
+    _min?: NestedIntFilter<$PrismaModel>
+    _max?: NestedIntFilter<$PrismaModel>
+  }
+
+  export type NestedFloatFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel>
+    in?: number[]
+    notIn?: number[]
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatFilter<$PrismaModel> | number
   }
 
 

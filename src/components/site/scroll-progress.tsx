@@ -30,7 +30,7 @@ export function ScrollProgress() {
     >
       <div
         className="h-full origin-left bg-gradient-to-r from-gold-light via-gold to-gold-light transition-[width] duration-100 ease-out"
-        style={{ width: `${progress * 100}%`, boxShadow: "0 0 8px rgba(240,165,0,0.55)" }}
+        style={{ width: `${progress * 100}%`, boxShadow: "0 0 10px rgba(255, 201, 77, 0.65)" }}
       />
     </div>
   );

@@ -34,7 +34,7 @@ export function ProcessSection({ onGetStarted }: ProcessSectionProps) {
                 {/* step number */}
                 <div className="flex items-center gap-3.5">
                   <span
-                    className="font-display text-[2rem] font-bold leading-none text-foreground/15 transition-colors duration-300 group-hover:text-gold/50"
+                    className="font-display text-[2rem] font-bold leading-none text-foreground/20 transition-colors duration-300 group-hover:text-gold/60"
                     aria-hidden="true"
                   >
                     {s.step}
@@ -55,7 +55,7 @@ export function ProcessSection({ onGetStarted }: ProcessSectionProps) {
           </p>
           <button
             onClick={onGetStarted}
-            className="btn-shine group inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-gold-light to-gold px-7 py-3.5 text-[14.5px] font-semibold text-[#141926] shadow-[0_12px_36px_-10px_rgba(160,110,0,0.5)] transition-transform hover:-translate-y-0.5 active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
+            className="btn-shine group inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-gold-light to-gold px-7 py-3.5 text-[14.5px] font-semibold text-[#141926] shadow-gold-lg transition-transform hover:-translate-y-0.5 active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
           >
             Begin with step 01 — Discovery
             <ArrowRight size={16} strokeWidth={2.4} className="transition-transform group-hover:translate-x-1" aria-hidden="true" />

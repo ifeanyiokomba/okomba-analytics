@@ -525,3 +525,92 @@ Stage Summary:
 - Gold palette is now rich honeycomb amber (#B8860B deep / #F5C451 light / #FFD580 bright) on light bg, bright honey gold (#F5C451 / #FFD580 / #FFE5A8) on dark — vibrant and premium, no longer "dull"
 - VLM-verified 9/10 design quality on home + insights — "premium, professionally curated, no AI-generated feel"
 - NEXT ROUND candidates: real email provider integration (Resend/SendGrid) via the deliver() stub; admin session timeout warning; keyboard shortcuts (n=new post, /=search); re-test subscriber-welcome email subscriberId tracking (currently null because notifyNewSubscriber doesn't receive the subscriber ID — minor audit-trail completeness item)
+
+---
+Task ID: 1
+Agent: full-stack-developer (testimonials)
+Task: Build a complete testimonial management system — Prisma Testimonial model, public API, admin CRUD APIs, admin "Testimonials" tab (list + editor dialog with live preview), and dynamic public Testimonials section with graceful fallback to the static content.
+
+Work Log:
+- SCHEMA: added `Testimonial` model to prisma/schema.prisma (id cuid, name, role, service, text, rating int default 5, avatar nullable, status draft|published default published, sortOrder int default 0, createdAt/updatedAt + @@index([status])). Ran `bun run db:push` — table created, Prisma Client regenerated.
+- Bumped PRISMA_CACHE_KEY in src/lib/db.ts to 'schema-v7-testimonials' so the running dev server instantiates a fresh client that knows the new model (the cache-key mechanism exists exactly for this).
+- SEED: created scripts/seed-testimonials.ts (bun, PrismaClient from ../src/generated/prisma) — idempotent, seeded the 3 static TESTIMONIALS from lib/content.ts (Chukwuemeka Obi / Adaeze Nwosu / Ibrahim Suleiman, all published, sortOrder 1-3). Verified 3 rows in DB.
+- LIB: src/lib/testimonials.ts — Testimonial + TestimonialStatus types, toTestimonial() row→API serializer (camelCase, ISO dates), mirroring the lib/posts.ts pattern.
+- PUBLIC API: GET /api/testimonials — published only, orderBy sortOrder asc then createdAt desc, no auth, shape { ok, testimonials }.
+- ADMIN APIs (both isAdminAuthorized()-guarded, zod-validated):
+  - GET/POST /api/admin/testimonials — GET lists ALL (draft+published, optional ?status= filter); POST creates (name 2-80, role 2-120, service 2-80, text 20-1000, rating 1-5 int, avatar optional ≤300, status enum default published, sortOrder int default 0).
+  - PATCH/DELETE /api/admin/testimonials/[id] — partial update (id injectable from route param) + delete; P2025 → 404.
+- ADMIN UI: src/components/site/admin/testimonials-tab.tsx (follows posts-tab pattern): 4 KPI cards (Total/Published/Drafts/Avg rating with toFixed(1)), gold "Add testimonial" banner CTA, surface-card list w/ rating stars + status pill + updated date + name/role + line-clamp-2 quote + service chip + sortOrder, search (name/role/service/quote) + all/draft/published filter pills, Edit button with ALWAYS-visible "Edit" label (no hidden sm:inline), delete w/ inline Confirm/Cancel.
+- EDITOR DIALOG: src/components/site/admin/testimonial-editor-dialog.tsx (follows post-editor-dialog pattern): name/role/service inputs, status select (published/draft), interactive 5-star picker (click + hover preview, radiogroup a11y), quote textarea w/ 20-1000 char count, optional avatar URL input w/ initials hint, LIVE PREVIEW card (quote mark, stars, quote, avatar-or-initials, name/role, service chip + status pill) in a right-hand column, inline validation errors, ESC-close + body scroll lock, Save/Cancel footer.
+- DASHBOARD WIRING (minimal edits to dashboard.tsx): added "testimonials" Tab between Posts and Email log (MessageSquareQuote icon), testimonials/deletingTestimonialId/editingTestimonial state, fetch /api/admin/testimonials added to the existing load() Promise.all, saveTestimonial (POST/PATCH, auto sortOrder: keep on edit / max+1 on create) + deleteTestimonial handlers (same toast pattern), draft-count tab badge, TestimonialsTab + TestimonialEditorDialog render blocks. No existing tab touched.
+- PUBLIC SECTION (testimonials-section.tsx): now a fetching client component — GET /api/testimonials on mount, 3 pulsing skeleton cards while loading, falls back to static TESTIMONIALS on fetch failure OR empty response (graceful degradation), hides section entirely if zero published and no fallback, existing card design preserved (stars, quote mark, avatar w/ initials fallback, service chip, Reveal animation), md:grid-cols-3 grid wraps 2-6+ cards naturally.
+- CONSTRAINTS respected: no edits to globals.css / navbar / footer / logo / cookie-consent / posts-tab / post-editor-dialog; only existing utility classes used.
+
+QA VERIFIED (agent-browser end-to-end + curl):
+- ✅ Admin session (admin@okomba.com) → Testimonials tab visible between Posts and Email log → 3 seeded testimonials listed w/ PUBLISHED pills + 5 stars + service chips; KPI cards show 3 Total / 3 Published / 0 Drafts / 5.0 Avg rating
+- ✅ "Add testimonial" → editor dialog (all fields + interactive star picker + live preview) → created "Funke Adeyemi" (COO, Lagos Retail Group, Data Analytics, 4 stars) as DRAFT → appears first w/ DRAFT pill + tab badge "Testimonials 1" → public API still returns 3 (draft excluded) ✓
+- ✅ Edit → status → Published → saved → admin list shows PUBLISHED pill, badge cleared → public API returns 4 → public #testimonials section renders 4 cards (verified via DOM eval + screenshot)
+- ✅ Delete w/ inline confirm → row gone from admin list → public API back to 3 → public site back to 3 cards
+- ✅ Search "funke" → "All testimonials (1 of 4)" filtered correctly
+- ✅ Unauthenticated curl to admin endpoints → 401 both GET and POST
+- ✅ Mobile 375px: 3 visible "Edit" labels (not hidden), no horizontal overflow
+- ✅ Screenshots at each step: /tmp/admin-testimonials-list.png, admin-testimonial-editor-empty.png, admin-testimonial-editor-filled.png, admin-testimonial-draft-created.png, admin-testimonial-published.png, public-testimonials-4-cards.png, admin-testimonial-search.png, admin-testimonial-delete-confirm.png, admin-testimonial-deleted.png, public-testimonials-final-3-cards.png, admin-testimonials-mobile.png
+- ✅ bun run lint clean; tsc --noEmit clean for project files (only pre-existing errors in unrelated examples/skills dirs); dev.log clean for my routes (only pre-existing EADDRINUSE from an unrelated duplicate-start attempt)
+
+Stage Summary:
+- Testimonial management is fully live end-to-end: DB-backed (SQLite via Prisma), public API + section on /#testimonials, and complete admin CRUD at /#/admin → Testimonials tab with KPIs, search/filter, editor dialog with live preview, and publish workflow (draft hidden from site until published).
+- Files created: prisma/schema.prisma (Testimonial model added), scripts/seed-testimonials.ts, src/lib/testimonials.ts, src/app/api/testimonials/route.ts, src/app/api/admin/testimonials/route.ts, src/app/api/admin/testimonials/[id]/route.ts, src/components/site/admin/testimonials-tab.tsx, src/components/site/admin/testimonial-editor-dialog.tsx
+- Files modified: src/lib/db.ts (cache key bump only), src/components/site/admin/dashboard.tsx (minimal wiring), src/components/site/testimonials-section.tsx (fetch + skeleton + fallback)
+- Decisions: sortOrder auto-managed in saveTestimonial (preserved on edit, max+1 on append) rather than a manual form field — keeps the editor simple; reused POST_STATUS_STYLES from admin/types.ts for draft/published pills to stay visually identical to the Posts tab; static TESTIMONIALS in content.ts kept as graceful-degradation fallback (untouched so other agents can still rely on it).
+
+---
+Task ID: 3
+Agent: main (orchestrator)
+Task: Logo redesign everywhere + typography & color palette upgrade + cookie consent + mobile friendliness + admin posts UX polish + testimonial management dispatch
+
+Work Log:
+- QA'd existing admin posts flows end-to-end with agent-browser (login → Posts tab → edit dialog populated + save PATCH verified in DB → title reverted; create dialog + validation errors confirmed working) — core flows were functional; issue was discoverability
+- LOGO SYSTEM REDESIGN (src/components/site/logo.tsx):
+  - New OkombaMark: pure-SVG badge with ink gradient (#151C30→#060910), gold gradient rim, bold Georgia serif "O" monogram, gold gradient baseline bar under the O, 4-point gold "insight spark" + halo ring at top-right; unique gradient IDs via useId
+  - New OkombaLockup: badge + Georgia serif "Okomba" wordmark + letterspaced gold "ANALYTICS" strapline (font-mono, 0.36em tracking); 3 sizes (sm 33px/md 40px/lg 50px badge) × 2 tones (light ink / dark white)
+  - OkombaNavLogo now uses md lockup (was tiny 34px PNG pill — wordmark inside was unreadable); OkombaLogo PNG kept for legacy contexts
+  - New favicon.svg matching the new mark (sparkle + gradient + baseline)
+  - Placements updated: navbar (h-[76px] for presence), footer (lg dark lockup), admin login (sm dark), admin dashboard header (sm dark)
+- TYPOGRAPHY (globals.css):
+  - Fluid display scale: .display-hero clamp(2.55rem→4.35rem), .display-section clamp(1.85rem→2.75rem), .display-card, .lead-body
+  - Base: font-feature-settings kern/liga/calt, -moz-osx smoothing, text-wrap balance on headings + pretty on paragraphs, refined -0.03em heading tracking
+  - Applied to hero h1/p, SectionHeading, FAQ/About/Contact h2s
+  - --font-serif theme token (Georgia stack) for the brand wordmark
+- COLOR PALETTE (globals.css + components):
+  - Light-bg gold brightened: #B8860B→#C9910A, gold-light #F5C451→#FFC94D, gold-bright #FFD580→#FFDF8E; ring/chart-1 →#E3A81C; section-light tokens matched
+  - Root .text-gradient-gold now sweeps dark→light (#C9910A→#FFC94D) so it never washes out on white; dark-section variant stays bright (#FFE9B8→#F5C451)
+  - shadow-gold/-lg more saturated; shimmer-line brighter; spotlight border stronger; selection/scrollbar retinted
+  - Removed ALL remaining dull-gold hardcodes: trust.tsx accent card, products-section CTA button, process-section button shadow, newsletter card shadow, hero/products radial washes, scroll-progress glow, subscribe confirm/unsubscribe email templates, avatar chip colors
+  - Process step numbers /15→/20 with stronger gold hover
+- COOKIE CONSENT (cookie-consent.tsx):
+  - "Essential only" now PERSISTS (was re-showing every reload); Accept all persists
+  - Footer "Cookies" button dispatches okomba:open-cookie-settings → banner reopens in "Cookie settings" mode
+  - Redesigned: OkombaMark in a white chip, shimmer top line, gold glow, Accept all + Essential only + close X
+- ADMIN POSTS UX (posts-tab.tsx): Edit button now always shows label (was hidden on mobile) as gold-prominent button, 32px touch height, delete confirm buttons enlarged
+- Testimonial management built by subagent (Task 1): Prisma Testimonial model + seed (3), /api/testimonials public, /api/admin/testimonials CRUD, Testimonials tab (KPIs/search/filter/inline confirm delete) + editor dialog (star picker/live preview), public section fetches DB with static fallback
+
+QA VERIFIED (agent-browser + VLM):
+- ✅ Homepage desktop: VLM 8.5/10 "agency-quality, human-curated, not AI-generated"; logo "clearly visible and well-proportioned"; gold "rich, warm, prominent — no longer dull"
+- ✅ Wordmark renders Georgia serif (computed font-family verified); favicon regenerated
+- ✅ Footer lockup "excellent and highly visible, well-fitted" on dark bg
+- ✅ Cookie flow: Accept → persists → footer Cookies button → reopens "Cookie settings" mode
+- ✅ Mobile 375px: html scrollWidth 375 = offsetWidth (no overflow) on home AND admin; hero VLM "high-quality mobile implementation" (stacked CTAs, touch targets, no breakage); admin header verified no overlap/wrap/cutoff
+- ✅ Admin login + dashboard: new sm dark lockup visible; 6 tabs (Overview/Inquiries/Subscribers/Posts/Testimonials/Email log)
+- ✅ Posts tab: Edit button with visible label opens populated editor; delete inline confirm present
+- ✅ Testimonials tab VLM: "feature-complete, professional" (KPIs/search/status filters/edit/delete/add)
+- ✅ Public testimonials section: 3 cards from DB; insights: 5 posts from DB; no console errors
+- ✅ Sticky footer at natural content bottom (footerTop 13213 / body 13928)
+- ✅ Lint clean
+
+Stage Summary:
+- Brand is now loud and clear: SVG badge + serif wordmark lockup at nav (40px), footer (50px), admin (33px), favicon, cookie banner
+- Typography is fluid (clamp-based editorial scale), typography helpers reusable
+- Gold is vibrant luminous honey (#C9910A/#FFC94D/#E3A81C family) consistently across every surface — no dull remnants
+- Cookie consent complete GDPR-lite pattern (persist choice + reopen from footer)
+- Admin is a 6-tab management suite; posts edit/delete fully verified working + more discoverable
+- NEXT ROUND candidates: pagination for posts/testimonials at scale, bulk actions, real email provider (Resend) behind deliver() stub, admin session timeout warning

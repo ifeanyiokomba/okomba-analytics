@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { ArrowLeft, Loader2, Lock, Mail, User } from "lucide-react";
-import { OkombaNavLogo } from "../logo";
+import { OkombaLockup } from "../logo";
 
 /* Admin login — env-credential flow with session cookie.
    Preserved exactly from the original implementation, just polished. */
@@ -123,7 +123,7 @@ export function AdminLogin({
           </form>
 
           <div className="mt-6 flex items-center justify-between border-t border-white/[0.06] pt-5">
-            <OkombaNavLogo />
+            <OkombaLockup size="sm" tone="dark" />
             <span className="font-mono text-[10px] text-muted-foreground/60">Internal use only</span>
           </div>
         </div>

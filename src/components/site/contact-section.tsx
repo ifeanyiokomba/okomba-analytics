@@ -58,7 +58,7 @@ export function ContactSection({ onGetStarted }: ContactSectionProps) {
                 <span className="h-1.5 w-1.5 rounded-full bg-gold animate-pulse-dot" aria-hidden="true" />
                 Contact
               </span>
-              <h2 className="mt-6 text-balance font-display text-3xl font-bold leading-[1.12] text-foreground sm:text-4xl">
+              <h2 className="display-section mt-6 font-display text-balance text-foreground">
                 Have an idea, project or problem to solve?{" "}
                 <span className="text-gradient-gold">Let&apos;s build the right solution.</span>
               </h2>
@@ -81,7 +81,7 @@ export function ContactSection({ onGetStarted }: ContactSectionProps) {
                     <span className="min-w-0 flex-1">
                       <span className="block text-[14.5px] font-semibold text-foreground">{m.label}</span>
                       <span className="block truncate text-[13px] text-muted-foreground">{m.value}</span>
-                      <span className="mt-0.5 block font-mono text-[10px] text-muted-foreground/70">{m.note}</span>
+                      <span className="mt-0.5 block truncate font-mono text-[10px] text-muted-foreground/70">{m.note}</span>
                     </span>
                     <ArrowRight
                       size={16}

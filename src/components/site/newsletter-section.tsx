@@ -70,7 +70,7 @@ export function NewsletterSection() {
   return (
     <section aria-label="Newsletter" className="container-xl">
       <Reveal>
-        <div className="relative overflow-hidden rounded-3xl border border-gold/30 bg-gradient-to-br from-gold/[0.14] via-[#fffdf7] to-white p-8 md:p-12 shadow-[0_20px_60px_-24px_rgba(160,110,0,0.35)]">
+        <div className="relative overflow-hidden rounded-3xl border border-gold/30 bg-gradient-to-br from-gold/[0.14] via-[#fffdf7] to-white p-8 md:p-12 shadow-[0_20px_60px_-24px_rgba(201,145,10,0.4)]">
           {/* decor */}
           <div className="bg-dots pointer-events-none absolute inset-0 opacity-30 [mask-image:radial-gradient(60%_80%_at_80%_20%,black,transparent)]" aria-hidden="true" />
           <div className="pointer-events-none absolute -right-20 -top-24 h-64 w-64 rounded-full bg-gold/[0.12] blur-[90px] animate-glow-breathe" aria-hidden="true" />

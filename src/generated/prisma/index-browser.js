@@ -167,6 +167,20 @@ exports.Prisma.PostScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.TestimonialScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  role: 'role',
+  service: 'service',
+  text: 'text',
+  rating: 'rating',
+  avatar: 'avatar',
+  status: 'status',
+  sortOrder: 'sortOrder',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.EmailLogScalarFieldEnum = {
   id: 'id',
   type: 'type',
@@ -195,6 +209,7 @@ exports.Prisma.ModelName = {
   AdminSession: 'AdminSession',
   Subscriber: 'Subscriber',
   Post: 'Post',
+  Testimonial: 'Testimonial',
   EmailLog: 'EmailLog'
 };
 

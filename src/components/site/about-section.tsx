@@ -37,7 +37,7 @@ export function AboutSection() {
                 <span className="h-1.5 w-1.5 rounded-full bg-gold animate-pulse-dot" aria-hidden="true" />
                 About us
               </span>
-              <h2 className="mt-6 text-balance font-display text-3xl font-bold leading-[1.12] text-foreground sm:text-4xl">
+              <h2 className="display-section mt-6 font-display text-balance text-foreground">
                 A technology company built on <span className="text-gradient-gold">capability</span>, not buzzwords.
               </h2>
               <p className="mt-6 text-[15px] leading-relaxed text-muted-foreground">

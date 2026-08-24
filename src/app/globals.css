@@ -9,6 +9,7 @@
   --font-sans: var(--font-inter);
   --font-display: var(--font-space-grotesk);
   --font-mono: var(--font-jetbrains-mono);
+  --font-serif: Georgia, "Times New Roman", Times, serif;
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -58,39 +59,39 @@
   --card-foreground: #141926;
   --popover: #ffffff;
   --popover-foreground: #141926;
-  --primary: #B8860B;
+  --primary: #C9910A;
   --primary-foreground: #ffffff;
   --secondary: #f4f5f8;
   --secondary-foreground: #141926;
   --muted: #f4f5f8;
   --muted-foreground: #5a6373;
   --accent: #f4f5f8;
-  --accent-foreground: #B8860B;
+  --accent-foreground: #C9910A;
   --destructive: #dc2626;
   --destructive-foreground: #ffffff;
   --border: rgba(20, 25, 38, 0.1);
   --input: rgba(20, 25, 38, 0.14);
-  --ring: #D4A017;
-  --chart-1: #D4A017;
+  --ring: #E3A81C;
+  --chart-1: #E3A81C;
   --chart-2: #0a9d84;
   --chart-3: #2d6bd4;
-  --chart-4: #F5C451;
+  --chart-4: #FFC94D;
   --chart-5: #dc2626;
   --sidebar: #ffffff;
   --sidebar-foreground: #141926;
-  --sidebar-primary: #B8860B;
+  --sidebar-primary: #C9910A;
   --sidebar-primary-foreground: #ffffff;
   --sidebar-accent: #f4f5f8;
   --sidebar-accent-foreground: #141926;
   --sidebar-border: rgba(20, 25, 38, 0.1);
-  --sidebar-ring: #D4A017;
+  --sidebar-ring: #E3A81C;
 
   /* ── Brand accents (light-bg tuned) ────────────────── */
-  /* Richer honey gold — was dull #a06e00, now vibrant honeycomb */
-  --gold: #B8860B;        /* Deep honey amber */
-  --gold-light: #F5C451;  /* Warm honey light */
-  --gold-bright: #FFD580; /* Golden hour highlight */
-  --gold-dim: rgba(212, 160, 23, 0.12);
+  /* Luminous honey gold — vibrant, confident, never dull */
+  --gold: #C9910A;         /* Vivid honey amber */
+  --gold-light: #FFC94D;   /* Warm honey light */
+  --gold-bright: #FFDF8E;  /* Golden hour highlight */
+  --gold-dim: rgba(201, 145, 10, 0.13);
   --teal: #0a9d84;
   --teal-dim: rgba(10, 157, 132, 0.1);
   --ink: #141926;
@@ -108,16 +109,22 @@
     @apply bg-background text-foreground;
     font-family: var(--font-inter), system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
+    font-feature-settings: "kern" 1, "liga" 1, "calt" 1;
     overflow-x: hidden;
   }
   ::selection {
-    background: rgba(212, 160, 23, 0.26);
+    background: rgba(201, 145, 10, 0.3);
     color: #141926;
   }
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-space-grotesk), var(--font-inter), sans-serif;
-    letter-spacing: -0.025em;
+    letter-spacing: -0.03em;
+    text-wrap: balance;
+  }
+  p {
+    text-wrap: pretty;
   }
   /* Slim custom scrollbar */
   ::-webkit-scrollbar {
@@ -132,8 +139,33 @@
     border-radius: 999px;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: #D4A017;
+    background: #C9910A;
   }
+}
+
+/* ── Fluid display typography ───────────────────────────── */
+/* Editorial scale that breathes with the viewport — never
+   too cramped on mobile, never shouting on desktop.        */
+.display-hero {
+  font-size: clamp(2.55rem, 6.6vw, 4.35rem);
+  line-height: 1.04;
+  letter-spacing: -0.038em;
+  font-weight: 700;
+}
+.display-section {
+  font-size: clamp(1.85rem, 3.8vw, 2.75rem);
+  line-height: 1.08;
+  letter-spacing: -0.032em;
+  font-weight: 700;
+}
+.display-card {
+  font-size: clamp(1.05rem, 1.6vw, 1.22rem);
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+}
+.lead-body {
+  font-size: clamp(1.02rem, 1.7vw, 1.2rem);
+  line-height: 1.62;
 }
 
 /* ── Layout primitives ──────────────────────────────────── */
@@ -175,7 +207,7 @@
   text-transform: uppercase;
 }
 .text-gradient-gold {
-  background: linear-gradient(120deg, #FFD580 0%, #F5C451 40%, #D4A017 100%);
+  background: linear-gradient(115deg, #C9910A 0%, #E3A81C 42%, #FFC94D 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -197,8 +229,8 @@
     box-shadow 0.35s ease;
 }
 .surface-card:hover {
-  border-color: rgba(212, 160, 23, 0.45);
-  box-shadow: 0 20px 48px -18px rgba(20, 25, 38, 0.25), 0 0 0 1px rgba(212, 160, 23, 0.1);
+  border-color: rgba(201, 145, 10, 0.5);
+  box-shadow: 0 20px 48px -18px rgba(20, 25, 38, 0.25), 0 0 0 1px rgba(201, 145, 10, 0.12);
   transform: translateY(-3px);
 }
 .surface-glass {
@@ -211,10 +243,10 @@
 
 /* ── Shadows (colored, premium) ─────────────────────────── */
 .shadow-gold {
-  box-shadow: 0 4px 18px rgba(212, 160, 23, 0.32), 0 1px 3px rgba(20, 25, 38, 0.08);
+  box-shadow: 0 4px 20px rgba(201, 145, 10, 0.4), 0 1px 3px rgba(20, 25, 38, 0.08);
 }
 .shadow-gold-lg {
-  box-shadow: 0 12px 40px rgba(212, 160, 23, 0.38), 0 4px 12px rgba(20, 25, 38, 0.08);
+  box-shadow: 0 12px 44px rgba(201, 145, 10, 0.46), 0 4px 12px rgba(20, 25, 38, 0.08);
 }
 .shadow-float {
   box-shadow: 0 24px 64px -18px rgba(20, 25, 38, 0.3), 0 8px 24px rgba(20, 25, 38, 0.1);
@@ -334,7 +366,7 @@
 
 /* Shimmer divider line */
 .shimmer-line {
-  background: linear-gradient(90deg, transparent 0%, rgba(212, 160, 23, 0.6) 50%, transparent 100%);
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 201, 77, 0.75) 50%, transparent 100%);
   background-size: 200% auto;
   animation: shimmer-line 3.2s linear infinite;
 }
@@ -366,7 +398,7 @@
   inset: -1px;
   border-radius: inherit;
   padding: 1px;
-  background: radial-gradient(320px circle at var(--mx, 50%) var(--my, 0%), rgba(212, 160, 23, 0.55), transparent 42%);
+  background: radial-gradient(320px circle at var(--mx, 50%) var(--my, 0%), rgba(227, 168, 28, 0.65), transparent 42%);
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
@@ -404,11 +436,11 @@
   --muted-foreground: #59616f;
   --border: rgba(20, 25, 38, 0.1);
   --input: rgba(20, 25, 38, 0.14);
-  --gold: #B8860B;
-  --gold-light: #D4A017;
-  --gold-bright: #F5C451;
-  --gold-dim: rgba(212, 160, 23, 0.12);
-  --ring: #D4A017;
+  --gold: #C9910A;
+  --gold-light: #E3A81C;
+  --gold-bright: #FFC94D;
+  --gold-dim: rgba(201, 145, 10, 0.13);
+  --ring: #E3A81C;
 }
 
 /* Dark section variant — restores the original dark palette inside
@@ -443,13 +475,13 @@
 
 /* Gradient-gold text needs deeper tones on light backgrounds */
 .section-light .text-gradient-gold {
-  background: linear-gradient(120deg, #B8860B 0%, #D4A017 45%, #F5C451 100%);
+  background: linear-gradient(115deg, #C9910A 0%, #E3A81C 40%, #FFC94D 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 .section-dark .text-gradient-gold {
-  background: linear-gradient(120deg, #FFE5A8 0%, #FFD580 40%, #F5C451 100%);
+  background: linear-gradient(115deg, #FFE9B8 0%, #FFD580 35%, #FFC94D 70%, #F5C451 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -482,8 +514,8 @@
     box-shadow 0.35s ease;
 }
 .surface-card-light:hover {
-  border-color: rgba(212, 160, 23, 0.42);
-  box-shadow: 0 20px 48px -18px rgba(20, 25, 38, 0.22), 0 0 0 1px rgba(212, 160, 23, 0.1);
+  border-color: rgba(201, 145, 10, 0.48);
+  box-shadow: 0 20px 48px -18px rgba(20, 25, 38, 0.22), 0 0 0 1px rgba(201, 145, 10, 0.12);
   transform: translateY(-3px);
 }
 
