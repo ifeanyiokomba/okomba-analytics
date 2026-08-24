@@ -381,3 +381,29 @@ Stage Summary:
 - Hero matches the "floating rounded container" conversion pattern from the reference, fully mobile-first
 - Loading screen professional & brief (~1.25s) with logo-driven reveal
 - Next-round candidates: more pronounced hero glow, dashboard card gold rim, light-theme sections alternation (Saasify pattern)
+
+---
+Task ID: U2 (user-requested — color variety + product carousel, from 2 new inspiration images)
+Agent: main
+Task: Light-section coloration (no longer all-dark) + dual-direction product card carousel
+
+Work Log:
+- Analyzed both new inspirations via VLM: "web designs.jpeg" (Carina — light sections, clean white cards, section alternation) + "A Sleek SAAS landing page design.jpeg" (warm cream #FDF8F5 light sections, mixed stat cards: dark card + accent-tinted card + white cards, soft 24px+ radius)
+- globals.css — new `.section-light` token system: warm cream bg #f7f4ec, ink foreground #141926, readable deeper gold #a06e00 (gold-light #c9922a) — all var-driven Tailwind utilities (bg-background, text-foreground, text-muted-foreground, border-border) auto-flip inside light sections; `.section-light .text-gradient-gold` deeper gradient override; `.surface-card-light` (white bg, ink borders, soft elevation, gold hover); `@keyframes marquee-reverse` + `.animate-marquee-reverse` (travels L→R via translateX(-50%→0)) w/ per-track `--marquee-duration` var; extended hover-pause to both marquee directions
+- StatsBand → light cream section w/ Sleek-SAAS mixed-card pattern: 1 dark navy anchor card (200+ projects, gold number), 2 white cards, 1 gold-tinted card (50+ clients, #7a5400 text) — icon boxes per accent; VLM 9/10 "premium feel achieved through confident use of mixed card tones"
+- ProductsSection → light cream section + DUAL-DIRECTION CAROUSEL (user request "left to right and then right to left"): two marquee rows of ProductCards (white surface-card-light, gold top hairline accent, icon/badge/points/CTA) — row 1 travels L→R (48s), row 2 travels R→L (42s, reversed order), seamless 2× duplication w/ aria-hidden copies, mask-fade-x edges, pause-on-hover, "Explore all services" CTA below; motion VERIFIED by pixel measurement: row1 +60px right, row2 −81px left over 2s; hover pause verified via real mouse (:hover true → animation-play-state paused → resumes when mouse leaves)
+- ProcessSection → light cream section (border-border) w/ surface-card-light step cards, watermark numbers text-foreground/15 hover gold/50, dark-ink gradient CTA button
+- Page rhythm now: dark hero → dark ticker → LIGHT stats → dark services → LIGHT products carousel → dark work → dark why → LIGHT process → dark testimonials/insights/newsletter/about/faq/contact → dark footer
+- Turbopack stale-CSS issue encountered (appended rules not served) → resolved by content-change nudge (recompiled in 803ms, var verified #f7f4ec on element)
+
+QA VERIFIED:
+- ✅ Carousel directions measured: L→R and R→L both moving; pause/resume on hover works
+- ✅ Light tokens cascade correctly (section --background resolves #f7f4ec)
+- ✅ Mobile 375px overflow CLEAN incl. carousel section
+- ✅ VLM: stats 9/10, products 8.5/10 ("elegant execution", gold hairline = "premium tier signature"), process excellent contrast; "carousel clipping" note = intentional infinite-scroll edge mask
+- ✅ Lint clean, no console errors
+
+Stage Summary:
+- Site no longer dark-all-through: three warm-cream sections create a light/dark breathing rhythm per the inspiration references
+- Product cards now continuously travel L→R and R→L in a hover-pausable carousel
+- NEXT-ROUND candidates: testimonials → light section for extra rhythm, carousel row speeds tuning, CTA hover emphasis, dark-card shadow consistency nit

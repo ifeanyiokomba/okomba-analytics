@@ -384,3 +384,58 @@
     transform: none;
   }
 }
+
+/* ── Light section variant (warm cream) ───────────────────── */
+/* Wraps a section to flip the token palette: warm cream bg,
+   dark ink text, readable darker gold accents. All Tailwind
+   utilities driven by these vars restyle automatically.      */
+.section-light {
+  --background: #f7f4ec;
+  --foreground: #141926;
+  --card: #ffffff;
+  --muted-foreground: #59616f;
+  --border: rgba(20, 25, 38, 0.1);
+  --input: rgba(20, 25, 38, 0.14);
+  --gold: #a06e00;
+  --gold-light: #c9922a;
+  --gold-dim: rgba(160, 110, 0, 0.1);
+  --ring: #a06e00;
+}
+
+/* Gradient-gold text needs deeper tones on light backgrounds */
+.section-light .text-gradient-gold {
+  background: linear-gradient(120deg, #8a5f00 0%, #a06e00 45%, #c9922a 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Light card treatment (white surface, ink borders, soft shadow) */
+.surface-card-light {
+  background: #ffffff;
+  border: 1px solid rgba(20, 25, 38, 0.08);
+  border-radius: 1rem;
+  box-shadow: 0 1px 2px rgba(20, 25, 38, 0.04), 0 8px 24px -18px rgba(20, 25, 38, 0.16);
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.35s ease,
+    box-shadow 0.35s ease;
+}
+.surface-card-light:hover {
+  border-color: rgba(160, 110, 0, 0.38);
+  box-shadow: 0 20px 48px -18px rgba(20, 25, 38, 0.22), 0 0 0 1px rgba(160, 110, 0, 0.08);
+  transform: translateY(-3px);
+}
+
+/* Reverse-direction marquee (cards travel left → right) */
+@keyframes marquee-reverse {
+  from { transform: translateX(-50%); }
+  to { transform: translateX(0); }
+}
+.animate-marquee-reverse { animation: marquee-reverse var(--marquee-duration, 44s) linear infinite; }
+
+/* Pause both marquee directions on hover */
+.marquee-track:hover .animate-marquee,
+.marquee-track:hover .animate-marquee-reverse {
+  animation-play-state: paused;
+}
+
+/* watcher nudge */

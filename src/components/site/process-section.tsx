@@ -11,7 +11,11 @@ type ProcessSectionProps = {
 
 export function ProcessSection({ onGetStarted }: ProcessSectionProps) {
   return (
-    <section id="process" className="section-pad relative scroll-mt-20 border-y border-white/[0.06] bg-[#070b14]" aria-label="Our process">
+    <section
+      id="process"
+      className="section-light scroll-mt-20 border-y border-border bg-background"
+      aria-label="Our process"
+    >
       <div className="container-xl relative">
         <SectionHeading
           eyebrow="How we work"
@@ -26,13 +30,16 @@ export function ProcessSection({ onGetStarted }: ProcessSectionProps) {
         <ol className="relative grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
           {PROCESS_STEPS.map((s, i) => (
             <Reveal as="li" key={s.step} delay={i * 80}>
-              <div className="surface-card group relative h-full p-6 md:p-7">
+              <div className="surface-card-light group relative h-full p-6 md:p-7">
                 {/* step number */}
                 <div className="flex items-center gap-3.5">
-                  <span className="font-display text-[2rem] font-bold leading-none text-white/[0.09] transition-colors duration-300 group-hover:text-gold/30" aria-hidden="true">
+                  <span
+                    className="font-display text-[2rem] font-bold leading-none text-foreground/15 transition-colors duration-300 group-hover:text-gold/50"
+                    aria-hidden="true"
+                  >
                     {s.step}
                   </span>
-                  <span className="h-px flex-1 bg-gradient-to-r from-gold/40 to-transparent" aria-hidden="true" />
+                  <span className="h-px flex-1 bg-gradient-to-r from-gold/50 to-transparent" aria-hidden="true" />
                 </div>
                 <h3 className="mt-4 text-[17px] font-semibold text-foreground">{s.title}</h3>
                 <p className="mt-2.5 text-[13.5px] leading-relaxed text-muted-foreground">{s.desc}</p>
@@ -48,7 +55,7 @@ export function ProcessSection({ onGetStarted }: ProcessSectionProps) {
           </p>
           <button
             onClick={onGetStarted}
-            className="btn-shine group inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-gold-light to-gold px-7 py-3.5 text-[14.5px] font-semibold text-ink shadow-gold-lg transition-transform hover:-translate-y-0.5 active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
+            className="btn-shine group inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-gold-light to-gold px-7 py-3.5 text-[14.5px] font-semibold text-[#141926] shadow-[0_12px_36px_-10px_rgba(160,110,0,0.5)] transition-transform hover:-translate-y-0.5 active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
           >
             Begin with step 01 — Discovery
             <ArrowRight size={16} strokeWidth={2.4} className="transition-transform group-hover:translate-x-1" aria-hidden="true" />
