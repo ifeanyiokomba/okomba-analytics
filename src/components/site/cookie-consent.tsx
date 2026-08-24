@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { Check, Cookie, Settings2, X } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { OkombaMark } from "./logo";
 
 const STORAGE_KEY = "okomba_cookie_consent";
 const ACCEPTED = "accepted";
@@ -86,8 +85,8 @@ export function CookieConsent() {
         <div className="shimmer-line pointer-events-none absolute inset-x-0 top-0 h-px opacity-60" aria-hidden="true" />
 
         <div className="relative flex items-start gap-3.5">
-          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-gold/20 bg-white shadow-sm">
-            <OkombaMark size={34} />
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gold-dim text-gold">
+            <Cookie size={18} aria-hidden="true" />
           </span>
 
           <div className="min-w-0 flex-1">

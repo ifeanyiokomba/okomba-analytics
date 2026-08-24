@@ -68,7 +68,7 @@ export function NewsletterSection() {
   };
 
   return (
-    <section aria-label="Newsletter" className="container-xl">
+    <section id="newsletter" aria-label="Newsletter" className="container-xl scroll-mt-24">
       <Reveal>
         <div className="relative overflow-hidden rounded-3xl border border-gold/30 bg-gradient-to-br from-gold/[0.14] via-[#fffdf7] to-white p-8 md:p-12 shadow-[0_20px_60px_-24px_rgba(201,145,10,0.4)]">
           {/* decor */}

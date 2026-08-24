@@ -15,7 +15,7 @@ import {
   Users,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { OkombaLockup } from "../logo";
+import { OkombaLogo } from "../logo";
 import type { Post } from "@/lib/posts";
 import type { Testimonial } from "@/lib/testimonials";
 import type { Service } from "@/lib/content";
@@ -377,7 +377,7 @@ export function AdminDashboard({
       <header className="sticky top-0 z-40 border-b border-white/[0.07] bg-[#05070d]/88 backdrop-blur-xl">
         <div className="container-xl flex h-16 items-center justify-between gap-4">
           <div className="flex items-center gap-3.5">
-            <OkombaLockup size="sm" tone="dark" />
+            <OkombaLogo height={40} priority onDark />
             <span className="hidden rounded-full border border-gold/30 bg-gold-dim px-3 py-1 font-mono text-[10px] text-gold sm:inline-block">
               ADMIN
             </span>

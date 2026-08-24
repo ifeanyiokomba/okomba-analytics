@@ -614,3 +614,39 @@ Stage Summary:
 - Cookie consent complete GDPR-lite pattern (persist choice + reopen from footer)
 - Admin is a 6-tab management suite; posts edit/delete fully verified working + more discoverable
 - NEXT ROUND candidates: pagination for posts/testimonials at scale, bulk actions, real email provider (Resend) behind deliver() stub, admin session timeout warning
+
+---
+Task ID: 4
+Agent: main (orchestrator)
+Task: Restore original brand logo everywhere + full production-readiness audit before connecting to the main website
+
+Work Log:
+- RESTORED ORIGINAL BRAND LOGO (user request — replaced the round-3 custom SVG lockup):
+  - logo.tsx reverted to the official brand system: OkombaMark (original simple O-badge SVG) + OkombaLogo (official 1308×428 PNG badge with white "Okomba" serif wordmark) + OkombaNavLogo
+  - NEW fitting improvements over the original: onDark prop — ring-white/40 + layered white ambient glow + soft black shadow + faint gold aura keeps the black badge crisply defined on dark surfaces (footer, admin header, admin login); light surfaces get ring-black/10 + soft shadow
+  - Placements: navbar 36px (restored 72px header + 104px mobile-menu pad), footer 38px onDark, admin dashboard header 40px onDark, admin login 36px onDark, footer trust chip OkombaMark 34
+  - favicon.svg restored to the original mark (dark square + serif O + gold dot) from git history
+  - Removed the round-3 OkombaLockup/wordmark system + unused --font-serif token; cookie banner reverted to Cookie-icon chip (original design)
+- PRODUCTION AUDIT:
+  - All 11 sections render (hero/services/solutions/work/why/process/testimonials/insights/about/faq/contact) + newsletter section
+  - Newsletter section: added missing id="newsletter" + scroll-mt-24 anchor; footer Newsletter link now targets it (was #insights)
+  - Root /api route: replaced leftover "Hello, world!" placeholder with proper health check {ok, service, time}
+  - Public APIs verified: /api/posts (5 published), /api/testimonials (3), POST /api/inquiries, POST /api/subscribe → confirm → unsubscribe full double-opt-in lifecycle (200s + correct HTML pages)
+  - Admin auth verified: 401s without session, login works, 6 tabs load, logout works
+  - DB cleaned for production: deleted 1 test inquiry, 4 test email logs, 13 stale admin sessions → final state 0 inquiries / 0 subscribers / 5 posts / 3 testimonials / 0 logs
+  - SEO verified: title, description, OG tags, twitter card, canonical-less single page, sitemap.xml 200, robots.txt 200 (disallows /api/), og-image.png 200, favicon 200, logo.png 200
+  - No hardcoded localhost/127.0.0.1 URLs in src/
+  - Note: "ask-image" console grep was a display artifact ([m stripped as ANSI code) — file content verified correct via python booleans
+- QA (agent-browser + VLM):
+  - ✅ Navbar logo: "clearly visible and crisp, perfectly matches official badge, well-fitted"
+  - ✅ Footer logo onDark: "clearly defined against dark background, subtle white ring + soft shadow"
+  - ✅ Admin header at 3x zoom: "black badge with white Okomba text (moderately legible), thin light ring, gold ADMIN pill"
+  - ✅ Admin login: 8.5/10, logo "clearly visible and well-defined"
+  - ✅ Desktop + mobile final: 9/10 "production-ready, top-tier responsive design"
+  - ✅ Mobile 375px: scrollWidth 375 = offsetWidth, no overflow
+  - ✅ Lint clean, dev.log clean, console clean (stale HMR entries from mid-edit only)
+
+Stage Summary:
+- Official brand logo (PNG badge) restored site-wide with proper light/dark fitting treatments
+- Site is production-ready: clean DB, working APIs, complete SEO, verified flows, 9/10 VLM verdict
+- NEXT ROUND candidates: password visibility toggle on admin login, real email provider (Resend) behind deliver() stub, pagination for posts/testimonials at scale

@@ -81,7 +81,7 @@ export function Navbar({ onGetStarted }: NavbarProps) {
         )}
       >
         <nav
-          className="container-xl flex h-[76px] items-center justify-between gap-6"
+          className="container-xl flex h-[72px] items-center justify-between gap-6"
           aria-label="Main navigation"
         >
           <button
@@ -168,7 +168,7 @@ export function Navbar({ onGetStarted }: NavbarProps) {
         aria-modal="true"
         aria-label="Mobile navigation"
       >
-        <div className="container-xl flex h-full flex-col overflow-y-auto pb-10 pt-[116px]">
+        <div className="container-xl flex h-full flex-col overflow-y-auto pb-10 pt-[104px]">
           <ul className="flex flex-col gap-1.5">
             {NAV_LINKS.map((l, i) => (
               <li key={l.id}>
