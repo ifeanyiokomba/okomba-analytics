@@ -331,3 +331,27 @@ Stage Summary:
   4. Optional: dark/light theme toggle (design system is dark-only)
   5. Optional: inquiry detail view (full message + reply-by-mail link)
 - RISKS: none blocking; admin dialogs share z-index pattern with marketing dialogs (consistent)
+
+---
+Task ID: R10 (cron review round 10)
+Agent: webDevReview cron (15-min cycle)
+Task: QA regression + admin inquiry detail dialog + production env-flag hardening + row affordance polish
+
+Work Log:
+- QA regression: server 200, no console errors, desktop 1280 & mobile 375 overflow-CLEAN
+- NEW FEATURE — Inquiry detail dialog: client name cells now clickable (inline-flex w/ ExternalLink icon that fades in on row hover via group/row) opening a full inquiry view: status badge (styled per status), name + formatted timestamp header, contact grid (email/phone/WhatsApp/budget — auto-hides empty), requested-services panel with clickable gold service chip that cross-links into the ServiceDetailDialog, full whitespace-preserving message block, footer with "Reply by email" (mailto: w/ pre-filled subject "Re: your {service} inquiry — Okomba Analytics") + "Reply on WhatsApp" (wa.me link w/ digits-only phone) buttons; Escape/overlay/X close + scroll lock; VERIFIED: dialog opens w/ full message, mailto href correctly encoded, wa.me link correct, service cross-link opens service dialog, Escape closes
+- PRODUCTION HARDENING — dev confirm simulation now env-gated: NEXT_PUBLIC_DEV_CONFIRM_SIMULATION !== "false" guards the simulated "Confirm my subscription" button in the newsletter UI; setting it to "false" in production env hides the dev affordance (real email provider will deliver actual confirm links)
+- STYLING — admin table row affordance: group/row hover (bg-white/[0.025]), name button gains ExternalLink icon (gold/70) on row hover, name truncates at 200px max
+- VLM QA: "Polished & Functional… excellent visual hierarchy… footer actions perfectly weighted"
+- Final: lint clean, admin mobile 375 CLEAN, site desktop 1440 CLEAN, no console errors, test data cleaned
+
+Stage Summary:
+- PROJECT STATUS: Admin portal now a complete operations console — every row is inspectable, every contact reachable in one click, every service explainable
+- VERIFIED: inquiry dialog (open/close/cross-link/reply links), env flag logic, row affordance, both viewports
+- UNRESOLVED/NEXT ROUND priorities:
+  1. Real email provider integration (deliver() swap — the one remaining major item)
+  2. Hero A/B copy variants
+  3. Optional: dark/light theme toggle
+  4. Optional: admin session timeout warning
+  5. Optional: keyboard shortcuts (n = new, / = search focus)
+- RISKS: none blocking; env flag defaults to showing the dev simulation (safe default for demo, document for production deploy)

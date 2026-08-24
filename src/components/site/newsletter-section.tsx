@@ -1,9 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AlertCircle, CheckCircle2, Loader2, Mail, MailCheck, Send } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Reveal } from "./reveal";
+
+/** Only true when no real email provider is configured (dev/demo mode). */
+const DEV_CONFIRM_SIMULATION = process.env.NEXT_PUBLIC_DEV_CONFIRM_SIMULATION !== "false";
 
 /**
  * Newsletter band — double opt-in email capture wired to POST /api/subscribe.
@@ -110,7 +113,7 @@ export function NewsletterSection() {
                   </div>
 
                   {/* Step 2 (dev simulation): confirm button when link present */}
-                  {state === "done" && confirmPath && (
+                  {state === "done" && confirmPath && DEV_CONFIRM_SIMULATION && (
                     <div className="w-full rounded-xl border border-gold/20 bg-gold/[0.06] p-4">
                       <p className="font-mono text-[10px] uppercase tracking-wider text-gold/80">
                         Confirm subscription
