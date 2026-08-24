@@ -407,3 +407,28 @@ Stage Summary:
 - Site no longer dark-all-through: three warm-cream sections create a light/dark breathing rhythm per the inspiration references
 - Product cards now continuously travel L→R and R→L in a hover-pausable carousel
 - NEXT-ROUND candidates: testimonials → light section for extra rhythm, carousel row speeds tuning, CTA hover emphasis, dark-card shadow consistency nit
+
+---
+Task ID: U3 (user-requested — white background for logo visibility + real projects)
+Agent: main
+Task: White-first theme flip + real products/projects (Votewise, Turbopay, BillSwift, Sanctum, TrustScore, Omniscore CPaaS)
+
+Work Log:
+- REAL CONTENT: PRODUCTS replaced with 6 real Okomba platforms — Turbopay (turbopay.okomba.com, Payments), BillSwift (Bill Payments), TrustScore (Identity Verification), Omniscore CPaaS (bulk SMS/messaging/voice/WhatsApp/Telegram/OTP), Votewise (votewise.com.ng, Voting), Sanctum Multipurpose — each w/ tagline/category/desc/points/icon/accent/link; CASE_STUDIES + CASE_STUDY_DETAILS (fictional) fully removed, replaced by new PROJECTS type + 6 real project entries w/ images (reused 3 + 3 newly AI-generated: project-trustscore fingerprint-shield, project-omniscore message-network, project-sanctum modular-blocks)
+- Work section rewritten (case-studies-section.tsx → projects grid): 6 project cards w/ image banners, category badges, LIVE badges + "Visit site" links for votewise.com.ng + turbopay.okomba.com (target=_blank), tags, "View project" → new ProjectDialog (white dialog: cover image w/ dark scrim + name overlay, tagline, overview, "What we built" checklist, tags, gold Visit button, "Built and operated by Okomba Analytics" badge); real TechStartNG pull-quote retained
+- WHITE-FIRST THEME: :root tokens flipped to light (bg #ffffff, ink #141926, deep gold #a06e00/#c9922a, deep teal #0a9d84, borders rgba-ink) — the entire token-driven UI flips automatically; new `.section-dark` utility restores the dark palette inside intentionally-dark surfaces: hero copy column, hero chart panel, footer, admin portal (login+dashboard), inquiry modal, blog dialog, page toast; surface-card/surface-glass/shadows/grid/dots/scrollbar/selection all re-tuned for white
+- Components updated: navbar (white glass scrolled bg + white mobile menu), loading screen (white bg, logo pops), ticker (light band), newsletter (white-gold gradient band, white input), about (white image scrim), contact (light banner), cookie consent + back-to-top (light glass), services details box (light), hero container shadow softened; swept border-white→border-black + bg-white→bg-black across 11 light components; themeColor → #ffffff
+- Fixed post-flip contrast bugs: hero h1/subtext/badge/checkmarks were ink-on-dark → copy column scoped section-dark; hero chart panel labels scoped dark; secondary CTA reverted to white borders; products blue accent deepened #5b9eff→#2d6bd4
+- Carousel now runs the 6 REAL products in both directions (row A L→R 48s, row B R→L 42s, verified earlier pattern intact)
+
+QA VERIFIED:
+- ✅ body bg rgb(255,255,255); navbar logo loaded on white; hero h1 + chart labels resolve light (rgb(244,246,250))
+- ✅ Carousel shows all 6 real product names (Turbopay, BillSwift, TrustScore, Omniscore CPaaS, Votewise, Sanctum)
+- ✅ Work section: 6 project cards w/ 2 LIVE badges + 2 visit links (votewise.com.ng href verified); project dialog opens w/ overview + Visit button
+- ✅ Mobile 375px overflow CLEAN; lint clean; no console errors
+- ✅ VLM final: navbar/branding 10/10, hero container 10/10, typography 10/10 (desktop); projects "clearly visible with high-quality imagery"
+
+Stage Summary:
+- Site is now WHITE-background first (logo badge fully visible everywhere), with dark anchor surfaces: hero container, footer, dialogs, admin — premium light/dark contrast pattern
+- Real products + projects power the carousel and work sections, with live links to votewise.com.ng and turbopay.okomba.com
+- NEXT ROUND candidates: hero social proof position tweak, services/why/testimonials visual polish on white, newsletter band accent, OG image refresh to white theme

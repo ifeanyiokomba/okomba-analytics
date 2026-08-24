@@ -113,7 +113,7 @@ export function ContactSection({ onGetStarted }: ContactSectionProps) {
               </div>
 
               {/* Big conversion banner */}
-              <div className="relative flex-1 overflow-hidden rounded-2xl border border-gold/25 bg-gradient-to-br from-gold/[0.12] via-[#0b101c] to-[#0b101c] p-7 md:p-8">
+              <div className="relative flex-1 overflow-hidden rounded-2xl border border-gold/25 bg-gradient-to-br from-gold/[0.12] via-white to-white p-7 md:p-8">
                 <div className="pointer-events-none absolute -right-16 -top-16 h-44 w-44 rounded-full bg-gold/[0.14] blur-3xl" aria-hidden="true" />
                 <div className="relative flex h-full flex-col">
                   <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-gold-light to-gold text-ink shadow-gold">

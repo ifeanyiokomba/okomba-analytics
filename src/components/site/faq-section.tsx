@@ -55,7 +55,7 @@ export function FaqSection() {
                 <AccordionItem
                   key={i}
                   value={`faq-${i}`}
-                  className="surface-card overflow-hidden rounded-2xl border-white/[0.07] px-6 transition-colors data-[state=open]:border-gold/30"
+                  className="surface-card overflow-hidden rounded-2xl border-black/[0.08] px-6 transition-colors data-[state=open]:border-gold/30"
                 >
                   <AccordionTrigger className="py-5 text-left text-[15px] font-semibold text-foreground hover:no-underline hover:text-gold [&>svg]:text-gold">
                     <span className="flex items-baseline gap-3.5">

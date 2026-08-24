@@ -70,7 +70,7 @@ export function NewsletterSection() {
   return (
     <section aria-label="Newsletter" className="container-xl">
       <Reveal>
-        <div className="relative overflow-hidden rounded-3xl border border-gold/20 bg-gradient-to-br from-gold/[0.1] via-[#0b101c] to-[#080d18] p-8 md:p-12">
+        <div className="relative overflow-hidden rounded-3xl border border-gold/30 bg-gradient-to-br from-gold/[0.14] via-[#fffdf7] to-white p-8 md:p-12 shadow-[0_20px_60px_-24px_rgba(160,110,0,0.35)]">
           {/* decor */}
           <div className="bg-dots pointer-events-none absolute inset-0 opacity-30 [mask-image:radial-gradient(60%_80%_at_80%_20%,black,transparent)]" aria-hidden="true" />
           <div className="pointer-events-none absolute -right-20 -top-24 h-64 w-64 rounded-full bg-gold/[0.12] blur-[90px] animate-glow-breathe" aria-hidden="true" />
@@ -152,10 +152,10 @@ export function NewsletterSection() {
                       aria-label="Email address"
                       autoComplete="email"
                       className={cn(
-                        "w-full rounded-2xl border bg-white/[0.04] py-4 pl-11 pr-4 text-[14.5px] text-foreground outline-none transition-colors placeholder:text-muted-foreground/60",
+                        "w-full rounded-2xl border bg-white py-4 pl-11 pr-4 text-[14.5px] text-foreground outline-none transition-colors placeholder:text-muted-foreground/60",
                         state === "error"
                           ? "border-red-500/60 focus:border-red-500"
-                          : "border-white/[0.12] focus:border-gold/60 focus:bg-gold/[0.04]"
+                          : "border-black/[0.12] focus:border-gold/60 focus:bg-gold/[0.04]"
                       )}
                     />
                   </div>

@@ -28,9 +28,9 @@ export function LoadingScreen({ onDone }: { onDone: () => void }) {
       }`}
     >
       {/* ambient backdrop */}
-      <div className="bg-grid pointer-events-none absolute inset-0 opacity-50 [mask-image:radial-gradient(40%_40%_at_50%_50%,black,transparent)]" aria-hidden="true" />
+      <div className="bg-grid pointer-events-none absolute inset-0 opacity-60 [mask-image:radial-gradient(40%_40%_at_50%_50%,black,transparent)]" aria-hidden="true" />
       <div
-        className="pointer-events-none absolute left-1/2 top-1/2 h-[300px] w-[300px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-gold/[0.08] blur-[90px]"
+        className="pointer-events-none absolute left-1/2 top-1/2 h-[300px] w-[300px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-gold/[0.14] blur-[90px]"
         style={{ animation: "glow-breathe 1.8s ease-in-out infinite" }}
         aria-hidden="true"
       />
@@ -58,7 +58,7 @@ export function LoadingScreen({ onDone }: { onDone: () => void }) {
         Digital Services &amp; Technology
       </p>
       <div
-        className="relative mt-6 h-[2px] w-40 overflow-hidden rounded-full bg-white/[0.07]"
+        className="relative mt-6 h-[2px] w-40 overflow-hidden rounded-full bg-black/[0.08]"
         style={{ animation: "fade-up-soft 0.5s 0.45s ease-out both" }}
         role="progressbar"
         aria-label="Loading"

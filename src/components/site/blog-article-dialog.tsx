@@ -33,7 +33,7 @@ export function BlogArticleDialog({ post, onClose }: BlogArticleDialogProps) {
       aria-label={`Article: ${post.title}`}
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
-      <article className="relative flex max-h-[92vh] w-full max-w-2xl flex-col overflow-hidden rounded-t-3xl border border-white/[0.08] bg-[#0b101c] shadow-float sm:rounded-3xl">
+      <article className="section-dark relative flex max-h-[92vh] w-full max-w-2xl flex-col overflow-hidden rounded-t-3xl border border-white/[0.08] bg-[#0b101c] shadow-float sm:rounded-3xl">
         {/* header */}
         <header className="flex items-start justify-between gap-4 border-b border-white/[0.06] p-6 md:p-8">
           <div className="min-w-0">

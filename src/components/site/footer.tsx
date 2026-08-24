@@ -24,7 +24,7 @@ export function Footer({ onNavigate, onGetStarted }: FooterProps) {
   ];
 
   return (
-    <footer className="relative mt-auto border-t border-white/[0.07] bg-[#04060b]" aria-label="Site footer">
+    <footer className="section-dark relative mt-auto border-t border-white/[0.07] bg-[#04060b]" aria-label="Site footer">
       {/* top glow line */}
       <div className="shimmer-line absolute inset-x-0 top-0 h-px opacity-70" aria-hidden="true" />
 

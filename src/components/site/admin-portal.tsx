@@ -360,7 +360,7 @@ function AdminDashboard({ onLogout, onExit }: { onLogout: () => void; onExit: ()
   const paginatedInquiries = filteredInquiries.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="section-dark min-h-screen bg-background">
       {/* Admin header */}
       <header className="sticky top-0 z-40 border-b border-white/[0.07] bg-[#05070d]/88 backdrop-blur-xl">
         <div className="container-xl flex h-16 items-center justify-between gap-4">

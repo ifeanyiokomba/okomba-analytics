@@ -41,7 +41,7 @@ export function TestimonialsSection() {
                   {t.text}
                 </blockquote>
 
-                <figcaption className="mt-6 flex items-center gap-3.5 border-t border-white/[0.06] pt-5">
+                <figcaption className="mt-6 flex items-center gap-3.5 border-t border-black/[0.07] pt-5">
                   {t.avatar ? (
                     <span className="relative h-11 w-11 shrink-0 overflow-hidden rounded-full ring-2 ring-gold/30">
                       <Image
@@ -65,7 +65,7 @@ export function TestimonialsSection() {
                     <p className="truncate text-[13.5px] font-semibold text-foreground">{t.name}</p>
                     <p className="truncate text-[12px] text-muted-foreground">{t.role}</p>
                   </div>
-                  <span className="ml-auto max-w-[140px] shrink-0 truncate rounded-full bg-white/[0.05] px-2.5 py-1 font-mono text-[9.5px] text-muted-foreground">
+                  <span className="ml-auto max-w-[140px] shrink-0 truncate rounded-full bg-black/[0.05] px-2.5 py-1 font-mono text-[9.5px] text-muted-foreground">
                     {t.service}
                   </span>
                 </figcaption>

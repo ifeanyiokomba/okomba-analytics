@@ -53,14 +53,14 @@ export function ServicesSection({ onRequestService }: ServicesSectionProps) {
                   "group inline-flex items-center gap-2 rounded-full border px-4 py-2 text-[13px] font-medium transition-all",
                   isActive
                     ? "border-gold/50 bg-gold-dim text-gold shadow-gold"
-                    : "border-white/[0.08] bg-white/[0.03] text-muted-foreground hover:border-white/20 hover:text-foreground"
+                    : "border-black/[0.08] bg-black/[0.03] text-muted-foreground hover:border-black/20 hover:text-foreground"
                 )}
               >
                 {cat}
                 <span
                   className={cn(
                     "rounded-full px-1.5 py-0.5 font-mono text-[9.5px] leading-none",
-                    isActive ? "bg-gold/20 text-gold" : "bg-white/[0.06] text-muted-foreground"
+                    isActive ? "bg-gold/20 text-gold" : "bg-black/[0.06] text-muted-foreground"
                   )}
                 >
                   {count}
@@ -115,7 +115,7 @@ function ServiceCard({ svc, index, expanded, onExpand, onRequest }: ServiceCardP
         <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-gold/20 bg-gold-dim text-gold transition-transform duration-300 group-hover:scale-105">
           <ServiceIcon name={svc.icon} size={22} />
         </span>
-        <span className="eyebrow rounded-full border border-white/[0.08] bg-white/[0.03] px-2.5 py-1 text-[9px] text-muted-foreground">
+        <span className="eyebrow rounded-full border border-black/[0.08] bg-black/[0.03] px-2.5 py-1 text-[9px] text-muted-foreground">
           {svc.category}
         </span>
       </div>
@@ -125,7 +125,7 @@ function ServiceCard({ svc, index, expanded, onExpand, onRequest }: ServiceCardP
 
       <div className="mt-4 flex flex-wrap gap-1.5">
         {svc.tags.slice(0, 3).map((t) => (
-          <span key={t} className="rounded-md bg-white/[0.05] px-2 py-1 font-mono text-[10px] text-muted-foreground">
+          <span key={t} className="rounded-md bg-black/[0.05] px-2 py-1 font-mono text-[10px] text-muted-foreground">
             {t}
           </span>
         ))}
@@ -142,7 +142,7 @@ function ServiceCard({ svc, index, expanded, onExpand, onRequest }: ServiceCardP
             transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
             className="overflow-hidden"
           >
-            <div className="mt-5 space-y-4 rounded-xl border border-white/[0.06] bg-[#080d18] p-4">
+            <div className="mt-5 space-y-4 rounded-xl border border-black/[0.07] bg-[#fafbfd] p-4">
               <div>
                 <p className="eyebrow mb-2.5 text-[9px] text-gold">Capabilities</p>
                 <ul className="grid gap-1.5">
@@ -169,7 +169,7 @@ function ServiceCard({ svc, index, expanded, onExpand, onRequest }: ServiceCardP
                   <p className="eyebrow mb-2.5 text-[9px] text-gold">Ideal for</p>
                   <div className="flex flex-wrap gap-1.5">
                     {svc.idealFor.map((t) => (
-                      <span key={t} className="rounded-md bg-white/[0.05] px-2 py-1 text-[11px] text-muted-foreground">
+                      <span key={t} className="rounded-md bg-black/[0.05] px-2 py-1 text-[11px] text-muted-foreground">
                         {t}
                       </span>
                     ))}
@@ -192,7 +192,7 @@ function ServiceCard({ svc, index, expanded, onExpand, onRequest }: ServiceCardP
         <button
           onClick={onExpand}
           aria-expanded={expanded}
-          className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-white/[0.09] bg-white/[0.03] text-muted-foreground transition-colors hover:border-gold/35 hover:text-gold"
+          className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-black/[0.09] bg-black/[0.03] text-muted-foreground transition-colors hover:border-gold/35 hover:text-gold"
           aria-label={expanded ? `Hide ${svc.title} details` : `View ${svc.title} details`}
         >
           <ChevronDown size={16} className={cn("transition-transform duration-300", expanded && "rotate-180")} aria-hidden="true" />

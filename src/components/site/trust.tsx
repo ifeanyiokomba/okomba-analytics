@@ -8,7 +8,7 @@ import { Reveal } from "./reveal";
 export function CapabilityTicker() {
   const items = [...TICKER_ITEMS, ...TICKER_ITEMS];
   return (
-    <section aria-label="Capabilities" className="border-y border-white/[0.06] bg-[#070b14]">
+    <section aria-label="Capabilities" className="border-y border-black/[0.07] bg-[#070b14]">
       <div className="marquee-track mask-fade-x overflow-hidden py-5">
         <div className="animate-marquee flex w-max items-center gap-10">
           {items.map((item, i) => (

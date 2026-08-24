@@ -267,7 +267,7 @@ export const CATEGORIES = [
   "Healthcare",
 ] as const;
 
-/* ── Products / Solutions ─────────────────────────────────── */
+/* ── Products / Solutions (real Okomba platforms) ──────────── */
 export type Product = {
   id: string;
   name: string;
@@ -277,120 +277,158 @@ export type Product = {
   points: string[];
   icon: string;
   accent: "gold" | "teal" | "blue";
+  link?: string;
 };
 
 export const PRODUCTS: Product[] = [
   {
-    id: "okomba-pay",
-    name: "Okomba Pay",
-    tagline: "Payment infrastructure, handled end-to-end",
-    category: "Fintech Platform",
-    desc: "A payment operations layer that connects Remita, Quickteller and gateway integrations into one managed service — collections, reconciliation and transfers without the technical headache.",
-    points: ["Gateway integration & setup", "Automated reconciliation", "Multi-channel collections"],
+    id: "turbopay",
+    name: "Turbopay",
+    tagline: "Payments, at turbo speed",
+    category: "Payments Platform",
+    desc: "A fast, reliable payment platform for modern businesses — collections, transfers and payment processing built for Nigeria's digital economy.",
+    points: ["Fast collections & transfers", "Business payment processing", "Built for Nigerian rails"],
     icon: "wallet",
     accent: "gold",
+    link: "https://turbopay.okomba.com",
   },
   {
-    id: "okomba-register",
-    name: "Okomba Register",
-    tagline: "Online registration & application systems",
-    category: "Registration Platform",
-    desc: "Structured registration workflows for events, programs, admissions and institutional applications — with data capture, verification, payments and certificate distribution built in.",
-    points: ["Smart application forms", "Verified data capture", "Certificate automation"],
-    icon: "clipboard",
+    id: "billswift",
+    name: "BillSwift",
+    tagline: "Bills paid in seconds",
+    category: "Bill Payments Platform",
+    desc: "Swift bill payments — airtime, data, utilities and more — with instant confirmation and clean transaction records.",
+    points: ["Airtime, data & utilities", "Instant confirmation", "Clean transaction records"],
+    icon: "zap",
     accent: "teal",
   },
   {
-    id: "okomba-ops",
-    name: "Okomba Ops",
-    tagline: "Digital operations on autopilot",
-    category: "Operations Suite",
-    desc: "A digital operations service that takes over workflows, documentation, scheduling and coordination — so teams run on systems instead of memory and chat messages.",
-    points: ["Workflow automation", "Documentation systems", "Stakeholder coordination"],
-    icon: "workflow",
+    id: "trustscore",
+    name: "TrustScore",
+    tagline: "Know who you're dealing with",
+    category: "Identity Verification",
+    desc: "Identity verification and trust scoring for businesses that need to validate customers quickly and confidently.",
+    points: ["Identity verification", "Trust scoring", "Fraud-aware checks"],
+    icon: "shield",
     accent: "blue",
   },
   {
-    id: "okomba-build",
-    name: "Okomba Build",
-    tagline: "Custom web & product engineering",
-    category: "Engineering Studio",
-    desc: "Full-cycle product engineering for web apps, dashboards and internal tools — from architecture and design to deployment and post-launch support.",
-    points: ["Full-stack development", "Admin dashboards", "Post-launch support"],
-    icon: "rocket",
+    id: "omniscore",
+    name: "Omniscore CPaaS",
+    tagline: "Every channel. One platform.",
+    category: "Communications Platform",
+    desc: "A communications platform-as-a-service for bulk SMS, messaging, voice, WhatsApp, Telegram and OTP verification — every channel behind one platform.",
+    points: ["Bulk SMS & messaging", "Voice, WhatsApp & Telegram", "OTP verification"],
+    icon: "workflow",
     accent: "gold",
   },
+  {
+    id: "votewise",
+    name: "Votewise",
+    tagline: "Elections people trust",
+    category: "Voting Platform",
+    desc: "A digital voting and election management platform delivering secure polls and real-time results.",
+    points: ["Secure digital voting", "Real-time results", "Election management"],
+    icon: "clipboard",
+    accent: "teal",
+    link: "https://votewise.com.ng",
+  },
+  {
+    id: "sanctum",
+    name: "Sanctum Multipurpose",
+    tagline: "One platform, many purposes",
+    category: "Multipurpose Platform",
+    desc: "A versatile multipurpose platform built to serve the varied operational needs of modern organizations.",
+    points: ["Multipurpose operations", "Modular capabilities", "Organization-ready"],
+    icon: "layers",
+    accent: "blue",
+  },
 ];
 
-/* ── Case studies (grounded in original testimonials) ─────── */
-export type CaseStudy = {
+/* ── Projects we've worked on (real) ──────────────────────── */
+export type Project = {
   id: string;
-  client: string;
-  industry: string;
-  image?: string;
-  challenge: string;
-  solution: string;
-  stack: string[];
-  outcome: string;
-  metrics: { label: string; value: string }[];
+  name: string;
+  category: string;
+  link?: string;
+  image: string;
+  tagline: string;
+  overview: string;
+  built: string[];
+  tags: string[];
 };
 
-export const CASE_STUDIES: CaseStudy[] = [
+export const PROJECTS: Project[] = [
   {
-    id: "cs-techstart",
-    client: "TechStartNG",
-    industry: "Startup — Technology",
-    image: "/images/case-techstart.png",
-    challenge:
-      "A fast-moving startup needed a production-grade web application to serve their customers, but had no internal engineering team and couldn't afford a slow agency cycle.",
-    solution:
-      "We designed and engineered a custom web application with a modern, scalable architecture — clean UI, fast load times and an admin layer their team could actually operate.",
-    stack: ["React", "TypeScript", "Node.js", "PostgreSQL"],
-    outcome:
-      "A web app that exceeded every expectation — professional, fast and beautifully designed, delivered on an aggressive startup timeline.",
-    metrics: [
-      { label: "Delivery", value: "On schedule" },
-      { label: "Stack", value: "Modern & scalable" },
-      { label: "Handover", value: "Team-enabled" },
-    ],
-  },
-  {
-    id: "cs-edubridge",
-    client: "EduBridge Foundation",
-    industry: "NGO — Education",
+    id: "p-votewise",
+    name: "Votewise",
+    category: "Voting & Elections",
+    link: "https://votewise.com.ng",
     image: "/images/case-edubridge.png",
-    challenge:
-      "The foundation's virtual summit required registration for hundreds of participants, coordination of presenters, and certificate distribution — with zero room for error.",
-    solution:
-      "We ran the entire digital operation: a participant registration system, event logistics coordination, and automated certificate distribution after the event.",
-    stack: ["Registration System", "Event Ops", "Automation"],
-    outcome:
-      "World-class, flawless execution — from registration through certificates, the summit ran seamlessly for every attendee.",
-    metrics: [
-      { label: "Execution", value: "Flawless" },
-      { label: "Registration", value: "Automated" },
-      { label: "Certificates", value: "100% delivered" },
-    ],
+    tagline: "Elections people trust",
+    overview:
+      "Votewise is a digital voting and election management platform — secure polls, transparent processes and real-time results for organizations that run credible elections.",
+    built: ["Secure digital voting engine", "Real-time results & audit trail", "Election management console"],
+    tags: ["Voting", "Elections", "Platform"],
   },
   {
-    id: "cs-finflow",
-    client: "FinFlow Nigeria",
-    industry: "Fintech — Payments",
+    id: "p-turbopay",
+    name: "Turbopay",
+    category: "Fintech · Payments",
+    link: "https://turbopay.okomba.com",
     image: "/images/case-finflow.png",
-    challenge:
-      "Complex Remita and payment gateway setups were stalling their transaction operations, with manual reconciliation slowing the business down.",
-    solution:
-      "We handled the full payment integration — Remita processing, gateway setup and workflow automation — turning their transaction pipeline into a fully automated system.",
-    stack: ["Remita", "Payment Gateway", "Automation"],
-    outcome:
-      "Exceptional integration support. Transaction processing is now fully automated with minimal friction.",
-    metrics: [
-      { label: "Processing", value: "Automated" },
-      { label: "Setup", value: "End-to-end managed" },
-      { label: "Friction", value: "Minimal" },
-    ],
+    tagline: "Payments, at turbo speed",
+    overview:
+      "Turbopay is our payments platform — fast collections, transfers and business payment processing built for Nigeria's digital economy.",
+    built: ["Collections & transfers", "Business payment processing", "Merchant-ready APIs"],
+    tags: ["Payments", "Fintech", "Transfers"],
+  },
+  {
+    id: "p-billswift",
+    name: "BillSwift",
+    category: "Bill Payments",
+    image: "/images/case-techstart.png",
+    tagline: "Bills paid in seconds",
+    overview:
+      "BillSwift makes bill payments swift — airtime, data, utilities and more, with instant confirmation and clean records for every transaction.",
+    built: ["Airtime, data & utility bills", "Instant confirmation flow", "Transaction history & records"],
+    tags: ["Bills", "Airtime", "Utilities"],
+  },
+  {
+    id: "p-trustscore",
+    name: "TrustScore",
+    category: "Identity Verification",
+    image: "/images/project-trustscore.png",
+    tagline: "Know who you're dealing with",
+    overview:
+      "TrustScore delivers identity verification and trust scoring — helping businesses validate customers quickly, confidently and with fraud-aware checks.",
+    built: ["Identity verification engine", "Trust scoring system", "Fraud-aware validation"],
+    tags: ["KYC", "Identity", "Trust"],
+  },
+  {
+    id: "p-omniscore",
+    name: "Omniscore CPaaS",
+    category: "Communications",
+    image: "/images/project-omniscore.png",
+    tagline: "Every channel. One platform.",
+    overview:
+      "Omniscore is our communications platform-as-a-service — bulk SMS, messaging, voice, WhatsApp, Telegram and OTP verification, unified behind one platform.",
+    built: ["Bulk SMS & messaging", "Voice, WhatsApp & Telegram", "OTP verification"],
+    tags: ["CPaaS", "SMS", "OTP"],
+  },
+  {
+    id: "p-sanctum",
+    name: "Sanctum Multipurpose",
+    category: "Multipurpose Platform",
+    image: "/images/project-sanctum.png",
+    tagline: "One platform, many purposes",
+    overview:
+      "Sanctum is a versatile multipurpose platform — modular capabilities that adapt to the varied operational needs of modern organizations.",
+    built: ["Modular capability system", "Multipurpose operations", "Organization-ready tooling"],
+    tags: ["Platform", "Modular", "Operations"],
   },
 ];
+
 
 /* ── Testimonials (from original repository) ──────────────── */
 export const TESTIMONIALS = [
@@ -794,50 +832,4 @@ export const FAQS = [
   },
 ];
 
-/* ── Case study dialog extras ─────────────────────────────── */
-export type CaseStudyDetail = {
-  id: string;
-  summary: string;
-  timeline: string;
-  teamSize: string;
-  highlights: string[];
-};
 
-export const CASE_STUDY_DETAILS: Record<string, CaseStudyDetail> = {
-  "cs-techstart": {
-    id: "cs-techstart",
-    summary:
-      "TechStartNG needed to launch a customer-facing web application on a startup timeline — without an in-house engineering team. We took them from concept to a production deployment, including an admin layer their non-technical staff operate daily.",
-    timeline: "6 weeks · concept → launch",
-    teamSize: "2 engineers + 1 designer",
-    highlights: [
-      "Production-grade web application delivered on schedule",
-      "Admin dashboard the internal team runs without developers",
-      "Scalable architecture ready for the next funding stage",
-    ],
-  },
-  "cs-edubridge": {
-    id: "cs-edubridge",
-    summary:
-      "EduBridge Foundation's virtual summit had one shot at flawless execution: hundreds of registrations, presenter coordination and certificates — all handled digitally. We ran the entire operation and it shipped without a single incident.",
-    timeline: "4 weeks · prep → certificates",
-    teamSize: "1 ops lead + 1 support engineer",
-    highlights: [
-      "Automated registration system for hundreds of participants",
-      "Presenter & logistics coordination end-to-end",
-      "100% certificate distribution after the event",
-    ],
-  },
-  "cs-finflow": {
-    id: "cs-finflow",
-    summary:
-      "FinFlow Nigeria's transaction operations were stalling on complex Remita and gateway setups with manual reconciliation. We engineered the full payment integration and automated the pipeline — turning their bottleneck into a non-event.",
-    timeline: "5 weeks · audit → automation",
-    teamSize: "2 engineers + 1 fintech ops specialist",
-    highlights: [
-      "Remita + gateway integration handled end-to-end",
-      "Transaction processing fully automated",
-      "Reconciliation friction reduced to near zero",
-    ],
-  },
-};

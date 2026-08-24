@@ -54,7 +54,7 @@ export function HeroVisual() {
         </div>
 
         {/* Chart area */}
-        <div className="rounded-xl border border-white/[0.06] bg-[#070b14] p-4">
+        <div className="section-dark rounded-xl border border-white/[0.06] bg-[#070b14] p-4">
           <div className="mb-3 flex items-center justify-between">
             <div>
               <p className="text-[12px] font-semibold text-foreground">Transaction volume</p>
@@ -152,7 +152,7 @@ export function HeroVisual() {
           {["#F0A500", "#00C9A7", "#5B9EFF", "#F43F5E"].map((c, i) => (
             <span
               key={i}
-              className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-[#0b101c] text-[10px] font-bold text-ink"
+              className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-white text-[10px] font-bold text-ink"
               style={{ background: c }}
             >
               {["CO", "AN", "NW", "IS"][i]}

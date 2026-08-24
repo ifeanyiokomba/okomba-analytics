@@ -51,14 +51,14 @@ export function InsightsSection() {
                   "group inline-flex items-center gap-2 rounded-full border px-4 py-2 text-[13px] font-medium transition-all",
                   isActive
                     ? "border-gold/50 bg-gold-dim text-gold shadow-gold"
-                    : "border-white/[0.08] bg-white/[0.03] text-muted-foreground hover:border-white/20 hover:text-foreground"
+                    : "border-black/[0.08] bg-black/[0.03] text-muted-foreground hover:border-black/20 hover:text-foreground"
                 )}
               >
                 {cat}
                 <span
                   className={cn(
                     "rounded-full px-1.5 py-0.5 font-mono text-[9.5px] leading-none",
-                    isActive ? "bg-gold/20 text-gold" : "bg-white/[0.06] text-muted-foreground"
+                    isActive ? "bg-gold/20 text-gold" : "bg-black/[0.06] text-muted-foreground"
                   )}
                 >
                   {count}
@@ -101,7 +101,7 @@ export function InsightsSection() {
                 </h3>
                 <p className="mt-2.5 flex-1 text-[13.5px] leading-relaxed text-muted-foreground">{p.excerpt}</p>
 
-                <div className="mt-6 flex items-center justify-between border-t border-white/[0.06] pt-5">
+                <div className="mt-6 flex items-center justify-between border-t border-black/[0.07] pt-5">
                   <span className="flex items-center gap-1.5 font-mono text-[10.5px] text-muted-foreground">
                     <Clock size={12} aria-hidden="true" /> {p.readTime}
                   </span>

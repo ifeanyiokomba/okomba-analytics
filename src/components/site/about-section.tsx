@@ -59,7 +59,7 @@ export function AboutSection() {
                   { k: "Specialty", v: "End-to-end delivery" },
                   { k: "Support", v: "Beyond launch" },
                 ].map((f) => (
-                  <div key={f.k} className="rounded-xl border border-white/[0.07] bg-white/[0.02] px-4 py-3.5">
+                  <div key={f.k} className="rounded-xl border border-black/[0.08] bg-black/[0.02] px-4 py-3.5">
                     <p className="eyebrow text-[9px] text-muted-foreground">{f.k}</p>
                     <p className="mt-1.5 text-[13.5px] font-semibold text-foreground">{f.v}</p>
                   </div>
@@ -67,7 +67,7 @@ export function AboutSection() {
               </div>
 
               {/* Visual panel with floating badge */}
-              <div className="relative mt-8 hidden overflow-hidden rounded-2xl border border-white/[0.07] sm:block">
+              <div className="relative mt-8 hidden overflow-hidden rounded-2xl border border-black/[0.08] sm:block">
                 <div className="relative h-52 w-full">
                   <Image
                     src="/images/about-visual.png"
@@ -76,7 +76,7 @@ export function AboutSection() {
                     sizes="(min-width: 1024px) 384px, 100vw"
                     className="object-cover"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#0b101c] via-transparent to-transparent" aria-hidden="true" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-transparent" aria-hidden="true" />
                 </div>
                 <div className="surface-glass absolute bottom-4 left-4 flex items-center gap-3 rounded-2xl px-4 py-3 shadow-float animate-float-med">
                   <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-teal-dim text-teal">

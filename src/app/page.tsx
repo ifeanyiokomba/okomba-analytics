@@ -137,7 +137,7 @@ export default function Home() {
         <div
           role="status"
           aria-live="polite"
-          className="fixed bottom-5 right-5 z-[150] flex max-w-sm items-start gap-3 rounded-2xl border border-teal/30 bg-[#0b101c]/95 p-4 pr-5 shadow-float backdrop-blur-xl [animation:slide-in-right_0.4s_cubic-bezier(0.22,1,0.36,1)]"
+          className="section-dark fixed bottom-5 right-5 z-[150] flex max-w-sm items-start gap-3 rounded-2xl border border-teal/30 bg-[#0b101c]/95 p-4 pr-5 shadow-float backdrop-blur-xl [animation:slide-in-right_0.4s_cubic-bezier(0.22,1,0.36,1)]"
         >
           <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-teal-dim text-teal">
             <CheckCircle2 size={18} aria-hidden="true" />

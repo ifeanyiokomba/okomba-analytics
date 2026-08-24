@@ -163,7 +163,7 @@ export function InquiryModal({ service, onClose, onSuccess }: InquiryModalProps)
     >
       <div
         ref={dialogRef}
-        className="relative flex max-h-[92vh] w-full max-w-lg flex-col overflow-hidden rounded-t-3xl border border-white/[0.09] bg-[#0b101c] shadow-float [animation:slide-in-up_0.35s_cubic-bezier(0.22,1,0.36,1)] sm:rounded-3xl"
+        className="section-dark relative flex max-h-[92vh] w-full max-w-lg flex-col overflow-hidden rounded-t-3xl border border-white/[0.09] bg-[#0b101c] shadow-float [animation:slide-in-up_0.35s_cubic-bezier(0.22,1,0.36,1)] sm:rounded-3xl"
       >
         {/* Header */}
         <header className="relative border-b border-white/[0.06] p-6 md:px-7">

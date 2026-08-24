@@ -27,12 +27,12 @@ function ProofAvatars() {
           alt=""
           width={32}
           height={32}
-          className="h-8 w-8 rounded-full border-2 border-[#0b101c] object-cover"
+          className="h-8 w-8 rounded-full border-2 border-white object-cover"
           style={{ zIndex: avatars.length - i }}
         />
       ))}
       <span
-        className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-[#0b101c] bg-gold-dim font-mono text-[9px] font-semibold text-gold"
+        className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-gold-dim font-mono text-[9px] font-semibold text-gold"
         style={{ zIndex: 0 }}
       >
         50+
@@ -53,9 +53,9 @@ export function Hero({ onGetStarted }: HeroProps) {
 
       <div className="container-xl relative">
         {/* ── Floating hero container (Saasify-style rounded card) ── */}
-        <div className="relative overflow-hidden rounded-[28px] border border-white/[0.08] bg-gradient-to-b from-[#0b111f] to-[#080d18] shadow-[0_32px_90px_-24px_rgba(0,0,0,0.8)]">
+        <div className="relative overflow-hidden rounded-[28px] border border-black/[0.08] bg-gradient-to-b from-[#0b111f] to-[#080d18] shadow-[0_32px_90px_-24px_rgba(20,25,38,0.35)]">
           {/* in-container decor */}
-          <div className="bg-grid pointer-events-none absolute inset-0 opacity-40 [mask-image:radial-gradient(75%_70%_at_50%_30%,black,transparent)]" aria-hidden="true" />
+          <div className="bg-grid-on-dark pointer-events-none absolute inset-0 opacity-40 [mask-image:radial-gradient(75%_70%_at_50%_30%,black,transparent)]" aria-hidden="true" />
           <div className="pointer-events-none absolute -top-32 left-1/2 h-[380px] w-[680px] -translate-x-1/2 rounded-full bg-gold/[0.08] blur-[120px]" aria-hidden="true" />
           <div className="pointer-events-none absolute -bottom-28 -left-16 h-[300px] w-[300px] rounded-full bg-teal/[0.06] blur-[100px]" aria-hidden="true" />
           {/* top gold hairline */}
@@ -63,7 +63,7 @@ export function Hero({ onGetStarted }: HeroProps) {
 
           <div className="relative grid grid-cols-1 items-center gap-12 p-6 sm:p-8 md:p-12 lg:grid-cols-[1.05fr_0.95fr] lg:gap-8 xl:p-14">
             {/* ── Copy column (mobile-first order) ── */}
-            <div className="max-w-xl">
+            <div className="section-dark max-w-xl">
               <Reveal delay={0}>
                 <span className="eyebrow inline-flex items-center gap-2.5 rounded-full border border-gold/25 bg-gold-dim px-4 py-1.5 text-gold">
                   <span className="h-1.5 w-1.5 rounded-full bg-gold animate-pulse-dot" aria-hidden="true" />
@@ -103,7 +103,7 @@ export function Hero({ onGetStarted }: HeroProps) {
                   </button>
                   <button
                     onClick={() => scrollTo("services")}
-                    className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-white/12 bg-white/[0.04] px-7 py-4 text-[15px] font-medium text-foreground transition-colors hover:border-gold/35 hover:bg-gold-dim/50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold sm:w-auto"
+                    className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-white/15 bg-white/[0.06] px-7 py-4 text-[15px] font-medium text-foreground transition-colors hover:border-gold/50 hover:bg-white/[0.1] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold sm:w-auto"
                   >
                     Explore Services
                   </button>
@@ -120,7 +120,7 @@ export function Hero({ onGetStarted }: HeroProps) {
                       <span className="block text-[11px] text-muted-foreground/70">across 200+ projects</span>
                     </p>
                   </div>
-                  <ul className="flex flex-wrap items-center gap-x-4 gap-y-1.5 sm:border-l sm:border-white/[0.08] sm:pl-6">
+                  <ul className="flex flex-wrap items-center gap-x-4 gap-y-1.5 sm:border-l sm:border-black/[0.08] sm:pl-6">
                     {HERO_PROOF.map((p) => (
                       <li key={p} className="flex items-center gap-1.5 text-[12px] text-muted-foreground">
                         <CheckCircle2 size={13} className="text-teal" aria-hidden="true" />

@@ -92,7 +92,7 @@ export function CookieConsent() {
               <button
                 onClick={dismiss}
                 aria-label="Dismiss cookie notice"
-                className="inline-flex items-center gap-1.5 rounded-xl border border-white/[0.1] bg-white/[0.03] px-4 py-2.5 text-[12.5px] font-medium text-muted-foreground transition-colors hover:border-white/25 hover:text-foreground focus-visible:outline-2 focus-visible:outline-gold"
+                className="inline-flex items-center gap-1.5 rounded-xl border border-black/[0.1] bg-black/[0.03] px-4 py-2.5 text-[12.5px] font-medium text-muted-foreground transition-colors hover:border-black/25 hover:text-foreground focus-visible:outline-2 focus-visible:outline-gold"
               >
                 <X size={13} aria-hidden="true" />
                 Essential only
