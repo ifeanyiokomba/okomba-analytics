@@ -1,0 +1,1264 @@
+     1→     1→# OKOMBA ANALYTICS — TERMII-INSPIRED FULL WEBSITE REBUILD
+     2→     2→
+     3→     3→## MASTER DIRECTIVE
+     4→     4→
+     5→     5→You are now responsible for rebuilding the **entire Okomba Analytics web application** into a premium, modern, highly interactive digital-services platform.
+     6→     6→
+     7→     7→Repository:
+     8→     8→
+     9→     9→`https://github.com/ifeanyiokomba/okomba-analytics`
+    10→    10→
+    11→    11→Primary visual/interaction inspiration:
+    12→    12→
+    13→    13→`https://termii.com`
+    14→    14→
+    15→    15→Important:
+    16→    16→
+    17→    17→**Do NOT clone Termii's website.**
+    18→    18→
+    19→    19→Do NOT copy:
+    20→    20→
+    21→    21→- Termii's branding
+    22→    22→- logo
+    23→    23→- exact copy
+    24→    24→- exact sections
+    25→    25→- illustrations
+    26→    26→- proprietary product language
+    27→    27→- proprietary animations
+    28→    28→- exact page structure
+    29→    29→
+    30→    30→Instead, reverse-engineer the **design principles and interaction philosophy** that make Termii's website feel premium, then rebuild those principles around **Okomba Analytics' own services, audience, products, brand and business model**.
+    31→    31→
+    32→    32→The goal is:
+    33→    33→
+    34→    34→> **Termii-level product design quality + Okomba Analytics identity + Okomba Analytics services.**
+    35→    35→
+    36→    36→---
+    37→    37→
+    38→    38→# 1. BEFORE CODING — STUDY TERMII
+    39→    39→
+    40→    40→First inspect the current Termii website carefully.
+    41→    41→
+    42→    42→Study:
+    43→    43→
+    44→    44→- typography
+    45→    45→- font weights
+    46→    46→- font sizes
+    47→    47→- heading scale
+    48→    48→- line heights
+    49→    49→- navigation
+    50→    50→- button treatment
+    51→    51→- hero composition
+    52→    52→- animated text
+    53→    53→- typing effects
+    54→    54→- cursor effects
+    55→    55→- section transitions
+    56→    56→- scroll behaviour
+    57→    57→- reveal animations
+    58→    58→- cards
+    59→    59→- borders
+    60→    60→- spacing
+    61→    61→- whitespace
+    62→    62→- product demonstrations
+    63→    63→- numbers/statistics
+    64→    64→- logos
+    65→    65→- testimonial presentation
+    66→    66→- case studies
+    67→    67→- CTA design
+    68→    68→- footer
+    69→    69→- mobile experience
+    70→    70→
+    71→    71→Pay particular attention to how Termii uses:
+    72→    72→
+    73→    73→### Animated narrative
+    74→    74→
+    75→    75→The website communicates its value through dynamic text, changing states and product-like UI rather than a static collection of paragraphs.
+    76→    76→
+    77→    77→### Product simulation
+    78→    78→
+    79→    79→Instead of merely saying what the platform does, the site visually demonstrates workflows such as transaction processing, verification, delivery, monitoring and recovery.
+    80→    80→
+    81→    81→### Progressive storytelling
+    82→    82→
+    83→    83→The visitor is taken through:
+    84→    84→
+    85→    85→Problem → consequence → solution → proof → product → process → trust → CTA.
+    86→    86→
+    87→    87→Adapt this storytelling structure to Okomba Analytics.
+    88→    88→
+    89→    89→---
+    90→    90→
+    91→    91→# 2. DEFINE THE NEW OKOMBA ANALYTICS POSITIONING
+    92→    92→
+    93→    93→Before designing the pages, establish the correct positioning.
+    94→    94→
+    95→    95→Okomba Analytics should feel like:
+    96→    96→
+    97→    97→**a modern technology and digital solutions company that helps individuals, businesses and organizations build, operate and improve their digital systems.**
+    98→    98→
+    99→    99→It must NOT feel like:
+   100→   100→
+   101→   101→- a freelance portfolio
+   102→   102→- a traditional computer service center
+   103→   103→- a generic agency
+   104→   104→- a collection of unrelated services
+   105→   105→- a low-cost IT shop
+   106→   106→
+   107→   107→The website should communicate:
+   108→   108→
+   109→   109→**Technology + Design + Data + Systems + Digital Operations**
+   110→   110→
+   111→   111→---
+   112→   112→
+   113→   113→# 3. CORE SERVICE ECOSYSTEM
+   114→   114→
+   115→   115→Build the website around the actual Okomba Analytics ecosystem.
+   116→   116→
+   117→   117→Organize the company's offerings intelligently rather than displaying a random service list.
+   118→   118→
+   119→   119→The agent should investigate the repository and existing business material first, but the service architecture should be capable of supporting categories such as:
+   120→   120→
+   121→   121→### Build
+   122→   122→
+   123→   123→Websites, web applications, SaaS products, business systems and custom software.
+   124→   124→
+   125→   125→### Data
+   126→   126→
+   127→   127→Data analysis, visualization, reporting, dashboards and data-driven decision support.
+   128→   128→
+   129→   129→### Design
+   130→   130→
+   131→   131→UI/UX, brand/digital design, presentation design and digital experiences.
+   132→   132→
+   133→   133→### Automate
+   134→   134→
+   135→   135→Business process automation, digital workflows and operational systems.
+   136→   136→
+   137→   137→### Operate
+   138→   138→
+   139→   139→Digital operations, registrations, administration and technology support.
+   140→   140→
+   141→   141→### Connect
+   142→   142→
+   143→   143→Payment systems, integrations, APIs, communications and third-party services.
+   144→   144→
+   145→   145→### Protect
+   146→   146→
+   147→   147→Security-oriented digital solutions and technical best practices.
+   148→   148→
+   149→   149→Do not blindly use these exact labels if repository/business research reveals better categories.
+   150→   150→
+   151→   151→The final architecture must make the services feel like **one coherent technology ecosystem**, not unrelated businesses.
+   152→   152→
+   153→   153→---
+   154→   154→
+   155→   155→# 4. HERO — MAKE THIS THE SIGNATURE EXPERIENCE
+   156→   156→
+   157→   157→The hero must be dramatically better than a conventional agency hero.
+   158→   158→
+   159→   159→Use Termii-style dynamic storytelling.
+   160→   160→
+   161→   161→The headline should contain an animated segment.
+   162→   162→
+   163→   163→For example:
+   164→   164→
+   165→   165→> We build digital experiences that help businesses **[grow / operate / automate / scale / connect / move faster].**
+   166→   166→
+   167→   167→The changing words must animate elegantly.
+   168→   168→
+   169→   169→Potential animation:
+   170→   170→
+   171→   171→`Build → Automate → Analyze → Connect → Scale`
+   172→   172→
+   173→   173→But do not use this blindly.
+   174→   174→
+   175→   175→Determine the strongest words based on Okomba Analytics' real services.
+   176→   176→
+   177→   177→The typing system should include:
+   178→   178→
+   179→   179→- smooth character rendering
+   180→   180→- natural typing speed
+   181→   181→- cursor
+   182→   182→- pause before deleting
+   183→   183→- graceful deletion
+   184→   184→- pause between phrases
+   185→   185→- occasional blinking cursor
+   186→   186→- mobile optimization
+   187→   187→- reduced-motion fallback
+   188→   188→
+   189→   189→Avoid childish "typing effect" aesthetics.
+   190→   190→
+   191→   191→It should feel like a sophisticated product interaction.
+   192→   192→
+   193→   193→---
+   194→   194→
+   195→   195→# 5. HERO VISUAL — DO NOT USE A GENERIC IMAGE
+   196→   196→
+   197→   197→The hero should show the **work Okomba Analytics actually does**.
+   198→   198→
+   199→   199→Create an interactive visual system that can cycle through different capabilities.
+   200→   200→
+   201→   201→For example:
+   202→   202→
+   203→   203→### State 1
+   204→   204→
+   205→   205→A business website being designed.
+   206→   206→
+   207→   207→### State 2
+   208→   208→
+   209→   209→A SaaS dashboard updating.
+   210→   210→
+   211→   211→### State 3
+   212→   212→
+   213→   213→A data visualization appearing.
+   214→   214→
+   215→   215→### State 4
+   216→   216→
+   217→   217→A payment/API transaction flowing.
+   218→   218→
+   219→   219→### State 5
+   220→   220→
+   221→   221→An automated workflow executing.
+   222→   222→
+   223→   223→### State 6
+   224→   224→
+   225→   225→A business report being generated.
+   226→   226→
+   227→   227→The animations should transition smoothly.
+   228→   228→
+   229→   229→The visitor should understand:
+   230→   230→
+   231→   231→**"These people build digital systems."**
+   232→   232→
+   233→   233→---
+   234→   234→
+   235→   235→# 6. TOP NAVIGATION
+   236→   236→
+   237→   237→Create an extremely polished navigation.
+   238→   238→
+   239→   239→Recommended structure:
+   240→   240→
+   241→   241→**OKOMBA ANALYTICS**
+   242→   242→
+   243→   243→Products  
+   244→   244→Services  
+   245→   245→Solutions  
+   246→   246→Work  
+   247→   247→About  
+   248→   248→Resources
+   249→   249→
+   250→   250→CTA:
+   251→   251→
+   252→   252→**Start a Project**
+   253→   253→
+   254→   254→Consider a compact "Products" or "Solutions" mega-menu if the product ecosystem justifies it.
+   255→   255→
+   256→   256→Use:
+   257→   257→
+   258→   258→- subtle hover states
+   259→   259→- animated dropdown indicators
+   260→   260→- clean spacing
+   261→   261→- sticky navigation
+   262→   262→- transparent/solid transition on scroll
+   263→   263→- mobile drawer
+   264→   264→- keyboard accessibility
+   265→   265→
+   266→   266→The navbar should feel like a technology company's product navigation, not an agency template.
+   267→   267→
+   268→   268→---
+   269→   269→
+   270→   270→# 7. LIVE VALUE BAR
+   271→   271→
+   272→   272→Borrow the idea of compact proof metrics from Termii.
+   273→   273→
+   274→   274→Termii currently uses concise proof signals such as transactions processed, countries reached, uptime and response/performance indicators.
+   275→   275→
+   276→   276→For Okomba Analytics, create an equivalent proof strip.
+   277→   277→
+   278→   278→Possible categories:
+   279→   279→
+   280→   280→- Digital Solutions Delivered
+   281→   281→- Products Built
+   282→   282→- Technologies Used
+   283→   283→- Businesses Supported
+   284→   284→- Years of Experience
+   285→   285→- Projects Completed
+   286→   286→
+   287→   287→Only use **real verified numbers**.
+   288→   288→
+   289→   289→Never invent metrics.
+   290→   290→
+   291→   291→Create subtle number animations when the section enters the viewport.
+   292→   292→
+   293→   293→---
+   294→   294→
+   295→   295→# 8. PROBLEM-FIRST STORYTELLING
+   296→   296→
+   297→   297→Do not immediately dump services on the visitor.
+   298→   298→
+   299→   299→First communicate the problems Okomba Analytics solves.
+   300→   300→
+   301→   301→Example narrative:
+   302→   302→
+   303→   303→### Businesses struggle with:
+   304→   304→
+   305→   305→Disconnected tools.
+   306→   306→
+   307→   307→Manual processes.
+   308→   308→
+   309→   309→Poor digital experiences.
+   310→   310→
+   311→   311→Unclear data.
+   312→   312→
+   313→   313→Expensive software development.
+   314→   314→
+   315→   315→Inefficient operations.
+   316→   316→
+   317→   317→Then transition into:
+   318→   318→
+   319→   319→> **We build the systems that bring everything together.**
+   320→   320→
+   321→   321→Use large typography and strong visual transitions.
+   322→   322→
+   323→   323→---
+   324→   324→
+   325→   325→# 9. SERVICES — TURN SERVICES INTO EXPERIENCES
+   326→   326→
+   327→   327→This is extremely important.
+   328→   328→
+   329→   329→Do not create:
+   330→   330→
+   331→   331→> Web Development  
+   332→   332→> Data Analysis  
+   333→   333→> Graphic Design  
+   334→   334→> etc.
+   335→   335→
+   336→   336→as simple icon cards.
+   337→   337→
+   338→   338→Instead, create a **rich interactive service section**.
+   339→   339→
+   340→   340→For example:
+   341→   341→
+   342→   342→### BUILD
+   343→   343→
+   344→   344→**From idea to production-ready digital product.**
+   345→   345→
+   346→   346→Show:
+   347→   347→
+   348→   348→- website
+   349→   349→- SaaS interface
+   350→   350→- mobile application
+   351→   351→- dashboard
+   352→   352→- backend system
+   353→   353→
+   354→   354→Then:
+   355→   355→
+   356→   356→### DATA
+   357→   357→
+   358→   358→**Turn your data into decisions.**
+   359→   359→
+   360→   360→Show:
+   361→   361→
+   362→   362→- charts
+   363→   363→- dashboards
+   364→   364→- reports
+   365→   365→- metrics
+   366→   366→- visualizations
+   367→   367→
+   368→   368→Then:
+   369→   369→
+   370→   370→### AUTOMATE
+   371→   371→
+   372→   372→**Make repetitive work disappear.**
+   373→   373→
+   374→   374→Show:
+   375→   375→
+   376→   376→- workflow
+   377→   377→- automation
+   378→   378→- trigger
+   379→   379→- process
+   380→   380→- completion
+   381→   381→
+   382→   382→Then:
+   383→   383→
+   384→   384→### CONNECT
+   385→   385→
+   386→   386→**Make your digital systems work together.**
+   387→   387→
+   388→   388→Show:
+   389→   389→
+   390→   390→- API
+   391→   391→- payment
+   392→   392→- notification
+   393→   393→- database
+   394→   394→- third-party services
+   395→   395→
+   396→   396→Each service should feel like a **mini product experience**.
+   397→   397→
+   398→   398→---
+   399→   399→
+   400→   400→# 10. SERVICE SECTION INTERACTION
+   401→   401→
+   402→   402→Build interactions such as:
+   403→   403→
+   404→   404→Hovering over:
+   405→   405→
+   406→   406→**Build**
+   407→   407→
+   408→   408→reveals a visual system.
+   409→   409→
+   410→   410→Hovering over:
+   411→   411→
+   412→   412→**Data**
+   413→   413→
+   414→   414→changes the visualization.
+   415→   415→
+   416→   416→Hovering over:
+   417→   417→
+   418→   418→**Automate**
+   419→   419→
+   420→   420→starts a workflow animation.
+   421→   421→
+   422→   422→Hovering over:
+   423→   423→
+   424→   424→**Connect**
+   425→   425→
+   426→   426→shows data moving between systems.
+   427→   427→
+   428→   428→The interactions should be subtle.
+   429→   429→
+   430→   430→The visitor should feel that the website itself demonstrates the company's technical ability.
+   431→   431→
+   432→   432→---
+   433→   433→
+   434→   434→# 11. PRODUCT ECOSYSTEM
+   435→   435→
+   436→   436→Okomba Analytics has broader technology initiatives and products.
+   437→   437→
+   438→   438→Do not hide these.
+   439→   439→
+   440→   440→Create a product ecosystem section.
+   441→   441→
+   442→   442→Each product should have:
+   443→   443→
+   444→   444→- name
+   445→   445→- category
+   446→   446→- one-sentence value proposition
+   447→   447→- interface preview
+   448→   448→- key capability
+   449→   449→- CTA
+   450→   450→
+   451→   451→Presentation should resemble a technology company's product portfolio.
+   452→   452→
+   453→   453→Use large visual previews rather than small thumbnail cards.
+   454→   454→
+   455→   455→---
+   456→   456→
+   457→   457→# 12. CASE STUDIES
+   458→   458→
+   459→   459→Termii places strong emphasis on proof through customer stories.
+   460→   460→
+   461→   461→Adapt this for Okomba Analytics.
+   462→   462→
+   463→   463→Instead of:
+   464→   464→
+   465→   465→**Portfolio**
+   466→   466→
+   467→   467→use a stronger concept such as:
+   468→   468→
+   469→   469→**Built for real problems.**
+   470→   470→
+   471→   471→Then show selected projects.
+   472→   472→
+   473→   473→Each project should tell:
+   474→   474→
+   475→   475→**Problem → Approach → Build → Result**
+   476→   476→
+   477→   477→Large visual previews should dominate.
+   478→   478→
+   479→   479→Use horizontal scrolling or alternating layouts if appropriate.
+   480→   480→
+   481→   481→---
+   482→   482→
+   483→   483→# 13. PRODUCT DEMONSTRATION SECTION
+   484→   484→
+   485→   485→Create a section where the website behaves like a product demo.
+   486→   486→
+   487→   487→For example:
+   488→   488→
+   489→   489→### "See how we turn an idea into a working system."
+   490→   490→
+   491→   491→Animate:
+   492→   492→
+   493→   493→1. Idea submitted
+   494→   494→2. Requirements analyzed
+   495→   495→3. Design created
+   496→   496→4. System developed
+   497→   497→5. Integrations connected
+   498→   498→6. Testing completed
+   499→   499→7. Product launched
+   500→   500→
+   501→   501→Make the interface look like an actual operational workflow.
+   502→   502→
+   503→   503→This is one of the strongest opportunities to differentiate the website.
+   504→   504→
+   505→   505→---
+   506→   506→
+   507→   507→# 14. DATA SECTION
+   508→   508→
+   509→   509→Because the company name is Okomba Analytics, data should have a visible role.
+   510→   510→
+   511→   511→Create a visually sophisticated data experience.
+   512→   512→
+   513→   513→Possible animation:
+   514→   514→
+   515→   515→- numbers increment
+   516→   516→- charts draw themselves
+   517→   517→- datasets appear
+   518→   518→- dashboard cards update
+   519→   519→- graphs respond to hover
+   520→   520→- KPI cards change state
+   521→   521→
+   522→   522→Messaging should communicate:
+   523→   523→
+   524→   524→> **We don't just collect data. We help you understand what it means.**
+   525→   525→
+   526→   526→Use real capabilities and examples only.
+   527→   527→
+   528→   528→---
+   529→   529→
+   530→   530→# 15. TECHNOLOGY SECTION
+   531→   531→
+   532→   532→Create a strong technology ecosystem section.
+   533→   533→
+   534→   534→Display technologies actually used by Okomba Analytics where appropriate.
+   535→   535→
+   536→   536→Potential categories:
+   537→   537→
+   538→   538→Frontend  
+   539→   539→Backend  
+   540→   540→Cloud  
+   541→   541→Database  
+   542→   542→Payments  
+   543→   543→Automation  
+   544→   544→Analytics  
+   545→   545→Infrastructure
+   546→   546→
+   547→   547→Do not make this a wall of logos.
+   548→   548→
+   549→   549→Use an interactive architecture visualization.
+   550→   550→
+   551→   551→Example:
+   552→   552→
+   553→   553→**Interface → Application → API → Data → Infrastructure**
+   554→   554→
+   555→   555→with animated connections.
+   556→   556→
+   557→   557→This communicates engineering capability without excessive technical jargon.
+   558→   558→
+   559→   559→---
+   560→   560→
+   561→   561→# 16. WHY OKOMBA ANALYTICS
+   562→   562→
+   563→   563→Create a strong differentiation section.
+   564→   564→
+   565→   565→Potential narrative:
+   566→   566→
+   567→   567→### One partner.
+   568→   568→
+   569→   569→Instead of hiring separate people for:
+   570→   570→
+   571→   571→Design  
+   572→   572→Development  
+   573→   573→Data  
+   574→   574→Automation  
+   575→   575→Operations
+   576→   576→
+   577→   577→Okomba Analytics brings these capabilities together.
+   578→   578→
+   579→   579→This should become a central competitive advantage.
+   580→   580→
+   581→   581→The visitor should understand:
+   582→   582→
+   583→   583→**"I can come with a problem, not necessarily a technical specification."**
+   584→   584→
+   585→   585→That is a powerful positioning statement.
+   586→   586→
+   587→   587→---
+   588→   588→
+   589→   589→# 17. PROCESS
+   590→   590→
+   591→   591→Build an elegant animated process.
+   592→   592→
+   593→   593→Suggested:
+   594→   594→
+   595→   595→**Discover**
+   596→   596→
+   597→   597→↓  
+   598→   598→**Design**
+   599→   599→
+   600→   600→↓  
+   601→   601→**Build**
+   602→   602→
+   603→   603→↓  
+   604→   604→**Integrate**
+   605→   605→
+   606→   606→↓  
+   607→   607→**Launch**
+   608→   608→
+   609→   609→↓  
+   610→   610→**Improve**
+   611→   611→
+   612→   612→As the visitor scrolls, the active stage should change.
+   613→   613→
+   614→   614→Use:
+   615→   615→
+   616→   616→- line progress
+   617→   617→- subtle motion
+   618→   618→- animated indicators
+   619→   619→- changing visual panels
+   620→   620→
+   621→   621→Avoid excessive gimmicks.
+   622→   622→
+   623→   623→---
+   624→   624→
+   625→   625→# 18. TESTIMONIAL / SOCIAL PROOF
+   626→   626→
+   627→   627→Create a polished proof section.
+   628→   628→
+   629→   629→Use actual:
+   630→   630→
+   631→   631→- client testimonials
+   632→   632→- project outcomes
+   633→   633→- partner relationships
+   634→   634→- recognizable clients
+   635→   635→- completed products
+   636→   636→
+   637→   637→Do not manufacture social proof.
+   638→   638→
+   639→   639→Use large quotations with strong typography.
+   640→   640→
+   641→   641→---
+   642→   642→
+   643→   643→# 19. TRUST SECTION
+   644→   644→
+   645→   645→Create a section for trust signals.
+   646→   646→
+   647→   647→Possible categories:
+   648→   648→
+   649→   649→- technologies
+   650→   650→- platforms
+   651→   651→- infrastructure
+   652→   652→- certifications
+   653→   653→- security practices
+   654→   654→- integrations
+   655→   655→- supported workflows
+   656→   656→
+   657→   657→Do not display certifications or compliance claims unless they are verified.
+   658→   658→
+   659→   659→---
+   660→   660→
+   661→   661→# 20. FINAL CTA
+   662→   662→
+   663→   663→The CTA should feel like a natural conclusion to the story.
+   664→   664→
+   665→   665→Not:
+   666→   666→
+   667→   667→**Contact Us**
+   668→   668→
+   669→   669→Instead:
+   670→   670→
+   671→   671→> **Have a problem worth solving?**
+   672→   672→
+   673→   673→Supporting text:
+   674→   674→
+   675→   675→> Tell us what you're trying to achieve. We'll help you figure out the right digital solution.
+   676→   676→
+   677→   677→Buttons:
+   678→   678→
+   679→   679→**Start a Project**
+   680→   680→
+   681→   681→**Talk to Us**
+   682→   682→
+   683→   683→This is much stronger for Okomba Analytics because visitors may not know exactly what service they need.
+   684→   684→
+   685→   685→---
+   686→   686→
+   687→   687→# 21. TYPOGRAPHY
+   688→   688→
+   689→   689→Typography must be treated as a major visual component.
+   690→   690→
+   691→   691→Use a carefully chosen modern sans-serif family.
+   692→   692→
+   693→   693→The typography system should include:
+   694→   694→
+   695→   695→### Display
+   696→   696→
+   697→   697→Very large.
+   698→   698→
+   699→   699→High visual impact.
+   700→   700→
+   701→   701→Tight line height.
+   702→   702→
+   703→   703→### Headings
+   704→   704→
+   705→   705→Strong hierarchy.
+   706→   706→
+   707→   707→### Body
+   708→   708→
+   709→   709→Highly readable.
+   710→   710→
+   711→   711→### Labels
+   712→   712→
+   713→   713→Small, precise, uppercase/medium weight where appropriate.
+   714→   714→
+   715→   715→### Numbers
+   716→   716→
+   717→   717→Use large numerals for proof/statistics.
+   718→   718→
+   719→   719→Typography should feel closer to a premium technology/product company than a traditional marketing website.
+   720→   720→
+   721→   721→---
+   722→   722→
+   723→   723→# 22. MOTION SYSTEM
+   724→   724→
+   725→   725→Build a unified motion language.
+   726→   726→
+   727→   727→Do not add random animations to individual sections.
+   728→   728→
+   729→   729→Define:
+   730→   730→
+   731→   731→### Micro
+   732→   732→
+   733→   733→150–250ms
+   734→   734→
+   735→   735→Buttons, icons, hover states.
+   736→   736→
+   737→   737→### Standard
+   738→   738→
+   739→   739→300–500ms
+   740→   740→
+   741→   741→Cards, navigation, reveal transitions.
+   742→   742→
+   743→   743→### Dramatic
+   744→   744→
+   745→   745→600–1000ms
+   746→   746→
+   747→   747→Hero and major storytelling transitions.
+   748→   748→
+   749→   749→Use easing curves consistently.
+   750→   750→
+   751→   751→Animations should feel:
+   752→   752→
+   753→   753→**smooth → deliberate → controlled → premium**
+   754→   754→
+   755→   755→Never:
+   756→   756→
+   757→   757→**bouncy → cartoonish → excessive**
+   758→   758→
+   759→   759→---
+   760→   760→
+   761→   761→# 23. SCROLL ANIMATION SYSTEM
+   762→   762→
+   763→   763→Create a reusable scroll animation system.
+   764→   764→
+   765→   765→Possible effects:
+   766→   766→
+   767→   767→- fade-up
+   768→   768→- fade-in
+   769→   769→- slide
+   770→   770→- scale
+   771→   771→- blur-to-sharp
+   772→   772→- number count
+   773→   773→- chart draw
+   774→   774→- horizontal movement
+   775→   775→- staggered children
+   776→   776→
+   777→   777→But use them selectively.
+   778→   778→
+   779→   779→Not every section should animate.
+   780→   780→
+   781→   781→The page should still be usable when animation is disabled.
+   782→   782→
+   783→   783→---
+   784→   784→
+   785→   785→# 24. CURSOR / POINTER INTERACTIONS
+   786→   786→
+   787→   787→Where appropriate, create subtle pointer interactions.
+   788→   788→
+   789→   789→Examples:
+   790→   790→
+   791→   791→- image follows cursor slightly
+   792→   792→- interactive cards respond to pointer
+   793→   793→- CTA button has subtle directional movement
+   794→   794→- service visualization responds to hover
+   795→   795→
+   796→   796→Do not implement a giant distracting custom cursor unless it genuinely improves the design.
+   797→   797→
+   798→   798→---
+   799→   799→
+   800→   800→# 25. HORIZONTAL STORYTELLING
+   801→   801→
+   802→   802→Use horizontal scrolling strategically for sections such as:
+   803→   803→
+   804→   804→- services
+   805→   805→- products
+   806→   806→- case studies
+   807→   807→
+   808→   808→But do not make the whole website horizontally scroll.
+   809→   809→
+   810→   810→On mobile, convert these experiences into natural vertical layouts.
+   811→   811→
+   812→   812→---
+   813→   813→
+   814→   814→# 26. DARK / LIGHT VISUAL TRANSITIONS
+   815→   815→
+   816→   816→Consider changing visual atmosphere throughout the page.
+   817→   817→
+   818→   818→Example:
+   819→   819→
+   820→   820→Light opening.
+   821→   821→
+   822→   822→Dark product section.
+   823→   823→
+   824→   824→Light data section.
+   825→   825→
+   826→   826→Dark technology section.
+   827→   827→
+   828→   828→Light case studies.
+   829→   829→
+   830→   830→Dark final CTA.
+   831→   831→
+   832→   832→Do not do this merely for decoration.
+   833→   833→
+   834→   834→Each color mode should support the story.
+   835→   835→
+   836→   836→---
+   837→   837→
+   838→   838→# 27. MICROCOPY
+   839→   839→
+   840→   840→Every section should use strong microcopy.
+   841→   841→
+   842→   842→Avoid:
+   843→   843→
+   844→   844→- "Learn More"
+   845→   845→- "Our Services"
+   846→   846→- "Welcome"
+   847→   847→- "Get in Touch"
+   848→   848→
+   849→   849→where a more meaningful label is possible.
+   850→   850→
+   851→   851→Use specific action language.
+   852→   852→
+   853→   853→Examples:
+   854→   854→
+   855→   855→**Explore the system**
+   856→   856→
+   857→   857→**See what we built**
+   858→   858→
+   859→   859→**Start your project**
+   860→   860→
+   861→   861→**Explore solutions**
+   862→   862→
+   863→   863→**Talk through your idea**
+   864→   864→
+   865→   865→---
+   866→   866→
+   867→   867→# 28. MOBILE EXPERIENCE
+   868→   868→
+   869→   869→Do NOT simply shrink the desktop website.
+   870→   870→
+   871→   871→Redesign interactions for mobile.
+   872→   872→
+   873→   873→Typing animation must remain readable.
+   874→   874→
+   875→   875→Hero visual must become compact.
+   876→   876→
+   877→   877→Cards should stack properly.
+   878→   878→
+   879→   879→Horizontal interactions should become swipe experiences where useful.
+   880→   880→
+   881→   881→Navbar becomes a polished mobile drawer.
+   882→   882→
+   883→   883→Buttons should have appropriate touch targets.
+   884→   884→
+   885→   885→Performance must remain excellent.
+   886→   886→
+   887→   887→---
+   888→   888→
+   889→   889→# 29. PERFORMANCE
+   890→   890→
+   891→   891→The animation-heavy design must still be fast.
+   892→   892→
+   893→   893→Optimize:
+   894→   894→
+   895→   895→- JavaScript
+   896→   896→- images
+   897→   897→- fonts
+   898→   898→- animation workload
+   899→   899→- lazy loading
+   900→   900→- rendering
+   901→   901→- large assets
+   902→   902→
+   903→   903→Avoid expensive animation techniques that cause frame drops.
+   904→   904→
+   905→   905→Prefer transforms and opacity.
+   906→   906→
+   907→   907→Avoid unnecessary continuous animations.
+   908→   908→
+   909→   909→---
+   910→   910→
+   911→   911→# 30. ACCESSIBILITY
+   912→   912→
+   913→   913→Every animation must have a non-animated fallback.
+   914→   914→
+   915→   915→Implement:
+   916→   916→
+   917→   917→`prefers-reduced-motion`
+   918→   918→
+   919→   919→Ensure:
+   920→   920→
+   921→   921→- keyboard navigation
+   922→   922→- focus states
+   923→   923→- semantic markup
+   924→   924→- proper contrast
+   925→   925→- accessible forms
+   926→   926→- accessible navigation
+   927→   927→- descriptive labels
+   928→   928→
+   929→   929→---
+   930→   930→
+   931→   931→# 31. SEO
+   932→   932→
+   933→   933→Build the marketing site as a serious search-ready business website.
+   934→   934→
+   935→   935→Include:
+   936→   936→
+   937→   937→- strong title
+   938→   938→- meta description
+   939→   939→- OG tags
+   940→   940→- structured headings
+   941→   941→- semantic HTML
+   942→   942→- favicon
+   943→   943→- canonical URL
+   944→   944→- robots
+   945→   945→- sitemap where appropriate
+   946→   946→- Organization structured data where appropriate
+   947→   947→
+   948→   948→Pages should have useful page-specific metadata.
+   949→   949→
+   950→   950→---
+   951→   951→
+   952→   952→# 32. PAGE ARCHITECTURE
+   953→   953→
+   954→   954→At minimum build:
+   955→   955→
+   956→   956→### `/`
+   957→   957→
+   958→   958→Main brand/product story.
+   959→   959→
+   960→   960→### `/services`
+   961→   961→
+   962→   962→Full service ecosystem.
+   963→   963→
+   964→   964→### `/solutions`
+   965→   965→
+   966→   966→Solutions organized by user/business problem.
+   967→   967→
+   968→   968→### `/work`
+   969→   969→
+   970→   970→Case studies and projects.
+   971→   971→
+   972→   972→### `/about`
+   973→   973→
+   974→   974→Company story and philosophy.
+   975→   975→
+   976→   976→### `/contact`
+   977→   977→
+   978→   978→Project inquiry.
+   979→   979→
+   980→   980→Add other pages only where they genuinely improve the product.
+   981→   981→
+   982→   982→---
+   983→   983→
+   984→   984→# 33. COMPONENT ARCHITECTURE
+   985→   985→
+   986→   986→Create reusable components.
+   987→   987→
+   988→   988→Recommended:
+   989→   989→
+   990→   990→- `Navbar`
+   991→   991→- `MobileNav`
+   992→   992→- `AnimatedHeadline`
+   993→   993→- `HeroVisual`
+   994→   994→- `ProofBar`
+   995→   995→- `SectionHeading`
+   996→   996→- `ServiceExplorer`
+   997→   997→- `ServiceVisual`
+   998→   998→- `ProductShowcase`
+   999→   999→- `WorkflowDemo`
+  1000→  1000→- `DataVisualization`
+  1001→  1001→- `TechArchitecture`
+  1002→  1002→- `CaseStudy`
+  1003→  1003→- `ProcessTimeline`
+  1004→  1004→- `Testimonial`
+  1005→  1005→- `CTA`
+  1006→  1006→- `Footer`
+  1007→  1007→
+  1008→  1008→Keep animation logic reusable.
+  1009→  1009→
+  1010→  1010→Do not write separate animation code for every section.
+  1011→  1011→
+  1012→  1012→---
+  1013→  1013→
+  1014→  1014→# 34. DESIGN TOKEN SYSTEM
+  1015→  1015→
+  1016→  1016→Create centralized design tokens for:
+  1017→  1017→
+  1018→  1018→- colors
+  1019→  1019→- typography
+  1020→  1020→- spacing
+  1021→  1021→- radius
+  1022→  1022→- shadows
+  1023→  1023→- transitions
+  1024→  1024→- container widths
+  1025→  1025→- breakpoints
+  1026→  1026→
+  1027→  1027→The site must feel visually consistent because all sections are built from the same design system.
+  1028→  1028→
+  1029→  1029→---
+  1030→  1030→
+  1031→  1031→# 35. BRAND IDENTITY
+  1032→  1032→
+  1033→  1033→Termii is inspiration.
+  1034→  1034→
+  1035→  1035→**Okomba Analytics is the brand.**
+  1036→  1036→
+  1037→  1037→The final website must clearly feel like Okomba Analytics.
+  1038→  1038→
+  1039→  1039→Use:
+  1040→  1040→
+  1041→  1041→- official logo
+  1042→  1042→- brand colors
+  1043→  1043→- authentic services
+  1044→  1044→- authentic products
+  1045→  1045→- authentic company positioning
+  1046→  1046→- authentic projects
+  1047→  1047→- authentic contact information
+  1048→  1048→
+  1049→  1049→Never make the website look like a Termii clone.
+  1050→  1050→
+  1051→  1051→The goal is for somebody to recognize:
+  1052→  1052→
+  1053→  1053→**"This is Okomba Analytics."**
+  1054→  1054→
+  1055→  1055→---
+  1056→  1056→
+  1057→  1057→# 36. ITERATIVE BUILD PROCESS
+  1058→  1058→
+  1059→  1059→Work in controlled batches.
+  1060→  1060→
+  1061→  1061→## BATCH 1
+  1062→  1062→
+  1063→  1063→Audit + information architecture.
+  1064→  1064→
+  1065→  1065→## BATCH 2
+  1066→  1066→
+  1067→  1067→Design system + typography + navigation.
+  1068→  1068→
+  1069→  1069→## BATCH 3
+  1070→  1070→
+  1071→  1071→Hero + animated typography + hero visual.
+  1072→  1072→
+  1073→  1073→## BATCH 4
+  1074→  1074→
+  1075→  1075→Problem narrative + proof section.
+  1076→  1076→
+  1077→  1077→## BATCH 5
+  1078→  1078→
+  1079→  1079→Services experience.
+  1080→  1080→
+  1081→  1081→## BATCH 6
+  1082→  1082→
+  1083→  1083→Products + solutions.
+  1084→  1084→
+  1085→  1085→## BATCH 7
+  1086→  1086→
+  1087→  1087→Interactive workflow/product demonstration.
+  1088→  1088→
+  1089→  1089→## BATCH 8
+  1090→  1090→
+  1091→  1091→Data/analytics experience.
+  1092→  1092→
+  1093→  1093→## BATCH 9
+  1094→  1094→
+  1095→  1095→Technology architecture.
+  1096→  1096→
+  1097→  1097→## BATCH 10
+  1098→  1098→
+  1099→  1099→Case studies + testimonials.
+  1100→  1100→
+  1101→  1101→## BATCH 11
+  1102→  1102→
+  1103→  1103→About + process.
+  1104→  1104→
+  1105→  1105→## BATCH 12
+  1106→  1106→
+  1107→  1107→Contact + final CTA + footer.
+  1108→  1108→
+  1109→  1109→## BATCH 13
+  1110→  1110→
+  1111→  1111→Mobile optimization.
+  1112→  1112→
+  1113→  1113→## BATCH 14
+  1114→  1114→
+  1115→  1115→Animation refinement.
+  1116→  1116→
+  1117→  1117→## BATCH 15
+  1118→  1118→
+  1119→  1119→Accessibility + SEO + performance.
+  1120→  1120→
+  1121→  1121→## BATCH 16
+  1122→  1122→
+  1123→  1123→Production QA.
+  1124→  1124→
+  1125→  1125→After every batch:
+  1126→  1126→
+  1127→  1127→1. Run the application.
+  1128→  1128→2. Inspect visually.
+  1129→  1129→3. Test interactions.
+  1130→  1130→4. Check console.
+  1131→  1131→5. Check responsive behavior.
+  1132→  1132→6. Fix problems.
+  1133→  1133→7. Commit the stable result.
+  1134→  1134→
+  1135→  1135→Do not accumulate dozens of broken changes before testing.
+  1136→  1136→
+  1137→  1137→---
+  1138→  1138→
+  1139→  1139→# 37. VISUAL QA STANDARD
+  1140→  1140→
+  1141→  1141→Before completion, compare the implementation against Termii at the level of:
+  1142→  1142→
+  1143→  1143→- typography quality
+  1144→  1144→- visual rhythm
+  1145→  1145→- animation quality
+  1146→  1146→- interaction quality
+  1147→  1147→- whitespace
+  1148→  1148→- section composition
+  1149→  1149→- visual storytelling
+  1150→  1150→- product demonstration
+  1151→  1151→- navigation
+  1152→  1152→- CTA quality
+  1153→  1153→- mobile polish
+  1154→  1154→
+  1155→  1155→The question is not:
+  1156→  1156→
+  1157→  1157→**"Does it look similar?"**
+  1158→  1158→
+  1159→  1159→The question is:
+  1160→  1160→
+  1161→  1161→**"Does it feel equally intentional and premium?"**
+  1162→  1162→
+  1163→  1163→---
+  1164→  1164→
+  1165→  1165→# 38. FINAL EXPERIENCE GOAL
+  1166→  1166→
+  1167→  1167→A visitor should arrive and immediately understand:
+  1168→  1168→
+  1169→  1169→**We build digital systems.**
+  1170→  1170→
+  1171→  1171→Then:
+  1172→  1172→
+  1173→  1173→**We understand business problems.**
+  1174→  1174→
+  1175→  1175→Then:
+  1176→  1176→
+  1177→  1177→**We can design, build, analyze, connect and improve the solution.**
+  1178→  1178→
+  1179→  1179→Then:
+  1180→  1180→
+  1181→  1181→**They have credible work and technical capability.**
+  1182→  1182→
+  1183→  1183→Finally:
+  1184→  1184→
+  1185→  1185→**I should talk to them about my project.**
+  1186→  1186→
+  1187→  1187→That entire journey should happen naturally through the design.
+  1188→  1188→
+  1189→  1189→---
+  1190→  1190→
+  1191→  1191→# 39. FINAL QA
+  1192→  1192→
+  1193→  1193→Before declaring the project complete:
+  1194→  1194→
+  1195→  1195→- [ ] Termii design language analyzed
+  1196→  1196→- [ ] Okomba brand audited
+  1197→  1197→- [ ] Current repository audited
+  1198→  1198→- [ ] Services mapped into coherent ecosystem
+  1199→  1199→- [ ] Design system created
+  1200→  1200→- [ ] Typography finalized
+  1201→  1201→- [ ] Animated headline implemented
+  1202→  1202→- [ ] Hero visual implemented
+  1203→  1203→- [ ] Navigation implemented
+  1204→  1204→- [ ] Proof metrics implemented
+  1205→  1205→- [ ] Problem narrative implemented
+  1206→  1206→- [ ] Service explorer implemented
+  1207→  1207→- [ ] Product ecosystem implemented
+  1208→  1208→- [ ] Interactive workflow implemented
+  1209→  1209→- [ ] Data visualization implemented
+  1210→  1210→- [ ] Technology section implemented
+  1211→  1211→- [ ] Case studies implemented
+  1212→  1212→- [ ] Testimonials implemented
+  1213→  1213→- [ ] Process implemented
+  1214→  1214→- [ ] Contact experience implemented
+  1215→  1215→- [ ] CTA implemented
+  1216→  1216→- [ ] Footer implemented
+  1217→  1217→- [ ] Mobile experience optimized
+  1218→  1218→- [ ] Accessibility reviewed
+  1219→  1219→- [ ] SEO reviewed
+  1220→  1220→- [ ] Performance reviewed
+  1221→  1221→- [ ] No broken links
+  1222→  1222→- [ ] No broken images
+  1223→  1223→- [ ] No console errors
+  1224→  1224→- [ ] No horizontal overflow
+  1225→  1225→- [ ] TypeScript passes
+  1226→  1226→- [ ] Production build passes
+  1227→  1227→- [ ] All major interactions tested
+  1228→  1228→- [ ] Reduced-motion mode tested
+  1229→  1229→- [ ] Logo usage verified
+  1230→  1230→- [ ] Final website feels like Okomba Analytics
+  1231→  1231→- [ ] Final website reaches a premium SaaS/product-company quality bar
+  1232→  1232→
+  1233→  1233→---
+  1234→  1234→
+  1235→  1235→# 40. NON-NEGOTIABLE
+  1236→  1236→
+  1237→  1237→Do not produce a basic agency landing page.
+  1238→  1238→
+  1239→  1239→Do not simply restyle the existing components.
+  1240→  1240→
+  1241→  1241→Do not copy Termii.
+  1242→  1242→
+  1243→  1243→Do not create random animations.
+  1244→  1244→
+  1245→  1245→Do not sacrifice performance.
+  1246→  1246→
+  1247→  1247→Do not fabricate proof.
+  1248→  1248→
+  1249→  1249→Do not use placeholder-looking content in the finished interface.
+  1250→  1250→
+  1251→  1251→Do not finish when the site merely "works."
+  1252→  1252→
+  1253→  1253→Build it until the website itself demonstrates the quality of Okomba Analytics' technical and creative capabilities.
+  1254→  1254→
+  1255→  1255→The website should become a **showcase of the company it represents**.
+  1256→  1256→
+  1257→  1257→The design philosophy should be:
+  1258→  1258→
+  1259→  1259→> **Termii-level polish.  
+  1260→  1260→> Okomba Analytics-level identity.  
+  1261→  1261→> Real services.  
+  1262→  1262→> Real products.  
+  1263→  1263→> Real proof.  
+  1264→  1264→> Exceptional interaction design.**

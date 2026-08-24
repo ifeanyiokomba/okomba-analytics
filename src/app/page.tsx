@@ -7,7 +7,11 @@ import type { Service } from "@/lib/content";
 import { Navbar } from "@/components/site/navbar";
 import { Hero } from "@/components/site/hero";
 import { CapabilityTicker, StatsBand } from "@/components/site/trust";
-import { ServicesSection } from "@/components/site/services-section";
+import { ProblemSection } from "@/components/site/problem-section";
+import { ServiceExplorer } from "@/components/site/service-explorer";
+import { WorkflowDemo } from "@/components/site/workflow-demo";
+import { DataExperience } from "@/components/site/data-experience";
+import { TechArchitecture } from "@/components/site/tech-architecture";
 import { ProductsSection } from "@/components/site/products-section";
 import { CaseStudiesSection } from "@/components/site/case-studies-section";
 import { WhySection } from "@/components/site/why-section";
@@ -105,8 +109,12 @@ export default function Home() {
         <Hero onGetStarted={() => openInquiry(null)} />
         <CapabilityTicker />
         <StatsBand />
-        <ServicesSection onRequestService={openInquiry} />
+        <ProblemSection />
+        <ServiceExplorer onRequestService={(svc) => openInquiry((svc as Service) ?? null)} />
+        <WorkflowDemo />
+        <DataExperience />
         <ProductsSection />
+        <TechArchitecture />
         <CaseStudiesSection />
         <WhySection />
         <ProcessSection onGetStarted={() => openInquiry(null)} />

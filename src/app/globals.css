@@ -167,6 +167,68 @@
   line-height: 1.62;
 }
 
+/* ── Termii-grade motion tokens ─────────────────────────── */
+/* Unified motion language: micro 150-250ms, standard 300-500ms,
+   dramatic 600-1000ms. Premium = smooth, deliberate, controlled. */
+:root {
+  --ease-premium: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-out-soft: cubic-bezier(0.16, 1, 0.3, 1);
+  --dur-micro: 200ms;
+  --dur-standard: 400ms;
+  --dur-dramatic: 800ms;
+}
+
+/* Typing caret */
+@keyframes caret-blink {
+  0%, 45% { opacity: 1; }
+  50%, 95% { opacity: 0; }
+  100% { opacity: 1; }
+}
+.caret-blink { animation: caret-blink 1.05s steps(1) infinite; }
+
+/* Status dot pulse (live systems) */
+@keyframes status-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(201, 145, 10, 0.45); }
+  70% { box-shadow: 0 0 0 7px rgba(201, 145, 10, 0); }
+}
+.animate-status-pulse { animation: status-pulse 2.2s ease-out infinite; }
+
+/* Card crossfade for cycling hero panels */
+@keyframes panel-in {
+  from { opacity: 0; transform: translateY(10px) scale(0.985); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.animate-panel-in { animation: panel-in 0.5s var(--ease-premium) both; }
+
+/* Chart draw for data visuals */
+@keyframes chart-draw {
+  from { stroke-dashoffset: var(--dash, 600); }
+  to { stroke-dashoffset: 0; }
+}
+.animate-chart-draw {
+  stroke-dasharray: var(--dash, 600);
+  animation: chart-draw 1.6s var(--ease-out-soft) both;
+}
+
+/* Flowing connection lines (tech architecture) */
+@keyframes flow-dash {
+  to { stroke-dashoffset: -28; }
+}
+.animate-flow-dash {
+  stroke-dasharray: 6 8;
+  animation: flow-dash 1.4s linear infinite;
+}
+
+/* Hero pipeline progress rail */
+@keyframes fill-bar-anim {
+  from { width: 8%; }
+  60% { width: 86%; }
+  to { width: 100%; }
+}
+.fill-bar-anim {
+  animation: fill-bar-anim 3.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
 /* ── Layout primitives ──────────────────────────────────── */
 .container-xl {
   width: 100%;

@@ -526,3 +526,150 @@
    526→- VLM-verified 9/10 design quality on home + insights — "premium, professionally curated, no AI-generated feel"
    527→- NEXT ROUND candidates: real email provider integration (Resend/SendGrid) via the deliver() stub; admin session timeout warning; keyboard shortcuts (n=new post, /=search); re-test subscriber-welcome email subscriberId tracking (currently null because notifyNewSubscriber doesn't receive the subscriber ID — minor audit-trail completeness item)
    528→
+   529→---
+   530→Task ID: 1
+   531→Agent: full-stack-developer (testimonials)
+   532→Task: Build a complete testimonial management system — Prisma Testimonial model, public API, admin CRUD APIs, admin "Testimonials" tab (list + editor dialog with live preview), and dynamic public Testimonials section with graceful fallback to the static content.
+   533→
+   534→Work Log:
+   535→- SCHEMA: added `Testimonial` model to prisma/schema.prisma (id cuid, name, role, service, text, rating int default 5, avatar nullable, status draft|published default published, sortOrder int default 0, createdAt/updatedAt + @@index([status])). Ran `bun run db:push` — table created, Prisma Client regenerated.
+   536→- Bumped PRISMA_CACHE_KEY in src/lib/db.ts to 'schema-v7-testimonials' so the running dev server instantiates a fresh client that knows the new model (the cache-key mechanism exists exactly for this).
+   537→- SEED: created scripts/seed-testimonials.ts (bun, PrismaClient from ../src/generated/prisma) — idempotent, seeded the 3 static TESTIMONIALS from lib/content.ts (Chukwuemeka Obi / Adaeze Nwosu / Ibrahim Suleiman, all published, sortOrder 1-3). Verified 3 rows in DB.
+   538→- LIB: src/lib/testimonials.ts — Testimonial + TestimonialStatus types, toTestimonial() row→API serializer (camelCase, ISO dates), mirroring the lib/posts.ts pattern.
+   539→- PUBLIC API: GET /api/testimonials — published only, orderBy sortOrder asc then createdAt desc, no auth, shape { ok, testimonials }.
+   540→- ADMIN APIs (both isAdminAuthorized()-guarded, zod-validated):
+   541→  - GET/POST /api/admin/testimonials — GET lists ALL (draft+published, optional ?status= filter); POST creates (name 2-80, role 2-120, service 2-80, text 20-1000, rating 1-5 int, avatar optional ≤300, status enum default published, sortOrder int default 0).
+   542→  - PATCH/DELETE /api/admin/testimonials/[id] — partial update (id injectable from route param) + delete; P2025 → 404.
+   543→- ADMIN UI: src/components/site/admin/testimonials-tab.tsx (follows posts-tab pattern): 4 KPI cards (Total/Published/Drafts/Avg rating with toFixed(1)), gold "Add testimonial" banner CTA, surface-card list w/ rating stars + status pill + updated date + name/role + line-clamp-2 quote + service chip + sortOrder, search (name/role/service/quote) + all/draft/published filter pills, Edit button with ALWAYS-visible "Edit" label (no hidden sm:inline), delete w/ inline Confirm/Cancel.
+   544→- EDITOR DIALOG: src/components/site/admin/testimonial-editor-dialog.tsx (follows post-editor-dialog pattern): name/role/service inputs, status select (published/draft), interactive 5-star picker (click + hover preview, radiogroup a11y), quote textarea w/ 20-1000 char count, optional avatar URL input w/ initials hint, LIVE PREVIEW card (quote mark, stars, quote, avatar-or-initials, name/role, service chip + status pill) in a right-hand column, inline validation errors, ESC-close + body scroll lock, Save/Cancel footer.
+   545→- DASHBOARD WIRING (minimal edits to dashboard.tsx): added "testimonials" Tab between Posts and Email log (MessageSquareQuote icon), testimonials/deletingTestimonialId/editingTestimonial state, fetch /api/admin/testimonials added to the existing load() Promise.all, saveTestimonial (POST/PATCH, auto sortOrder: keep on edit / max+1 on create) + deleteTestimonial handlers (same toast pattern), draft-count tab badge, TestimonialsTab + TestimonialEditorDialog render blocks. No existing tab touched.
+   546→- PUBLIC SECTION (testimonials-section.tsx): now a fetching client component — GET /api/testimonials on mount, 3 pulsing skeleton cards while loading, falls back to static TESTIMONIALS on fetch failure OR empty response (graceful degradation), hides section entirely if zero published and no fallback, existing card design preserved (stars, quote mark, avatar w/ initials fallback, service chip, Reveal animation), md:grid-cols-3 grid wraps 2-6+ cards naturally.
+   547→- CONSTRAINTS respected: no edits to globals.css / navbar / footer / logo / cookie-consent / posts-tab / post-editor-dialog; only existing utility classes used.
+   548→
+   549→QA VERIFIED (agent-browser end-to-end + curl):
+   550→- ✅ Admin session (admin@okomba.com) → Testimonials tab visible between Posts and Email log → 3 seeded testimonials listed w/ PUBLISHED pills + 5 stars + service chips; KPI cards show 3 Total / 3 Published / 0 Drafts / 5.0 Avg rating
+   551→- ✅ "Add testimonial" → editor dialog (all fields + interactive star picker + live preview) → created "Funke Adeyemi" (COO, Lagos Retail Group, Data Analytics, 4 stars) as DRAFT → appears first w/ DRAFT pill + tab badge "Testimonials 1" → public API still returns 3 (draft excluded) ✓
+   552→- ✅ Edit → status → Published → saved → admin list shows PUBLISHED pill, badge cleared → public API returns 4 → public #testimonials section renders 4 cards (verified via DOM eval + screenshot)
+   553→- ✅ Delete w/ inline confirm → row gone from admin list → public API back to 3 → public site back to 3 cards
+   554→- ✅ Search "funke" → "All testimonials (1 of 4)" filtered correctly
+   555→- ✅ Unauthenticated curl to admin endpoints → 401 both GET and POST
+   556→- ✅ Mobile 375px: 3 visible "Edit" labels (not hidden), no horizontal overflow
+   557→- ✅ Screenshots at each step: /tmp/admin-testimonials-list.png, admin-testimonial-editor-empty.png, admin-testimonial-editor-filled.png, admin-testimonial-draft-created.png, admin-testimonial-published.png, public-testimonials-4-cards.png, admin-testimonial-search.png, admin-testimonial-delete-confirm.png, admin-testimonial-deleted.png, public-testimonials-final-3-cards.png, admin-testimonials-mobile.png
+   558→- ✅ bun run lint clean; tsc --noEmit clean for project files (only pre-existing errors in unrelated examples/skills dirs); dev.log clean for my routes (only pre-existing EADDRINUSE from an unrelated duplicate-start attempt)
+   559→
+   560→Stage Summary:
+   561→- Testimonial management is fully live end-to-end: DB-backed (SQLite via Prisma), public API + section on /#testimonials, and complete admin CRUD at /#/admin → Testimonials tab with KPIs, search/filter, editor dialog with live preview, and publish workflow (draft hidden from site until published).
+   562→- Files created: prisma/schema.prisma (Testimonial model added), scripts/seed-testimonials.ts, src/lib/testimonials.ts, src/app/api/testimonials/route.ts, src/app/api/admin/testimonials/route.ts, src/app/api/admin/testimonials/[id]/route.ts, src/components/site/admin/testimonials-tab.tsx, src/components/site/admin/testimonial-editor-dialog.tsx
+   563→- Files modified: src/lib/db.ts (cache key bump only), src/components/site/admin/dashboard.tsx (minimal wiring), src/components/site/testimonials-section.tsx (fetch + skeleton + fallback)
+   564→- Decisions: sortOrder auto-managed in saveTestimonial (preserved on edit, max+1 on append) rather than a manual form field — keeps the editor simple; reused POST_STATUS_STYLES from admin/types.ts for draft/published pills to stay visually identical to the Posts tab; static TESTIMONIALS in content.ts kept as graceful-degradation fallback (untouched so other agents can still rely on it).
+   565→
+   566→---
+   567→Task ID: 3
+   568→Agent: main (orchestrator)
+   569→Task: Logo redesign everywhere + typography & color palette upgrade + cookie consent + mobile friendliness + admin posts UX polish + testimonial management dispatch
+   570→
+   571→Work Log:
+   572→- QA'd existing admin posts flows end-to-end with agent-browser (login → Posts tab → edit dialog populated + save PATCH verified in DB → title reverted; create dialog + validation errors confirmed working) — core flows were functional; issue was discoverability
+   573→- LOGO SYSTEM REDESIGN (src/components/site/logo.tsx):
+   574→  - New OkombaMark: pure-SVG badge with ink gradient (#151C30→#060910), gold gradient rim, bold Georgia serif "O" monogram, gold gradient baseline bar under the O, 4-point gold "insight spark" + halo ring at top-right; unique gradient IDs via useId
+   575→  - New OkombaLockup: badge + Georgia serif "Okomba" wordmark + letterspaced gold "ANALYTICS" strapline (font-mono, 0.36em tracking); 3 sizes (sm 33px/md 40px/lg 50px badge) × 2 tones (light ink / dark white)
+   576→  - OkombaNavLogo now uses md lockup (was tiny 34px PNG pill — wordmark inside was unreadable); OkombaLogo PNG kept for legacy contexts
+   577→  - New favicon.svg matching the new mark (sparkle + gradient + baseline)
+   578→  - Placements updated: navbar (h-[76px] for presence), footer (lg dark lockup), admin login (sm dark), admin dashboard header (sm dark)
+   579→- TYPOGRAPHY (globals.css):
+   580→  - Fluid display scale: .display-hero clamp(2.55rem→4.35rem), .display-section clamp(1.85rem→2.75rem), .display-card, .lead-body
+   581→  - Base: font-feature-settings kern/liga/calt, -moz-osx smoothing, text-wrap balance on headings + pretty on paragraphs, refined -0.03em heading tracking
+   582→  - Applied to hero h1/p, SectionHeading, FAQ/About/Contact h2s
+   583→  - --font-serif theme token (Georgia stack) for the brand wordmark
+   584→- COLOR PALETTE (globals.css + components):
+   585→  - Light-bg gold brightened: #B8860B→#C9910A, gold-light #F5C451→#FFC94D, gold-bright #FFD580→#FFDF8E; ring/chart-1 →#E3A81C; section-light tokens matched
+   586→  - Root .text-gradient-gold now sweeps dark→light (#C9910A→#FFC94D) so it never washes out on white; dark-section variant stays bright (#FFE9B8→#F5C451)
+   587→  - shadow-gold/-lg more saturated; shimmer-line brighter; spotlight border stronger; selection/scrollbar retinted
+   588→  - Removed ALL remaining dull-gold hardcodes: trust.tsx accent card, products-section CTA button, process-section button shadow, newsletter card shadow, hero/products radial washes, scroll-progress glow, subscribe confirm/unsubscribe email templates, avatar chip colors
+   589→  - Process step numbers /15→/20 with stronger gold hover
+   590→- COOKIE CONSENT (cookie-consent.tsx):
+   591→  - "Essential only" now PERSISTS (was re-showing every reload); Accept all persists
+   592→  - Footer "Cookies" button dispatches okomba:open-cookie-settings → banner reopens in "Cookie settings" mode
+   593→  - Redesigned: OkombaMark in a white chip, shimmer top line, gold glow, Accept all + Essential only + close X
+   594→- ADMIN POSTS UX (posts-tab.tsx): Edit button now always shows label (was hidden on mobile) as gold-prominent button, 32px touch height, delete confirm buttons enlarged
+   595→- Testimonial management built by subagent (Task 1): Prisma Testimonial model + seed (3), /api/testimonials public, /api/admin/testimonials CRUD, Testimonials tab (KPIs/search/filter/inline confirm delete) + editor dialog (star picker/live preview), public section fetches DB with static fallback
+   596→
+   597→QA VERIFIED (agent-browser + VLM):
+   598→- ✅ Homepage desktop: VLM 8.5/10 "agency-quality, human-curated, not AI-generated"; logo "clearly visible and well-proportioned"; gold "rich, warm, prominent — no longer dull"
+   599→- ✅ Wordmark renders Georgia serif (computed font-family verified); favicon regenerated
+   600→- ✅ Footer lockup "excellent and highly visible, well-fitted" on dark bg
+   601→- ✅ Cookie flow: Accept → persists → footer Cookies button → reopens "Cookie settings" mode
+   602→- ✅ Mobile 375px: html scrollWidth 375 = offsetWidth (no overflow) on home AND admin; hero VLM "high-quality mobile implementation" (stacked CTAs, touch targets, no breakage); admin header verified no overlap/wrap/cutoff
+   603→- ✅ Admin login + dashboard: new sm dark lockup visible; 6 tabs (Overview/Inquiries/Subscribers/Posts/Testimonials/Email log)
+   604→- ✅ Posts tab: Edit button with visible label opens populated editor; delete inline confirm present
+   605→- ✅ Testimonials tab VLM: "feature-complete, professional" (KPIs/search/status filters/edit/delete/add)
+   606→- ✅ Public testimonials section: 3 cards from DB; insights: 5 posts from DB; no console errors
+   607→- ✅ Sticky footer at natural content bottom (footerTop 13213 / body 13928)
+   608→- ✅ Lint clean
+   609→
+   610→Stage Summary:
+   611→- Brand is now loud and clear: SVG badge + serif wordmark lockup at nav (40px), footer (50px), admin (33px), favicon, cookie banner
+   612→- Typography is fluid (clamp-based editorial scale), typography helpers reusable
+   613→- Gold is vibrant luminous honey (#C9910A/#FFC94D/#E3A81C family) consistently across every surface — no dull remnants
+   614→- Cookie consent complete GDPR-lite pattern (persist choice + reopen from footer)
+   615→- Admin is a 6-tab management suite; posts edit/delete fully verified working + more discoverable
+   616→- NEXT ROUND candidates: pagination for posts/testimonials at scale, bulk actions, real email provider (Resend) behind deliver() stub, admin session timeout warning
+   617→
+   618→---
+   619→Task ID: 4
+   620→Agent: main (orchestrator)
+   621→Task: Restore original brand logo everywhere + full production-readiness audit before connecting to the main website
+   622→
+   623→Work Log:
+   624→- RESTORED ORIGINAL BRAND LOGO (user request — replaced the round-3 custom SVG lockup):
+   625→  - logo.tsx reverted to the official brand system: OkombaMark (original simple O-badge SVG) + OkombaLogo (official 1308×428 PNG badge with white "Okomba" serif wordmark) + OkombaNavLogo
+   626→  - NEW fitting improvements over the original: onDark prop — ring-white/40 + layered white ambient glow + soft black shadow + faint gold aura keeps the black badge crisply defined on dark surfaces (footer, admin header, admin login); light surfaces get ring-black/10 + soft shadow
+   627→  - Placements: navbar 36px (restored 72px header + 104px mobile-menu pad), footer 38px onDark, admin dashboard header 40px onDark, admin login 36px onDark, footer trust chip OkombaMark 34
+   628→  - favicon.svg restored to the original mark (dark square + serif O + gold dot) from git history
+   629→  - Removed the round-3 OkombaLockup/wordmark system + unused --font-serif token; cookie banner reverted to Cookie-icon chip (original design)
+   630→- PRODUCTION AUDIT:
+   631→  - All 11 sections render (hero/services/solutions/work/why/process/testimonials/insights/about/faq/contact) + newsletter section
+   632→  - Newsletter section: added missing id="newsletter" + scroll-mt-24 anchor; footer Newsletter link now targets it (was #insights)
+   633→  - Root /api route: replaced leftover "Hello, world!" placeholder with proper health check {ok, service, time}
+   634→  - Public APIs verified: /api/posts (5 published), /api/testimonials (3), POST /api/inquiries, POST /api/subscribe → confirm → unsubscribe full double-opt-in lifecycle (200s + correct HTML pages)
+   635→  - Admin auth verified: 401s without session, login works, 6 tabs load, logout works
+   636→  - DB cleaned for production: deleted 1 test inquiry, 4 test email logs, 13 stale admin sessions → final state 0 inquiries / 0 subscribers / 5 posts / 3 testimonials / 0 logs
+   637→  - SEO verified: title, description, OG tags, twitter card, canonical-less single page, sitemap.xml 200, robots.txt 200 (disallows /api/), og-image.png 200, favicon 200, logo.png 200
+   638→  - No hardcoded localhost/127.0.0.1 URLs in src/
+   639→  - Note: "ask-image" console grep was a display artifact ([m stripped as ANSI code) — file content verified correct via python booleans
+   640→- QA (agent-browser + VLM):
+   641→  - ✅ Navbar logo: "clearly visible and crisp, perfectly matches official badge, well-fitted"
+   642→  - ✅ Footer logo onDark: "clearly defined against dark background, subtle white ring + soft shadow"
+   643→  - ✅ Admin header at 3x zoom: "black badge with white Okomba text (moderately legible), thin light ring, gold ADMIN pill"
+   644→  - ✅ Admin login: 8.5/10, logo "clearly visible and well-defined"
+   645→  - ✅ Desktop + mobile final: 9/10 "production-ready, top-tier responsive design"
+   646→  - ✅ Mobile 375px: scrollWidth 375 = offsetWidth, no overflow
+   647→  - ✅ Lint clean, dev.log clean, console clean (stale HMR entries from mid-edit only)
+   648→
+   649→Stage Summary:
+   650→- Official brand logo (PNG badge) restored site-wide with proper light/dark fitting treatments
+   651→- Site is production-ready: clean DB, working APIs, complete SEO, verified flows, 9/10 VLM verdict
+   652→- NEXT ROUND candidates: password visibility toggle on admin login, real email provider (Resend) behind deliver() stub, pagination for posts/testimonials at scale
+   653→
+   654→---
+   655→Task ID: 5 (Termii-inspired rebuild)
+   656→Agent: main (orchestrator)
+   657→Task: Execute the uploaded "Okomba Analytics — Termii-Inspired Full Web App Rebuild Directive" — research Termii, plan strategically, rebuild to premium product-company quality
+   658→
+   659→TERMII RESEARCH FINDINGS (agent-browser + VLM on termii.com):
+   660→- Cream off-white bg (#FDFBF7) — paper-like premium, NOT stark white
+   661→- Massive ExtraBold headline, extreme weight contrast, colored word + colored dot
+   662→- Live-UI floating cards in hero: TXN-9190 / ₦85,000 / badges Verified·Secured·Sent / "Processing transfer..." / AI verification card — shows the RESULT of the workflow, not diagrams
+   663→- Metrics as subtle technical spec pills ("3B+ transactions processed") above headline — API-status feel, not marketing counters
+   664→- Micro-trust line under CTAs ("Free to start · 190+ countries · 99.9% uptime SLA")
+   665→- 1px subtle borders, 12-16px radius, near-flat, diffuse shadows only on floating cards
+   666→- Dark primary CTA + white secondary; abstract flowing gradient lines behind hero cards
+   667→- Developer-first aesthetic: restraint, direct technical copy, monochrome + single accent
+   668→
+   669→STRATEGIC PLAN (single-page architecture, all workflows preserved):
+   670→- Hero REBUILD: animated typing headline (rotate: automate/scale/connect/decide/move faster) + live-UI hero visual cycling through Okomba service workflows (brief received → system deployed LIVE → dashboard updating) + metrics pill + micro-trust line
+   671→- NEW sections: ProblemSection (problem-first storytelling) / ServiceExplorer (interactive Build·Data·Automate·Connect hover system replacing ServicesSection) / WorkflowDemo (dark, auto-advancing idea→launch pipeline) / DataExperience (animated charts + KPI cards) / TechArchitecture (Interface→App→API→Data→Infra animated flow)
+   672→- UPGRADES: StatsBand→count-up animated numbers / Process→scroll-driven active timeline / CaseStudies→Problem→Approach→Result / Contact→"Have a problem worth solving?" final CTA
+   673→- Section rhythm: light opening → dark engineering anchors (WorkflowDemo, TechArchitecture) → light proof → dark footer
+   674→- Subagent split: A=Problem+ServiceExplorer, B=Workflow+Data+Tech, C=upgrades (Stats/Process/Cases/Contact); main=hero+page wiring+QA
+   675→

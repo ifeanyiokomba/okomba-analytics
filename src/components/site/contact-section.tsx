@@ -10,7 +10,7 @@ const CONTACT_METHODS = [
     label: "Email support",
     value: CONTACT.email,
     href: `mailto:${CONTACT.email}`,
-    accent: "border-[#5b9eff]/25 bg-[#5b9eff]/10 text-[#5b9eff]",
+    accent: "border-black/[0.08] bg-black/[0.04] text-foreground",
     note: "Detailed briefs & documents",
   },
   {
@@ -56,15 +56,15 @@ export function ContactSection({ onGetStarted }: ContactSectionProps) {
             <div>
               <span className="eyebrow inline-flex items-center gap-2.5 rounded-full border border-gold/25 bg-gold-dim px-4 py-1.5 text-gold">
                 <span className="h-1.5 w-1.5 rounded-full bg-gold animate-pulse-dot" aria-hidden="true" />
-                Contact
+                Have a problem worth solving?
               </span>
               <h2 className="display-section mt-6 font-display text-balance text-foreground">
-                Have an idea, project or problem to solve?{" "}
-                <span className="text-gradient-gold">Let&apos;s build the right solution.</span>
+                Tell us{" "}
+                <span className="text-gradient-gold">what you&apos;re trying to achieve.</span>
               </h2>
               <p className="mt-5 max-w-lg text-[15px] leading-relaxed text-muted-foreground">
-                Tell us what you need — a website, a payment system, an operation to automate — and
-                our team will respond within 24 hours with a tailored proposal.
+                We&apos;ll help you figure out the right digital solution — even if you&apos;re not
+                sure what that is yet.
               </p>
 
               <div className="mt-8 space-y-3">
@@ -73,7 +73,7 @@ export function ContactSection({ onGetStarted }: ContactSectionProps) {
                     key={m.label}
                     href={m.href}
                     {...(m.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-                    className="surface-card group flex items-center gap-4 p-4.5 px-5 py-4 focus-visible:outline-2 focus-visible:outline-gold"
+                    className="surface-card group flex items-center gap-4 px-5 py-4 focus-visible:outline-2 focus-visible:outline-gold"
                   >
                     <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border ${m.accent}`}>
                       <m.icon size={19} strokeWidth={1.9} aria-hidden="true" />
