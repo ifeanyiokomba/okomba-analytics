@@ -23,9 +23,11 @@ import {
   TrendingUp,
   User,
   Users,
+  X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { exportInquiriesCsv, exportSubscribersCsv } from "@/lib/csv-export";
+import { SERVICES, type Service } from "@/lib/content";
 import { OkombaNavLogo } from "./logo";
 
 /* ─────────────────────────────────────────────────────────────
@@ -56,6 +58,7 @@ type Stats = {
   last7Days: number;
   subscribers: number;
   byService: { service: string; count: number }[];
+  byBudget: { budget: string; count: number }[];
 };
 
 const STATUSES = ["new", "contacted", "in_progress", "closed"] as const;
@@ -227,10 +230,12 @@ function AdminDashboard({ onLogout, onExit }: { onLogout: () => void; onExit: ()
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const [detailService, setDetailService] = useState<Service | null>(null);
 
   // table controls
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [budgetFilter, setBudgetFilter] = useState<string>("all");
   const [page, setPage] = useState(1);
   const [sortKey, setSortKey] = useState<"createdAt" | "name" | "service">("createdAt");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
@@ -277,7 +282,7 @@ function AdminDashboard({ onLogout, onExit }: { onLogout: () => void; onExit: ()
   // Reset to first page whenever filters change
   useEffect(() => {
     setPage(1);
-  }, [search, statusFilter, sortKey, sortDir]);
+  }, [search, statusFilter, budgetFilter, sortKey, sortDir]);
 
   const updateStatus = async (id: string, status: string) => {
     setUpdatingId(id);
@@ -318,12 +323,16 @@ function AdminDashboard({ onLogout, onExit }: { onLogout: () => void; onExit: ()
     : [];
 
   const maxServiceCount = stats?.byService?.[0]?.count ?? 1;
+  const maxBudgetCount = stats?.byBudget?.[0]?.count ?? 1;
 
-  // Filtered inquiries for the table (client-side search + status filter)
+  // Filtered inquiries for the table (client-side search + status + budget filters)
   const filteredInquiries = inquiries
     .filter((i) => {
       const matchesStatus = statusFilter === "all" || i.status === statusFilter;
-      if (!matchesStatus) return false;
+      const matchesBudget =
+        budgetFilter === "all" ||
+        (budgetFilter === "none" ? !i.budget : i.budget === budgetFilter);
+      if (!matchesStatus || !matchesBudget) return false;
       if (!search.trim()) return true;
       const q = search.trim().toLowerCase();
       return (
@@ -431,6 +440,28 @@ function AdminDashboard({ onLogout, onExit }: { onLogout: () => void; onExit: ()
           </div>
         )}
 
+        {/* Budget distribution */}
+        {stats && stats.byBudget.length > 0 && (
+          <div className="surface-card mt-4 p-6">
+            <h2 className="text-[14.5px] font-semibold text-foreground">Budget distribution</h2>
+            <p className="mt-1 text-[11.5px] text-muted-foreground">From inquiries that shared a budget range</p>
+            <div className="mt-5 space-y-3.5">
+              {stats.byBudget.map((b) => (
+                <div key={b.budget} className="flex items-center gap-4">
+                  <span className="w-40 shrink-0 truncate text-[12.5px] text-muted-foreground md:w-56">{b.budget}</span>
+                  <div className="h-2 flex-1 overflow-hidden rounded-full bg-white/[0.06]">
+                    <div
+                      className="h-full rounded-full bg-gradient-to-r from-teal to-[#00e0c0] transition-[width] duration-700"
+                      style={{ width: `${Math.max((b.count / maxBudgetCount) * 100, 4)}%` }}
+                    />
+                  </div>
+                  <span className="w-7 shrink-0 text-right font-mono text-[12px] font-semibold text-teal">{b.count}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Inquiries table */}
         <div className="surface-card mt-4 overflow-hidden">
           <div className="flex flex-col gap-4 border-b border-white/[0.06] px-6 py-5 md:flex-row md:items-center md:justify-between">
@@ -487,6 +518,28 @@ function AdminDashboard({ onLogout, onExit }: { onLogout: () => void; onExit: ()
                 ))}
               </div>
             </div>
+
+            {/* Budget filter chips (derived from data) */}
+            {Array.from(new Set(inquiries.map((i) => i.budget).filter(Boolean))).length > 0 && (
+              <div className="flex flex-wrap items-center gap-1.5">
+                <span className="mr-1 font-mono text-[9.5px] uppercase tracking-wider text-muted-foreground/70">Budget</span>
+                {["all", "none", ...Array.from(new Set(inquiries.map((i) => i.budget).filter((b): b is string => !!b)))].map((b) => (
+                  <button
+                    key={b}
+                    onClick={() => setBudgetFilter(b)}
+                    aria-pressed={budgetFilter === b}
+                    className={cn(
+                      "rounded-full border px-3 py-1.5 font-mono text-[10.5px] font-medium transition-colors",
+                      budgetFilter === b
+                        ? "border-teal/50 bg-teal-dim text-teal"
+                        : "border-white/[0.08] bg-white/[0.03] text-muted-foreground hover:border-white/20 hover:text-foreground"
+                    )}
+                  >
+                    {b === "all" ? "All" : b === "none" ? "No budget" : b}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           {loading ? (
@@ -506,6 +559,7 @@ function AdminDashboard({ onLogout, onExit }: { onLogout: () => void; onExit: ()
                 onClick={() => {
                   setSearch("");
                   setStatusFilter("all");
+                  setBudgetFilter("all");
                 }}
                 className="rounded-lg border border-gold/30 bg-gold-dim px-3.5 py-1.5 text-[12px] font-medium text-gold transition-colors hover:bg-gold/20"
               >
@@ -565,7 +619,17 @@ function AdminDashboard({ onLogout, onExit }: { onLogout: () => void; onExit: ()
                         {i.whatsapp && <p className="text-[11px] text-muted-foreground/70">WA: {i.whatsapp}</p>}
                       </td>
                       <td className="px-6 py-4">
-                        <p className="max-w-[180px] text-[12.5px] text-foreground/90">{i.service}</p>
+                        <button
+                          onClick={() => {
+                            const svc = SERVICES.find((s) => s.title === i.service) ?? null;
+                            setDetailService(svc);
+                          }}
+                          disabled={!SERVICES.some((s) => s.title === i.service)}
+                          title={SERVICES.some((s) => s.title === i.service) ? `View ${i.service} details` : undefined}
+                          className="max-w-[180px] text-left text-[12.5px] text-foreground/90 transition-colors hover:text-gold disabled:cursor-default disabled:hover:text-foreground/90"
+                        >
+                          {i.service}
+                        </button>
                         {i.addlService && <p className="mt-0.5 max-w-[180px] text-[11px] text-muted-foreground">+ {i.addlService}</p>}
                         {i.budget && (
                           <span className="mt-1.5 inline-block rounded-md bg-gold/10 px-2 py-0.5 font-mono text-[10px] font-medium text-gold">
@@ -727,6 +791,94 @@ function AdminDashboard({ onLogout, onExit }: { onLogout: () => void; onExit: ()
           )}
         </div>
       </main>
+
+      {/* Service drilldown dialog */}
+      <ServiceDetailDialog service={detailService} onClose={() => setDetailService(null)} />
+    </div>
+  );
+}
+
+/* ── Service detail drilldown ─────────────────────────────── */
+function ServiceDetailDialog({ service, onClose }: { service: Service | null; onClose: () => void }) {
+  useEffect(() => {
+    if (!service) return;
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+    document.addEventListener("keydown", onKey);
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = "";
+    };
+  }, [service, onClose]);
+
+  if (!service) return null;
+
+  return (
+    <div
+      className="fixed inset-0 z-[100] flex items-end justify-center bg-[#03050a]/85 backdrop-blur-md sm:items-center sm:p-6"
+      role="dialog"
+      aria-modal="true"
+      aria-label={`Service details: ${service.title}`}
+      onClick={(e) => e.target === e.currentTarget && onClose()}
+    >
+      <div className="relative flex max-h-[92vh] w-full max-w-lg flex-col overflow-hidden rounded-t-3xl border border-white/[0.09] bg-[#0b101c] shadow-float sm:rounded-3xl [animation:slide-in-up_0.35s_cubic-bezier(0.22,1,0.36,1)]">
+        <header className="relative border-b border-white/[0.06] p-6 md:p-8">
+          <div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-gold/[0.1] blur-2xl" aria-hidden="true" />
+          <div className="relative flex items-start justify-between gap-4">
+            <div>
+              <span className="eyebrow rounded-full border border-gold/25 bg-gold-dim px-3 py-1 text-[9px] text-gold">
+                {service.category}
+              </span>
+              <h2 className="mt-3.5 font-display text-[21px] font-bold leading-snug text-foreground">{service.title}</h2>
+              <p className="mt-1.5 text-[13px] text-muted-foreground">{service.desc}</p>
+            </div>
+            <button
+              onClick={onClose}
+              aria-label="Close service details"
+              className="shrink-0 rounded-xl border border-white/[0.09] bg-white/[0.04] p-2.5 text-muted-foreground transition-colors hover:border-gold/40 hover:text-gold"
+            >
+              <X size={17} aria-hidden="true" />
+            </button>
+          </div>
+        </header>
+
+        <div className="overflow-y-auto px-6 py-7 md:px-8" style={{ display: "grid", gap: "1.15rem" }}>
+          <div>
+            <p className="eyebrow mb-2.5 text-[9px] text-gold">Capabilities</p>
+            <ul className="grid gap-1.5">
+              {service.subs.map((s) => (
+                <li key={s} className="flex items-start gap-2 text-[12.5px] text-muted-foreground">
+                  <span className="mt-[7px] h-1 w-1 shrink-0 rounded-full bg-teal" aria-hidden="true" />
+                  {s}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div>
+              <p className="eyebrow mb-2.5 text-[9px] text-gold">Benefits</p>
+              <ul className="space-y-1.5">
+                {service.benefits.map((b) => (
+                  <li key={b} className="text-[12.5px] text-muted-foreground">
+                    <span className="text-teal">✓</span> {b}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <p className="eyebrow mb-2.5 text-[9px] text-gold">Ideal for</p>
+              <div className="flex flex-wrap gap-1.5">
+                {service.idealFor.map((t) => (
+                  <span key={t} className="rounded-md bg-white/[0.05] px-2 py-1 text-[11px] text-muted-foreground">
+                    {t}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

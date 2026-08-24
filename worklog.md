@@ -307,3 +307,27 @@ Stage Summary:
   4. Budget distribution chart in admin stats (leverage new field)
   5. Production hardening: remove dev-simulated confirm button behind env flag
 - RISKS: none blocking; all flows token-guarded + idempotent
+
+---
+Task ID: R9 (cron review round 9)
+Agent: webDevReview cron (15-min cycle)
+Task: QA regression + admin budget distribution chart + service drilldown dialog + budget filter chips
+
+Work Log:
+- QA regression: server 200, no console errors, desktop 1280 & mobile 375 overflow-CLEAN
+- NEW FEATURE — Budget distribution chart: GET /api/inquiries?stats=1 now aggregates byBudget (groupBy budget where not null, sorted desc); admin dashboard gained "Budget distribution" panel (teal gradient bars — visually distinct from gold service bars, count labels, caption "From inquiries that shared a budget range"); VERIFIED with 4 seeded inquiries across 2 budget bands + 1 no-budget: chart renders both bands correctly
+- NEW FEATURE — Service drilldown dialog: inquiry service cells are now clickable buttons (disabled for unknown services) opening a ServiceDetailDialog with full service info (category badge, description, capabilities list w/ teal bullets, benefits, ideal-for chips) from the shared SERVICES content lib; Escape/overlay/X close, scroll lock; VERIFIED: click "Web & Mobile App Development" → dialog opens (477 chars) → Escape closes
+- NEW FEATURE — Budget filter chips: second chip row (labeled "Budget") auto-derived from present budget values + "All" + "No budget" options; teal active state (vs gold status chips); integrates with search/status/sort + Clear filters resets all; VERIFIED: ₦1.5M – ₦5M chip → exactly 2 rows (Ada + Chi), All → 4 rows
+- VLM QA: "Polished & Consistent… Excellent readability" (chart) + "Professional modal layout" (drilldown)
+- Final: lint clean, admin mobile 375 CLEAN, no console errors, test data cleaned
+
+Stage Summary:
+- PROJECT STATUS: Admin analytics complete. Budget data now flows full-circle: inquiry form → DB → chart → filter → drilldown
+- VERIFIED: byBudget aggregation, chart rendering, budget filter (2/4 rows), service drilldown open/close, mobile overflow
+- UNRESOLVED/NEXT ROUND priorities:
+  1. Real email provider integration (deliver() swap in notify.ts — highest remaining value)
+  2. Hero A/B copy variants
+  3. Production hardening: env flag for dev-simulated newsletter confirm button
+  4. Optional: dark/light theme toggle (design system is dark-only)
+  5. Optional: inquiry detail view (full message + reply-by-mail link)
+- RISKS: none blocking; admin dialogs share z-index pattern with marketing dialogs (consistent)

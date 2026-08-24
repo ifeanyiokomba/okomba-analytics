@@ -186,6 +186,7 @@ export async function GET(req: Request) {
         last7Days,
         groupedByService,
         subscribers,
+        groupedByBudget,
       ] = await Promise.all([
         db.inquiry.count(),
         db.inquiry.count({ where: { status: "new" } }),
@@ -198,10 +199,19 @@ export async function GET(req: Request) {
           _count: { _all: true },
         }),
         db.subscriber.count(),
+        db.inquiry.groupBy({
+          by: ["budget"],
+          _count: { _all: true },
+          where: { budget: { not: null } },
+        }),
       ]);
 
       const byService = groupedByService
         .map((row) => ({ service: row.service, count: row._count._all }))
+        .sort((a, b) => b.count - a.count);
+
+      const byBudget = groupedByBudget
+        .map((row) => ({ budget: row.budget as string, count: row._count._all }))
         .sort((a, b) => b.count - a.count);
 
       return NextResponse.json({
@@ -214,6 +224,7 @@ export async function GET(req: Request) {
           closed,
           last7Days,
           byService,
+          byBudget,
           subscribers,
         },
       });
