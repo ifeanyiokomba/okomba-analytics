@@ -1,23 +1,27 @@
 "use client";
 
 import { useState } from "react";
-import { AlertCircle, CheckCircle2, Loader2, Mail, Send } from "lucide-react";
+import { AlertCircle, CheckCircle2, Loader2, Mail, MailCheck, Send } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Reveal } from "./reveal";
 
 /**
- * Newsletter band — email capture wired to POST /api/subscribe.
+ * Newsletter band — double opt-in email capture wired to POST /api/subscribe.
+ * Step 1: enter email → pending subscriber created, confirm link shown (dev
+ * simulation of the email). Step 2: user visits confirm link → confirmed.
  */
 export function NewsletterSection() {
   const [email, setEmail] = useState("");
-  const [state, setState] = useState<"idle" | "busy" | "done" | "error">("idle");
+  const [state, setState] = useState<"idle" | "busy" | "sent" | "done" | "error">("idle");
   const [message, setMessage] = useState("");
+  const [confirmPath, setConfirmPath] = useState<string | null>(null);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (state === "busy") return;
     setState("busy");
     setMessage("");
+    setConfirmPath(null);
     try {
       const res = await fetch("/api/subscribe", {
         method: "POST",
@@ -27,11 +31,36 @@ export function NewsletterSection() {
       const data = await res.json();
       if (!res.ok) throw new Error(data?.error ?? "Subscription failed");
       setState("done");
-      setMessage("You're on the list — practical insights, no spam.");
+      setMessage(
+        data.alreadyConfirmed
+          ? "You're already subscribed — thank you!"
+          : "Almost there — one click confirms your subscription."
+      );
+      if (data.confirmPath) setConfirmPath(data.confirmPath);
       setEmail("");
     } catch (err) {
       setState("error");
       setMessage(err instanceof Error ? err.message : "Something went wrong");
+    }
+  };
+
+  const confirmNow = async () => {
+    if (!confirmPath) return;
+    setState("busy");
+    try {
+      const res = await fetch(confirmPath);
+      // The confirm endpoint returns a branded HTML page; the fetch itself
+      // confirms the subscription server-side.
+      if (res.ok) {
+        setState("sent");
+        setMessage("Confirmed! You're on the list — practical insights, no spam.");
+      } else {
+        setState("error");
+        setMessage("Confirmation failed — please try subscribing again.");
+      }
+    } catch {
+      setState("error");
+      setMessage("Confirmation failed — please try again.");
     }
   };
 
@@ -59,18 +88,46 @@ export function NewsletterSection() {
             </div>
 
             <div>
-              {state === "done" ? (
-                <div
-                  role="status"
-                  className="flex items-start gap-3.5 rounded-2xl border border-teal/30 bg-teal/[0.08] p-5"
-                >
-                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-teal-dim text-teal">
-                    <CheckCircle2 size={19} aria-hidden="true" />
-                  </span>
-                  <div>
-                    <p className="text-[14.5px] font-semibold text-foreground">Subscribed</p>
-                    <p className="mt-1 text-[13px] leading-relaxed text-muted-foreground">{message}</p>
+              {state === "done" || state === "sent" ? (
+                <div className="flex flex-col items-start gap-4 rounded-2xl border border-teal/30 bg-teal/[0.08] p-5">
+                  <div
+                    role="status"
+                    className="flex w-full items-start gap-3.5"
+                  >
+                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-teal-dim text-teal">
+                      {state === "sent" ? (
+                        <MailCheck size={19} aria-hidden="true" />
+                      ) : (
+                        <CheckCircle2 size={19} aria-hidden="true" />
+                      )}
+                    </span>
+                    <div>
+                      <p className="text-[14.5px] font-semibold text-foreground">
+                        {state === "sent" ? "Subscription confirmed" : "Check your inbox"}
+                      </p>
+                      <p className="mt-1 text-[13px] leading-relaxed text-muted-foreground">{message}</p>
+                    </div>
                   </div>
+
+                  {/* Step 2 (dev simulation): confirm button when link present */}
+                  {state === "done" && confirmPath && (
+                    <div className="w-full rounded-xl border border-gold/20 bg-gold/[0.06] p-4">
+                      <p className="font-mono text-[10px] uppercase tracking-wider text-gold/80">
+                        Confirm subscription
+                      </p>
+                      <p className="mt-1.5 text-[12px] leading-relaxed text-muted-foreground">
+                        In production this arrives by email. For now, confirm with one click:
+                      </p>
+                      <button
+                        onClick={confirmNow}
+                        disabled={state !== "done"}
+                        className="btn-shine mt-3 inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-gold-light to-gold px-5 py-2.5 text-[13px] font-semibold text-ink shadow-gold transition-transform hover:-translate-y-0.5 disabled:opacity-50"
+                      >
+                        <MailCheck size={14} aria-hidden="true" />
+                        Confirm my subscription
+                      </button>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <form onSubmit={submit} noValidate className="flex flex-col gap-3">

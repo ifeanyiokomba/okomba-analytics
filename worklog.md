@@ -257,3 +257,28 @@ Stage Summary:
   4. Admin: service-detail drilldown (inquiry → related service info)
   5. Copy deck refinement / hero A/B variants
 - RISKS: none blocking; images are static public assets (cached, no runtime cost)
+
+---
+Task ID: R7 (cron review round 7)
+Agent: webDevReview cron (15-min cycle)
+Task: QA regression + testimonial avatars + newsletter double-opt-in flow + hero glow polish
+
+Work Log:
+- QA regression: server 200, no console errors, desktop 1280 & mobile 375 overflow-CLEAN
+- NEW FEATURE (visual) — Testimonial client avatars: 3 AI-generated professional Nigerian portraits (public/images/avatar-{chukwuemeka,adaeze,ibrahim}.png, 1024x1024) wired into TESTIMONIALS via new avatar field; rendered in 44px circular frames with gold ring-2 accent + descriptive alt text; initials fallback retained for avatar-less entries; all 3 verified LOADED
+- NEW FEATURE — Newsletter double opt-in: Subscriber model extended (status pending|confirmed, confirmToken unique nullable, confirmedAt) w/ db:push; POST /api/subscribe now creates PENDING subscriber w/ 64-hex token and returns confirmPath (idempotent for already-confirmed); new GET /api/subscribe/confirm?token=… endpoint returns a fully branded HTML confirmation page (Okomba dark theme, success/error variants, token cleared after confirm, invalid-token → 400 w/ retry message); newsletter UI upgraded to two-step flow (step 1 "Check your inbox" w/ dev-simulated confirm button panel, step 2 "Confirmed!"), error states preserved; admin subscribers panel now shows CONFIRMED/PENDING status badges (teal/gold) + confirmedAt date; subscribers CSV export includes Status column; VERIFIED end-to-end: UI subscribe → confirm click → "Confirmed!", API token confirm → status flips pending→confirmed + token nulled, invalid token → branded error page 400
+- BUG FIX (recurring infra) — Prisma singleton stale after schema change again (new fields unknown → PrismaClientValidationError); resolved by bumping db.ts cache key to schema-v4-subscriber-optin (the cache-key guard from R1 working as designed)
+- STYLING — Hero backdrop: added warm gold radial horizon glow (top) + cool teal counterweight glow (bottom-left) layered over the grid; subtle atmosphere upgrade
+- VLM QA: avatars "authentic, fit the premium aesthetic", opt-in UI "extremely clear", hero glow verified
+- Final: lint clean, mobile 375 CLEAN, no console errors, test subscribers cleaned
+
+Stage Summary:
+- PROJECT STATUS: Marketing site visually complete (imagery everywhere), newsletter now email-compliant double opt-in with branded confirm page
+- VERIFIED: 3 avatars loading, full opt-in flow (UI + API + branded page + invalid token), admin status badges, hero glow, mobile overflow
+- UNRESOLVED/NEXT ROUND priorities:
+  1. Real email provider integration (deliver() in notify.ts + wire confirm link into subscriber email)
+  2. Unsubscribe flow (token-based, same branded page pattern)
+  3. Admin: service-detail drilldown from inquiry rows
+  4. Copy deck refinement / hero A/B variants
+  5. Optional: cookie-consent banner (regulatory readiness)
+- RISKS: dev-simulated confirm button must be removed/hidden in production once real email provider sends actual links

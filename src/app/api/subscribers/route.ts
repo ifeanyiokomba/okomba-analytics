@@ -16,8 +16,8 @@ export async function GET() {
 
     const [subscribers, total] = await Promise.all([
       db.subscriber.findMany({
-        orderBy: { createdAt: "desc" },
-        select: { id: true, email: true, createdAt: true },
+        orderBy: [{ status: "desc" }, { createdAt: "desc" }],
+        select: { id: true, email: true, status: true, confirmedAt: true, createdAt: true },
       }),
       db.subscriber.count(),
     ]);

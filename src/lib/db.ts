@@ -10,7 +10,7 @@ const globalForPrisma = globalThis as unknown as {
  * mid-development (e.g. new models added): if the key changes, a fresh
  * client is instantiated instead of reusing the outdated global one.
  */
-const PRISMA_CACHE_KEY = 'schema-v3-generated-path'
+const PRISMA_CACHE_KEY = 'schema-v4-subscriber-optin'
 
 export const db =
   globalForPrisma.prisma && globalForPrisma.prismaCacheKey === PRISMA_CACHE_KEY

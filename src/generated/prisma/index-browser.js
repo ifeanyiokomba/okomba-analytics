@@ -142,6 +142,9 @@ exports.Prisma.AdminSessionScalarFieldEnum = {
 exports.Prisma.SubscriberScalarFieldEnum = {
   id: 'id',
   email: 'email',
+  status: 'status',
+  confirmToken: 'confirmToken',
+  confirmedAt: 'confirmedAt',
   createdAt: 'createdAt'
 };
 

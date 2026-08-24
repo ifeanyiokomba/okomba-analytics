@@ -53,11 +53,15 @@ export function exportInquiriesCsv(inquiries: InquiryCsvRow[]): void {
   downloadCsv(toCsv([header, ...rows]), `okomba-inquiries-${dateStamp()}.csv`);
 }
 
-export type SubscriberCsvRow = { email: string; createdAt: string };
+export type SubscriberCsvRow = {
+  email: string;
+  status: string;
+  createdAt: string;
+};
 
 export function exportSubscribersCsv(subscribers: SubscriberCsvRow[]): void {
-  const header = ["Email", "Subscribed At"];
-  const rows = subscribers.map((s) => [s.email, new Date(s.createdAt).toISOString()]);
+  const header = ["Email", "Status", "Subscribed At"];
+  const rows = subscribers.map((s) => [s.email, s.status, new Date(s.createdAt).toISOString()]);
   downloadCsv(toCsv([header, ...rows]), `okomba-subscribers-${dateStamp()}.csv`);
 }
 

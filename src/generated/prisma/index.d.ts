@@ -3107,18 +3107,27 @@ export namespace Prisma {
   export type SubscriberMinAggregateOutputType = {
     id: string | null
     email: string | null
+    status: string | null
+    confirmToken: string | null
+    confirmedAt: Date | null
     createdAt: Date | null
   }
 
   export type SubscriberMaxAggregateOutputType = {
     id: string | null
     email: string | null
+    status: string | null
+    confirmToken: string | null
+    confirmedAt: Date | null
     createdAt: Date | null
   }
 
   export type SubscriberCountAggregateOutputType = {
     id: number
     email: number
+    status: number
+    confirmToken: number
+    confirmedAt: number
     createdAt: number
     _all: number
   }
@@ -3127,18 +3136,27 @@ export namespace Prisma {
   export type SubscriberMinAggregateInputType = {
     id?: true
     email?: true
+    status?: true
+    confirmToken?: true
+    confirmedAt?: true
     createdAt?: true
   }
 
   export type SubscriberMaxAggregateInputType = {
     id?: true
     email?: true
+    status?: true
+    confirmToken?: true
+    confirmedAt?: true
     createdAt?: true
   }
 
   export type SubscriberCountAggregateInputType = {
     id?: true
     email?: true
+    status?: true
+    confirmToken?: true
+    confirmedAt?: true
     createdAt?: true
     _all?: true
   }
@@ -3218,6 +3236,9 @@ export namespace Prisma {
   export type SubscriberGroupByOutputType = {
     id: string
     email: string
+    status: string
+    confirmToken: string | null
+    confirmedAt: Date | null
     createdAt: Date
     _count: SubscriberCountAggregateOutputType | null
     _min: SubscriberMinAggregateOutputType | null
@@ -3241,28 +3262,40 @@ export namespace Prisma {
   export type SubscriberSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     email?: boolean
+    status?: boolean
+    confirmToken?: boolean
+    confirmedAt?: boolean
     createdAt?: boolean
   }, ExtArgs["result"]["subscriber"]>
 
   export type SubscriberSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     email?: boolean
+    status?: boolean
+    confirmToken?: boolean
+    confirmedAt?: boolean
     createdAt?: boolean
   }, ExtArgs["result"]["subscriber"]>
 
   export type SubscriberSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     email?: boolean
+    status?: boolean
+    confirmToken?: boolean
+    confirmedAt?: boolean
     createdAt?: boolean
   }, ExtArgs["result"]["subscriber"]>
 
   export type SubscriberSelectScalar = {
     id?: boolean
     email?: boolean
+    status?: boolean
+    confirmToken?: boolean
+    confirmedAt?: boolean
     createdAt?: boolean
   }
 
-  export type SubscriberOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "email" | "createdAt", ExtArgs["result"]["subscriber"]>
+  export type SubscriberOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "email" | "status" | "confirmToken" | "confirmedAt" | "createdAt", ExtArgs["result"]["subscriber"]>
 
   export type $SubscriberPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Subscriber"
@@ -3270,6 +3303,9 @@ export namespace Prisma {
     scalars: $Extensions.GetPayloadResult<{
       id: string
       email: string
+      status: string
+      confirmToken: string | null
+      confirmedAt: Date | null
       createdAt: Date
     }, ExtArgs["result"]["subscriber"]>
     composites: {}
@@ -3696,6 +3732,9 @@ export namespace Prisma {
   interface SubscriberFieldRefs {
     readonly id: FieldRef<"Subscriber", 'String'>
     readonly email: FieldRef<"Subscriber", 'String'>
+    readonly status: FieldRef<"Subscriber", 'String'>
+    readonly confirmToken: FieldRef<"Subscriber", 'String'>
+    readonly confirmedAt: FieldRef<"Subscriber", 'DateTime'>
     readonly createdAt: FieldRef<"Subscriber", 'DateTime'>
   }
     
@@ -4102,6 +4141,9 @@ export namespace Prisma {
   export const SubscriberScalarFieldEnum: {
     id: 'id',
     email: 'email',
+    status: 'status',
+    confirmToken: 'confirmToken',
+    confirmedAt: 'confirmedAt',
     createdAt: 'createdAt'
   };
 
@@ -4288,27 +4330,39 @@ export namespace Prisma {
     NOT?: SubscriberWhereInput | SubscriberWhereInput[]
     id?: StringFilter<"Subscriber"> | string
     email?: StringFilter<"Subscriber"> | string
+    status?: StringFilter<"Subscriber"> | string
+    confirmToken?: StringNullableFilter<"Subscriber"> | string | null
+    confirmedAt?: DateTimeNullableFilter<"Subscriber"> | Date | string | null
     createdAt?: DateTimeFilter<"Subscriber"> | Date | string
   }
 
   export type SubscriberOrderByWithRelationInput = {
     id?: SortOrder
     email?: SortOrder
+    status?: SortOrder
+    confirmToken?: SortOrderInput | SortOrder
+    confirmedAt?: SortOrderInput | SortOrder
     createdAt?: SortOrder
   }
 
   export type SubscriberWhereUniqueInput = Prisma.AtLeast<{
     id?: string
     email?: string
+    confirmToken?: string
     AND?: SubscriberWhereInput | SubscriberWhereInput[]
     OR?: SubscriberWhereInput[]
     NOT?: SubscriberWhereInput | SubscriberWhereInput[]
+    status?: StringFilter<"Subscriber"> | string
+    confirmedAt?: DateTimeNullableFilter<"Subscriber"> | Date | string | null
     createdAt?: DateTimeFilter<"Subscriber"> | Date | string
-  }, "id" | "email">
+  }, "id" | "email" | "confirmToken">
 
   export type SubscriberOrderByWithAggregationInput = {
     id?: SortOrder
     email?: SortOrder
+    status?: SortOrder
+    confirmToken?: SortOrderInput | SortOrder
+    confirmedAt?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     _count?: SubscriberCountOrderByAggregateInput
     _max?: SubscriberMaxOrderByAggregateInput
@@ -4321,6 +4375,9 @@ export namespace Prisma {
     NOT?: SubscriberScalarWhereWithAggregatesInput | SubscriberScalarWhereWithAggregatesInput[]
     id?: StringWithAggregatesFilter<"Subscriber"> | string
     email?: StringWithAggregatesFilter<"Subscriber"> | string
+    status?: StringWithAggregatesFilter<"Subscriber"> | string
+    confirmToken?: StringNullableWithAggregatesFilter<"Subscriber"> | string | null
+    confirmedAt?: DateTimeNullableWithAggregatesFilter<"Subscriber"> | Date | string | null
     createdAt?: DateTimeWithAggregatesFilter<"Subscriber"> | Date | string
   }
 
@@ -4474,42 +4531,63 @@ export namespace Prisma {
   export type SubscriberCreateInput = {
     id?: string
     email: string
+    status?: string
+    confirmToken?: string | null
+    confirmedAt?: Date | string | null
     createdAt?: Date | string
   }
 
   export type SubscriberUncheckedCreateInput = {
     id?: string
     email: string
+    status?: string
+    confirmToken?: string | null
+    confirmedAt?: Date | string | null
     createdAt?: Date | string
   }
 
   export type SubscriberUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    confirmToken?: NullableStringFieldUpdateOperationsInput | string | null
+    confirmedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type SubscriberUncheckedUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    confirmToken?: NullableStringFieldUpdateOperationsInput | string | null
+    confirmedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type SubscriberCreateManyInput = {
     id?: string
     email: string
+    status?: string
+    confirmToken?: string | null
+    confirmedAt?: Date | string | null
     createdAt?: Date | string
   }
 
   export type SubscriberUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    confirmToken?: NullableStringFieldUpdateOperationsInput | string | null
+    confirmedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type SubscriberUncheckedUpdateManyInput = {
     id?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    confirmToken?: NullableStringFieldUpdateOperationsInput | string | null
+    confirmedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -4668,22 +4746,56 @@ export namespace Prisma {
     createdAt?: SortOrder
   }
 
+  export type DateTimeNullableFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | null
+    notIn?: Date[] | string[] | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
+  }
+
   export type SubscriberCountOrderByAggregateInput = {
     id?: SortOrder
     email?: SortOrder
+    status?: SortOrder
+    confirmToken?: SortOrder
+    confirmedAt?: SortOrder
     createdAt?: SortOrder
   }
 
   export type SubscriberMaxOrderByAggregateInput = {
     id?: SortOrder
     email?: SortOrder
+    status?: SortOrder
+    confirmToken?: SortOrder
+    confirmedAt?: SortOrder
     createdAt?: SortOrder
   }
 
   export type SubscriberMinOrderByAggregateInput = {
     id?: SortOrder
     email?: SortOrder
+    status?: SortOrder
+    confirmToken?: SortOrder
+    confirmedAt?: SortOrder
     createdAt?: SortOrder
+  }
+
+  export type DateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | null
+    notIn?: Date[] | string[] | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableWithAggregatesFilter<$PrismaModel> | Date | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedDateTimeNullableFilter<$PrismaModel>
+    _max?: NestedDateTimeNullableFilter<$PrismaModel>
   }
 
   export type StringFieldUpdateOperationsInput = {
@@ -4696,6 +4808,10 @@ export namespace Prisma {
 
   export type DateTimeFieldUpdateOperationsInput = {
     set?: Date | string
+  }
+
+  export type NullableDateTimeFieldUpdateOperationsInput = {
+    set?: Date | string | null
   }
 
   export type NestedStringFilter<$PrismaModel = never> = {
@@ -4805,6 +4921,31 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedDateTimeFilter<$PrismaModel>
     _max?: NestedDateTimeFilter<$PrismaModel>
+  }
+
+  export type NestedDateTimeNullableFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | null
+    notIn?: Date[] | string[] | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
+  }
+
+  export type NestedDateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | null
+    notIn?: Date[] | string[] | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableWithAggregatesFilter<$PrismaModel> | Date | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedDateTimeNullableFilter<$PrismaModel>
+    _max?: NestedDateTimeNullableFilter<$PrismaModel>
   }
 
 

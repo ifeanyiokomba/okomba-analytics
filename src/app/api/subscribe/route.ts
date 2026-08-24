@@ -31,9 +31,15 @@ function rateLimited(ip: string): boolean {
   return bucket.count > RATE_LIMIT;
 }
 
+function makeToken(): string {
+  return crypto.randomUUID().replace(/-/g, "") + crypto.randomUUID().replace(/-/g, "");
+}
+
 /**
- * POST /api/subscribe — public newsletter subscription.
- * Idempotent: subscribing an existing email returns success (no duplicate rows).
+ * POST /api/subscribe — public newsletter subscription (double opt-in step 1).
+ * Creates/reuses a pending subscriber and returns the confirmation path.
+ * The client UI simulates the confirmation email (dev) while the notification
+ * stub carries the confirm link for a real email provider.
  */
 export async function POST(req: Request) {
   try {
@@ -60,16 +66,35 @@ export async function POST(req: Request) {
 
     const { email } = parsed.data;
 
-    // Upsert-style: silently succeed if already subscribed
     const existing = await db.subscriber.findUnique({ where: { email } });
 
-    if (!existing) {
-      await db.subscriber.create({ data: { email } });
-      // Fire-and-forget notification (never blocks the response)
-      notifyNewSubscriber(email).catch(() => undefined);
+    if (existing && existing.status === "confirmed") {
+      // Already confirmed — idempotent success
+      return NextResponse.json({ ok: true, alreadyConfirmed: true }, { status: 201 });
     }
 
-    return NextResponse.json({ ok: true }, { status: 201 });
+    const token = existing?.confirmToken ?? makeToken();
+
+    if (existing) {
+      // pending — refresh the token so a re-subscribe gets a fresh link
+      await db.subscriber.update({
+        where: { email },
+        data: { confirmToken: token },
+      });
+    } else {
+      await db.subscriber.create({
+        data: { email, status: "pending", confirmToken: token },
+      });
+    }
+
+    // Fire-and-forget notification carrying the confirmation link
+    notifyNewSubscriber(email).catch(() => undefined);
+
+    // In dev (no email provider) the client shows the confirm link directly.
+    return NextResponse.json(
+      { ok: true, confirmPath: `/api/subscribe/confirm?token=${token}` },
+      { status: 201 }
+    );
   } catch (err) {
     console.error("[subscribe] error:", err);
     return NextResponse.json(

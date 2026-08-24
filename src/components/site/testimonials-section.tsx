@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { Star } from "lucide-react";
 import { TESTIMONIALS } from "@/lib/content";
 import { SectionHeading } from "./section-heading";
@@ -41,13 +42,25 @@ export function TestimonialsSection() {
                 </blockquote>
 
                 <figcaption className="mt-6 flex items-center gap-3.5 border-t border-white/[0.06] pt-5">
-                  <span
-                    className="flex h-10 w-10 items-center justify-center rounded-full text-[12px] font-bold text-ink"
-                    style={{ background: AVATAR_COLORS[i % AVATAR_COLORS.length] }}
-                    aria-hidden="true"
-                  >
-                    {t.name.split(" ").map((n) => n[0]).join("")}
-                  </span>
+                  {t.avatar ? (
+                    <span className="relative h-11 w-11 shrink-0 overflow-hidden rounded-full ring-2 ring-gold/30">
+                      <Image
+                        src={t.avatar}
+                        alt={`Portrait of ${t.name}`}
+                        fill
+                        sizes="44px"
+                        className="object-cover"
+                      />
+                    </span>
+                  ) : (
+                    <span
+                      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-[12px] font-bold text-ink"
+                      style={{ background: AVATAR_COLORS[i % AVATAR_COLORS.length] }}
+                      aria-hidden="true"
+                    >
+                      {t.name.split(" ").map((n) => n[0]).join("")}
+                    </span>
+                  )}
                   <div className="min-w-0">
                     <p className="truncate text-[13.5px] font-semibold text-foreground">{t.name}</p>
                     <p className="truncate text-[12px] text-muted-foreground">{t.role}</p>

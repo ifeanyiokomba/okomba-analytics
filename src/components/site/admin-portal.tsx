@@ -211,7 +211,13 @@ function AdminLogin({ onLogin, onExit }: { onLogin: () => void; onExit: () => vo
 }
 
 /* ── Dashboard ─────────────────────────────────────────────── */
-type Subscriber = { id: string; email: string; createdAt: string };
+type Subscriber = {
+  id: string;
+  email: string;
+  status: string;
+  confirmedAt: string | null;
+  createdAt: string;
+};
 
 function AdminDashboard({ onLogout, onExit }: { onLogout: () => void; onExit: () => void }) {
   const [inquiries, setInquiries] = useState<Inquiry[]>([]);
@@ -678,14 +684,27 @@ function AdminDashboard({ onLogout, onExit }: { onLogout: () => void; onExit: ()
                     key={s.id}
                     className="flex items-center justify-between gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3"
                   >
-                    <a
-                      href={`mailto:${s.email}`}
-                      className="truncate text-[12.5px] font-medium text-foreground transition-colors hover:text-gold"
-                    >
-                      {s.email}
-                    </a>
+                    <div className="flex min-w-0 items-center gap-2.5">
+                      <a
+                        href={`mailto:${s.email}`}
+                        className="truncate text-[12.5px] font-medium text-foreground transition-colors hover:text-gold"
+                      >
+                        {s.email}
+                      </a>
+                      <span
+                        title={s.status === "confirmed" ? "Confirmed subscriber" : "Awaiting confirmation"}
+                        className={cn(
+                          "shrink-0 rounded-full px-2 py-0.5 font-mono text-[9px] font-semibold",
+                          s.status === "confirmed"
+                            ? "bg-teal/15 text-teal"
+                            : "bg-gold/15 text-gold/80"
+                        )}
+                      >
+                        {s.status === "confirmed" ? "CONFIRMED" : "PENDING"}
+                      </span>
+                    </div>
                     <span className="shrink-0 font-mono text-[10px] text-muted-foreground/70">
-                      {new Date(s.createdAt).toLocaleDateString("en-NG", { day: "numeric", month: "short" })}
+                      {new Date(s.confirmedAt ?? s.createdAt).toLocaleDateString("en-NG", { day: "numeric", month: "short" })}
                     </span>
                   </li>
                 ))}

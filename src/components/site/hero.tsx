@@ -23,7 +23,11 @@ export function Hero({ onGetStarted }: HeroProps) {
     <section id="hero" aria-label="Hero" className="relative overflow-hidden">
       {/* Backdrop decor */}
       <div className="bg-grid mask-fade-y pointer-events-none absolute inset-0" aria-hidden="true" />
+      {/* warm horizon glow */}
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-[420px] bg-[radial-gradient(70%_100%_at_50%_0%,rgba(240,165,0,0.07),transparent)]" aria-hidden="true" />
       <div className="pointer-events-none absolute -top-40 left-1/2 h-[420px] w-[720px] -translate-x-1/2 rounded-full bg-gold/[0.07] blur-[130px]" aria-hidden="true" />
+      {/* bottom-left cool counterweight */}
+      <div className="pointer-events-none absolute -bottom-32 -left-24 h-[340px] w-[340px] rounded-full bg-teal/[0.05] blur-[110px]" aria-hidden="true" />
 
       <div className="container-xl relative grid grid-cols-1 items-center gap-14 pb-24 pt-32 md:pb-32 md:pt-40 lg:grid-cols-[1.05fr_0.95fr] lg:gap-10 lg:pb-40 lg:pt-44">
         {/* ── Copy column ── */}
