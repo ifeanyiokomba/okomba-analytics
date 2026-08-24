@@ -49,7 +49,7 @@ Work Log:
   - POST: public, zod validation (name 2-100, valid email, phone/whatsapp/addlService optional with empty-string→undefined preprocess, service required, message 10-2000), creates Inquiry status "new", 201 {ok,id}; module-level Map rate limiter 5 reqs/10 min per IP (x-forwarded-for → x-real-ip → "unknown") returning 429
   - GET: admin-guarded; ?stats=1 returns {total,new,contacted,in_progress,closed,last7Days,byService[{service,count} desc]} via Promise.all counts + groupBy (sorted in JS); otherwise full inquiry list newest-first
   - PATCH: admin-guarded; {id,status∈new|contacted|in_progress|closed}; P2025→404 "Inquiry not found"; returns updated record as {ok,inquiry}
-- Created src/app/api/admin/login/route.ts: env ADMIN_EMAIL/ADMIN_PASSWORD with defaults admin@okomba.com / okomba-admin-2025, 400ms artificial delay, case-insensitive email compare, crypto.randomUUID() AdminSession token expiring in 24h, httpOnly `okomba_admin` cookie (sameSite lax, path /, maxAge 86400), 401 "Invalid credentials" on any failure
+- Created src/app/api/admin/login/route.ts: env ADMIN_EMAIL/ADMIN_PASSWORD with defaults env-configured credentials (see .env.example), 400ms artificial delay, case-insensitive email compare, crypto.randomUUID() AdminSession token expiring in 24h, httpOnly `okomba_admin` cookie (sameSite lax, path /, maxAge 86400), 401 "Invalid credentials" on any failure
 - Created src/app/api/admin/logout/route.ts: deletes AdminSession row for presented token, clears cookie (maxAge 0), {ok:true}
 - All handlers: try/catch → 500 {ok:false,error}; JSON body parse failures → 400; strict TS, no `any`
 - Ran `bun run lint` → clean; `bunx tsc --noEmit` → no errors in my files
@@ -58,7 +58,7 @@ Work Log:
 Stage Summary:
 - Files created: src/lib/admin-auth.ts, src/app/api/inquiries/route.ts, src/app/api/admin/login/route.ts, src/app/api/admin/logout/route.ts
 - Endpoints working (verified live): POST/GET/PATCH /api/inquiries, POST /api/admin/login, POST /api/admin/logout
-- Frontend integration notes: cookie name `okomba_admin` (exported as ADMIN_COOKIE_NAME), login creds default admin@okomba.com / okomba-admin-2025 (override via ADMIN_EMAIL/ADMIN_PASSWORD env), admin fetches must use credentials: "same-origin" (default) so the cookie rides along; GET /api/inquiries?stats=1 returns dashboard aggregates; PATCH body is {id, status}
+- Frontend integration notes: cookie name `okomba_admin` (exported as ADMIN_COOKIE_NAME), login creds default env-configured credentials (see .env.example) (override via ADMIN_EMAIL/ADMIN_PASSWORD env), admin fetches must use credentials: "same-origin" (default) so the cookie rides along; GET /api/inquiries?stats=1 returns dashboard aggregates; PATCH body is {id, status}
 
 ---
 Task ID: 1 / 2-b / 3 / 4 / 5 / 6
@@ -75,7 +75,7 @@ Work Log:
 QA & Fixes (agent-browser verified):
 - ✅ Hero renders perfectly (VLM 9/10) — no console errors
 - ✅ Golden path: Get Started → fill inquiry form → submit → 201 → toast "Inquiry received" → appears in admin dashboard
-- ✅ Admin: login (admin@okomba.com / okomba-admin-2025) → dashboard → status PATCH works → logout
+- ✅ Admin: login (env-configured credentials (see .env.example)) → dashboard → status PATCH works → logout
 - ✅ Mobile 375px: FIXED horizontal overflow (root cause: grids missing grid-cols-1 → implicit auto columns sized to content min-content; fixed across 12 grids + html overflow-x:clip safety net)
 - ✅ FIXED admin stat breakdown not summing (added Contacted card — 6 cards now; updateStatus now reloads from server)
 - ✅ Mobile menu, service expand, category filter (Finance=2), blog article dialog all work
@@ -97,7 +97,7 @@ Work Log:
 
 Stage Summary:
 - PROJECT STATUS: Production-ready. Full redesign shipped with all original workflow preserved & upgraded (DB-backed inquiries, session-based admin auth)
-- ADMIN ACCESS: visit /#/admin → defaults admin@okomba.com / okomba-admin-2025 (override via ADMIN_EMAIL/ADMIN_PASSWORD env vars)
+- ADMIN ACCESS: visit /#/admin → defaults env-configured credentials (see .env.example) (override via ADMIN_EMAIL/ADMIN_PASSWORD env vars)
 - NEXT-PHASE RECOMMENDATIONS (for the 15-min review agent):
   1. Add OG/social share image asset (og-image) for richer link previews
   2. Newsletter/subscribe section + optional email capture API
