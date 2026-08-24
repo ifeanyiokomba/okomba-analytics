@@ -126,6 +126,7 @@ exports.Prisma.InquiryScalarFieldEnum = {
   whatsapp: 'whatsapp',
   service: 'service',
   addlService: 'addlService',
+  budget: 'budget',
   message: 'message',
   status: 'status',
   createdAt: 'createdAt',
@@ -144,8 +145,10 @@ exports.Prisma.SubscriberScalarFieldEnum = {
   email: 'email',
   status: 'status',
   confirmToken: 'confirmToken',
+  unsubscribeToken: 'unsubscribeToken',
   confirmedAt: 'confirmedAt',
-  createdAt: 'createdAt'
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 };
 
 exports.Prisma.SortOrder = {

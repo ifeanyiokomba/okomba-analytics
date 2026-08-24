@@ -18,6 +18,7 @@ type FormState = {
   whatsapp: string;
   service: string;
   addlService: string;
+  budget: string;
   message: string;
 };
 
@@ -28,8 +29,18 @@ const INITIAL_FORM: FormState = {
   whatsapp: "",
   service: "",
   addlService: "",
+  budget: "",
   message: "",
 };
+
+const BUDGET_OPTIONS = [
+  "Under ₦150k",
+  "₦150k – ₦500k",
+  "₦500k – ₦1.5M",
+  "₦1.5M – ₦5M",
+  "₦5M+",
+  "Not sure yet",
+];
 
 /**
  * Inquiry modal — the core conversion workflow (preserved from original app).
@@ -116,6 +127,7 @@ export function InquiryModal({ service, onClose, onSuccess }: InquiryModalProps)
           whatsapp: form.whatsapp.trim() || undefined,
           service: form.service,
           addlService: form.addlService || undefined,
+          budget: form.budget || undefined,
           message: form.message.trim(),
         }),
       });
@@ -264,12 +276,12 @@ export function InquiryModal({ service, onClose, onSuccess }: InquiryModalProps)
                 )}
               </div>
               <div>
-                <label htmlFor="iq-addl" className={labelCls}>Additional service</label>
-                <select id="iq-addl" value={form.addlService} onChange={set("addlService")} className={cn(inputCls("addlService"), "cursor-pointer appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2212%22%20height%3D%2212%22%20viewBox%3D%220%200%2012%2012%22%3E%3Cpath%20fill%3D%22%239aa3b8%22%20d%3D%22M6%208L1%203h10z%22%2F%3E%3C%2Fsvg%3E')] bg-[position:right_1rem_center] bg-no-repeat pr-10")}>
-                  <option value="">Optional…</option>
-                  {SERVICES.filter((s) => s.title !== form.service).map((s) => (
-                    <option key={s.id} value={s.title} className="bg-[#0b101c]">
-                      {s.title}
+                <label htmlFor="iq-budget" className={labelCls}>Budget range</label>
+                <select id="iq-budget" value={form.budget} onChange={set("budget")} className={cn(inputCls("budget"), "cursor-pointer appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2212%22%20height%3D%2212%22%20viewBox%3D%220%200%2012%2012%22%3E%3Cpath%20fill%3D%22%239aa3b8%22%20d%3D%22M6%208L1%203h10z%22%2F%3E%3C%2Fsvg%3E')] bg-[position:right_1rem_center] bg-no-repeat pr-10")}>
+                  <option value="">Optional — helps us tailor the proposal</option>
+                  {BUDGET_OPTIONS.map((b) => (
+                    <option key={b} value={b} className="bg-[#0b101c]">
+                      {b}
                     </option>
                   ))}
                 </select>
@@ -292,6 +304,19 @@ export function InquiryModal({ service, onClose, onSuccess }: InquiryModalProps)
               {errors.message && (
                 <p className={errorCls}><AlertCircle size={12} aria-hidden="true" />{errors.message}</p>
               )}
+            </div>
+
+            {/* Additional service (moved below budget for flow) */}
+            <div>
+              <label htmlFor="iq-addl" className={labelCls}>Additional service</label>
+              <select id="iq-addl" value={form.addlService} onChange={set("addlService")} className={cn(inputCls("addlService"), "cursor-pointer appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2212%22%20height%3D%2212%22%20viewBox%3D%220%200%2012%2012%22%3E%3Cpath%20fill%3D%22%239aa3b8%22%20d%3D%22M6%208L1%203h10z%22%2F%3E%3C%2Fsvg%3E')] bg-[position:right_1rem_center] bg-no-repeat pr-10")}>
+                <option value="">Optional — any second service?</option>
+                {SERVICES.filter((s) => s.title !== form.service).map((s) => (
+                  <option key={s.id} value={s.title} className="bg-[#0b101c]">
+                    {s.title}
+                  </option>
+                ))}
+              </select>
             </div>
 
             {/* Selected service context hint */}

@@ -41,6 +41,7 @@ type Inquiry = {
   whatsapp?: string | null;
   service: string;
   addlService?: string | null;
+  budget?: string | null;
   message: string;
   status: string;
   createdAt: string;
@@ -566,6 +567,11 @@ function AdminDashboard({ onLogout, onExit }: { onLogout: () => void; onExit: ()
                       <td className="px-6 py-4">
                         <p className="max-w-[180px] text-[12.5px] text-foreground/90">{i.service}</p>
                         {i.addlService && <p className="mt-0.5 max-w-[180px] text-[11px] text-muted-foreground">+ {i.addlService}</p>}
+                        {i.budget && (
+                          <span className="mt-1.5 inline-block rounded-md bg-gold/10 px-2 py-0.5 font-mono text-[10px] font-medium text-gold">
+                            {i.budget}
+                          </span>
+                        )}
                       </td>
                       <td className="max-w-[260px] px-6 py-4">
                         <p className="line-clamp-2 text-[12.5px] leading-relaxed text-muted-foreground">{i.message}</p>
@@ -692,15 +698,23 @@ function AdminDashboard({ onLogout, onExit }: { onLogout: () => void; onExit: ()
                         {s.email}
                       </a>
                       <span
-                        title={s.status === "confirmed" ? "Confirmed subscriber" : "Awaiting confirmation"}
+                        title={
+                          s.status === "confirmed"
+                            ? "Confirmed subscriber"
+                            : s.status === "unsubscribed"
+                              ? "Unsubscribed"
+                              : "Awaiting confirmation"
+                        }
                         className={cn(
                           "shrink-0 rounded-full px-2 py-0.5 font-mono text-[9px] font-semibold",
                           s.status === "confirmed"
                             ? "bg-teal/15 text-teal"
-                            : "bg-gold/15 text-gold/80"
+                            : s.status === "unsubscribed"
+                              ? "bg-red-500/15 text-red-400"
+                              : "bg-gold/15 text-gold/80"
                         )}
                       >
-                        {s.status === "confirmed" ? "CONFIRMED" : "PENDING"}
+                        {s.status === "confirmed" ? "CONFIRMED" : s.status === "unsubscribed" ? "UNSUBSCRIBED" : "PENDING"}
                       </span>
                     </div>
                     <span className="shrink-0 font-mono text-[10px] text-muted-foreground/70">

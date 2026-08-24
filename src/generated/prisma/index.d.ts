@@ -1061,6 +1061,7 @@ export namespace Prisma {
     whatsapp: string | null
     service: string | null
     addlService: string | null
+    budget: string | null
     message: string | null
     status: string | null
     createdAt: Date | null
@@ -1075,6 +1076,7 @@ export namespace Prisma {
     whatsapp: string | null
     service: string | null
     addlService: string | null
+    budget: string | null
     message: string | null
     status: string | null
     createdAt: Date | null
@@ -1089,6 +1091,7 @@ export namespace Prisma {
     whatsapp: number
     service: number
     addlService: number
+    budget: number
     message: number
     status: number
     createdAt: number
@@ -1105,6 +1108,7 @@ export namespace Prisma {
     whatsapp?: true
     service?: true
     addlService?: true
+    budget?: true
     message?: true
     status?: true
     createdAt?: true
@@ -1119,6 +1123,7 @@ export namespace Prisma {
     whatsapp?: true
     service?: true
     addlService?: true
+    budget?: true
     message?: true
     status?: true
     createdAt?: true
@@ -1133,6 +1138,7 @@ export namespace Prisma {
     whatsapp?: true
     service?: true
     addlService?: true
+    budget?: true
     message?: true
     status?: true
     createdAt?: true
@@ -1220,6 +1226,7 @@ export namespace Prisma {
     whatsapp: string | null
     service: string
     addlService: string | null
+    budget: string | null
     message: string
     status: string
     createdAt: Date
@@ -1251,6 +1258,7 @@ export namespace Prisma {
     whatsapp?: boolean
     service?: boolean
     addlService?: boolean
+    budget?: boolean
     message?: boolean
     status?: boolean
     createdAt?: boolean
@@ -1265,6 +1273,7 @@ export namespace Prisma {
     whatsapp?: boolean
     service?: boolean
     addlService?: boolean
+    budget?: boolean
     message?: boolean
     status?: boolean
     createdAt?: boolean
@@ -1279,6 +1288,7 @@ export namespace Prisma {
     whatsapp?: boolean
     service?: boolean
     addlService?: boolean
+    budget?: boolean
     message?: boolean
     status?: boolean
     createdAt?: boolean
@@ -1293,13 +1303,14 @@ export namespace Prisma {
     whatsapp?: boolean
     service?: boolean
     addlService?: boolean
+    budget?: boolean
     message?: boolean
     status?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type InquiryOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "email" | "phone" | "whatsapp" | "service" | "addlService" | "message" | "status" | "createdAt" | "updatedAt", ExtArgs["result"]["inquiry"]>
+  export type InquiryOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "email" | "phone" | "whatsapp" | "service" | "addlService" | "budget" | "message" | "status" | "createdAt" | "updatedAt", ExtArgs["result"]["inquiry"]>
 
   export type $InquiryPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Inquiry"
@@ -1312,6 +1323,7 @@ export namespace Prisma {
       whatsapp: string | null
       service: string
       addlService: string | null
+      budget: string | null
       message: string
       status: string
       createdAt: Date
@@ -1746,6 +1758,7 @@ export namespace Prisma {
     readonly whatsapp: FieldRef<"Inquiry", 'String'>
     readonly service: FieldRef<"Inquiry", 'String'>
     readonly addlService: FieldRef<"Inquiry", 'String'>
+    readonly budget: FieldRef<"Inquiry", 'String'>
     readonly message: FieldRef<"Inquiry", 'String'>
     readonly status: FieldRef<"Inquiry", 'String'>
     readonly createdAt: FieldRef<"Inquiry", 'DateTime'>
@@ -3109,8 +3122,10 @@ export namespace Prisma {
     email: string | null
     status: string | null
     confirmToken: string | null
+    unsubscribeToken: string | null
     confirmedAt: Date | null
     createdAt: Date | null
+    updatedAt: Date | null
   }
 
   export type SubscriberMaxAggregateOutputType = {
@@ -3118,8 +3133,10 @@ export namespace Prisma {
     email: string | null
     status: string | null
     confirmToken: string | null
+    unsubscribeToken: string | null
     confirmedAt: Date | null
     createdAt: Date | null
+    updatedAt: Date | null
   }
 
   export type SubscriberCountAggregateOutputType = {
@@ -3127,8 +3144,10 @@ export namespace Prisma {
     email: number
     status: number
     confirmToken: number
+    unsubscribeToken: number
     confirmedAt: number
     createdAt: number
+    updatedAt: number
     _all: number
   }
 
@@ -3138,8 +3157,10 @@ export namespace Prisma {
     email?: true
     status?: true
     confirmToken?: true
+    unsubscribeToken?: true
     confirmedAt?: true
     createdAt?: true
+    updatedAt?: true
   }
 
   export type SubscriberMaxAggregateInputType = {
@@ -3147,8 +3168,10 @@ export namespace Prisma {
     email?: true
     status?: true
     confirmToken?: true
+    unsubscribeToken?: true
     confirmedAt?: true
     createdAt?: true
+    updatedAt?: true
   }
 
   export type SubscriberCountAggregateInputType = {
@@ -3156,8 +3179,10 @@ export namespace Prisma {
     email?: true
     status?: true
     confirmToken?: true
+    unsubscribeToken?: true
     confirmedAt?: true
     createdAt?: true
+    updatedAt?: true
     _all?: true
   }
 
@@ -3238,8 +3263,10 @@ export namespace Prisma {
     email: string
     status: string
     confirmToken: string | null
+    unsubscribeToken: string | null
     confirmedAt: Date | null
     createdAt: Date
+    updatedAt: Date
     _count: SubscriberCountAggregateOutputType | null
     _min: SubscriberMinAggregateOutputType | null
     _max: SubscriberMaxAggregateOutputType | null
@@ -3264,8 +3291,10 @@ export namespace Prisma {
     email?: boolean
     status?: boolean
     confirmToken?: boolean
+    unsubscribeToken?: boolean
     confirmedAt?: boolean
     createdAt?: boolean
+    updatedAt?: boolean
   }, ExtArgs["result"]["subscriber"]>
 
   export type SubscriberSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -3273,8 +3302,10 @@ export namespace Prisma {
     email?: boolean
     status?: boolean
     confirmToken?: boolean
+    unsubscribeToken?: boolean
     confirmedAt?: boolean
     createdAt?: boolean
+    updatedAt?: boolean
   }, ExtArgs["result"]["subscriber"]>
 
   export type SubscriberSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -3282,8 +3313,10 @@ export namespace Prisma {
     email?: boolean
     status?: boolean
     confirmToken?: boolean
+    unsubscribeToken?: boolean
     confirmedAt?: boolean
     createdAt?: boolean
+    updatedAt?: boolean
   }, ExtArgs["result"]["subscriber"]>
 
   export type SubscriberSelectScalar = {
@@ -3291,11 +3324,13 @@ export namespace Prisma {
     email?: boolean
     status?: boolean
     confirmToken?: boolean
+    unsubscribeToken?: boolean
     confirmedAt?: boolean
     createdAt?: boolean
+    updatedAt?: boolean
   }
 
-  export type SubscriberOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "email" | "status" | "confirmToken" | "confirmedAt" | "createdAt", ExtArgs["result"]["subscriber"]>
+  export type SubscriberOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "email" | "status" | "confirmToken" | "unsubscribeToken" | "confirmedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["subscriber"]>
 
   export type $SubscriberPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Subscriber"
@@ -3305,8 +3340,10 @@ export namespace Prisma {
       email: string
       status: string
       confirmToken: string | null
+      unsubscribeToken: string | null
       confirmedAt: Date | null
       createdAt: Date
+      updatedAt: Date
     }, ExtArgs["result"]["subscriber"]>
     composites: {}
   }
@@ -3734,8 +3771,10 @@ export namespace Prisma {
     readonly email: FieldRef<"Subscriber", 'String'>
     readonly status: FieldRef<"Subscriber", 'String'>
     readonly confirmToken: FieldRef<"Subscriber", 'String'>
+    readonly unsubscribeToken: FieldRef<"Subscriber", 'String'>
     readonly confirmedAt: FieldRef<"Subscriber", 'DateTime'>
     readonly createdAt: FieldRef<"Subscriber", 'DateTime'>
+    readonly updatedAt: FieldRef<"Subscriber", 'DateTime'>
   }
     
 
@@ -4119,6 +4158,7 @@ export namespace Prisma {
     whatsapp: 'whatsapp',
     service: 'service',
     addlService: 'addlService',
+    budget: 'budget',
     message: 'message',
     status: 'status',
     createdAt: 'createdAt',
@@ -4143,8 +4183,10 @@ export namespace Prisma {
     email: 'email',
     status: 'status',
     confirmToken: 'confirmToken',
+    unsubscribeToken: 'unsubscribeToken',
     confirmedAt: 'confirmedAt',
-    createdAt: 'createdAt'
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
   };
 
   export type SubscriberScalarFieldEnum = (typeof SubscriberScalarFieldEnum)[keyof typeof SubscriberScalarFieldEnum]
@@ -4206,6 +4248,7 @@ export namespace Prisma {
     whatsapp?: StringNullableFilter<"Inquiry"> | string | null
     service?: StringFilter<"Inquiry"> | string
     addlService?: StringNullableFilter<"Inquiry"> | string | null
+    budget?: StringNullableFilter<"Inquiry"> | string | null
     message?: StringFilter<"Inquiry"> | string
     status?: StringFilter<"Inquiry"> | string
     createdAt?: DateTimeFilter<"Inquiry"> | Date | string
@@ -4220,6 +4263,7 @@ export namespace Prisma {
     whatsapp?: SortOrderInput | SortOrder
     service?: SortOrder
     addlService?: SortOrderInput | SortOrder
+    budget?: SortOrderInput | SortOrder
     message?: SortOrder
     status?: SortOrder
     createdAt?: SortOrder
@@ -4237,6 +4281,7 @@ export namespace Prisma {
     whatsapp?: StringNullableFilter<"Inquiry"> | string | null
     service?: StringFilter<"Inquiry"> | string
     addlService?: StringNullableFilter<"Inquiry"> | string | null
+    budget?: StringNullableFilter<"Inquiry"> | string | null
     message?: StringFilter<"Inquiry"> | string
     status?: StringFilter<"Inquiry"> | string
     createdAt?: DateTimeFilter<"Inquiry"> | Date | string
@@ -4251,6 +4296,7 @@ export namespace Prisma {
     whatsapp?: SortOrderInput | SortOrder
     service?: SortOrder
     addlService?: SortOrderInput | SortOrder
+    budget?: SortOrderInput | SortOrder
     message?: SortOrder
     status?: SortOrder
     createdAt?: SortOrder
@@ -4271,6 +4317,7 @@ export namespace Prisma {
     whatsapp?: StringNullableWithAggregatesFilter<"Inquiry"> | string | null
     service?: StringWithAggregatesFilter<"Inquiry"> | string
     addlService?: StringNullableWithAggregatesFilter<"Inquiry"> | string | null
+    budget?: StringNullableWithAggregatesFilter<"Inquiry"> | string | null
     message?: StringWithAggregatesFilter<"Inquiry"> | string
     status?: StringWithAggregatesFilter<"Inquiry"> | string
     createdAt?: DateTimeWithAggregatesFilter<"Inquiry"> | Date | string
@@ -4332,8 +4379,10 @@ export namespace Prisma {
     email?: StringFilter<"Subscriber"> | string
     status?: StringFilter<"Subscriber"> | string
     confirmToken?: StringNullableFilter<"Subscriber"> | string | null
+    unsubscribeToken?: StringNullableFilter<"Subscriber"> | string | null
     confirmedAt?: DateTimeNullableFilter<"Subscriber"> | Date | string | null
     createdAt?: DateTimeFilter<"Subscriber"> | Date | string
+    updatedAt?: DateTimeFilter<"Subscriber"> | Date | string
   }
 
   export type SubscriberOrderByWithRelationInput = {
@@ -4341,29 +4390,35 @@ export namespace Prisma {
     email?: SortOrder
     status?: SortOrder
     confirmToken?: SortOrderInput | SortOrder
+    unsubscribeToken?: SortOrderInput | SortOrder
     confirmedAt?: SortOrderInput | SortOrder
     createdAt?: SortOrder
+    updatedAt?: SortOrder
   }
 
   export type SubscriberWhereUniqueInput = Prisma.AtLeast<{
     id?: string
     email?: string
     confirmToken?: string
+    unsubscribeToken?: string
     AND?: SubscriberWhereInput | SubscriberWhereInput[]
     OR?: SubscriberWhereInput[]
     NOT?: SubscriberWhereInput | SubscriberWhereInput[]
     status?: StringFilter<"Subscriber"> | string
     confirmedAt?: DateTimeNullableFilter<"Subscriber"> | Date | string | null
     createdAt?: DateTimeFilter<"Subscriber"> | Date | string
-  }, "id" | "email" | "confirmToken">
+    updatedAt?: DateTimeFilter<"Subscriber"> | Date | string
+  }, "id" | "email" | "confirmToken" | "unsubscribeToken">
 
   export type SubscriberOrderByWithAggregationInput = {
     id?: SortOrder
     email?: SortOrder
     status?: SortOrder
     confirmToken?: SortOrderInput | SortOrder
+    unsubscribeToken?: SortOrderInput | SortOrder
     confirmedAt?: SortOrderInput | SortOrder
     createdAt?: SortOrder
+    updatedAt?: SortOrder
     _count?: SubscriberCountOrderByAggregateInput
     _max?: SubscriberMaxOrderByAggregateInput
     _min?: SubscriberMinOrderByAggregateInput
@@ -4377,8 +4432,10 @@ export namespace Prisma {
     email?: StringWithAggregatesFilter<"Subscriber"> | string
     status?: StringWithAggregatesFilter<"Subscriber"> | string
     confirmToken?: StringNullableWithAggregatesFilter<"Subscriber"> | string | null
+    unsubscribeToken?: StringNullableWithAggregatesFilter<"Subscriber"> | string | null
     confirmedAt?: DateTimeNullableWithAggregatesFilter<"Subscriber"> | Date | string | null
     createdAt?: DateTimeWithAggregatesFilter<"Subscriber"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"Subscriber"> | Date | string
   }
 
   export type InquiryCreateInput = {
@@ -4389,6 +4446,7 @@ export namespace Prisma {
     whatsapp?: string | null
     service: string
     addlService?: string | null
+    budget?: string | null
     message: string
     status?: string
     createdAt?: Date | string
@@ -4403,6 +4461,7 @@ export namespace Prisma {
     whatsapp?: string | null
     service: string
     addlService?: string | null
+    budget?: string | null
     message: string
     status?: string
     createdAt?: Date | string
@@ -4417,6 +4476,7 @@ export namespace Prisma {
     whatsapp?: NullableStringFieldUpdateOperationsInput | string | null
     service?: StringFieldUpdateOperationsInput | string
     addlService?: NullableStringFieldUpdateOperationsInput | string | null
+    budget?: NullableStringFieldUpdateOperationsInput | string | null
     message?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -4431,6 +4491,7 @@ export namespace Prisma {
     whatsapp?: NullableStringFieldUpdateOperationsInput | string | null
     service?: StringFieldUpdateOperationsInput | string
     addlService?: NullableStringFieldUpdateOperationsInput | string | null
+    budget?: NullableStringFieldUpdateOperationsInput | string | null
     message?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -4445,6 +4506,7 @@ export namespace Prisma {
     whatsapp?: string | null
     service: string
     addlService?: string | null
+    budget?: string | null
     message: string
     status?: string
     createdAt?: Date | string
@@ -4459,6 +4521,7 @@ export namespace Prisma {
     whatsapp?: NullableStringFieldUpdateOperationsInput | string | null
     service?: StringFieldUpdateOperationsInput | string
     addlService?: NullableStringFieldUpdateOperationsInput | string | null
+    budget?: NullableStringFieldUpdateOperationsInput | string | null
     message?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -4473,6 +4536,7 @@ export namespace Prisma {
     whatsapp?: NullableStringFieldUpdateOperationsInput | string | null
     service?: StringFieldUpdateOperationsInput | string
     addlService?: NullableStringFieldUpdateOperationsInput | string | null
+    budget?: NullableStringFieldUpdateOperationsInput | string | null
     message?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -4533,8 +4597,10 @@ export namespace Prisma {
     email: string
     status?: string
     confirmToken?: string | null
+    unsubscribeToken?: string | null
     confirmedAt?: Date | string | null
     createdAt?: Date | string
+    updatedAt?: Date | string
   }
 
   export type SubscriberUncheckedCreateInput = {
@@ -4542,8 +4608,10 @@ export namespace Prisma {
     email: string
     status?: string
     confirmToken?: string | null
+    unsubscribeToken?: string | null
     confirmedAt?: Date | string | null
     createdAt?: Date | string
+    updatedAt?: Date | string
   }
 
   export type SubscriberUpdateInput = {
@@ -4551,8 +4619,10 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     confirmToken?: NullableStringFieldUpdateOperationsInput | string | null
+    unsubscribeToken?: NullableStringFieldUpdateOperationsInput | string | null
     confirmedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type SubscriberUncheckedUpdateInput = {
@@ -4560,8 +4630,10 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     confirmToken?: NullableStringFieldUpdateOperationsInput | string | null
+    unsubscribeToken?: NullableStringFieldUpdateOperationsInput | string | null
     confirmedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type SubscriberCreateManyInput = {
@@ -4569,8 +4641,10 @@ export namespace Prisma {
     email: string
     status?: string
     confirmToken?: string | null
+    unsubscribeToken?: string | null
     confirmedAt?: Date | string | null
     createdAt?: Date | string
+    updatedAt?: Date | string
   }
 
   export type SubscriberUpdateManyMutationInput = {
@@ -4578,8 +4652,10 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     confirmToken?: NullableStringFieldUpdateOperationsInput | string | null
+    unsubscribeToken?: NullableStringFieldUpdateOperationsInput | string | null
     confirmedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type SubscriberUncheckedUpdateManyInput = {
@@ -4587,8 +4663,10 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     confirmToken?: NullableStringFieldUpdateOperationsInput | string | null
+    unsubscribeToken?: NullableStringFieldUpdateOperationsInput | string | null
     confirmedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type StringFilter<$PrismaModel = never> = {
@@ -4643,6 +4721,7 @@ export namespace Prisma {
     whatsapp?: SortOrder
     service?: SortOrder
     addlService?: SortOrder
+    budget?: SortOrder
     message?: SortOrder
     status?: SortOrder
     createdAt?: SortOrder
@@ -4657,6 +4736,7 @@ export namespace Prisma {
     whatsapp?: SortOrder
     service?: SortOrder
     addlService?: SortOrder
+    budget?: SortOrder
     message?: SortOrder
     status?: SortOrder
     createdAt?: SortOrder
@@ -4671,6 +4751,7 @@ export namespace Prisma {
     whatsapp?: SortOrder
     service?: SortOrder
     addlService?: SortOrder
+    budget?: SortOrder
     message?: SortOrder
     status?: SortOrder
     createdAt?: SortOrder
@@ -4762,8 +4843,10 @@ export namespace Prisma {
     email?: SortOrder
     status?: SortOrder
     confirmToken?: SortOrder
+    unsubscribeToken?: SortOrder
     confirmedAt?: SortOrder
     createdAt?: SortOrder
+    updatedAt?: SortOrder
   }
 
   export type SubscriberMaxOrderByAggregateInput = {
@@ -4771,8 +4854,10 @@ export namespace Prisma {
     email?: SortOrder
     status?: SortOrder
     confirmToken?: SortOrder
+    unsubscribeToken?: SortOrder
     confirmedAt?: SortOrder
     createdAt?: SortOrder
+    updatedAt?: SortOrder
   }
 
   export type SubscriberMinOrderByAggregateInput = {
@@ -4780,8 +4865,10 @@ export namespace Prisma {
     email?: SortOrder
     status?: SortOrder
     confirmToken?: SortOrder
+    unsubscribeToken?: SortOrder
     confirmedAt?: SortOrder
     createdAt?: SortOrder
+    updatedAt?: SortOrder
   }
 
   export type DateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {

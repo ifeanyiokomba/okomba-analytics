@@ -282,3 +282,28 @@ Stage Summary:
   4. Copy deck refinement / hero A/B variants
   5. Optional: cookie-consent banner (regulatory readiness)
 - RISKS: dev-simulated confirm button must be removed/hidden in production once real email provider sends actual links
+
+---
+Task ID: R8 (cron review round 8)
+Agent: webDevReview cron (15-min cycle)
+Task: QA regression + newsletter unsubscribe flow + cookie consent banner + inquiry budget field
+
+Work Log:
+- QA regression: server 200, no console errors, desktop 1280 & mobile 375 overflow-CLEAN
+- NEW FEATURE — Newsletter unsubscribe flow: Subscriber model extended (status adds "unsubscribed", unique unsubscribeToken, updatedAt); POST /api/subscribe issues unsubscribe tokens on create/pending-refresh, returns unsubscribePath for already-confirmed (w/ silent token issuance for legacy rows); new GET /api/subscribe/unsubscribe?token=… endpoint w/ branded HTML page (power-icon, "re-subscribe anytime" note, noindex meta); admin badges extended (UNSUBSCRIBED = red, CONFIRMED teal, PENDING gold); footer gained Newsletter link; VERIFIED: subscribe → unsub → status flips to unsubscribed + repeat → "already unsubscribed" (idempotent), invalid token → 400 branded error
+- NEW FEATURE — Cookie consent banner (cookie-consent.tsx): glass card w/ gold cookie icon, delayed slide-up (1.4s), Accept (persists to localStorage okomba_cookie_consent) + Essential only (dismiss), privacy-approach link scrolls to About, leaving animation; VERIFIED: appears fresh (after localStorage.clear), Accept dismisses + persists, stays hidden after reload
+- NEW FEATURE — Inquiry budget field: Inquiry model + budget column (nullable) + zod validation (≤60 chars optional) + POST persistence; inquiry modal gained Budget range select (Under ₦150k / ₦150k–₦500k / ₦500k–₦1.5M / ₦1.5M–₦5M / ₦5M+ / Not sure yet) beside Service, Additional service relocated below message for flow; admin table shows gold budget badge on service cell; CSV export includes Budget column; VERIFIED end-to-end: UI submit w/ budget → 201 → toast → DB persisted "₦1.5M – ₦5M" → admin badge displays
+- Prisma cache key bumped to schema-v6-inquiry-budget (guard worked, no stale-client errors this round)
+- VLM QA: cookie banner "Excellent… none observed", admin budget badge verified
+- Final: lint clean, mobile 375 CLEAN, no console errors, test data cleaned
+
+Stage Summary:
+- PROJECT STATUS: Regulatory-ready & conversion-optimized. Full newsletter lifecycle (subscribe → confirm → unsubscribe), cookie consent, budget-qualified inquiries
+- VERIFIED: unsubscribe (valid/idempotent/invalid), cookie banner (show/accept/persist), budget field (UI → API → DB → admin → CSV), mobile overflow
+- UNRESOLVED/NEXT ROUND priorities:
+  1. Real email provider integration (deliver() swap — confirm + unsubscribe links ride the same tokens)
+  2. Admin: service-detail drilldown from inquiry rows
+  3. Hero A/B copy variants (data-driven positioning)
+  4. Budget distribution chart in admin stats (leverage new field)
+  5. Production hardening: remove dev-simulated confirm button behind env flag
+- RISKS: none blocking; all flows token-guarded + idempotent

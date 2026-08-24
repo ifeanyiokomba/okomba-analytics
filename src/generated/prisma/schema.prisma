@@ -16,6 +16,7 @@ model Inquiry {
   whatsapp    String?
   service     String
   addlService String?
+  budget      String?
   message     String
   status      String   @default("new") // new | contacted | in_progress | closed
   createdAt   DateTime @default(now())
@@ -30,10 +31,12 @@ model AdminSession {
 }
 
 model Subscriber {
-  id           String    @id @default(cuid())
-  email        String    @unique
-  status       String    @default("pending") // pending | confirmed
-  confirmToken String?   @unique
-  confirmedAt  DateTime?
-  createdAt    DateTime  @default(now())
+  id               String    @id @default(cuid())
+  email            String    @unique
+  status           String    @default("pending") // pending | confirmed | unsubscribed
+  confirmToken     String?   @unique
+  unsubscribeToken String?   @unique
+  confirmedAt      DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
 }

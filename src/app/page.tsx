@@ -22,6 +22,7 @@ import { Footer } from "@/components/site/footer";
 import { LoadingScreen } from "@/components/site/loading-screen";
 import { ScrollProgress } from "@/components/site/scroll-progress";
 import { BackToTop } from "@/components/site/back-to-top";
+import { CookieConsent } from "@/components/site/cookie-consent";
 
 /* ── Lazy-loaded: only fetched when actually opened ── */
 const InquiryModal = dynamic(
@@ -102,6 +103,7 @@ export default function Home() {
       <Navbar onGetStarted={() => openInquiry(null)} />
       <ScrollProgress />
       <BackToTop />
+      <CookieConsent />
 
       <main id="main" className="flex-1">
         <Hero onGetStarted={() => openInquiry(null)} />

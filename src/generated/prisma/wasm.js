@@ -98,6 +98,7 @@ exports.Prisma.InquiryScalarFieldEnum = {
   whatsapp: 'whatsapp',
   service: 'service',
   addlService: 'addlService',
+  budget: 'budget',
   message: 'message',
   status: 'status',
   createdAt: 'createdAt',
@@ -116,8 +117,10 @@ exports.Prisma.SubscriberScalarFieldEnum = {
   email: 'email',
   status: 'status',
   confirmToken: 'confirmToken',
+  unsubscribeToken: 'unsubscribeToken',
   confirmedAt: 'confirmedAt',
-  createdAt: 'createdAt'
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 };
 
 exports.Prisma.SortOrder = {
@@ -175,7 +178,6 @@ const config = {
     "db"
   ],
   "activeProvider": "sqlite",
-  "postinstall": false,
   "inlineDatasources": {
     "db": {
       "url": {
@@ -184,13 +186,13 @@ const config = {
       }
     }
   },
-  "inlineSchema": "generator client {\n  provider = \"prisma-client-js\"\n  output   = \"../src/generated/prisma\"\n}\n\ndatasource db {\n  provider = \"sqlite\"\n  url      = env(\"DATABASE_URL\")\n}\n\nmodel Inquiry {\n  id          String   @id @default(cuid())\n  name        String\n  email       String\n  phone       String?\n  whatsapp    String?\n  service     String\n  addlService String?\n  message     String\n  status      String   @default(\"new\") // new | contacted | in_progress | closed\n  createdAt   DateTime @default(now())\n  updatedAt   DateTime @updatedAt\n}\n\nmodel AdminSession {\n  id        String   @id @default(cuid())\n  token     String   @unique\n  expiresAt DateTime\n  createdAt DateTime @default(now())\n}\n\nmodel Subscriber {\n  id           String    @id @default(cuid())\n  email        String    @unique\n  status       String    @default(\"pending\") // pending | confirmed\n  confirmToken String?   @unique\n  confirmedAt  DateTime?\n  createdAt    DateTime  @default(now())\n}\n",
-  "inlineSchemaHash": "d64e2ccc62b2bc5712efa540355fbf919fa83cd0b30a0129119e6daca275f310",
+  "inlineSchema": "generator client {\n  provider = \"prisma-client-js\"\n  output   = \"../src/generated/prisma\"\n}\n\ndatasource db {\n  provider = \"sqlite\"\n  url      = env(\"DATABASE_URL\")\n}\n\nmodel Inquiry {\n  id          String   @id @default(cuid())\n  name        String\n  email       String\n  phone       String?\n  whatsapp    String?\n  service     String\n  addlService String?\n  budget      String?\n  message     String\n  status      String   @default(\"new\") // new | contacted | in_progress | closed\n  createdAt   DateTime @default(now())\n  updatedAt   DateTime @updatedAt\n}\n\nmodel AdminSession {\n  id        String   @id @default(cuid())\n  token     String   @unique\n  expiresAt DateTime\n  createdAt DateTime @default(now())\n}\n\nmodel Subscriber {\n  id               String    @id @default(cuid())\n  email            String    @unique\n  status           String    @default(\"pending\") // pending | confirmed | unsubscribed\n  confirmToken     String?   @unique\n  unsubscribeToken String?   @unique\n  confirmedAt      DateTime?\n  createdAt        DateTime  @default(now())\n  updatedAt        DateTime  @updatedAt\n}\n",
+  "inlineSchemaHash": "0b17d4bbaa45dcf4479badf0cdad2564bd2f1f39f5a61434bad2aa679a3bffd7",
   "copyEngine": true
 }
 config.dirname = '/'
 
-config.runtimeDataModel = JSON.parse("{\"models\":{\"Inquiry\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"name\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"email\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"phone\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"whatsapp\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"service\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"addlService\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"message\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"status\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"updatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"}],\"dbName\":null},\"AdminSession\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"token\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"expiresAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"}],\"dbName\":null},\"Subscriber\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"email\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"status\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"confirmToken\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"confirmedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"}],\"dbName\":null}},\"enums\":{},\"types\":{}}")
+config.runtimeDataModel = JSON.parse("{\"models\":{\"Inquiry\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"name\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"email\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"phone\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"whatsapp\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"service\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"addlService\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"budget\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"message\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"status\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"updatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"}],\"dbName\":null},\"AdminSession\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"token\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"expiresAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"}],\"dbName\":null},\"Subscriber\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"email\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"status\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"confirmToken\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"unsubscribeToken\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"confirmedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"updatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"}],\"dbName\":null}},\"enums\":{},\"types\":{}}")
 defineDmmfProperty(exports.Prisma, config.runtimeDataModel)
 config.engineWasm = {
   getRuntime: async () => require('./query_engine_bg.js'),

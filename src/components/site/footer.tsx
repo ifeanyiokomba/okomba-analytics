@@ -146,6 +146,12 @@ export function Footer({ onNavigate, onGetStarted }: FooterProps) {
             <button onClick={() => onNavigate("about")} className="text-[12.5px] text-muted-foreground transition-colors hover:text-foreground">
               Terms
             </button>
+            <a
+              href="/#insights"
+              className="text-[12.5px] text-muted-foreground transition-colors hover:text-foreground"
+            >
+              Newsletter
+            </a>
             <a href="/#/" className="font-mono text-[10px] text-muted-foreground/50 transition-colors hover:text-muted-foreground" aria-label="Admin portal">
               ·
             </a>

@@ -66,6 +66,10 @@ const inquirySchema = z.object({
     z.string().trim().max(30, "WhatsApp must be at most 30 characters").optional()
   ),
   service: z.string().trim().min(1, "Please select a service"),
+  budget: z.preprocess(
+    emptyToUndefined,
+    z.string().trim().max(60, "Budget must be at most 60 characters").optional()
+  ),
   addlService: z.preprocess(
     emptyToUndefined,
     z
@@ -130,6 +134,7 @@ export async function POST(req: Request) {
         whatsapp: parsed.data.whatsapp ?? null,
         service: parsed.data.service,
         addlService: parsed.data.addlService ?? null,
+        budget: parsed.data.budget ?? null,
         message: parsed.data.message,
         status: "new",
       },

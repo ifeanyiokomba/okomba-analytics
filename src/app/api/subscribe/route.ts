@@ -35,6 +35,16 @@ function makeToken(): string {
   return crypto.randomUUID().replace(/-/g, "") + crypto.randomUUID().replace(/-/g, "");
 }
 
+async function ensureTokens(email: string): Promise<{ confirmToken: string; unsubscribeToken: string }> {
+  const confirmToken = makeToken();
+  const unsubscribeToken = makeToken();
+  await db.subscriber.update({
+    where: { email },
+    data: { confirmToken, unsubscribeToken },
+  });
+  return { confirmToken, unsubscribeToken };
+}
+
 /**
  * POST /api/subscribe — public newsletter subscription (double opt-in step 1).
  * Creates/reuses a pending subscriber and returns the confirmation path.
@@ -68,22 +78,35 @@ export async function POST(req: Request) {
 
     const existing = await db.subscriber.findUnique({ where: { email } });
 
-    if (existing && existing.status === "confirmed") {
-      // Already confirmed — idempotent success
-      return NextResponse.json({ ok: true, alreadyConfirmed: true }, { status: 201 });
+    if (existing && existing.status === "confirmed" && existing.unsubscribeToken) {
+      // Already confirmed — idempotent success w/ unsubscribe path
+      return NextResponse.json(
+        { ok: true, alreadyConfirmed: true, unsubscribePath: `/api/subscribe/unsubscribe?token=${existing.unsubscribeToken}` },
+        { status: 201 }
+      );
+    }
+
+    if (existing && existing.status === "confirmed" && !existing.unsubscribeToken) {
+      // Confirmed before unsubscribe tokens existed — issue one silently
+      const tokens = await ensureTokens(email);
+      return NextResponse.json(
+        { ok: true, alreadyConfirmed: true, unsubscribePath: `/api/subscribe/unsubscribe?token=${tokens.unsubscribeToken}` },
+        { status: 201 }
+      );
     }
 
     const token = existing?.confirmToken ?? makeToken();
+    const unsubToken = existing?.unsubscribeToken ?? makeToken();
 
     if (existing) {
-      // pending — refresh the token so a re-subscribe gets a fresh link
+      // pending — refresh the tokens so a re-subscribe gets fresh links
       await db.subscriber.update({
         where: { email },
-        data: { confirmToken: token },
+        data: { confirmToken: token, unsubscribeToken: unsubToken },
       });
     } else {
       await db.subscriber.create({
-        data: { email, status: "pending", confirmToken: token },
+        data: { email, status: "pending", confirmToken: token, unsubscribeToken: unsubToken },
       });
     }
 

@@ -22,6 +22,7 @@ export type InquiryCsvRow = {
   whatsapp: string | null;
   service: string;
   addlService: string | null;
+  budget: string | null;
   message: string;
   status: string;
   createdAt: string;
@@ -35,6 +36,7 @@ export function exportInquiriesCsv(inquiries: InquiryCsvRow[]): void {
     "WhatsApp",
     "Service",
     "Additional Service",
+    "Budget",
     "Message",
     "Status",
     "Received At",
@@ -46,6 +48,7 @@ export function exportInquiriesCsv(inquiries: InquiryCsvRow[]): void {
     i.whatsapp,
     i.service,
     i.addlService,
+    i.budget,
     i.message.replace(/\r?\n/g, " "), // collapse newlines for single-line cells
     i.status,
     new Date(i.createdAt).toISOString(),
