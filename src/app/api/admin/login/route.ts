@@ -82,8 +82,20 @@ export async function POST(req: Request) {
     // Small artificial delay to slow down brute-force attempts.
     await sleep(BRUTE_FORCE_DELAY_MS);
 
-    const adminEmail = process.env.ADMIN_EMAIL ?? DEFAULT_ADMIN_EMAIL;
-    const adminPassword = process.env.ADMIN_PASSWORD ?? DEFAULT_ADMIN_PASSWORD;
+    // Credentials come from env. Source-level defaults are DEV-ONLY:
+    // production deployments MUST set ADMIN_EMAIL / ADMIN_PASSWORD
+    // (the defaults are public in the repository by design).
+    const isProduction = process.env.NODE_ENV === "production";
+    const adminEmail = process.env.ADMIN_EMAIL ?? (isProduction ? null : DEFAULT_ADMIN_EMAIL);
+    const adminPassword = process.env.ADMIN_PASSWORD ?? (isProduction ? null : DEFAULT_ADMIN_PASSWORD);
+
+    if (!adminEmail || !adminPassword) {
+      console.error("[admin/login] ADMIN_EMAIL / ADMIN_PASSWORD env vars are not set — refusing production login.");
+      return NextResponse.json(
+        { ok: false, error: "Server not configured. Set ADMIN_EMAIL and ADMIN_PASSWORD environment variables." },
+        { status: 503 }
+      );
+    }
 
     let body: unknown;
     try {
