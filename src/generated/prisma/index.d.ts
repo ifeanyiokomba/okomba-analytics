@@ -43,6 +43,38 @@ export type Testimonial = $Result.DefaultSelection<Prisma.$TestimonialPayload>
  * 
  */
 export type EmailLog = $Result.DefaultSelection<Prisma.$EmailLogPayload>
+/**
+ * Model ReceivedEmail
+ * ── Phase-1 Module 2: audit-trail models ────────────────────
+ *    Directive asked for Mongoose models; this stack is Prisma +
+ *    SQLite (deployed on Render with a persistent disk — migrating
+ *    to Mongo would break the deployment kit and every preserved
+ *    workflow). Equivalent Prisma models deliver the same audit
+ *    goals without the regression. Mappings:
+ *      received_emails → ReceivedEmail
+ *      sent_emails     → EmailLog (extended above — the admin Email
+ *                        log UI already reads it; a duplicate table
+ *                        would drift)
+ *      invoices        → Invoice
+ *      events          → EventRecord
+ *      whatsapp_messages → WhatsAppMessage
+ */
+export type ReceivedEmail = $Result.DefaultSelection<Prisma.$ReceivedEmailPayload>
+/**
+ * Model Invoice
+ * 
+ */
+export type Invoice = $Result.DefaultSelection<Prisma.$InvoicePayload>
+/**
+ * Model EventRecord
+ * 
+ */
+export type EventRecord = $Result.DefaultSelection<Prisma.$EventRecordPayload>
+/**
+ * Model WhatsAppMessage
+ * 
+ */
+export type WhatsAppMessage = $Result.DefaultSelection<Prisma.$WhatsAppMessagePayload>
 
 /**
  * ##  Prisma Client ʲˢ
@@ -221,6 +253,46 @@ export class PrismaClient<
     * ```
     */
   get emailLog(): Prisma.EmailLogDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.receivedEmail`: Exposes CRUD operations for the **ReceivedEmail** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more ReceivedEmails
+    * const receivedEmails = await prisma.receivedEmail.findMany()
+    * ```
+    */
+  get receivedEmail(): Prisma.ReceivedEmailDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.invoice`: Exposes CRUD operations for the **Invoice** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more Invoices
+    * const invoices = await prisma.invoice.findMany()
+    * ```
+    */
+  get invoice(): Prisma.InvoiceDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.eventRecord`: Exposes CRUD operations for the **EventRecord** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more EventRecords
+    * const eventRecords = await prisma.eventRecord.findMany()
+    * ```
+    */
+  get eventRecord(): Prisma.EventRecordDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.whatsAppMessage`: Exposes CRUD operations for the **WhatsAppMessage** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more WhatsAppMessages
+    * const whatsAppMessages = await prisma.whatsAppMessage.findMany()
+    * ```
+    */
+  get whatsAppMessage(): Prisma.WhatsAppMessageDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -667,7 +739,11 @@ export namespace Prisma {
     Subscriber: 'Subscriber',
     Post: 'Post',
     Testimonial: 'Testimonial',
-    EmailLog: 'EmailLog'
+    EmailLog: 'EmailLog',
+    ReceivedEmail: 'ReceivedEmail',
+    Invoice: 'Invoice',
+    EventRecord: 'EventRecord',
+    WhatsAppMessage: 'WhatsAppMessage'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -686,7 +762,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "inquiry" | "adminSession" | "subscriber" | "post" | "testimonial" | "emailLog"
+      modelProps: "inquiry" | "adminSession" | "subscriber" | "post" | "testimonial" | "emailLog" | "receivedEmail" | "invoice" | "eventRecord" | "whatsAppMessage"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1134,6 +1210,302 @@ export namespace Prisma {
           }
         }
       }
+      ReceivedEmail: {
+        payload: Prisma.$ReceivedEmailPayload<ExtArgs>
+        fields: Prisma.ReceivedEmailFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.ReceivedEmailFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ReceivedEmailPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.ReceivedEmailFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ReceivedEmailPayload>
+          }
+          findFirst: {
+            args: Prisma.ReceivedEmailFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ReceivedEmailPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.ReceivedEmailFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ReceivedEmailPayload>
+          }
+          findMany: {
+            args: Prisma.ReceivedEmailFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ReceivedEmailPayload>[]
+          }
+          create: {
+            args: Prisma.ReceivedEmailCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ReceivedEmailPayload>
+          }
+          createMany: {
+            args: Prisma.ReceivedEmailCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.ReceivedEmailCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ReceivedEmailPayload>[]
+          }
+          delete: {
+            args: Prisma.ReceivedEmailDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ReceivedEmailPayload>
+          }
+          update: {
+            args: Prisma.ReceivedEmailUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ReceivedEmailPayload>
+          }
+          deleteMany: {
+            args: Prisma.ReceivedEmailDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.ReceivedEmailUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.ReceivedEmailUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ReceivedEmailPayload>[]
+          }
+          upsert: {
+            args: Prisma.ReceivedEmailUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ReceivedEmailPayload>
+          }
+          aggregate: {
+            args: Prisma.ReceivedEmailAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateReceivedEmail>
+          }
+          groupBy: {
+            args: Prisma.ReceivedEmailGroupByArgs<ExtArgs>
+            result: $Utils.Optional<ReceivedEmailGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.ReceivedEmailCountArgs<ExtArgs>
+            result: $Utils.Optional<ReceivedEmailCountAggregateOutputType> | number
+          }
+        }
+      }
+      Invoice: {
+        payload: Prisma.$InvoicePayload<ExtArgs>
+        fields: Prisma.InvoiceFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.InvoiceFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InvoicePayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.InvoiceFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InvoicePayload>
+          }
+          findFirst: {
+            args: Prisma.InvoiceFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InvoicePayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.InvoiceFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InvoicePayload>
+          }
+          findMany: {
+            args: Prisma.InvoiceFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InvoicePayload>[]
+          }
+          create: {
+            args: Prisma.InvoiceCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InvoicePayload>
+          }
+          createMany: {
+            args: Prisma.InvoiceCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.InvoiceCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InvoicePayload>[]
+          }
+          delete: {
+            args: Prisma.InvoiceDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InvoicePayload>
+          }
+          update: {
+            args: Prisma.InvoiceUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InvoicePayload>
+          }
+          deleteMany: {
+            args: Prisma.InvoiceDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.InvoiceUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.InvoiceUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InvoicePayload>[]
+          }
+          upsert: {
+            args: Prisma.InvoiceUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InvoicePayload>
+          }
+          aggregate: {
+            args: Prisma.InvoiceAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateInvoice>
+          }
+          groupBy: {
+            args: Prisma.InvoiceGroupByArgs<ExtArgs>
+            result: $Utils.Optional<InvoiceGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.InvoiceCountArgs<ExtArgs>
+            result: $Utils.Optional<InvoiceCountAggregateOutputType> | number
+          }
+        }
+      }
+      EventRecord: {
+        payload: Prisma.$EventRecordPayload<ExtArgs>
+        fields: Prisma.EventRecordFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.EventRecordFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EventRecordPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.EventRecordFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EventRecordPayload>
+          }
+          findFirst: {
+            args: Prisma.EventRecordFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EventRecordPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.EventRecordFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EventRecordPayload>
+          }
+          findMany: {
+            args: Prisma.EventRecordFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EventRecordPayload>[]
+          }
+          create: {
+            args: Prisma.EventRecordCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EventRecordPayload>
+          }
+          createMany: {
+            args: Prisma.EventRecordCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.EventRecordCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EventRecordPayload>[]
+          }
+          delete: {
+            args: Prisma.EventRecordDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EventRecordPayload>
+          }
+          update: {
+            args: Prisma.EventRecordUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EventRecordPayload>
+          }
+          deleteMany: {
+            args: Prisma.EventRecordDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.EventRecordUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.EventRecordUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EventRecordPayload>[]
+          }
+          upsert: {
+            args: Prisma.EventRecordUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EventRecordPayload>
+          }
+          aggregate: {
+            args: Prisma.EventRecordAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateEventRecord>
+          }
+          groupBy: {
+            args: Prisma.EventRecordGroupByArgs<ExtArgs>
+            result: $Utils.Optional<EventRecordGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.EventRecordCountArgs<ExtArgs>
+            result: $Utils.Optional<EventRecordCountAggregateOutputType> | number
+          }
+        }
+      }
+      WhatsAppMessage: {
+        payload: Prisma.$WhatsAppMessagePayload<ExtArgs>
+        fields: Prisma.WhatsAppMessageFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.WhatsAppMessageFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$WhatsAppMessagePayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.WhatsAppMessageFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$WhatsAppMessagePayload>
+          }
+          findFirst: {
+            args: Prisma.WhatsAppMessageFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$WhatsAppMessagePayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.WhatsAppMessageFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$WhatsAppMessagePayload>
+          }
+          findMany: {
+            args: Prisma.WhatsAppMessageFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$WhatsAppMessagePayload>[]
+          }
+          create: {
+            args: Prisma.WhatsAppMessageCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$WhatsAppMessagePayload>
+          }
+          createMany: {
+            args: Prisma.WhatsAppMessageCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.WhatsAppMessageCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$WhatsAppMessagePayload>[]
+          }
+          delete: {
+            args: Prisma.WhatsAppMessageDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$WhatsAppMessagePayload>
+          }
+          update: {
+            args: Prisma.WhatsAppMessageUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$WhatsAppMessagePayload>
+          }
+          deleteMany: {
+            args: Prisma.WhatsAppMessageDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.WhatsAppMessageUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.WhatsAppMessageUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$WhatsAppMessagePayload>[]
+          }
+          upsert: {
+            args: Prisma.WhatsAppMessageUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$WhatsAppMessagePayload>
+          }
+          aggregate: {
+            args: Prisma.WhatsAppMessageAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateWhatsAppMessage>
+          }
+          groupBy: {
+            args: Prisma.WhatsAppMessageGroupByArgs<ExtArgs>
+            result: $Utils.Optional<WhatsAppMessageGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.WhatsAppMessageCountArgs<ExtArgs>
+            result: $Utils.Optional<WhatsAppMessageCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -1236,6 +1608,10 @@ export namespace Prisma {
     post?: PostOmit
     testimonial?: TestimonialOmit
     emailLog?: EmailLogOmit
+    receivedEmail?: ReceivedEmailOmit
+    invoice?: InvoiceOmit
+    eventRecord?: EventRecordOmit
+    whatsAppMessage?: WhatsAppMessageOmit
   }
 
   /* Types for Logging */
@@ -6638,6 +7014,10 @@ export namespace Prisma {
     status: string | null
     error: string | null
     sentAt: Date | null
+    bodyText: string | null
+    bodyHtml: string | null
+    attachments: string | null
+    invoiceId: string | null
   }
 
   export type EmailLogMaxAggregateOutputType = {
@@ -6650,6 +7030,10 @@ export namespace Prisma {
     status: string | null
     error: string | null
     sentAt: Date | null
+    bodyText: string | null
+    bodyHtml: string | null
+    attachments: string | null
+    invoiceId: string | null
   }
 
   export type EmailLogCountAggregateOutputType = {
@@ -6662,6 +7046,10 @@ export namespace Prisma {
     status: number
     error: number
     sentAt: number
+    bodyText: number
+    bodyHtml: number
+    attachments: number
+    invoiceId: number
     _all: number
   }
 
@@ -6676,6 +7064,10 @@ export namespace Prisma {
     status?: true
     error?: true
     sentAt?: true
+    bodyText?: true
+    bodyHtml?: true
+    attachments?: true
+    invoiceId?: true
   }
 
   export type EmailLogMaxAggregateInputType = {
@@ -6688,6 +7080,10 @@ export namespace Prisma {
     status?: true
     error?: true
     sentAt?: true
+    bodyText?: true
+    bodyHtml?: true
+    attachments?: true
+    invoiceId?: true
   }
 
   export type EmailLogCountAggregateInputType = {
@@ -6700,6 +7096,10 @@ export namespace Prisma {
     status?: true
     error?: true
     sentAt?: true
+    bodyText?: true
+    bodyHtml?: true
+    attachments?: true
+    invoiceId?: true
     _all?: true
   }
 
@@ -6785,6 +7185,10 @@ export namespace Prisma {
     status: string
     error: string | null
     sentAt: Date
+    bodyText: string | null
+    bodyHtml: string | null
+    attachments: string
+    invoiceId: string | null
     _count: EmailLogCountAggregateOutputType | null
     _min: EmailLogMinAggregateOutputType | null
     _max: EmailLogMaxAggregateOutputType | null
@@ -6814,6 +7218,10 @@ export namespace Prisma {
     status?: boolean
     error?: boolean
     sentAt?: boolean
+    bodyText?: boolean
+    bodyHtml?: boolean
+    attachments?: boolean
+    invoiceId?: boolean
   }, ExtArgs["result"]["emailLog"]>
 
   export type EmailLogSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -6826,6 +7234,10 @@ export namespace Prisma {
     status?: boolean
     error?: boolean
     sentAt?: boolean
+    bodyText?: boolean
+    bodyHtml?: boolean
+    attachments?: boolean
+    invoiceId?: boolean
   }, ExtArgs["result"]["emailLog"]>
 
   export type EmailLogSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -6838,6 +7250,10 @@ export namespace Prisma {
     status?: boolean
     error?: boolean
     sentAt?: boolean
+    bodyText?: boolean
+    bodyHtml?: boolean
+    attachments?: boolean
+    invoiceId?: boolean
   }, ExtArgs["result"]["emailLog"]>
 
   export type EmailLogSelectScalar = {
@@ -6850,9 +7266,13 @@ export namespace Prisma {
     status?: boolean
     error?: boolean
     sentAt?: boolean
+    bodyText?: boolean
+    bodyHtml?: boolean
+    attachments?: boolean
+    invoiceId?: boolean
   }
 
-  export type EmailLogOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "type" | "recipientEmail" | "subject" | "postId" | "subscriberId" | "status" | "error" | "sentAt", ExtArgs["result"]["emailLog"]>
+  export type EmailLogOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "type" | "recipientEmail" | "subject" | "postId" | "subscriberId" | "status" | "error" | "sentAt" | "bodyText" | "bodyHtml" | "attachments" | "invoiceId", ExtArgs["result"]["emailLog"]>
 
   export type $EmailLogPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "EmailLog"
@@ -6867,6 +7287,10 @@ export namespace Prisma {
       status: string
       error: string | null
       sentAt: Date
+      bodyText: string | null
+      bodyHtml: string | null
+      attachments: string
+      invoiceId: string | null
     }, ExtArgs["result"]["emailLog"]>
     composites: {}
   }
@@ -7299,6 +7723,10 @@ export namespace Prisma {
     readonly status: FieldRef<"EmailLog", 'String'>
     readonly error: FieldRef<"EmailLog", 'String'>
     readonly sentAt: FieldRef<"EmailLog", 'DateTime'>
+    readonly bodyText: FieldRef<"EmailLog", 'String'>
+    readonly bodyHtml: FieldRef<"EmailLog", 'String'>
+    readonly attachments: FieldRef<"EmailLog", 'String'>
+    readonly invoiceId: FieldRef<"EmailLog", 'String'>
   }
     
 
@@ -7664,6 +8092,4449 @@ export namespace Prisma {
 
 
   /**
+   * Model ReceivedEmail
+   */
+
+  export type AggregateReceivedEmail = {
+    _count: ReceivedEmailCountAggregateOutputType | null
+    _avg: ReceivedEmailAvgAggregateOutputType | null
+    _sum: ReceivedEmailSumAggregateOutputType | null
+    _min: ReceivedEmailMinAggregateOutputType | null
+    _max: ReceivedEmailMaxAggregateOutputType | null
+  }
+
+  export type ReceivedEmailAvgAggregateOutputType = {
+    leadScore: number | null
+  }
+
+  export type ReceivedEmailSumAggregateOutputType = {
+    leadScore: number | null
+  }
+
+  export type ReceivedEmailMinAggregateOutputType = {
+    id: string | null
+    source: string | null
+    name: string | null
+    email: string | null
+    phone: string | null
+    subject: string | null
+    message: string | null
+    leadScore: number | null
+    meta: string | null
+    inquiryId: string | null
+    createdAt: Date | null
+  }
+
+  export type ReceivedEmailMaxAggregateOutputType = {
+    id: string | null
+    source: string | null
+    name: string | null
+    email: string | null
+    phone: string | null
+    subject: string | null
+    message: string | null
+    leadScore: number | null
+    meta: string | null
+    inquiryId: string | null
+    createdAt: Date | null
+  }
+
+  export type ReceivedEmailCountAggregateOutputType = {
+    id: number
+    source: number
+    name: number
+    email: number
+    phone: number
+    subject: number
+    message: number
+    leadScore: number
+    meta: number
+    inquiryId: number
+    createdAt: number
+    _all: number
+  }
+
+
+  export type ReceivedEmailAvgAggregateInputType = {
+    leadScore?: true
+  }
+
+  export type ReceivedEmailSumAggregateInputType = {
+    leadScore?: true
+  }
+
+  export type ReceivedEmailMinAggregateInputType = {
+    id?: true
+    source?: true
+    name?: true
+    email?: true
+    phone?: true
+    subject?: true
+    message?: true
+    leadScore?: true
+    meta?: true
+    inquiryId?: true
+    createdAt?: true
+  }
+
+  export type ReceivedEmailMaxAggregateInputType = {
+    id?: true
+    source?: true
+    name?: true
+    email?: true
+    phone?: true
+    subject?: true
+    message?: true
+    leadScore?: true
+    meta?: true
+    inquiryId?: true
+    createdAt?: true
+  }
+
+  export type ReceivedEmailCountAggregateInputType = {
+    id?: true
+    source?: true
+    name?: true
+    email?: true
+    phone?: true
+    subject?: true
+    message?: true
+    leadScore?: true
+    meta?: true
+    inquiryId?: true
+    createdAt?: true
+    _all?: true
+  }
+
+  export type ReceivedEmailAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ReceivedEmail to aggregate.
+     */
+    where?: ReceivedEmailWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ReceivedEmails to fetch.
+     */
+    orderBy?: ReceivedEmailOrderByWithRelationInput | ReceivedEmailOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: ReceivedEmailWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ReceivedEmails from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ReceivedEmails.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned ReceivedEmails
+    **/
+    _count?: true | ReceivedEmailCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: ReceivedEmailAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: ReceivedEmailSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: ReceivedEmailMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: ReceivedEmailMaxAggregateInputType
+  }
+
+  export type GetReceivedEmailAggregateType<T extends ReceivedEmailAggregateArgs> = {
+        [P in keyof T & keyof AggregateReceivedEmail]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateReceivedEmail[P]>
+      : GetScalarType<T[P], AggregateReceivedEmail[P]>
+  }
+
+
+
+
+  export type ReceivedEmailGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ReceivedEmailWhereInput
+    orderBy?: ReceivedEmailOrderByWithAggregationInput | ReceivedEmailOrderByWithAggregationInput[]
+    by: ReceivedEmailScalarFieldEnum[] | ReceivedEmailScalarFieldEnum
+    having?: ReceivedEmailScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: ReceivedEmailCountAggregateInputType | true
+    _avg?: ReceivedEmailAvgAggregateInputType
+    _sum?: ReceivedEmailSumAggregateInputType
+    _min?: ReceivedEmailMinAggregateInputType
+    _max?: ReceivedEmailMaxAggregateInputType
+  }
+
+  export type ReceivedEmailGroupByOutputType = {
+    id: string
+    source: string
+    name: string | null
+    email: string | null
+    phone: string | null
+    subject: string | null
+    message: string
+    leadScore: number | null
+    meta: string
+    inquiryId: string | null
+    createdAt: Date
+    _count: ReceivedEmailCountAggregateOutputType | null
+    _avg: ReceivedEmailAvgAggregateOutputType | null
+    _sum: ReceivedEmailSumAggregateOutputType | null
+    _min: ReceivedEmailMinAggregateOutputType | null
+    _max: ReceivedEmailMaxAggregateOutputType | null
+  }
+
+  type GetReceivedEmailGroupByPayload<T extends ReceivedEmailGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<ReceivedEmailGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof ReceivedEmailGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], ReceivedEmailGroupByOutputType[P]>
+            : GetScalarType<T[P], ReceivedEmailGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type ReceivedEmailSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    source?: boolean
+    name?: boolean
+    email?: boolean
+    phone?: boolean
+    subject?: boolean
+    message?: boolean
+    leadScore?: boolean
+    meta?: boolean
+    inquiryId?: boolean
+    createdAt?: boolean
+  }, ExtArgs["result"]["receivedEmail"]>
+
+  export type ReceivedEmailSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    source?: boolean
+    name?: boolean
+    email?: boolean
+    phone?: boolean
+    subject?: boolean
+    message?: boolean
+    leadScore?: boolean
+    meta?: boolean
+    inquiryId?: boolean
+    createdAt?: boolean
+  }, ExtArgs["result"]["receivedEmail"]>
+
+  export type ReceivedEmailSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    source?: boolean
+    name?: boolean
+    email?: boolean
+    phone?: boolean
+    subject?: boolean
+    message?: boolean
+    leadScore?: boolean
+    meta?: boolean
+    inquiryId?: boolean
+    createdAt?: boolean
+  }, ExtArgs["result"]["receivedEmail"]>
+
+  export type ReceivedEmailSelectScalar = {
+    id?: boolean
+    source?: boolean
+    name?: boolean
+    email?: boolean
+    phone?: boolean
+    subject?: boolean
+    message?: boolean
+    leadScore?: boolean
+    meta?: boolean
+    inquiryId?: boolean
+    createdAt?: boolean
+  }
+
+  export type ReceivedEmailOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "source" | "name" | "email" | "phone" | "subject" | "message" | "leadScore" | "meta" | "inquiryId" | "createdAt", ExtArgs["result"]["receivedEmail"]>
+
+  export type $ReceivedEmailPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "ReceivedEmail"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      source: string
+      name: string | null
+      email: string | null
+      phone: string | null
+      subject: string | null
+      message: string
+      leadScore: number | null
+      meta: string
+      inquiryId: string | null
+      createdAt: Date
+    }, ExtArgs["result"]["receivedEmail"]>
+    composites: {}
+  }
+
+  type ReceivedEmailGetPayload<S extends boolean | null | undefined | ReceivedEmailDefaultArgs> = $Result.GetResult<Prisma.$ReceivedEmailPayload, S>
+
+  type ReceivedEmailCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<ReceivedEmailFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: ReceivedEmailCountAggregateInputType | true
+    }
+
+  export interface ReceivedEmailDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['ReceivedEmail'], meta: { name: 'ReceivedEmail' } }
+    /**
+     * Find zero or one ReceivedEmail that matches the filter.
+     * @param {ReceivedEmailFindUniqueArgs} args - Arguments to find a ReceivedEmail
+     * @example
+     * // Get one ReceivedEmail
+     * const receivedEmail = await prisma.receivedEmail.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends ReceivedEmailFindUniqueArgs>(args: SelectSubset<T, ReceivedEmailFindUniqueArgs<ExtArgs>>): Prisma__ReceivedEmailClient<$Result.GetResult<Prisma.$ReceivedEmailPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one ReceivedEmail that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {ReceivedEmailFindUniqueOrThrowArgs} args - Arguments to find a ReceivedEmail
+     * @example
+     * // Get one ReceivedEmail
+     * const receivedEmail = await prisma.receivedEmail.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends ReceivedEmailFindUniqueOrThrowArgs>(args: SelectSubset<T, ReceivedEmailFindUniqueOrThrowArgs<ExtArgs>>): Prisma__ReceivedEmailClient<$Result.GetResult<Prisma.$ReceivedEmailPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ReceivedEmail that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ReceivedEmailFindFirstArgs} args - Arguments to find a ReceivedEmail
+     * @example
+     * // Get one ReceivedEmail
+     * const receivedEmail = await prisma.receivedEmail.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends ReceivedEmailFindFirstArgs>(args?: SelectSubset<T, ReceivedEmailFindFirstArgs<ExtArgs>>): Prisma__ReceivedEmailClient<$Result.GetResult<Prisma.$ReceivedEmailPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ReceivedEmail that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ReceivedEmailFindFirstOrThrowArgs} args - Arguments to find a ReceivedEmail
+     * @example
+     * // Get one ReceivedEmail
+     * const receivedEmail = await prisma.receivedEmail.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends ReceivedEmailFindFirstOrThrowArgs>(args?: SelectSubset<T, ReceivedEmailFindFirstOrThrowArgs<ExtArgs>>): Prisma__ReceivedEmailClient<$Result.GetResult<Prisma.$ReceivedEmailPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more ReceivedEmails that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ReceivedEmailFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all ReceivedEmails
+     * const receivedEmails = await prisma.receivedEmail.findMany()
+     * 
+     * // Get first 10 ReceivedEmails
+     * const receivedEmails = await prisma.receivedEmail.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const receivedEmailWithIdOnly = await prisma.receivedEmail.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends ReceivedEmailFindManyArgs>(args?: SelectSubset<T, ReceivedEmailFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ReceivedEmailPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a ReceivedEmail.
+     * @param {ReceivedEmailCreateArgs} args - Arguments to create a ReceivedEmail.
+     * @example
+     * // Create one ReceivedEmail
+     * const ReceivedEmail = await prisma.receivedEmail.create({
+     *   data: {
+     *     // ... data to create a ReceivedEmail
+     *   }
+     * })
+     * 
+     */
+    create<T extends ReceivedEmailCreateArgs>(args: SelectSubset<T, ReceivedEmailCreateArgs<ExtArgs>>): Prisma__ReceivedEmailClient<$Result.GetResult<Prisma.$ReceivedEmailPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many ReceivedEmails.
+     * @param {ReceivedEmailCreateManyArgs} args - Arguments to create many ReceivedEmails.
+     * @example
+     * // Create many ReceivedEmails
+     * const receivedEmail = await prisma.receivedEmail.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends ReceivedEmailCreateManyArgs>(args?: SelectSubset<T, ReceivedEmailCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many ReceivedEmails and returns the data saved in the database.
+     * @param {ReceivedEmailCreateManyAndReturnArgs} args - Arguments to create many ReceivedEmails.
+     * @example
+     * // Create many ReceivedEmails
+     * const receivedEmail = await prisma.receivedEmail.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many ReceivedEmails and only return the `id`
+     * const receivedEmailWithIdOnly = await prisma.receivedEmail.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends ReceivedEmailCreateManyAndReturnArgs>(args?: SelectSubset<T, ReceivedEmailCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ReceivedEmailPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a ReceivedEmail.
+     * @param {ReceivedEmailDeleteArgs} args - Arguments to delete one ReceivedEmail.
+     * @example
+     * // Delete one ReceivedEmail
+     * const ReceivedEmail = await prisma.receivedEmail.delete({
+     *   where: {
+     *     // ... filter to delete one ReceivedEmail
+     *   }
+     * })
+     * 
+     */
+    delete<T extends ReceivedEmailDeleteArgs>(args: SelectSubset<T, ReceivedEmailDeleteArgs<ExtArgs>>): Prisma__ReceivedEmailClient<$Result.GetResult<Prisma.$ReceivedEmailPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one ReceivedEmail.
+     * @param {ReceivedEmailUpdateArgs} args - Arguments to update one ReceivedEmail.
+     * @example
+     * // Update one ReceivedEmail
+     * const receivedEmail = await prisma.receivedEmail.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends ReceivedEmailUpdateArgs>(args: SelectSubset<T, ReceivedEmailUpdateArgs<ExtArgs>>): Prisma__ReceivedEmailClient<$Result.GetResult<Prisma.$ReceivedEmailPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more ReceivedEmails.
+     * @param {ReceivedEmailDeleteManyArgs} args - Arguments to filter ReceivedEmails to delete.
+     * @example
+     * // Delete a few ReceivedEmails
+     * const { count } = await prisma.receivedEmail.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends ReceivedEmailDeleteManyArgs>(args?: SelectSubset<T, ReceivedEmailDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ReceivedEmails.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ReceivedEmailUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many ReceivedEmails
+     * const receivedEmail = await prisma.receivedEmail.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends ReceivedEmailUpdateManyArgs>(args: SelectSubset<T, ReceivedEmailUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ReceivedEmails and returns the data updated in the database.
+     * @param {ReceivedEmailUpdateManyAndReturnArgs} args - Arguments to update many ReceivedEmails.
+     * @example
+     * // Update many ReceivedEmails
+     * const receivedEmail = await prisma.receivedEmail.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more ReceivedEmails and only return the `id`
+     * const receivedEmailWithIdOnly = await prisma.receivedEmail.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends ReceivedEmailUpdateManyAndReturnArgs>(args: SelectSubset<T, ReceivedEmailUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ReceivedEmailPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one ReceivedEmail.
+     * @param {ReceivedEmailUpsertArgs} args - Arguments to update or create a ReceivedEmail.
+     * @example
+     * // Update or create a ReceivedEmail
+     * const receivedEmail = await prisma.receivedEmail.upsert({
+     *   create: {
+     *     // ... data to create a ReceivedEmail
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the ReceivedEmail we want to update
+     *   }
+     * })
+     */
+    upsert<T extends ReceivedEmailUpsertArgs>(args: SelectSubset<T, ReceivedEmailUpsertArgs<ExtArgs>>): Prisma__ReceivedEmailClient<$Result.GetResult<Prisma.$ReceivedEmailPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of ReceivedEmails.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ReceivedEmailCountArgs} args - Arguments to filter ReceivedEmails to count.
+     * @example
+     * // Count the number of ReceivedEmails
+     * const count = await prisma.receivedEmail.count({
+     *   where: {
+     *     // ... the filter for the ReceivedEmails we want to count
+     *   }
+     * })
+    **/
+    count<T extends ReceivedEmailCountArgs>(
+      args?: Subset<T, ReceivedEmailCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], ReceivedEmailCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a ReceivedEmail.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ReceivedEmailAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends ReceivedEmailAggregateArgs>(args: Subset<T, ReceivedEmailAggregateArgs>): Prisma.PrismaPromise<GetReceivedEmailAggregateType<T>>
+
+    /**
+     * Group by ReceivedEmail.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ReceivedEmailGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends ReceivedEmailGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: ReceivedEmailGroupByArgs['orderBy'] }
+        : { orderBy?: ReceivedEmailGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, ReceivedEmailGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetReceivedEmailGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the ReceivedEmail model
+   */
+  readonly fields: ReceivedEmailFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for ReceivedEmail.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__ReceivedEmailClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the ReceivedEmail model
+   */
+  interface ReceivedEmailFieldRefs {
+    readonly id: FieldRef<"ReceivedEmail", 'String'>
+    readonly source: FieldRef<"ReceivedEmail", 'String'>
+    readonly name: FieldRef<"ReceivedEmail", 'String'>
+    readonly email: FieldRef<"ReceivedEmail", 'String'>
+    readonly phone: FieldRef<"ReceivedEmail", 'String'>
+    readonly subject: FieldRef<"ReceivedEmail", 'String'>
+    readonly message: FieldRef<"ReceivedEmail", 'String'>
+    readonly leadScore: FieldRef<"ReceivedEmail", 'Int'>
+    readonly meta: FieldRef<"ReceivedEmail", 'String'>
+    readonly inquiryId: FieldRef<"ReceivedEmail", 'String'>
+    readonly createdAt: FieldRef<"ReceivedEmail", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * ReceivedEmail findUnique
+   */
+  export type ReceivedEmailFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ReceivedEmail
+     */
+    select?: ReceivedEmailSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ReceivedEmail
+     */
+    omit?: ReceivedEmailOmit<ExtArgs> | null
+    /**
+     * Filter, which ReceivedEmail to fetch.
+     */
+    where: ReceivedEmailWhereUniqueInput
+  }
+
+  /**
+   * ReceivedEmail findUniqueOrThrow
+   */
+  export type ReceivedEmailFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ReceivedEmail
+     */
+    select?: ReceivedEmailSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ReceivedEmail
+     */
+    omit?: ReceivedEmailOmit<ExtArgs> | null
+    /**
+     * Filter, which ReceivedEmail to fetch.
+     */
+    where: ReceivedEmailWhereUniqueInput
+  }
+
+  /**
+   * ReceivedEmail findFirst
+   */
+  export type ReceivedEmailFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ReceivedEmail
+     */
+    select?: ReceivedEmailSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ReceivedEmail
+     */
+    omit?: ReceivedEmailOmit<ExtArgs> | null
+    /**
+     * Filter, which ReceivedEmail to fetch.
+     */
+    where?: ReceivedEmailWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ReceivedEmails to fetch.
+     */
+    orderBy?: ReceivedEmailOrderByWithRelationInput | ReceivedEmailOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for ReceivedEmails.
+     */
+    cursor?: ReceivedEmailWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ReceivedEmails from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ReceivedEmails.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ReceivedEmails.
+     */
+    distinct?: ReceivedEmailScalarFieldEnum | ReceivedEmailScalarFieldEnum[]
+  }
+
+  /**
+   * ReceivedEmail findFirstOrThrow
+   */
+  export type ReceivedEmailFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ReceivedEmail
+     */
+    select?: ReceivedEmailSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ReceivedEmail
+     */
+    omit?: ReceivedEmailOmit<ExtArgs> | null
+    /**
+     * Filter, which ReceivedEmail to fetch.
+     */
+    where?: ReceivedEmailWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ReceivedEmails to fetch.
+     */
+    orderBy?: ReceivedEmailOrderByWithRelationInput | ReceivedEmailOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for ReceivedEmails.
+     */
+    cursor?: ReceivedEmailWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ReceivedEmails from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ReceivedEmails.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ReceivedEmails.
+     */
+    distinct?: ReceivedEmailScalarFieldEnum | ReceivedEmailScalarFieldEnum[]
+  }
+
+  /**
+   * ReceivedEmail findMany
+   */
+  export type ReceivedEmailFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ReceivedEmail
+     */
+    select?: ReceivedEmailSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ReceivedEmail
+     */
+    omit?: ReceivedEmailOmit<ExtArgs> | null
+    /**
+     * Filter, which ReceivedEmails to fetch.
+     */
+    where?: ReceivedEmailWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ReceivedEmails to fetch.
+     */
+    orderBy?: ReceivedEmailOrderByWithRelationInput | ReceivedEmailOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing ReceivedEmails.
+     */
+    cursor?: ReceivedEmailWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ReceivedEmails from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ReceivedEmails.
+     */
+    skip?: number
+    distinct?: ReceivedEmailScalarFieldEnum | ReceivedEmailScalarFieldEnum[]
+  }
+
+  /**
+   * ReceivedEmail create
+   */
+  export type ReceivedEmailCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ReceivedEmail
+     */
+    select?: ReceivedEmailSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ReceivedEmail
+     */
+    omit?: ReceivedEmailOmit<ExtArgs> | null
+    /**
+     * The data needed to create a ReceivedEmail.
+     */
+    data: XOR<ReceivedEmailCreateInput, ReceivedEmailUncheckedCreateInput>
+  }
+
+  /**
+   * ReceivedEmail createMany
+   */
+  export type ReceivedEmailCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many ReceivedEmails.
+     */
+    data: ReceivedEmailCreateManyInput | ReceivedEmailCreateManyInput[]
+  }
+
+  /**
+   * ReceivedEmail createManyAndReturn
+   */
+  export type ReceivedEmailCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ReceivedEmail
+     */
+    select?: ReceivedEmailSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ReceivedEmail
+     */
+    omit?: ReceivedEmailOmit<ExtArgs> | null
+    /**
+     * The data used to create many ReceivedEmails.
+     */
+    data: ReceivedEmailCreateManyInput | ReceivedEmailCreateManyInput[]
+  }
+
+  /**
+   * ReceivedEmail update
+   */
+  export type ReceivedEmailUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ReceivedEmail
+     */
+    select?: ReceivedEmailSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ReceivedEmail
+     */
+    omit?: ReceivedEmailOmit<ExtArgs> | null
+    /**
+     * The data needed to update a ReceivedEmail.
+     */
+    data: XOR<ReceivedEmailUpdateInput, ReceivedEmailUncheckedUpdateInput>
+    /**
+     * Choose, which ReceivedEmail to update.
+     */
+    where: ReceivedEmailWhereUniqueInput
+  }
+
+  /**
+   * ReceivedEmail updateMany
+   */
+  export type ReceivedEmailUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update ReceivedEmails.
+     */
+    data: XOR<ReceivedEmailUpdateManyMutationInput, ReceivedEmailUncheckedUpdateManyInput>
+    /**
+     * Filter which ReceivedEmails to update
+     */
+    where?: ReceivedEmailWhereInput
+    /**
+     * Limit how many ReceivedEmails to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ReceivedEmail updateManyAndReturn
+   */
+  export type ReceivedEmailUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ReceivedEmail
+     */
+    select?: ReceivedEmailSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ReceivedEmail
+     */
+    omit?: ReceivedEmailOmit<ExtArgs> | null
+    /**
+     * The data used to update ReceivedEmails.
+     */
+    data: XOR<ReceivedEmailUpdateManyMutationInput, ReceivedEmailUncheckedUpdateManyInput>
+    /**
+     * Filter which ReceivedEmails to update
+     */
+    where?: ReceivedEmailWhereInput
+    /**
+     * Limit how many ReceivedEmails to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ReceivedEmail upsert
+   */
+  export type ReceivedEmailUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ReceivedEmail
+     */
+    select?: ReceivedEmailSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ReceivedEmail
+     */
+    omit?: ReceivedEmailOmit<ExtArgs> | null
+    /**
+     * The filter to search for the ReceivedEmail to update in case it exists.
+     */
+    where: ReceivedEmailWhereUniqueInput
+    /**
+     * In case the ReceivedEmail found by the `where` argument doesn't exist, create a new ReceivedEmail with this data.
+     */
+    create: XOR<ReceivedEmailCreateInput, ReceivedEmailUncheckedCreateInput>
+    /**
+     * In case the ReceivedEmail was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<ReceivedEmailUpdateInput, ReceivedEmailUncheckedUpdateInput>
+  }
+
+  /**
+   * ReceivedEmail delete
+   */
+  export type ReceivedEmailDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ReceivedEmail
+     */
+    select?: ReceivedEmailSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ReceivedEmail
+     */
+    omit?: ReceivedEmailOmit<ExtArgs> | null
+    /**
+     * Filter which ReceivedEmail to delete.
+     */
+    where: ReceivedEmailWhereUniqueInput
+  }
+
+  /**
+   * ReceivedEmail deleteMany
+   */
+  export type ReceivedEmailDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ReceivedEmails to delete
+     */
+    where?: ReceivedEmailWhereInput
+    /**
+     * Limit how many ReceivedEmails to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * ReceivedEmail without action
+   */
+  export type ReceivedEmailDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ReceivedEmail
+     */
+    select?: ReceivedEmailSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ReceivedEmail
+     */
+    omit?: ReceivedEmailOmit<ExtArgs> | null
+  }
+
+
+  /**
+   * Model Invoice
+   */
+
+  export type AggregateInvoice = {
+    _count: InvoiceCountAggregateOutputType | null
+    _avg: InvoiceAvgAggregateOutputType | null
+    _sum: InvoiceSumAggregateOutputType | null
+    _min: InvoiceMinAggregateOutputType | null
+    _max: InvoiceMaxAggregateOutputType | null
+  }
+
+  export type InvoiceAvgAggregateOutputType = {
+    amountKobo: number | null
+  }
+
+  export type InvoiceSumAggregateOutputType = {
+    amountKobo: number | null
+  }
+
+  export type InvoiceMinAggregateOutputType = {
+    id: string | null
+    invoiceNumber: string | null
+    inquiryId: string | null
+    customerName: string | null
+    customerEmail: string | null
+    customerPhone: string | null
+    service: string | null
+    description: string | null
+    amountKobo: number | null
+    currency: string | null
+    durationLabel: string | null
+    dueDate: Date | null
+    status: string | null
+    dvaAccountNumber: string | null
+    dvaBankName: string | null
+    dvaBankCode: string | null
+    pdfUrl: string | null
+    paidAt: Date | null
+    sentAt: Date | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type InvoiceMaxAggregateOutputType = {
+    id: string | null
+    invoiceNumber: string | null
+    inquiryId: string | null
+    customerName: string | null
+    customerEmail: string | null
+    customerPhone: string | null
+    service: string | null
+    description: string | null
+    amountKobo: number | null
+    currency: string | null
+    durationLabel: string | null
+    dueDate: Date | null
+    status: string | null
+    dvaAccountNumber: string | null
+    dvaBankName: string | null
+    dvaBankCode: string | null
+    pdfUrl: string | null
+    paidAt: Date | null
+    sentAt: Date | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type InvoiceCountAggregateOutputType = {
+    id: number
+    invoiceNumber: number
+    inquiryId: number
+    customerName: number
+    customerEmail: number
+    customerPhone: number
+    service: number
+    description: number
+    amountKobo: number
+    currency: number
+    durationLabel: number
+    dueDate: number
+    status: number
+    dvaAccountNumber: number
+    dvaBankName: number
+    dvaBankCode: number
+    pdfUrl: number
+    paidAt: number
+    sentAt: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type InvoiceAvgAggregateInputType = {
+    amountKobo?: true
+  }
+
+  export type InvoiceSumAggregateInputType = {
+    amountKobo?: true
+  }
+
+  export type InvoiceMinAggregateInputType = {
+    id?: true
+    invoiceNumber?: true
+    inquiryId?: true
+    customerName?: true
+    customerEmail?: true
+    customerPhone?: true
+    service?: true
+    description?: true
+    amountKobo?: true
+    currency?: true
+    durationLabel?: true
+    dueDate?: true
+    status?: true
+    dvaAccountNumber?: true
+    dvaBankName?: true
+    dvaBankCode?: true
+    pdfUrl?: true
+    paidAt?: true
+    sentAt?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type InvoiceMaxAggregateInputType = {
+    id?: true
+    invoiceNumber?: true
+    inquiryId?: true
+    customerName?: true
+    customerEmail?: true
+    customerPhone?: true
+    service?: true
+    description?: true
+    amountKobo?: true
+    currency?: true
+    durationLabel?: true
+    dueDate?: true
+    status?: true
+    dvaAccountNumber?: true
+    dvaBankName?: true
+    dvaBankCode?: true
+    pdfUrl?: true
+    paidAt?: true
+    sentAt?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type InvoiceCountAggregateInputType = {
+    id?: true
+    invoiceNumber?: true
+    inquiryId?: true
+    customerName?: true
+    customerEmail?: true
+    customerPhone?: true
+    service?: true
+    description?: true
+    amountKobo?: true
+    currency?: true
+    durationLabel?: true
+    dueDate?: true
+    status?: true
+    dvaAccountNumber?: true
+    dvaBankName?: true
+    dvaBankCode?: true
+    pdfUrl?: true
+    paidAt?: true
+    sentAt?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type InvoiceAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Invoice to aggregate.
+     */
+    where?: InvoiceWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Invoices to fetch.
+     */
+    orderBy?: InvoiceOrderByWithRelationInput | InvoiceOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: InvoiceWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Invoices from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Invoices.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned Invoices
+    **/
+    _count?: true | InvoiceCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: InvoiceAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: InvoiceSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: InvoiceMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: InvoiceMaxAggregateInputType
+  }
+
+  export type GetInvoiceAggregateType<T extends InvoiceAggregateArgs> = {
+        [P in keyof T & keyof AggregateInvoice]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateInvoice[P]>
+      : GetScalarType<T[P], AggregateInvoice[P]>
+  }
+
+
+
+
+  export type InvoiceGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: InvoiceWhereInput
+    orderBy?: InvoiceOrderByWithAggregationInput | InvoiceOrderByWithAggregationInput[]
+    by: InvoiceScalarFieldEnum[] | InvoiceScalarFieldEnum
+    having?: InvoiceScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: InvoiceCountAggregateInputType | true
+    _avg?: InvoiceAvgAggregateInputType
+    _sum?: InvoiceSumAggregateInputType
+    _min?: InvoiceMinAggregateInputType
+    _max?: InvoiceMaxAggregateInputType
+  }
+
+  export type InvoiceGroupByOutputType = {
+    id: string
+    invoiceNumber: string
+    inquiryId: string | null
+    customerName: string
+    customerEmail: string
+    customerPhone: string | null
+    service: string
+    description: string | null
+    amountKobo: number
+    currency: string
+    durationLabel: string | null
+    dueDate: Date | null
+    status: string
+    dvaAccountNumber: string | null
+    dvaBankName: string | null
+    dvaBankCode: string | null
+    pdfUrl: string | null
+    paidAt: Date | null
+    sentAt: Date | null
+    createdAt: Date
+    updatedAt: Date
+    _count: InvoiceCountAggregateOutputType | null
+    _avg: InvoiceAvgAggregateOutputType | null
+    _sum: InvoiceSumAggregateOutputType | null
+    _min: InvoiceMinAggregateOutputType | null
+    _max: InvoiceMaxAggregateOutputType | null
+  }
+
+  type GetInvoiceGroupByPayload<T extends InvoiceGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<InvoiceGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof InvoiceGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], InvoiceGroupByOutputType[P]>
+            : GetScalarType<T[P], InvoiceGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type InvoiceSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    invoiceNumber?: boolean
+    inquiryId?: boolean
+    customerName?: boolean
+    customerEmail?: boolean
+    customerPhone?: boolean
+    service?: boolean
+    description?: boolean
+    amountKobo?: boolean
+    currency?: boolean
+    durationLabel?: boolean
+    dueDate?: boolean
+    status?: boolean
+    dvaAccountNumber?: boolean
+    dvaBankName?: boolean
+    dvaBankCode?: boolean
+    pdfUrl?: boolean
+    paidAt?: boolean
+    sentAt?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["invoice"]>
+
+  export type InvoiceSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    invoiceNumber?: boolean
+    inquiryId?: boolean
+    customerName?: boolean
+    customerEmail?: boolean
+    customerPhone?: boolean
+    service?: boolean
+    description?: boolean
+    amountKobo?: boolean
+    currency?: boolean
+    durationLabel?: boolean
+    dueDate?: boolean
+    status?: boolean
+    dvaAccountNumber?: boolean
+    dvaBankName?: boolean
+    dvaBankCode?: boolean
+    pdfUrl?: boolean
+    paidAt?: boolean
+    sentAt?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["invoice"]>
+
+  export type InvoiceSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    invoiceNumber?: boolean
+    inquiryId?: boolean
+    customerName?: boolean
+    customerEmail?: boolean
+    customerPhone?: boolean
+    service?: boolean
+    description?: boolean
+    amountKobo?: boolean
+    currency?: boolean
+    durationLabel?: boolean
+    dueDate?: boolean
+    status?: boolean
+    dvaAccountNumber?: boolean
+    dvaBankName?: boolean
+    dvaBankCode?: boolean
+    pdfUrl?: boolean
+    paidAt?: boolean
+    sentAt?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["invoice"]>
+
+  export type InvoiceSelectScalar = {
+    id?: boolean
+    invoiceNumber?: boolean
+    inquiryId?: boolean
+    customerName?: boolean
+    customerEmail?: boolean
+    customerPhone?: boolean
+    service?: boolean
+    description?: boolean
+    amountKobo?: boolean
+    currency?: boolean
+    durationLabel?: boolean
+    dueDate?: boolean
+    status?: boolean
+    dvaAccountNumber?: boolean
+    dvaBankName?: boolean
+    dvaBankCode?: boolean
+    pdfUrl?: boolean
+    paidAt?: boolean
+    sentAt?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type InvoiceOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "invoiceNumber" | "inquiryId" | "customerName" | "customerEmail" | "customerPhone" | "service" | "description" | "amountKobo" | "currency" | "durationLabel" | "dueDate" | "status" | "dvaAccountNumber" | "dvaBankName" | "dvaBankCode" | "pdfUrl" | "paidAt" | "sentAt" | "createdAt" | "updatedAt", ExtArgs["result"]["invoice"]>
+
+  export type $InvoicePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "Invoice"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      invoiceNumber: string
+      inquiryId: string | null
+      customerName: string
+      customerEmail: string
+      customerPhone: string | null
+      service: string
+      description: string | null
+      amountKobo: number
+      currency: string
+      durationLabel: string | null
+      dueDate: Date | null
+      status: string
+      dvaAccountNumber: string | null
+      dvaBankName: string | null
+      dvaBankCode: string | null
+      pdfUrl: string | null
+      paidAt: Date | null
+      sentAt: Date | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["invoice"]>
+    composites: {}
+  }
+
+  type InvoiceGetPayload<S extends boolean | null | undefined | InvoiceDefaultArgs> = $Result.GetResult<Prisma.$InvoicePayload, S>
+
+  type InvoiceCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<InvoiceFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: InvoiceCountAggregateInputType | true
+    }
+
+  export interface InvoiceDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['Invoice'], meta: { name: 'Invoice' } }
+    /**
+     * Find zero or one Invoice that matches the filter.
+     * @param {InvoiceFindUniqueArgs} args - Arguments to find a Invoice
+     * @example
+     * // Get one Invoice
+     * const invoice = await prisma.invoice.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends InvoiceFindUniqueArgs>(args: SelectSubset<T, InvoiceFindUniqueArgs<ExtArgs>>): Prisma__InvoiceClient<$Result.GetResult<Prisma.$InvoicePayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one Invoice that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {InvoiceFindUniqueOrThrowArgs} args - Arguments to find a Invoice
+     * @example
+     * // Get one Invoice
+     * const invoice = await prisma.invoice.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends InvoiceFindUniqueOrThrowArgs>(args: SelectSubset<T, InvoiceFindUniqueOrThrowArgs<ExtArgs>>): Prisma__InvoiceClient<$Result.GetResult<Prisma.$InvoicePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Invoice that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {InvoiceFindFirstArgs} args - Arguments to find a Invoice
+     * @example
+     * // Get one Invoice
+     * const invoice = await prisma.invoice.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends InvoiceFindFirstArgs>(args?: SelectSubset<T, InvoiceFindFirstArgs<ExtArgs>>): Prisma__InvoiceClient<$Result.GetResult<Prisma.$InvoicePayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Invoice that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {InvoiceFindFirstOrThrowArgs} args - Arguments to find a Invoice
+     * @example
+     * // Get one Invoice
+     * const invoice = await prisma.invoice.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends InvoiceFindFirstOrThrowArgs>(args?: SelectSubset<T, InvoiceFindFirstOrThrowArgs<ExtArgs>>): Prisma__InvoiceClient<$Result.GetResult<Prisma.$InvoicePayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more Invoices that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {InvoiceFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all Invoices
+     * const invoices = await prisma.invoice.findMany()
+     * 
+     * // Get first 10 Invoices
+     * const invoices = await prisma.invoice.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const invoiceWithIdOnly = await prisma.invoice.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends InvoiceFindManyArgs>(args?: SelectSubset<T, InvoiceFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InvoicePayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a Invoice.
+     * @param {InvoiceCreateArgs} args - Arguments to create a Invoice.
+     * @example
+     * // Create one Invoice
+     * const Invoice = await prisma.invoice.create({
+     *   data: {
+     *     // ... data to create a Invoice
+     *   }
+     * })
+     * 
+     */
+    create<T extends InvoiceCreateArgs>(args: SelectSubset<T, InvoiceCreateArgs<ExtArgs>>): Prisma__InvoiceClient<$Result.GetResult<Prisma.$InvoicePayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many Invoices.
+     * @param {InvoiceCreateManyArgs} args - Arguments to create many Invoices.
+     * @example
+     * // Create many Invoices
+     * const invoice = await prisma.invoice.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends InvoiceCreateManyArgs>(args?: SelectSubset<T, InvoiceCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many Invoices and returns the data saved in the database.
+     * @param {InvoiceCreateManyAndReturnArgs} args - Arguments to create many Invoices.
+     * @example
+     * // Create many Invoices
+     * const invoice = await prisma.invoice.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many Invoices and only return the `id`
+     * const invoiceWithIdOnly = await prisma.invoice.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends InvoiceCreateManyAndReturnArgs>(args?: SelectSubset<T, InvoiceCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InvoicePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a Invoice.
+     * @param {InvoiceDeleteArgs} args - Arguments to delete one Invoice.
+     * @example
+     * // Delete one Invoice
+     * const Invoice = await prisma.invoice.delete({
+     *   where: {
+     *     // ... filter to delete one Invoice
+     *   }
+     * })
+     * 
+     */
+    delete<T extends InvoiceDeleteArgs>(args: SelectSubset<T, InvoiceDeleteArgs<ExtArgs>>): Prisma__InvoiceClient<$Result.GetResult<Prisma.$InvoicePayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one Invoice.
+     * @param {InvoiceUpdateArgs} args - Arguments to update one Invoice.
+     * @example
+     * // Update one Invoice
+     * const invoice = await prisma.invoice.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends InvoiceUpdateArgs>(args: SelectSubset<T, InvoiceUpdateArgs<ExtArgs>>): Prisma__InvoiceClient<$Result.GetResult<Prisma.$InvoicePayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more Invoices.
+     * @param {InvoiceDeleteManyArgs} args - Arguments to filter Invoices to delete.
+     * @example
+     * // Delete a few Invoices
+     * const { count } = await prisma.invoice.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends InvoiceDeleteManyArgs>(args?: SelectSubset<T, InvoiceDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Invoices.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {InvoiceUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many Invoices
+     * const invoice = await prisma.invoice.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends InvoiceUpdateManyArgs>(args: SelectSubset<T, InvoiceUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Invoices and returns the data updated in the database.
+     * @param {InvoiceUpdateManyAndReturnArgs} args - Arguments to update many Invoices.
+     * @example
+     * // Update many Invoices
+     * const invoice = await prisma.invoice.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more Invoices and only return the `id`
+     * const invoiceWithIdOnly = await prisma.invoice.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends InvoiceUpdateManyAndReturnArgs>(args: SelectSubset<T, InvoiceUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InvoicePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one Invoice.
+     * @param {InvoiceUpsertArgs} args - Arguments to update or create a Invoice.
+     * @example
+     * // Update or create a Invoice
+     * const invoice = await prisma.invoice.upsert({
+     *   create: {
+     *     // ... data to create a Invoice
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the Invoice we want to update
+     *   }
+     * })
+     */
+    upsert<T extends InvoiceUpsertArgs>(args: SelectSubset<T, InvoiceUpsertArgs<ExtArgs>>): Prisma__InvoiceClient<$Result.GetResult<Prisma.$InvoicePayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of Invoices.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {InvoiceCountArgs} args - Arguments to filter Invoices to count.
+     * @example
+     * // Count the number of Invoices
+     * const count = await prisma.invoice.count({
+     *   where: {
+     *     // ... the filter for the Invoices we want to count
+     *   }
+     * })
+    **/
+    count<T extends InvoiceCountArgs>(
+      args?: Subset<T, InvoiceCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], InvoiceCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a Invoice.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {InvoiceAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends InvoiceAggregateArgs>(args: Subset<T, InvoiceAggregateArgs>): Prisma.PrismaPromise<GetInvoiceAggregateType<T>>
+
+    /**
+     * Group by Invoice.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {InvoiceGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends InvoiceGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: InvoiceGroupByArgs['orderBy'] }
+        : { orderBy?: InvoiceGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, InvoiceGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetInvoiceGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the Invoice model
+   */
+  readonly fields: InvoiceFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for Invoice.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__InvoiceClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the Invoice model
+   */
+  interface InvoiceFieldRefs {
+    readonly id: FieldRef<"Invoice", 'String'>
+    readonly invoiceNumber: FieldRef<"Invoice", 'String'>
+    readonly inquiryId: FieldRef<"Invoice", 'String'>
+    readonly customerName: FieldRef<"Invoice", 'String'>
+    readonly customerEmail: FieldRef<"Invoice", 'String'>
+    readonly customerPhone: FieldRef<"Invoice", 'String'>
+    readonly service: FieldRef<"Invoice", 'String'>
+    readonly description: FieldRef<"Invoice", 'String'>
+    readonly amountKobo: FieldRef<"Invoice", 'Int'>
+    readonly currency: FieldRef<"Invoice", 'String'>
+    readonly durationLabel: FieldRef<"Invoice", 'String'>
+    readonly dueDate: FieldRef<"Invoice", 'DateTime'>
+    readonly status: FieldRef<"Invoice", 'String'>
+    readonly dvaAccountNumber: FieldRef<"Invoice", 'String'>
+    readonly dvaBankName: FieldRef<"Invoice", 'String'>
+    readonly dvaBankCode: FieldRef<"Invoice", 'String'>
+    readonly pdfUrl: FieldRef<"Invoice", 'String'>
+    readonly paidAt: FieldRef<"Invoice", 'DateTime'>
+    readonly sentAt: FieldRef<"Invoice", 'DateTime'>
+    readonly createdAt: FieldRef<"Invoice", 'DateTime'>
+    readonly updatedAt: FieldRef<"Invoice", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * Invoice findUnique
+   */
+  export type InvoiceFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Invoice
+     */
+    select?: InvoiceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Invoice
+     */
+    omit?: InvoiceOmit<ExtArgs> | null
+    /**
+     * Filter, which Invoice to fetch.
+     */
+    where: InvoiceWhereUniqueInput
+  }
+
+  /**
+   * Invoice findUniqueOrThrow
+   */
+  export type InvoiceFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Invoice
+     */
+    select?: InvoiceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Invoice
+     */
+    omit?: InvoiceOmit<ExtArgs> | null
+    /**
+     * Filter, which Invoice to fetch.
+     */
+    where: InvoiceWhereUniqueInput
+  }
+
+  /**
+   * Invoice findFirst
+   */
+  export type InvoiceFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Invoice
+     */
+    select?: InvoiceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Invoice
+     */
+    omit?: InvoiceOmit<ExtArgs> | null
+    /**
+     * Filter, which Invoice to fetch.
+     */
+    where?: InvoiceWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Invoices to fetch.
+     */
+    orderBy?: InvoiceOrderByWithRelationInput | InvoiceOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Invoices.
+     */
+    cursor?: InvoiceWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Invoices from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Invoices.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Invoices.
+     */
+    distinct?: InvoiceScalarFieldEnum | InvoiceScalarFieldEnum[]
+  }
+
+  /**
+   * Invoice findFirstOrThrow
+   */
+  export type InvoiceFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Invoice
+     */
+    select?: InvoiceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Invoice
+     */
+    omit?: InvoiceOmit<ExtArgs> | null
+    /**
+     * Filter, which Invoice to fetch.
+     */
+    where?: InvoiceWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Invoices to fetch.
+     */
+    orderBy?: InvoiceOrderByWithRelationInput | InvoiceOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Invoices.
+     */
+    cursor?: InvoiceWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Invoices from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Invoices.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Invoices.
+     */
+    distinct?: InvoiceScalarFieldEnum | InvoiceScalarFieldEnum[]
+  }
+
+  /**
+   * Invoice findMany
+   */
+  export type InvoiceFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Invoice
+     */
+    select?: InvoiceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Invoice
+     */
+    omit?: InvoiceOmit<ExtArgs> | null
+    /**
+     * Filter, which Invoices to fetch.
+     */
+    where?: InvoiceWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Invoices to fetch.
+     */
+    orderBy?: InvoiceOrderByWithRelationInput | InvoiceOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing Invoices.
+     */
+    cursor?: InvoiceWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Invoices from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Invoices.
+     */
+    skip?: number
+    distinct?: InvoiceScalarFieldEnum | InvoiceScalarFieldEnum[]
+  }
+
+  /**
+   * Invoice create
+   */
+  export type InvoiceCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Invoice
+     */
+    select?: InvoiceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Invoice
+     */
+    omit?: InvoiceOmit<ExtArgs> | null
+    /**
+     * The data needed to create a Invoice.
+     */
+    data: XOR<InvoiceCreateInput, InvoiceUncheckedCreateInput>
+  }
+
+  /**
+   * Invoice createMany
+   */
+  export type InvoiceCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many Invoices.
+     */
+    data: InvoiceCreateManyInput | InvoiceCreateManyInput[]
+  }
+
+  /**
+   * Invoice createManyAndReturn
+   */
+  export type InvoiceCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Invoice
+     */
+    select?: InvoiceSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Invoice
+     */
+    omit?: InvoiceOmit<ExtArgs> | null
+    /**
+     * The data used to create many Invoices.
+     */
+    data: InvoiceCreateManyInput | InvoiceCreateManyInput[]
+  }
+
+  /**
+   * Invoice update
+   */
+  export type InvoiceUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Invoice
+     */
+    select?: InvoiceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Invoice
+     */
+    omit?: InvoiceOmit<ExtArgs> | null
+    /**
+     * The data needed to update a Invoice.
+     */
+    data: XOR<InvoiceUpdateInput, InvoiceUncheckedUpdateInput>
+    /**
+     * Choose, which Invoice to update.
+     */
+    where: InvoiceWhereUniqueInput
+  }
+
+  /**
+   * Invoice updateMany
+   */
+  export type InvoiceUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update Invoices.
+     */
+    data: XOR<InvoiceUpdateManyMutationInput, InvoiceUncheckedUpdateManyInput>
+    /**
+     * Filter which Invoices to update
+     */
+    where?: InvoiceWhereInput
+    /**
+     * Limit how many Invoices to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * Invoice updateManyAndReturn
+   */
+  export type InvoiceUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Invoice
+     */
+    select?: InvoiceSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Invoice
+     */
+    omit?: InvoiceOmit<ExtArgs> | null
+    /**
+     * The data used to update Invoices.
+     */
+    data: XOR<InvoiceUpdateManyMutationInput, InvoiceUncheckedUpdateManyInput>
+    /**
+     * Filter which Invoices to update
+     */
+    where?: InvoiceWhereInput
+    /**
+     * Limit how many Invoices to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * Invoice upsert
+   */
+  export type InvoiceUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Invoice
+     */
+    select?: InvoiceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Invoice
+     */
+    omit?: InvoiceOmit<ExtArgs> | null
+    /**
+     * The filter to search for the Invoice to update in case it exists.
+     */
+    where: InvoiceWhereUniqueInput
+    /**
+     * In case the Invoice found by the `where` argument doesn't exist, create a new Invoice with this data.
+     */
+    create: XOR<InvoiceCreateInput, InvoiceUncheckedCreateInput>
+    /**
+     * In case the Invoice was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<InvoiceUpdateInput, InvoiceUncheckedUpdateInput>
+  }
+
+  /**
+   * Invoice delete
+   */
+  export type InvoiceDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Invoice
+     */
+    select?: InvoiceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Invoice
+     */
+    omit?: InvoiceOmit<ExtArgs> | null
+    /**
+     * Filter which Invoice to delete.
+     */
+    where: InvoiceWhereUniqueInput
+  }
+
+  /**
+   * Invoice deleteMany
+   */
+  export type InvoiceDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Invoices to delete
+     */
+    where?: InvoiceWhereInput
+    /**
+     * Limit how many Invoices to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * Invoice without action
+   */
+  export type InvoiceDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Invoice
+     */
+    select?: InvoiceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Invoice
+     */
+    omit?: InvoiceOmit<ExtArgs> | null
+  }
+
+
+  /**
+   * Model EventRecord
+   */
+
+  export type AggregateEventRecord = {
+    _count: EventRecordCountAggregateOutputType | null
+    _min: EventRecordMinAggregateOutputType | null
+    _max: EventRecordMaxAggregateOutputType | null
+  }
+
+  export type EventRecordMinAggregateOutputType = {
+    id: string | null
+    type: string | null
+    customerEmail: string | null
+    customerPhone: string | null
+    eventDate: Date | null
+    relatedInvoiceId: string | null
+    payload: string | null
+    status: string | null
+    processedAt: Date | null
+    createdAt: Date | null
+  }
+
+  export type EventRecordMaxAggregateOutputType = {
+    id: string | null
+    type: string | null
+    customerEmail: string | null
+    customerPhone: string | null
+    eventDate: Date | null
+    relatedInvoiceId: string | null
+    payload: string | null
+    status: string | null
+    processedAt: Date | null
+    createdAt: Date | null
+  }
+
+  export type EventRecordCountAggregateOutputType = {
+    id: number
+    type: number
+    customerEmail: number
+    customerPhone: number
+    eventDate: number
+    relatedInvoiceId: number
+    payload: number
+    status: number
+    processedAt: number
+    createdAt: number
+    _all: number
+  }
+
+
+  export type EventRecordMinAggregateInputType = {
+    id?: true
+    type?: true
+    customerEmail?: true
+    customerPhone?: true
+    eventDate?: true
+    relatedInvoiceId?: true
+    payload?: true
+    status?: true
+    processedAt?: true
+    createdAt?: true
+  }
+
+  export type EventRecordMaxAggregateInputType = {
+    id?: true
+    type?: true
+    customerEmail?: true
+    customerPhone?: true
+    eventDate?: true
+    relatedInvoiceId?: true
+    payload?: true
+    status?: true
+    processedAt?: true
+    createdAt?: true
+  }
+
+  export type EventRecordCountAggregateInputType = {
+    id?: true
+    type?: true
+    customerEmail?: true
+    customerPhone?: true
+    eventDate?: true
+    relatedInvoiceId?: true
+    payload?: true
+    status?: true
+    processedAt?: true
+    createdAt?: true
+    _all?: true
+  }
+
+  export type EventRecordAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which EventRecord to aggregate.
+     */
+    where?: EventRecordWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of EventRecords to fetch.
+     */
+    orderBy?: EventRecordOrderByWithRelationInput | EventRecordOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: EventRecordWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` EventRecords from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` EventRecords.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned EventRecords
+    **/
+    _count?: true | EventRecordCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: EventRecordMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: EventRecordMaxAggregateInputType
+  }
+
+  export type GetEventRecordAggregateType<T extends EventRecordAggregateArgs> = {
+        [P in keyof T & keyof AggregateEventRecord]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateEventRecord[P]>
+      : GetScalarType<T[P], AggregateEventRecord[P]>
+  }
+
+
+
+
+  export type EventRecordGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: EventRecordWhereInput
+    orderBy?: EventRecordOrderByWithAggregationInput | EventRecordOrderByWithAggregationInput[]
+    by: EventRecordScalarFieldEnum[] | EventRecordScalarFieldEnum
+    having?: EventRecordScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: EventRecordCountAggregateInputType | true
+    _min?: EventRecordMinAggregateInputType
+    _max?: EventRecordMaxAggregateInputType
+  }
+
+  export type EventRecordGroupByOutputType = {
+    id: string
+    type: string
+    customerEmail: string | null
+    customerPhone: string | null
+    eventDate: Date
+    relatedInvoiceId: string | null
+    payload: string
+    status: string
+    processedAt: Date | null
+    createdAt: Date
+    _count: EventRecordCountAggregateOutputType | null
+    _min: EventRecordMinAggregateOutputType | null
+    _max: EventRecordMaxAggregateOutputType | null
+  }
+
+  type GetEventRecordGroupByPayload<T extends EventRecordGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<EventRecordGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof EventRecordGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], EventRecordGroupByOutputType[P]>
+            : GetScalarType<T[P], EventRecordGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type EventRecordSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    type?: boolean
+    customerEmail?: boolean
+    customerPhone?: boolean
+    eventDate?: boolean
+    relatedInvoiceId?: boolean
+    payload?: boolean
+    status?: boolean
+    processedAt?: boolean
+    createdAt?: boolean
+  }, ExtArgs["result"]["eventRecord"]>
+
+  export type EventRecordSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    type?: boolean
+    customerEmail?: boolean
+    customerPhone?: boolean
+    eventDate?: boolean
+    relatedInvoiceId?: boolean
+    payload?: boolean
+    status?: boolean
+    processedAt?: boolean
+    createdAt?: boolean
+  }, ExtArgs["result"]["eventRecord"]>
+
+  export type EventRecordSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    type?: boolean
+    customerEmail?: boolean
+    customerPhone?: boolean
+    eventDate?: boolean
+    relatedInvoiceId?: boolean
+    payload?: boolean
+    status?: boolean
+    processedAt?: boolean
+    createdAt?: boolean
+  }, ExtArgs["result"]["eventRecord"]>
+
+  export type EventRecordSelectScalar = {
+    id?: boolean
+    type?: boolean
+    customerEmail?: boolean
+    customerPhone?: boolean
+    eventDate?: boolean
+    relatedInvoiceId?: boolean
+    payload?: boolean
+    status?: boolean
+    processedAt?: boolean
+    createdAt?: boolean
+  }
+
+  export type EventRecordOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "type" | "customerEmail" | "customerPhone" | "eventDate" | "relatedInvoiceId" | "payload" | "status" | "processedAt" | "createdAt", ExtArgs["result"]["eventRecord"]>
+
+  export type $EventRecordPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "EventRecord"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      type: string
+      customerEmail: string | null
+      customerPhone: string | null
+      eventDate: Date
+      relatedInvoiceId: string | null
+      payload: string
+      status: string
+      processedAt: Date | null
+      createdAt: Date
+    }, ExtArgs["result"]["eventRecord"]>
+    composites: {}
+  }
+
+  type EventRecordGetPayload<S extends boolean | null | undefined | EventRecordDefaultArgs> = $Result.GetResult<Prisma.$EventRecordPayload, S>
+
+  type EventRecordCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<EventRecordFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: EventRecordCountAggregateInputType | true
+    }
+
+  export interface EventRecordDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['EventRecord'], meta: { name: 'EventRecord' } }
+    /**
+     * Find zero or one EventRecord that matches the filter.
+     * @param {EventRecordFindUniqueArgs} args - Arguments to find a EventRecord
+     * @example
+     * // Get one EventRecord
+     * const eventRecord = await prisma.eventRecord.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends EventRecordFindUniqueArgs>(args: SelectSubset<T, EventRecordFindUniqueArgs<ExtArgs>>): Prisma__EventRecordClient<$Result.GetResult<Prisma.$EventRecordPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one EventRecord that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {EventRecordFindUniqueOrThrowArgs} args - Arguments to find a EventRecord
+     * @example
+     * // Get one EventRecord
+     * const eventRecord = await prisma.eventRecord.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends EventRecordFindUniqueOrThrowArgs>(args: SelectSubset<T, EventRecordFindUniqueOrThrowArgs<ExtArgs>>): Prisma__EventRecordClient<$Result.GetResult<Prisma.$EventRecordPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first EventRecord that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {EventRecordFindFirstArgs} args - Arguments to find a EventRecord
+     * @example
+     * // Get one EventRecord
+     * const eventRecord = await prisma.eventRecord.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends EventRecordFindFirstArgs>(args?: SelectSubset<T, EventRecordFindFirstArgs<ExtArgs>>): Prisma__EventRecordClient<$Result.GetResult<Prisma.$EventRecordPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first EventRecord that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {EventRecordFindFirstOrThrowArgs} args - Arguments to find a EventRecord
+     * @example
+     * // Get one EventRecord
+     * const eventRecord = await prisma.eventRecord.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends EventRecordFindFirstOrThrowArgs>(args?: SelectSubset<T, EventRecordFindFirstOrThrowArgs<ExtArgs>>): Prisma__EventRecordClient<$Result.GetResult<Prisma.$EventRecordPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more EventRecords that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {EventRecordFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all EventRecords
+     * const eventRecords = await prisma.eventRecord.findMany()
+     * 
+     * // Get first 10 EventRecords
+     * const eventRecords = await prisma.eventRecord.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const eventRecordWithIdOnly = await prisma.eventRecord.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends EventRecordFindManyArgs>(args?: SelectSubset<T, EventRecordFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$EventRecordPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a EventRecord.
+     * @param {EventRecordCreateArgs} args - Arguments to create a EventRecord.
+     * @example
+     * // Create one EventRecord
+     * const EventRecord = await prisma.eventRecord.create({
+     *   data: {
+     *     // ... data to create a EventRecord
+     *   }
+     * })
+     * 
+     */
+    create<T extends EventRecordCreateArgs>(args: SelectSubset<T, EventRecordCreateArgs<ExtArgs>>): Prisma__EventRecordClient<$Result.GetResult<Prisma.$EventRecordPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many EventRecords.
+     * @param {EventRecordCreateManyArgs} args - Arguments to create many EventRecords.
+     * @example
+     * // Create many EventRecords
+     * const eventRecord = await prisma.eventRecord.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends EventRecordCreateManyArgs>(args?: SelectSubset<T, EventRecordCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many EventRecords and returns the data saved in the database.
+     * @param {EventRecordCreateManyAndReturnArgs} args - Arguments to create many EventRecords.
+     * @example
+     * // Create many EventRecords
+     * const eventRecord = await prisma.eventRecord.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many EventRecords and only return the `id`
+     * const eventRecordWithIdOnly = await prisma.eventRecord.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends EventRecordCreateManyAndReturnArgs>(args?: SelectSubset<T, EventRecordCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$EventRecordPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a EventRecord.
+     * @param {EventRecordDeleteArgs} args - Arguments to delete one EventRecord.
+     * @example
+     * // Delete one EventRecord
+     * const EventRecord = await prisma.eventRecord.delete({
+     *   where: {
+     *     // ... filter to delete one EventRecord
+     *   }
+     * })
+     * 
+     */
+    delete<T extends EventRecordDeleteArgs>(args: SelectSubset<T, EventRecordDeleteArgs<ExtArgs>>): Prisma__EventRecordClient<$Result.GetResult<Prisma.$EventRecordPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one EventRecord.
+     * @param {EventRecordUpdateArgs} args - Arguments to update one EventRecord.
+     * @example
+     * // Update one EventRecord
+     * const eventRecord = await prisma.eventRecord.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends EventRecordUpdateArgs>(args: SelectSubset<T, EventRecordUpdateArgs<ExtArgs>>): Prisma__EventRecordClient<$Result.GetResult<Prisma.$EventRecordPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more EventRecords.
+     * @param {EventRecordDeleteManyArgs} args - Arguments to filter EventRecords to delete.
+     * @example
+     * // Delete a few EventRecords
+     * const { count } = await prisma.eventRecord.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends EventRecordDeleteManyArgs>(args?: SelectSubset<T, EventRecordDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more EventRecords.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {EventRecordUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many EventRecords
+     * const eventRecord = await prisma.eventRecord.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends EventRecordUpdateManyArgs>(args: SelectSubset<T, EventRecordUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more EventRecords and returns the data updated in the database.
+     * @param {EventRecordUpdateManyAndReturnArgs} args - Arguments to update many EventRecords.
+     * @example
+     * // Update many EventRecords
+     * const eventRecord = await prisma.eventRecord.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more EventRecords and only return the `id`
+     * const eventRecordWithIdOnly = await prisma.eventRecord.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends EventRecordUpdateManyAndReturnArgs>(args: SelectSubset<T, EventRecordUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$EventRecordPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one EventRecord.
+     * @param {EventRecordUpsertArgs} args - Arguments to update or create a EventRecord.
+     * @example
+     * // Update or create a EventRecord
+     * const eventRecord = await prisma.eventRecord.upsert({
+     *   create: {
+     *     // ... data to create a EventRecord
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the EventRecord we want to update
+     *   }
+     * })
+     */
+    upsert<T extends EventRecordUpsertArgs>(args: SelectSubset<T, EventRecordUpsertArgs<ExtArgs>>): Prisma__EventRecordClient<$Result.GetResult<Prisma.$EventRecordPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of EventRecords.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {EventRecordCountArgs} args - Arguments to filter EventRecords to count.
+     * @example
+     * // Count the number of EventRecords
+     * const count = await prisma.eventRecord.count({
+     *   where: {
+     *     // ... the filter for the EventRecords we want to count
+     *   }
+     * })
+    **/
+    count<T extends EventRecordCountArgs>(
+      args?: Subset<T, EventRecordCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], EventRecordCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a EventRecord.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {EventRecordAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends EventRecordAggregateArgs>(args: Subset<T, EventRecordAggregateArgs>): Prisma.PrismaPromise<GetEventRecordAggregateType<T>>
+
+    /**
+     * Group by EventRecord.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {EventRecordGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends EventRecordGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: EventRecordGroupByArgs['orderBy'] }
+        : { orderBy?: EventRecordGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, EventRecordGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetEventRecordGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the EventRecord model
+   */
+  readonly fields: EventRecordFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for EventRecord.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__EventRecordClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the EventRecord model
+   */
+  interface EventRecordFieldRefs {
+    readonly id: FieldRef<"EventRecord", 'String'>
+    readonly type: FieldRef<"EventRecord", 'String'>
+    readonly customerEmail: FieldRef<"EventRecord", 'String'>
+    readonly customerPhone: FieldRef<"EventRecord", 'String'>
+    readonly eventDate: FieldRef<"EventRecord", 'DateTime'>
+    readonly relatedInvoiceId: FieldRef<"EventRecord", 'String'>
+    readonly payload: FieldRef<"EventRecord", 'String'>
+    readonly status: FieldRef<"EventRecord", 'String'>
+    readonly processedAt: FieldRef<"EventRecord", 'DateTime'>
+    readonly createdAt: FieldRef<"EventRecord", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * EventRecord findUnique
+   */
+  export type EventRecordFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EventRecord
+     */
+    select?: EventRecordSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the EventRecord
+     */
+    omit?: EventRecordOmit<ExtArgs> | null
+    /**
+     * Filter, which EventRecord to fetch.
+     */
+    where: EventRecordWhereUniqueInput
+  }
+
+  /**
+   * EventRecord findUniqueOrThrow
+   */
+  export type EventRecordFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EventRecord
+     */
+    select?: EventRecordSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the EventRecord
+     */
+    omit?: EventRecordOmit<ExtArgs> | null
+    /**
+     * Filter, which EventRecord to fetch.
+     */
+    where: EventRecordWhereUniqueInput
+  }
+
+  /**
+   * EventRecord findFirst
+   */
+  export type EventRecordFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EventRecord
+     */
+    select?: EventRecordSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the EventRecord
+     */
+    omit?: EventRecordOmit<ExtArgs> | null
+    /**
+     * Filter, which EventRecord to fetch.
+     */
+    where?: EventRecordWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of EventRecords to fetch.
+     */
+    orderBy?: EventRecordOrderByWithRelationInput | EventRecordOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for EventRecords.
+     */
+    cursor?: EventRecordWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` EventRecords from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` EventRecords.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of EventRecords.
+     */
+    distinct?: EventRecordScalarFieldEnum | EventRecordScalarFieldEnum[]
+  }
+
+  /**
+   * EventRecord findFirstOrThrow
+   */
+  export type EventRecordFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EventRecord
+     */
+    select?: EventRecordSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the EventRecord
+     */
+    omit?: EventRecordOmit<ExtArgs> | null
+    /**
+     * Filter, which EventRecord to fetch.
+     */
+    where?: EventRecordWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of EventRecords to fetch.
+     */
+    orderBy?: EventRecordOrderByWithRelationInput | EventRecordOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for EventRecords.
+     */
+    cursor?: EventRecordWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` EventRecords from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` EventRecords.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of EventRecords.
+     */
+    distinct?: EventRecordScalarFieldEnum | EventRecordScalarFieldEnum[]
+  }
+
+  /**
+   * EventRecord findMany
+   */
+  export type EventRecordFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EventRecord
+     */
+    select?: EventRecordSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the EventRecord
+     */
+    omit?: EventRecordOmit<ExtArgs> | null
+    /**
+     * Filter, which EventRecords to fetch.
+     */
+    where?: EventRecordWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of EventRecords to fetch.
+     */
+    orderBy?: EventRecordOrderByWithRelationInput | EventRecordOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing EventRecords.
+     */
+    cursor?: EventRecordWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` EventRecords from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` EventRecords.
+     */
+    skip?: number
+    distinct?: EventRecordScalarFieldEnum | EventRecordScalarFieldEnum[]
+  }
+
+  /**
+   * EventRecord create
+   */
+  export type EventRecordCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EventRecord
+     */
+    select?: EventRecordSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the EventRecord
+     */
+    omit?: EventRecordOmit<ExtArgs> | null
+    /**
+     * The data needed to create a EventRecord.
+     */
+    data: XOR<EventRecordCreateInput, EventRecordUncheckedCreateInput>
+  }
+
+  /**
+   * EventRecord createMany
+   */
+  export type EventRecordCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many EventRecords.
+     */
+    data: EventRecordCreateManyInput | EventRecordCreateManyInput[]
+  }
+
+  /**
+   * EventRecord createManyAndReturn
+   */
+  export type EventRecordCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EventRecord
+     */
+    select?: EventRecordSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the EventRecord
+     */
+    omit?: EventRecordOmit<ExtArgs> | null
+    /**
+     * The data used to create many EventRecords.
+     */
+    data: EventRecordCreateManyInput | EventRecordCreateManyInput[]
+  }
+
+  /**
+   * EventRecord update
+   */
+  export type EventRecordUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EventRecord
+     */
+    select?: EventRecordSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the EventRecord
+     */
+    omit?: EventRecordOmit<ExtArgs> | null
+    /**
+     * The data needed to update a EventRecord.
+     */
+    data: XOR<EventRecordUpdateInput, EventRecordUncheckedUpdateInput>
+    /**
+     * Choose, which EventRecord to update.
+     */
+    where: EventRecordWhereUniqueInput
+  }
+
+  /**
+   * EventRecord updateMany
+   */
+  export type EventRecordUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update EventRecords.
+     */
+    data: XOR<EventRecordUpdateManyMutationInput, EventRecordUncheckedUpdateManyInput>
+    /**
+     * Filter which EventRecords to update
+     */
+    where?: EventRecordWhereInput
+    /**
+     * Limit how many EventRecords to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * EventRecord updateManyAndReturn
+   */
+  export type EventRecordUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EventRecord
+     */
+    select?: EventRecordSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the EventRecord
+     */
+    omit?: EventRecordOmit<ExtArgs> | null
+    /**
+     * The data used to update EventRecords.
+     */
+    data: XOR<EventRecordUpdateManyMutationInput, EventRecordUncheckedUpdateManyInput>
+    /**
+     * Filter which EventRecords to update
+     */
+    where?: EventRecordWhereInput
+    /**
+     * Limit how many EventRecords to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * EventRecord upsert
+   */
+  export type EventRecordUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EventRecord
+     */
+    select?: EventRecordSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the EventRecord
+     */
+    omit?: EventRecordOmit<ExtArgs> | null
+    /**
+     * The filter to search for the EventRecord to update in case it exists.
+     */
+    where: EventRecordWhereUniqueInput
+    /**
+     * In case the EventRecord found by the `where` argument doesn't exist, create a new EventRecord with this data.
+     */
+    create: XOR<EventRecordCreateInput, EventRecordUncheckedCreateInput>
+    /**
+     * In case the EventRecord was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<EventRecordUpdateInput, EventRecordUncheckedUpdateInput>
+  }
+
+  /**
+   * EventRecord delete
+   */
+  export type EventRecordDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EventRecord
+     */
+    select?: EventRecordSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the EventRecord
+     */
+    omit?: EventRecordOmit<ExtArgs> | null
+    /**
+     * Filter which EventRecord to delete.
+     */
+    where: EventRecordWhereUniqueInput
+  }
+
+  /**
+   * EventRecord deleteMany
+   */
+  export type EventRecordDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which EventRecords to delete
+     */
+    where?: EventRecordWhereInput
+    /**
+     * Limit how many EventRecords to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * EventRecord without action
+   */
+  export type EventRecordDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EventRecord
+     */
+    select?: EventRecordSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the EventRecord
+     */
+    omit?: EventRecordOmit<ExtArgs> | null
+  }
+
+
+  /**
+   * Model WhatsAppMessage
+   */
+
+  export type AggregateWhatsAppMessage = {
+    _count: WhatsAppMessageCountAggregateOutputType | null
+    _min: WhatsAppMessageMinAggregateOutputType | null
+    _max: WhatsAppMessageMaxAggregateOutputType | null
+  }
+
+  export type WhatsAppMessageMinAggregateOutputType = {
+    id: string | null
+    direction: string | null
+    toPhone: string | null
+    fromPhone: string | null
+    messageText: string | null
+    mediaUrl: string | null
+    mediaFilename: string | null
+    relatedInvoiceId: string | null
+    sentAt: Date | null
+  }
+
+  export type WhatsAppMessageMaxAggregateOutputType = {
+    id: string | null
+    direction: string | null
+    toPhone: string | null
+    fromPhone: string | null
+    messageText: string | null
+    mediaUrl: string | null
+    mediaFilename: string | null
+    relatedInvoiceId: string | null
+    sentAt: Date | null
+  }
+
+  export type WhatsAppMessageCountAggregateOutputType = {
+    id: number
+    direction: number
+    toPhone: number
+    fromPhone: number
+    messageText: number
+    mediaUrl: number
+    mediaFilename: number
+    relatedInvoiceId: number
+    sentAt: number
+    _all: number
+  }
+
+
+  export type WhatsAppMessageMinAggregateInputType = {
+    id?: true
+    direction?: true
+    toPhone?: true
+    fromPhone?: true
+    messageText?: true
+    mediaUrl?: true
+    mediaFilename?: true
+    relatedInvoiceId?: true
+    sentAt?: true
+  }
+
+  export type WhatsAppMessageMaxAggregateInputType = {
+    id?: true
+    direction?: true
+    toPhone?: true
+    fromPhone?: true
+    messageText?: true
+    mediaUrl?: true
+    mediaFilename?: true
+    relatedInvoiceId?: true
+    sentAt?: true
+  }
+
+  export type WhatsAppMessageCountAggregateInputType = {
+    id?: true
+    direction?: true
+    toPhone?: true
+    fromPhone?: true
+    messageText?: true
+    mediaUrl?: true
+    mediaFilename?: true
+    relatedInvoiceId?: true
+    sentAt?: true
+    _all?: true
+  }
+
+  export type WhatsAppMessageAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which WhatsAppMessage to aggregate.
+     */
+    where?: WhatsAppMessageWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of WhatsAppMessages to fetch.
+     */
+    orderBy?: WhatsAppMessageOrderByWithRelationInput | WhatsAppMessageOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: WhatsAppMessageWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` WhatsAppMessages from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` WhatsAppMessages.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned WhatsAppMessages
+    **/
+    _count?: true | WhatsAppMessageCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: WhatsAppMessageMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: WhatsAppMessageMaxAggregateInputType
+  }
+
+  export type GetWhatsAppMessageAggregateType<T extends WhatsAppMessageAggregateArgs> = {
+        [P in keyof T & keyof AggregateWhatsAppMessage]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateWhatsAppMessage[P]>
+      : GetScalarType<T[P], AggregateWhatsAppMessage[P]>
+  }
+
+
+
+
+  export type WhatsAppMessageGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: WhatsAppMessageWhereInput
+    orderBy?: WhatsAppMessageOrderByWithAggregationInput | WhatsAppMessageOrderByWithAggregationInput[]
+    by: WhatsAppMessageScalarFieldEnum[] | WhatsAppMessageScalarFieldEnum
+    having?: WhatsAppMessageScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: WhatsAppMessageCountAggregateInputType | true
+    _min?: WhatsAppMessageMinAggregateInputType
+    _max?: WhatsAppMessageMaxAggregateInputType
+  }
+
+  export type WhatsAppMessageGroupByOutputType = {
+    id: string
+    direction: string
+    toPhone: string | null
+    fromPhone: string | null
+    messageText: string | null
+    mediaUrl: string | null
+    mediaFilename: string | null
+    relatedInvoiceId: string | null
+    sentAt: Date
+    _count: WhatsAppMessageCountAggregateOutputType | null
+    _min: WhatsAppMessageMinAggregateOutputType | null
+    _max: WhatsAppMessageMaxAggregateOutputType | null
+  }
+
+  type GetWhatsAppMessageGroupByPayload<T extends WhatsAppMessageGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<WhatsAppMessageGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof WhatsAppMessageGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], WhatsAppMessageGroupByOutputType[P]>
+            : GetScalarType<T[P], WhatsAppMessageGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type WhatsAppMessageSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    direction?: boolean
+    toPhone?: boolean
+    fromPhone?: boolean
+    messageText?: boolean
+    mediaUrl?: boolean
+    mediaFilename?: boolean
+    relatedInvoiceId?: boolean
+    sentAt?: boolean
+  }, ExtArgs["result"]["whatsAppMessage"]>
+
+  export type WhatsAppMessageSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    direction?: boolean
+    toPhone?: boolean
+    fromPhone?: boolean
+    messageText?: boolean
+    mediaUrl?: boolean
+    mediaFilename?: boolean
+    relatedInvoiceId?: boolean
+    sentAt?: boolean
+  }, ExtArgs["result"]["whatsAppMessage"]>
+
+  export type WhatsAppMessageSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    direction?: boolean
+    toPhone?: boolean
+    fromPhone?: boolean
+    messageText?: boolean
+    mediaUrl?: boolean
+    mediaFilename?: boolean
+    relatedInvoiceId?: boolean
+    sentAt?: boolean
+  }, ExtArgs["result"]["whatsAppMessage"]>
+
+  export type WhatsAppMessageSelectScalar = {
+    id?: boolean
+    direction?: boolean
+    toPhone?: boolean
+    fromPhone?: boolean
+    messageText?: boolean
+    mediaUrl?: boolean
+    mediaFilename?: boolean
+    relatedInvoiceId?: boolean
+    sentAt?: boolean
+  }
+
+  export type WhatsAppMessageOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "direction" | "toPhone" | "fromPhone" | "messageText" | "mediaUrl" | "mediaFilename" | "relatedInvoiceId" | "sentAt", ExtArgs["result"]["whatsAppMessage"]>
+
+  export type $WhatsAppMessagePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "WhatsAppMessage"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      direction: string
+      toPhone: string | null
+      fromPhone: string | null
+      messageText: string | null
+      mediaUrl: string | null
+      mediaFilename: string | null
+      relatedInvoiceId: string | null
+      sentAt: Date
+    }, ExtArgs["result"]["whatsAppMessage"]>
+    composites: {}
+  }
+
+  type WhatsAppMessageGetPayload<S extends boolean | null | undefined | WhatsAppMessageDefaultArgs> = $Result.GetResult<Prisma.$WhatsAppMessagePayload, S>
+
+  type WhatsAppMessageCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<WhatsAppMessageFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: WhatsAppMessageCountAggregateInputType | true
+    }
+
+  export interface WhatsAppMessageDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['WhatsAppMessage'], meta: { name: 'WhatsAppMessage' } }
+    /**
+     * Find zero or one WhatsAppMessage that matches the filter.
+     * @param {WhatsAppMessageFindUniqueArgs} args - Arguments to find a WhatsAppMessage
+     * @example
+     * // Get one WhatsAppMessage
+     * const whatsAppMessage = await prisma.whatsAppMessage.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends WhatsAppMessageFindUniqueArgs>(args: SelectSubset<T, WhatsAppMessageFindUniqueArgs<ExtArgs>>): Prisma__WhatsAppMessageClient<$Result.GetResult<Prisma.$WhatsAppMessagePayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one WhatsAppMessage that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {WhatsAppMessageFindUniqueOrThrowArgs} args - Arguments to find a WhatsAppMessage
+     * @example
+     * // Get one WhatsAppMessage
+     * const whatsAppMessage = await prisma.whatsAppMessage.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends WhatsAppMessageFindUniqueOrThrowArgs>(args: SelectSubset<T, WhatsAppMessageFindUniqueOrThrowArgs<ExtArgs>>): Prisma__WhatsAppMessageClient<$Result.GetResult<Prisma.$WhatsAppMessagePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first WhatsAppMessage that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {WhatsAppMessageFindFirstArgs} args - Arguments to find a WhatsAppMessage
+     * @example
+     * // Get one WhatsAppMessage
+     * const whatsAppMessage = await prisma.whatsAppMessage.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends WhatsAppMessageFindFirstArgs>(args?: SelectSubset<T, WhatsAppMessageFindFirstArgs<ExtArgs>>): Prisma__WhatsAppMessageClient<$Result.GetResult<Prisma.$WhatsAppMessagePayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first WhatsAppMessage that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {WhatsAppMessageFindFirstOrThrowArgs} args - Arguments to find a WhatsAppMessage
+     * @example
+     * // Get one WhatsAppMessage
+     * const whatsAppMessage = await prisma.whatsAppMessage.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends WhatsAppMessageFindFirstOrThrowArgs>(args?: SelectSubset<T, WhatsAppMessageFindFirstOrThrowArgs<ExtArgs>>): Prisma__WhatsAppMessageClient<$Result.GetResult<Prisma.$WhatsAppMessagePayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more WhatsAppMessages that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {WhatsAppMessageFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all WhatsAppMessages
+     * const whatsAppMessages = await prisma.whatsAppMessage.findMany()
+     * 
+     * // Get first 10 WhatsAppMessages
+     * const whatsAppMessages = await prisma.whatsAppMessage.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const whatsAppMessageWithIdOnly = await prisma.whatsAppMessage.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends WhatsAppMessageFindManyArgs>(args?: SelectSubset<T, WhatsAppMessageFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$WhatsAppMessagePayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a WhatsAppMessage.
+     * @param {WhatsAppMessageCreateArgs} args - Arguments to create a WhatsAppMessage.
+     * @example
+     * // Create one WhatsAppMessage
+     * const WhatsAppMessage = await prisma.whatsAppMessage.create({
+     *   data: {
+     *     // ... data to create a WhatsAppMessage
+     *   }
+     * })
+     * 
+     */
+    create<T extends WhatsAppMessageCreateArgs>(args: SelectSubset<T, WhatsAppMessageCreateArgs<ExtArgs>>): Prisma__WhatsAppMessageClient<$Result.GetResult<Prisma.$WhatsAppMessagePayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many WhatsAppMessages.
+     * @param {WhatsAppMessageCreateManyArgs} args - Arguments to create many WhatsAppMessages.
+     * @example
+     * // Create many WhatsAppMessages
+     * const whatsAppMessage = await prisma.whatsAppMessage.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends WhatsAppMessageCreateManyArgs>(args?: SelectSubset<T, WhatsAppMessageCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many WhatsAppMessages and returns the data saved in the database.
+     * @param {WhatsAppMessageCreateManyAndReturnArgs} args - Arguments to create many WhatsAppMessages.
+     * @example
+     * // Create many WhatsAppMessages
+     * const whatsAppMessage = await prisma.whatsAppMessage.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many WhatsAppMessages and only return the `id`
+     * const whatsAppMessageWithIdOnly = await prisma.whatsAppMessage.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends WhatsAppMessageCreateManyAndReturnArgs>(args?: SelectSubset<T, WhatsAppMessageCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$WhatsAppMessagePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a WhatsAppMessage.
+     * @param {WhatsAppMessageDeleteArgs} args - Arguments to delete one WhatsAppMessage.
+     * @example
+     * // Delete one WhatsAppMessage
+     * const WhatsAppMessage = await prisma.whatsAppMessage.delete({
+     *   where: {
+     *     // ... filter to delete one WhatsAppMessage
+     *   }
+     * })
+     * 
+     */
+    delete<T extends WhatsAppMessageDeleteArgs>(args: SelectSubset<T, WhatsAppMessageDeleteArgs<ExtArgs>>): Prisma__WhatsAppMessageClient<$Result.GetResult<Prisma.$WhatsAppMessagePayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one WhatsAppMessage.
+     * @param {WhatsAppMessageUpdateArgs} args - Arguments to update one WhatsAppMessage.
+     * @example
+     * // Update one WhatsAppMessage
+     * const whatsAppMessage = await prisma.whatsAppMessage.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends WhatsAppMessageUpdateArgs>(args: SelectSubset<T, WhatsAppMessageUpdateArgs<ExtArgs>>): Prisma__WhatsAppMessageClient<$Result.GetResult<Prisma.$WhatsAppMessagePayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more WhatsAppMessages.
+     * @param {WhatsAppMessageDeleteManyArgs} args - Arguments to filter WhatsAppMessages to delete.
+     * @example
+     * // Delete a few WhatsAppMessages
+     * const { count } = await prisma.whatsAppMessage.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends WhatsAppMessageDeleteManyArgs>(args?: SelectSubset<T, WhatsAppMessageDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more WhatsAppMessages.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {WhatsAppMessageUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many WhatsAppMessages
+     * const whatsAppMessage = await prisma.whatsAppMessage.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends WhatsAppMessageUpdateManyArgs>(args: SelectSubset<T, WhatsAppMessageUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more WhatsAppMessages and returns the data updated in the database.
+     * @param {WhatsAppMessageUpdateManyAndReturnArgs} args - Arguments to update many WhatsAppMessages.
+     * @example
+     * // Update many WhatsAppMessages
+     * const whatsAppMessage = await prisma.whatsAppMessage.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more WhatsAppMessages and only return the `id`
+     * const whatsAppMessageWithIdOnly = await prisma.whatsAppMessage.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends WhatsAppMessageUpdateManyAndReturnArgs>(args: SelectSubset<T, WhatsAppMessageUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$WhatsAppMessagePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one WhatsAppMessage.
+     * @param {WhatsAppMessageUpsertArgs} args - Arguments to update or create a WhatsAppMessage.
+     * @example
+     * // Update or create a WhatsAppMessage
+     * const whatsAppMessage = await prisma.whatsAppMessage.upsert({
+     *   create: {
+     *     // ... data to create a WhatsAppMessage
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the WhatsAppMessage we want to update
+     *   }
+     * })
+     */
+    upsert<T extends WhatsAppMessageUpsertArgs>(args: SelectSubset<T, WhatsAppMessageUpsertArgs<ExtArgs>>): Prisma__WhatsAppMessageClient<$Result.GetResult<Prisma.$WhatsAppMessagePayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of WhatsAppMessages.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {WhatsAppMessageCountArgs} args - Arguments to filter WhatsAppMessages to count.
+     * @example
+     * // Count the number of WhatsAppMessages
+     * const count = await prisma.whatsAppMessage.count({
+     *   where: {
+     *     // ... the filter for the WhatsAppMessages we want to count
+     *   }
+     * })
+    **/
+    count<T extends WhatsAppMessageCountArgs>(
+      args?: Subset<T, WhatsAppMessageCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], WhatsAppMessageCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a WhatsAppMessage.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {WhatsAppMessageAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends WhatsAppMessageAggregateArgs>(args: Subset<T, WhatsAppMessageAggregateArgs>): Prisma.PrismaPromise<GetWhatsAppMessageAggregateType<T>>
+
+    /**
+     * Group by WhatsAppMessage.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {WhatsAppMessageGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends WhatsAppMessageGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: WhatsAppMessageGroupByArgs['orderBy'] }
+        : { orderBy?: WhatsAppMessageGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, WhatsAppMessageGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetWhatsAppMessageGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the WhatsAppMessage model
+   */
+  readonly fields: WhatsAppMessageFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for WhatsAppMessage.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__WhatsAppMessageClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the WhatsAppMessage model
+   */
+  interface WhatsAppMessageFieldRefs {
+    readonly id: FieldRef<"WhatsAppMessage", 'String'>
+    readonly direction: FieldRef<"WhatsAppMessage", 'String'>
+    readonly toPhone: FieldRef<"WhatsAppMessage", 'String'>
+    readonly fromPhone: FieldRef<"WhatsAppMessage", 'String'>
+    readonly messageText: FieldRef<"WhatsAppMessage", 'String'>
+    readonly mediaUrl: FieldRef<"WhatsAppMessage", 'String'>
+    readonly mediaFilename: FieldRef<"WhatsAppMessage", 'String'>
+    readonly relatedInvoiceId: FieldRef<"WhatsAppMessage", 'String'>
+    readonly sentAt: FieldRef<"WhatsAppMessage", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * WhatsAppMessage findUnique
+   */
+  export type WhatsAppMessageFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the WhatsAppMessage
+     */
+    select?: WhatsAppMessageSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the WhatsAppMessage
+     */
+    omit?: WhatsAppMessageOmit<ExtArgs> | null
+    /**
+     * Filter, which WhatsAppMessage to fetch.
+     */
+    where: WhatsAppMessageWhereUniqueInput
+  }
+
+  /**
+   * WhatsAppMessage findUniqueOrThrow
+   */
+  export type WhatsAppMessageFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the WhatsAppMessage
+     */
+    select?: WhatsAppMessageSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the WhatsAppMessage
+     */
+    omit?: WhatsAppMessageOmit<ExtArgs> | null
+    /**
+     * Filter, which WhatsAppMessage to fetch.
+     */
+    where: WhatsAppMessageWhereUniqueInput
+  }
+
+  /**
+   * WhatsAppMessage findFirst
+   */
+  export type WhatsAppMessageFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the WhatsAppMessage
+     */
+    select?: WhatsAppMessageSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the WhatsAppMessage
+     */
+    omit?: WhatsAppMessageOmit<ExtArgs> | null
+    /**
+     * Filter, which WhatsAppMessage to fetch.
+     */
+    where?: WhatsAppMessageWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of WhatsAppMessages to fetch.
+     */
+    orderBy?: WhatsAppMessageOrderByWithRelationInput | WhatsAppMessageOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for WhatsAppMessages.
+     */
+    cursor?: WhatsAppMessageWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` WhatsAppMessages from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` WhatsAppMessages.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of WhatsAppMessages.
+     */
+    distinct?: WhatsAppMessageScalarFieldEnum | WhatsAppMessageScalarFieldEnum[]
+  }
+
+  /**
+   * WhatsAppMessage findFirstOrThrow
+   */
+  export type WhatsAppMessageFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the WhatsAppMessage
+     */
+    select?: WhatsAppMessageSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the WhatsAppMessage
+     */
+    omit?: WhatsAppMessageOmit<ExtArgs> | null
+    /**
+     * Filter, which WhatsAppMessage to fetch.
+     */
+    where?: WhatsAppMessageWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of WhatsAppMessages to fetch.
+     */
+    orderBy?: WhatsAppMessageOrderByWithRelationInput | WhatsAppMessageOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for WhatsAppMessages.
+     */
+    cursor?: WhatsAppMessageWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` WhatsAppMessages from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` WhatsAppMessages.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of WhatsAppMessages.
+     */
+    distinct?: WhatsAppMessageScalarFieldEnum | WhatsAppMessageScalarFieldEnum[]
+  }
+
+  /**
+   * WhatsAppMessage findMany
+   */
+  export type WhatsAppMessageFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the WhatsAppMessage
+     */
+    select?: WhatsAppMessageSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the WhatsAppMessage
+     */
+    omit?: WhatsAppMessageOmit<ExtArgs> | null
+    /**
+     * Filter, which WhatsAppMessages to fetch.
+     */
+    where?: WhatsAppMessageWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of WhatsAppMessages to fetch.
+     */
+    orderBy?: WhatsAppMessageOrderByWithRelationInput | WhatsAppMessageOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing WhatsAppMessages.
+     */
+    cursor?: WhatsAppMessageWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` WhatsAppMessages from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` WhatsAppMessages.
+     */
+    skip?: number
+    distinct?: WhatsAppMessageScalarFieldEnum | WhatsAppMessageScalarFieldEnum[]
+  }
+
+  /**
+   * WhatsAppMessage create
+   */
+  export type WhatsAppMessageCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the WhatsAppMessage
+     */
+    select?: WhatsAppMessageSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the WhatsAppMessage
+     */
+    omit?: WhatsAppMessageOmit<ExtArgs> | null
+    /**
+     * The data needed to create a WhatsAppMessage.
+     */
+    data: XOR<WhatsAppMessageCreateInput, WhatsAppMessageUncheckedCreateInput>
+  }
+
+  /**
+   * WhatsAppMessage createMany
+   */
+  export type WhatsAppMessageCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many WhatsAppMessages.
+     */
+    data: WhatsAppMessageCreateManyInput | WhatsAppMessageCreateManyInput[]
+  }
+
+  /**
+   * WhatsAppMessage createManyAndReturn
+   */
+  export type WhatsAppMessageCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the WhatsAppMessage
+     */
+    select?: WhatsAppMessageSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the WhatsAppMessage
+     */
+    omit?: WhatsAppMessageOmit<ExtArgs> | null
+    /**
+     * The data used to create many WhatsAppMessages.
+     */
+    data: WhatsAppMessageCreateManyInput | WhatsAppMessageCreateManyInput[]
+  }
+
+  /**
+   * WhatsAppMessage update
+   */
+  export type WhatsAppMessageUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the WhatsAppMessage
+     */
+    select?: WhatsAppMessageSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the WhatsAppMessage
+     */
+    omit?: WhatsAppMessageOmit<ExtArgs> | null
+    /**
+     * The data needed to update a WhatsAppMessage.
+     */
+    data: XOR<WhatsAppMessageUpdateInput, WhatsAppMessageUncheckedUpdateInput>
+    /**
+     * Choose, which WhatsAppMessage to update.
+     */
+    where: WhatsAppMessageWhereUniqueInput
+  }
+
+  /**
+   * WhatsAppMessage updateMany
+   */
+  export type WhatsAppMessageUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update WhatsAppMessages.
+     */
+    data: XOR<WhatsAppMessageUpdateManyMutationInput, WhatsAppMessageUncheckedUpdateManyInput>
+    /**
+     * Filter which WhatsAppMessages to update
+     */
+    where?: WhatsAppMessageWhereInput
+    /**
+     * Limit how many WhatsAppMessages to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * WhatsAppMessage updateManyAndReturn
+   */
+  export type WhatsAppMessageUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the WhatsAppMessage
+     */
+    select?: WhatsAppMessageSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the WhatsAppMessage
+     */
+    omit?: WhatsAppMessageOmit<ExtArgs> | null
+    /**
+     * The data used to update WhatsAppMessages.
+     */
+    data: XOR<WhatsAppMessageUpdateManyMutationInput, WhatsAppMessageUncheckedUpdateManyInput>
+    /**
+     * Filter which WhatsAppMessages to update
+     */
+    where?: WhatsAppMessageWhereInput
+    /**
+     * Limit how many WhatsAppMessages to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * WhatsAppMessage upsert
+   */
+  export type WhatsAppMessageUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the WhatsAppMessage
+     */
+    select?: WhatsAppMessageSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the WhatsAppMessage
+     */
+    omit?: WhatsAppMessageOmit<ExtArgs> | null
+    /**
+     * The filter to search for the WhatsAppMessage to update in case it exists.
+     */
+    where: WhatsAppMessageWhereUniqueInput
+    /**
+     * In case the WhatsAppMessage found by the `where` argument doesn't exist, create a new WhatsAppMessage with this data.
+     */
+    create: XOR<WhatsAppMessageCreateInput, WhatsAppMessageUncheckedCreateInput>
+    /**
+     * In case the WhatsAppMessage was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<WhatsAppMessageUpdateInput, WhatsAppMessageUncheckedUpdateInput>
+  }
+
+  /**
+   * WhatsAppMessage delete
+   */
+  export type WhatsAppMessageDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the WhatsAppMessage
+     */
+    select?: WhatsAppMessageSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the WhatsAppMessage
+     */
+    omit?: WhatsAppMessageOmit<ExtArgs> | null
+    /**
+     * Filter which WhatsAppMessage to delete.
+     */
+    where: WhatsAppMessageWhereUniqueInput
+  }
+
+  /**
+   * WhatsAppMessage deleteMany
+   */
+  export type WhatsAppMessageDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which WhatsAppMessages to delete
+     */
+    where?: WhatsAppMessageWhereInput
+    /**
+     * Limit how many WhatsAppMessages to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * WhatsAppMessage without action
+   */
+  export type WhatsAppMessageDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the WhatsAppMessage
+     */
+    select?: WhatsAppMessageSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the WhatsAppMessage
+     */
+    omit?: WhatsAppMessageOmit<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -7761,10 +12632,89 @@ export namespace Prisma {
     subscriberId: 'subscriberId',
     status: 'status',
     error: 'error',
-    sentAt: 'sentAt'
+    sentAt: 'sentAt',
+    bodyText: 'bodyText',
+    bodyHtml: 'bodyHtml',
+    attachments: 'attachments',
+    invoiceId: 'invoiceId'
   };
 
   export type EmailLogScalarFieldEnum = (typeof EmailLogScalarFieldEnum)[keyof typeof EmailLogScalarFieldEnum]
+
+
+  export const ReceivedEmailScalarFieldEnum: {
+    id: 'id',
+    source: 'source',
+    name: 'name',
+    email: 'email',
+    phone: 'phone',
+    subject: 'subject',
+    message: 'message',
+    leadScore: 'leadScore',
+    meta: 'meta',
+    inquiryId: 'inquiryId',
+    createdAt: 'createdAt'
+  };
+
+  export type ReceivedEmailScalarFieldEnum = (typeof ReceivedEmailScalarFieldEnum)[keyof typeof ReceivedEmailScalarFieldEnum]
+
+
+  export const InvoiceScalarFieldEnum: {
+    id: 'id',
+    invoiceNumber: 'invoiceNumber',
+    inquiryId: 'inquiryId',
+    customerName: 'customerName',
+    customerEmail: 'customerEmail',
+    customerPhone: 'customerPhone',
+    service: 'service',
+    description: 'description',
+    amountKobo: 'amountKobo',
+    currency: 'currency',
+    durationLabel: 'durationLabel',
+    dueDate: 'dueDate',
+    status: 'status',
+    dvaAccountNumber: 'dvaAccountNumber',
+    dvaBankName: 'dvaBankName',
+    dvaBankCode: 'dvaBankCode',
+    pdfUrl: 'pdfUrl',
+    paidAt: 'paidAt',
+    sentAt: 'sentAt',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type InvoiceScalarFieldEnum = (typeof InvoiceScalarFieldEnum)[keyof typeof InvoiceScalarFieldEnum]
+
+
+  export const EventRecordScalarFieldEnum: {
+    id: 'id',
+    type: 'type',
+    customerEmail: 'customerEmail',
+    customerPhone: 'customerPhone',
+    eventDate: 'eventDate',
+    relatedInvoiceId: 'relatedInvoiceId',
+    payload: 'payload',
+    status: 'status',
+    processedAt: 'processedAt',
+    createdAt: 'createdAt'
+  };
+
+  export type EventRecordScalarFieldEnum = (typeof EventRecordScalarFieldEnum)[keyof typeof EventRecordScalarFieldEnum]
+
+
+  export const WhatsAppMessageScalarFieldEnum: {
+    id: 'id',
+    direction: 'direction',
+    toPhone: 'toPhone',
+    fromPhone: 'fromPhone',
+    messageText: 'messageText',
+    mediaUrl: 'mediaUrl',
+    mediaFilename: 'mediaFilename',
+    relatedInvoiceId: 'relatedInvoiceId',
+    sentAt: 'sentAt'
+  };
+
+  export type WhatsAppMessageScalarFieldEnum = (typeof WhatsAppMessageScalarFieldEnum)[keyof typeof WhatsAppMessageScalarFieldEnum]
 
 
   export const SortOrder: {
@@ -8209,6 +13159,10 @@ export namespace Prisma {
     status?: StringFilter<"EmailLog"> | string
     error?: StringNullableFilter<"EmailLog"> | string | null
     sentAt?: DateTimeFilter<"EmailLog"> | Date | string
+    bodyText?: StringNullableFilter<"EmailLog"> | string | null
+    bodyHtml?: StringNullableFilter<"EmailLog"> | string | null
+    attachments?: StringFilter<"EmailLog"> | string
+    invoiceId?: StringNullableFilter<"EmailLog"> | string | null
   }
 
   export type EmailLogOrderByWithRelationInput = {
@@ -8221,6 +13175,10 @@ export namespace Prisma {
     status?: SortOrder
     error?: SortOrderInput | SortOrder
     sentAt?: SortOrder
+    bodyText?: SortOrderInput | SortOrder
+    bodyHtml?: SortOrderInput | SortOrder
+    attachments?: SortOrder
+    invoiceId?: SortOrderInput | SortOrder
   }
 
   export type EmailLogWhereUniqueInput = Prisma.AtLeast<{
@@ -8236,6 +13194,10 @@ export namespace Prisma {
     status?: StringFilter<"EmailLog"> | string
     error?: StringNullableFilter<"EmailLog"> | string | null
     sentAt?: DateTimeFilter<"EmailLog"> | Date | string
+    bodyText?: StringNullableFilter<"EmailLog"> | string | null
+    bodyHtml?: StringNullableFilter<"EmailLog"> | string | null
+    attachments?: StringFilter<"EmailLog"> | string
+    invoiceId?: StringNullableFilter<"EmailLog"> | string | null
   }, "id">
 
   export type EmailLogOrderByWithAggregationInput = {
@@ -8248,6 +13210,10 @@ export namespace Prisma {
     status?: SortOrder
     error?: SortOrderInput | SortOrder
     sentAt?: SortOrder
+    bodyText?: SortOrderInput | SortOrder
+    bodyHtml?: SortOrderInput | SortOrder
+    attachments?: SortOrder
+    invoiceId?: SortOrderInput | SortOrder
     _count?: EmailLogCountOrderByAggregateInput
     _max?: EmailLogMaxOrderByAggregateInput
     _min?: EmailLogMinOrderByAggregateInput
@@ -8266,6 +13232,377 @@ export namespace Prisma {
     status?: StringWithAggregatesFilter<"EmailLog"> | string
     error?: StringNullableWithAggregatesFilter<"EmailLog"> | string | null
     sentAt?: DateTimeWithAggregatesFilter<"EmailLog"> | Date | string
+    bodyText?: StringNullableWithAggregatesFilter<"EmailLog"> | string | null
+    bodyHtml?: StringNullableWithAggregatesFilter<"EmailLog"> | string | null
+    attachments?: StringWithAggregatesFilter<"EmailLog"> | string
+    invoiceId?: StringNullableWithAggregatesFilter<"EmailLog"> | string | null
+  }
+
+  export type ReceivedEmailWhereInput = {
+    AND?: ReceivedEmailWhereInput | ReceivedEmailWhereInput[]
+    OR?: ReceivedEmailWhereInput[]
+    NOT?: ReceivedEmailWhereInput | ReceivedEmailWhereInput[]
+    id?: StringFilter<"ReceivedEmail"> | string
+    source?: StringFilter<"ReceivedEmail"> | string
+    name?: StringNullableFilter<"ReceivedEmail"> | string | null
+    email?: StringNullableFilter<"ReceivedEmail"> | string | null
+    phone?: StringNullableFilter<"ReceivedEmail"> | string | null
+    subject?: StringNullableFilter<"ReceivedEmail"> | string | null
+    message?: StringFilter<"ReceivedEmail"> | string
+    leadScore?: IntNullableFilter<"ReceivedEmail"> | number | null
+    meta?: StringFilter<"ReceivedEmail"> | string
+    inquiryId?: StringNullableFilter<"ReceivedEmail"> | string | null
+    createdAt?: DateTimeFilter<"ReceivedEmail"> | Date | string
+  }
+
+  export type ReceivedEmailOrderByWithRelationInput = {
+    id?: SortOrder
+    source?: SortOrder
+    name?: SortOrderInput | SortOrder
+    email?: SortOrderInput | SortOrder
+    phone?: SortOrderInput | SortOrder
+    subject?: SortOrderInput | SortOrder
+    message?: SortOrder
+    leadScore?: SortOrderInput | SortOrder
+    meta?: SortOrder
+    inquiryId?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type ReceivedEmailWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: ReceivedEmailWhereInput | ReceivedEmailWhereInput[]
+    OR?: ReceivedEmailWhereInput[]
+    NOT?: ReceivedEmailWhereInput | ReceivedEmailWhereInput[]
+    source?: StringFilter<"ReceivedEmail"> | string
+    name?: StringNullableFilter<"ReceivedEmail"> | string | null
+    email?: StringNullableFilter<"ReceivedEmail"> | string | null
+    phone?: StringNullableFilter<"ReceivedEmail"> | string | null
+    subject?: StringNullableFilter<"ReceivedEmail"> | string | null
+    message?: StringFilter<"ReceivedEmail"> | string
+    leadScore?: IntNullableFilter<"ReceivedEmail"> | number | null
+    meta?: StringFilter<"ReceivedEmail"> | string
+    inquiryId?: StringNullableFilter<"ReceivedEmail"> | string | null
+    createdAt?: DateTimeFilter<"ReceivedEmail"> | Date | string
+  }, "id">
+
+  export type ReceivedEmailOrderByWithAggregationInput = {
+    id?: SortOrder
+    source?: SortOrder
+    name?: SortOrderInput | SortOrder
+    email?: SortOrderInput | SortOrder
+    phone?: SortOrderInput | SortOrder
+    subject?: SortOrderInput | SortOrder
+    message?: SortOrder
+    leadScore?: SortOrderInput | SortOrder
+    meta?: SortOrder
+    inquiryId?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    _count?: ReceivedEmailCountOrderByAggregateInput
+    _avg?: ReceivedEmailAvgOrderByAggregateInput
+    _max?: ReceivedEmailMaxOrderByAggregateInput
+    _min?: ReceivedEmailMinOrderByAggregateInput
+    _sum?: ReceivedEmailSumOrderByAggregateInput
+  }
+
+  export type ReceivedEmailScalarWhereWithAggregatesInput = {
+    AND?: ReceivedEmailScalarWhereWithAggregatesInput | ReceivedEmailScalarWhereWithAggregatesInput[]
+    OR?: ReceivedEmailScalarWhereWithAggregatesInput[]
+    NOT?: ReceivedEmailScalarWhereWithAggregatesInput | ReceivedEmailScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"ReceivedEmail"> | string
+    source?: StringWithAggregatesFilter<"ReceivedEmail"> | string
+    name?: StringNullableWithAggregatesFilter<"ReceivedEmail"> | string | null
+    email?: StringNullableWithAggregatesFilter<"ReceivedEmail"> | string | null
+    phone?: StringNullableWithAggregatesFilter<"ReceivedEmail"> | string | null
+    subject?: StringNullableWithAggregatesFilter<"ReceivedEmail"> | string | null
+    message?: StringWithAggregatesFilter<"ReceivedEmail"> | string
+    leadScore?: IntNullableWithAggregatesFilter<"ReceivedEmail"> | number | null
+    meta?: StringWithAggregatesFilter<"ReceivedEmail"> | string
+    inquiryId?: StringNullableWithAggregatesFilter<"ReceivedEmail"> | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"ReceivedEmail"> | Date | string
+  }
+
+  export type InvoiceWhereInput = {
+    AND?: InvoiceWhereInput | InvoiceWhereInput[]
+    OR?: InvoiceWhereInput[]
+    NOT?: InvoiceWhereInput | InvoiceWhereInput[]
+    id?: StringFilter<"Invoice"> | string
+    invoiceNumber?: StringFilter<"Invoice"> | string
+    inquiryId?: StringNullableFilter<"Invoice"> | string | null
+    customerName?: StringFilter<"Invoice"> | string
+    customerEmail?: StringFilter<"Invoice"> | string
+    customerPhone?: StringNullableFilter<"Invoice"> | string | null
+    service?: StringFilter<"Invoice"> | string
+    description?: StringNullableFilter<"Invoice"> | string | null
+    amountKobo?: IntFilter<"Invoice"> | number
+    currency?: StringFilter<"Invoice"> | string
+    durationLabel?: StringNullableFilter<"Invoice"> | string | null
+    dueDate?: DateTimeNullableFilter<"Invoice"> | Date | string | null
+    status?: StringFilter<"Invoice"> | string
+    dvaAccountNumber?: StringNullableFilter<"Invoice"> | string | null
+    dvaBankName?: StringNullableFilter<"Invoice"> | string | null
+    dvaBankCode?: StringNullableFilter<"Invoice"> | string | null
+    pdfUrl?: StringNullableFilter<"Invoice"> | string | null
+    paidAt?: DateTimeNullableFilter<"Invoice"> | Date | string | null
+    sentAt?: DateTimeNullableFilter<"Invoice"> | Date | string | null
+    createdAt?: DateTimeFilter<"Invoice"> | Date | string
+    updatedAt?: DateTimeFilter<"Invoice"> | Date | string
+  }
+
+  export type InvoiceOrderByWithRelationInput = {
+    id?: SortOrder
+    invoiceNumber?: SortOrder
+    inquiryId?: SortOrderInput | SortOrder
+    customerName?: SortOrder
+    customerEmail?: SortOrder
+    customerPhone?: SortOrderInput | SortOrder
+    service?: SortOrder
+    description?: SortOrderInput | SortOrder
+    amountKobo?: SortOrder
+    currency?: SortOrder
+    durationLabel?: SortOrderInput | SortOrder
+    dueDate?: SortOrderInput | SortOrder
+    status?: SortOrder
+    dvaAccountNumber?: SortOrderInput | SortOrder
+    dvaBankName?: SortOrderInput | SortOrder
+    dvaBankCode?: SortOrderInput | SortOrder
+    pdfUrl?: SortOrderInput | SortOrder
+    paidAt?: SortOrderInput | SortOrder
+    sentAt?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type InvoiceWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    invoiceNumber?: string
+    AND?: InvoiceWhereInput | InvoiceWhereInput[]
+    OR?: InvoiceWhereInput[]
+    NOT?: InvoiceWhereInput | InvoiceWhereInput[]
+    inquiryId?: StringNullableFilter<"Invoice"> | string | null
+    customerName?: StringFilter<"Invoice"> | string
+    customerEmail?: StringFilter<"Invoice"> | string
+    customerPhone?: StringNullableFilter<"Invoice"> | string | null
+    service?: StringFilter<"Invoice"> | string
+    description?: StringNullableFilter<"Invoice"> | string | null
+    amountKobo?: IntFilter<"Invoice"> | number
+    currency?: StringFilter<"Invoice"> | string
+    durationLabel?: StringNullableFilter<"Invoice"> | string | null
+    dueDate?: DateTimeNullableFilter<"Invoice"> | Date | string | null
+    status?: StringFilter<"Invoice"> | string
+    dvaAccountNumber?: StringNullableFilter<"Invoice"> | string | null
+    dvaBankName?: StringNullableFilter<"Invoice"> | string | null
+    dvaBankCode?: StringNullableFilter<"Invoice"> | string | null
+    pdfUrl?: StringNullableFilter<"Invoice"> | string | null
+    paidAt?: DateTimeNullableFilter<"Invoice"> | Date | string | null
+    sentAt?: DateTimeNullableFilter<"Invoice"> | Date | string | null
+    createdAt?: DateTimeFilter<"Invoice"> | Date | string
+    updatedAt?: DateTimeFilter<"Invoice"> | Date | string
+  }, "id" | "invoiceNumber">
+
+  export type InvoiceOrderByWithAggregationInput = {
+    id?: SortOrder
+    invoiceNumber?: SortOrder
+    inquiryId?: SortOrderInput | SortOrder
+    customerName?: SortOrder
+    customerEmail?: SortOrder
+    customerPhone?: SortOrderInput | SortOrder
+    service?: SortOrder
+    description?: SortOrderInput | SortOrder
+    amountKobo?: SortOrder
+    currency?: SortOrder
+    durationLabel?: SortOrderInput | SortOrder
+    dueDate?: SortOrderInput | SortOrder
+    status?: SortOrder
+    dvaAccountNumber?: SortOrderInput | SortOrder
+    dvaBankName?: SortOrderInput | SortOrder
+    dvaBankCode?: SortOrderInput | SortOrder
+    pdfUrl?: SortOrderInput | SortOrder
+    paidAt?: SortOrderInput | SortOrder
+    sentAt?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: InvoiceCountOrderByAggregateInput
+    _avg?: InvoiceAvgOrderByAggregateInput
+    _max?: InvoiceMaxOrderByAggregateInput
+    _min?: InvoiceMinOrderByAggregateInput
+    _sum?: InvoiceSumOrderByAggregateInput
+  }
+
+  export type InvoiceScalarWhereWithAggregatesInput = {
+    AND?: InvoiceScalarWhereWithAggregatesInput | InvoiceScalarWhereWithAggregatesInput[]
+    OR?: InvoiceScalarWhereWithAggregatesInput[]
+    NOT?: InvoiceScalarWhereWithAggregatesInput | InvoiceScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"Invoice"> | string
+    invoiceNumber?: StringWithAggregatesFilter<"Invoice"> | string
+    inquiryId?: StringNullableWithAggregatesFilter<"Invoice"> | string | null
+    customerName?: StringWithAggregatesFilter<"Invoice"> | string
+    customerEmail?: StringWithAggregatesFilter<"Invoice"> | string
+    customerPhone?: StringNullableWithAggregatesFilter<"Invoice"> | string | null
+    service?: StringWithAggregatesFilter<"Invoice"> | string
+    description?: StringNullableWithAggregatesFilter<"Invoice"> | string | null
+    amountKobo?: IntWithAggregatesFilter<"Invoice"> | number
+    currency?: StringWithAggregatesFilter<"Invoice"> | string
+    durationLabel?: StringNullableWithAggregatesFilter<"Invoice"> | string | null
+    dueDate?: DateTimeNullableWithAggregatesFilter<"Invoice"> | Date | string | null
+    status?: StringWithAggregatesFilter<"Invoice"> | string
+    dvaAccountNumber?: StringNullableWithAggregatesFilter<"Invoice"> | string | null
+    dvaBankName?: StringNullableWithAggregatesFilter<"Invoice"> | string | null
+    dvaBankCode?: StringNullableWithAggregatesFilter<"Invoice"> | string | null
+    pdfUrl?: StringNullableWithAggregatesFilter<"Invoice"> | string | null
+    paidAt?: DateTimeNullableWithAggregatesFilter<"Invoice"> | Date | string | null
+    sentAt?: DateTimeNullableWithAggregatesFilter<"Invoice"> | Date | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"Invoice"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"Invoice"> | Date | string
+  }
+
+  export type EventRecordWhereInput = {
+    AND?: EventRecordWhereInput | EventRecordWhereInput[]
+    OR?: EventRecordWhereInput[]
+    NOT?: EventRecordWhereInput | EventRecordWhereInput[]
+    id?: StringFilter<"EventRecord"> | string
+    type?: StringFilter<"EventRecord"> | string
+    customerEmail?: StringNullableFilter<"EventRecord"> | string | null
+    customerPhone?: StringNullableFilter<"EventRecord"> | string | null
+    eventDate?: DateTimeFilter<"EventRecord"> | Date | string
+    relatedInvoiceId?: StringNullableFilter<"EventRecord"> | string | null
+    payload?: StringFilter<"EventRecord"> | string
+    status?: StringFilter<"EventRecord"> | string
+    processedAt?: DateTimeNullableFilter<"EventRecord"> | Date | string | null
+    createdAt?: DateTimeFilter<"EventRecord"> | Date | string
+  }
+
+  export type EventRecordOrderByWithRelationInput = {
+    id?: SortOrder
+    type?: SortOrder
+    customerEmail?: SortOrderInput | SortOrder
+    customerPhone?: SortOrderInput | SortOrder
+    eventDate?: SortOrder
+    relatedInvoiceId?: SortOrderInput | SortOrder
+    payload?: SortOrder
+    status?: SortOrder
+    processedAt?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type EventRecordWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: EventRecordWhereInput | EventRecordWhereInput[]
+    OR?: EventRecordWhereInput[]
+    NOT?: EventRecordWhereInput | EventRecordWhereInput[]
+    type?: StringFilter<"EventRecord"> | string
+    customerEmail?: StringNullableFilter<"EventRecord"> | string | null
+    customerPhone?: StringNullableFilter<"EventRecord"> | string | null
+    eventDate?: DateTimeFilter<"EventRecord"> | Date | string
+    relatedInvoiceId?: StringNullableFilter<"EventRecord"> | string | null
+    payload?: StringFilter<"EventRecord"> | string
+    status?: StringFilter<"EventRecord"> | string
+    processedAt?: DateTimeNullableFilter<"EventRecord"> | Date | string | null
+    createdAt?: DateTimeFilter<"EventRecord"> | Date | string
+  }, "id">
+
+  export type EventRecordOrderByWithAggregationInput = {
+    id?: SortOrder
+    type?: SortOrder
+    customerEmail?: SortOrderInput | SortOrder
+    customerPhone?: SortOrderInput | SortOrder
+    eventDate?: SortOrder
+    relatedInvoiceId?: SortOrderInput | SortOrder
+    payload?: SortOrder
+    status?: SortOrder
+    processedAt?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    _count?: EventRecordCountOrderByAggregateInput
+    _max?: EventRecordMaxOrderByAggregateInput
+    _min?: EventRecordMinOrderByAggregateInput
+  }
+
+  export type EventRecordScalarWhereWithAggregatesInput = {
+    AND?: EventRecordScalarWhereWithAggregatesInput | EventRecordScalarWhereWithAggregatesInput[]
+    OR?: EventRecordScalarWhereWithAggregatesInput[]
+    NOT?: EventRecordScalarWhereWithAggregatesInput | EventRecordScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"EventRecord"> | string
+    type?: StringWithAggregatesFilter<"EventRecord"> | string
+    customerEmail?: StringNullableWithAggregatesFilter<"EventRecord"> | string | null
+    customerPhone?: StringNullableWithAggregatesFilter<"EventRecord"> | string | null
+    eventDate?: DateTimeWithAggregatesFilter<"EventRecord"> | Date | string
+    relatedInvoiceId?: StringNullableWithAggregatesFilter<"EventRecord"> | string | null
+    payload?: StringWithAggregatesFilter<"EventRecord"> | string
+    status?: StringWithAggregatesFilter<"EventRecord"> | string
+    processedAt?: DateTimeNullableWithAggregatesFilter<"EventRecord"> | Date | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"EventRecord"> | Date | string
+  }
+
+  export type WhatsAppMessageWhereInput = {
+    AND?: WhatsAppMessageWhereInput | WhatsAppMessageWhereInput[]
+    OR?: WhatsAppMessageWhereInput[]
+    NOT?: WhatsAppMessageWhereInput | WhatsAppMessageWhereInput[]
+    id?: StringFilter<"WhatsAppMessage"> | string
+    direction?: StringFilter<"WhatsAppMessage"> | string
+    toPhone?: StringNullableFilter<"WhatsAppMessage"> | string | null
+    fromPhone?: StringNullableFilter<"WhatsAppMessage"> | string | null
+    messageText?: StringNullableFilter<"WhatsAppMessage"> | string | null
+    mediaUrl?: StringNullableFilter<"WhatsAppMessage"> | string | null
+    mediaFilename?: StringNullableFilter<"WhatsAppMessage"> | string | null
+    relatedInvoiceId?: StringNullableFilter<"WhatsAppMessage"> | string | null
+    sentAt?: DateTimeFilter<"WhatsAppMessage"> | Date | string
+  }
+
+  export type WhatsAppMessageOrderByWithRelationInput = {
+    id?: SortOrder
+    direction?: SortOrder
+    toPhone?: SortOrderInput | SortOrder
+    fromPhone?: SortOrderInput | SortOrder
+    messageText?: SortOrderInput | SortOrder
+    mediaUrl?: SortOrderInput | SortOrder
+    mediaFilename?: SortOrderInput | SortOrder
+    relatedInvoiceId?: SortOrderInput | SortOrder
+    sentAt?: SortOrder
+  }
+
+  export type WhatsAppMessageWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: WhatsAppMessageWhereInput | WhatsAppMessageWhereInput[]
+    OR?: WhatsAppMessageWhereInput[]
+    NOT?: WhatsAppMessageWhereInput | WhatsAppMessageWhereInput[]
+    direction?: StringFilter<"WhatsAppMessage"> | string
+    toPhone?: StringNullableFilter<"WhatsAppMessage"> | string | null
+    fromPhone?: StringNullableFilter<"WhatsAppMessage"> | string | null
+    messageText?: StringNullableFilter<"WhatsAppMessage"> | string | null
+    mediaUrl?: StringNullableFilter<"WhatsAppMessage"> | string | null
+    mediaFilename?: StringNullableFilter<"WhatsAppMessage"> | string | null
+    relatedInvoiceId?: StringNullableFilter<"WhatsAppMessage"> | string | null
+    sentAt?: DateTimeFilter<"WhatsAppMessage"> | Date | string
+  }, "id">
+
+  export type WhatsAppMessageOrderByWithAggregationInput = {
+    id?: SortOrder
+    direction?: SortOrder
+    toPhone?: SortOrderInput | SortOrder
+    fromPhone?: SortOrderInput | SortOrder
+    messageText?: SortOrderInput | SortOrder
+    mediaUrl?: SortOrderInput | SortOrder
+    mediaFilename?: SortOrderInput | SortOrder
+    relatedInvoiceId?: SortOrderInput | SortOrder
+    sentAt?: SortOrder
+    _count?: WhatsAppMessageCountOrderByAggregateInput
+    _max?: WhatsAppMessageMaxOrderByAggregateInput
+    _min?: WhatsAppMessageMinOrderByAggregateInput
+  }
+
+  export type WhatsAppMessageScalarWhereWithAggregatesInput = {
+    AND?: WhatsAppMessageScalarWhereWithAggregatesInput | WhatsAppMessageScalarWhereWithAggregatesInput[]
+    OR?: WhatsAppMessageScalarWhereWithAggregatesInput[]
+    NOT?: WhatsAppMessageScalarWhereWithAggregatesInput | WhatsAppMessageScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"WhatsAppMessage"> | string
+    direction?: StringWithAggregatesFilter<"WhatsAppMessage"> | string
+    toPhone?: StringNullableWithAggregatesFilter<"WhatsAppMessage"> | string | null
+    fromPhone?: StringNullableWithAggregatesFilter<"WhatsAppMessage"> | string | null
+    messageText?: StringNullableWithAggregatesFilter<"WhatsAppMessage"> | string | null
+    mediaUrl?: StringNullableWithAggregatesFilter<"WhatsAppMessage"> | string | null
+    mediaFilename?: StringNullableWithAggregatesFilter<"WhatsAppMessage"> | string | null
+    relatedInvoiceId?: StringNullableWithAggregatesFilter<"WhatsAppMessage"> | string | null
+    sentAt?: DateTimeWithAggregatesFilter<"WhatsAppMessage"> | Date | string
   }
 
   export type InquiryCreateInput = {
@@ -8719,6 +14056,10 @@ export namespace Prisma {
     status?: string
     error?: string | null
     sentAt?: Date | string
+    bodyText?: string | null
+    bodyHtml?: string | null
+    attachments?: string
+    invoiceId?: string | null
   }
 
   export type EmailLogUncheckedCreateInput = {
@@ -8731,6 +14072,10 @@ export namespace Prisma {
     status?: string
     error?: string | null
     sentAt?: Date | string
+    bodyText?: string | null
+    bodyHtml?: string | null
+    attachments?: string
+    invoiceId?: string | null
   }
 
   export type EmailLogUpdateInput = {
@@ -8743,6 +14088,10 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     error?: NullableStringFieldUpdateOperationsInput | string | null
     sentAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    bodyText?: NullableStringFieldUpdateOperationsInput | string | null
+    bodyHtml?: NullableStringFieldUpdateOperationsInput | string | null
+    attachments?: StringFieldUpdateOperationsInput | string
+    invoiceId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type EmailLogUncheckedUpdateInput = {
@@ -8755,6 +14104,10 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     error?: NullableStringFieldUpdateOperationsInput | string | null
     sentAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    bodyText?: NullableStringFieldUpdateOperationsInput | string | null
+    bodyHtml?: NullableStringFieldUpdateOperationsInput | string | null
+    attachments?: StringFieldUpdateOperationsInput | string
+    invoiceId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type EmailLogCreateManyInput = {
@@ -8767,6 +14120,10 @@ export namespace Prisma {
     status?: string
     error?: string | null
     sentAt?: Date | string
+    bodyText?: string | null
+    bodyHtml?: string | null
+    attachments?: string
+    invoiceId?: string | null
   }
 
   export type EmailLogUpdateManyMutationInput = {
@@ -8779,6 +14136,10 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     error?: NullableStringFieldUpdateOperationsInput | string | null
     sentAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    bodyText?: NullableStringFieldUpdateOperationsInput | string | null
+    bodyHtml?: NullableStringFieldUpdateOperationsInput | string | null
+    attachments?: StringFieldUpdateOperationsInput | string
+    invoiceId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type EmailLogUncheckedUpdateManyInput = {
@@ -8790,6 +14151,451 @@ export namespace Prisma {
     subscriberId?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
     error?: NullableStringFieldUpdateOperationsInput | string | null
+    sentAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    bodyText?: NullableStringFieldUpdateOperationsInput | string | null
+    bodyHtml?: NullableStringFieldUpdateOperationsInput | string | null
+    attachments?: StringFieldUpdateOperationsInput | string
+    invoiceId?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type ReceivedEmailCreateInput = {
+    id?: string
+    source?: string
+    name?: string | null
+    email?: string | null
+    phone?: string | null
+    subject?: string | null
+    message: string
+    leadScore?: number | null
+    meta?: string
+    inquiryId?: string | null
+    createdAt?: Date | string
+  }
+
+  export type ReceivedEmailUncheckedCreateInput = {
+    id?: string
+    source?: string
+    name?: string | null
+    email?: string | null
+    phone?: string | null
+    subject?: string | null
+    message: string
+    leadScore?: number | null
+    meta?: string
+    inquiryId?: string | null
+    createdAt?: Date | string
+  }
+
+  export type ReceivedEmailUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    source?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    subject?: NullableStringFieldUpdateOperationsInput | string | null
+    message?: StringFieldUpdateOperationsInput | string
+    leadScore?: NullableIntFieldUpdateOperationsInput | number | null
+    meta?: StringFieldUpdateOperationsInput | string
+    inquiryId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ReceivedEmailUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    source?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    subject?: NullableStringFieldUpdateOperationsInput | string | null
+    message?: StringFieldUpdateOperationsInput | string
+    leadScore?: NullableIntFieldUpdateOperationsInput | number | null
+    meta?: StringFieldUpdateOperationsInput | string
+    inquiryId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ReceivedEmailCreateManyInput = {
+    id?: string
+    source?: string
+    name?: string | null
+    email?: string | null
+    phone?: string | null
+    subject?: string | null
+    message: string
+    leadScore?: number | null
+    meta?: string
+    inquiryId?: string | null
+    createdAt?: Date | string
+  }
+
+  export type ReceivedEmailUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    source?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    subject?: NullableStringFieldUpdateOperationsInput | string | null
+    message?: StringFieldUpdateOperationsInput | string
+    leadScore?: NullableIntFieldUpdateOperationsInput | number | null
+    meta?: StringFieldUpdateOperationsInput | string
+    inquiryId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ReceivedEmailUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    source?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    subject?: NullableStringFieldUpdateOperationsInput | string | null
+    message?: StringFieldUpdateOperationsInput | string
+    leadScore?: NullableIntFieldUpdateOperationsInput | number | null
+    meta?: StringFieldUpdateOperationsInput | string
+    inquiryId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type InvoiceCreateInput = {
+    id?: string
+    invoiceNumber: string
+    inquiryId?: string | null
+    customerName: string
+    customerEmail: string
+    customerPhone?: string | null
+    service: string
+    description?: string | null
+    amountKobo: number
+    currency?: string
+    durationLabel?: string | null
+    dueDate?: Date | string | null
+    status?: string
+    dvaAccountNumber?: string | null
+    dvaBankName?: string | null
+    dvaBankCode?: string | null
+    pdfUrl?: string | null
+    paidAt?: Date | string | null
+    sentAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type InvoiceUncheckedCreateInput = {
+    id?: string
+    invoiceNumber: string
+    inquiryId?: string | null
+    customerName: string
+    customerEmail: string
+    customerPhone?: string | null
+    service: string
+    description?: string | null
+    amountKobo: number
+    currency?: string
+    durationLabel?: string | null
+    dueDate?: Date | string | null
+    status?: string
+    dvaAccountNumber?: string | null
+    dvaBankName?: string | null
+    dvaBankCode?: string | null
+    pdfUrl?: string | null
+    paidAt?: Date | string | null
+    sentAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type InvoiceUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    invoiceNumber?: StringFieldUpdateOperationsInput | string
+    inquiryId?: NullableStringFieldUpdateOperationsInput | string | null
+    customerName?: StringFieldUpdateOperationsInput | string
+    customerEmail?: StringFieldUpdateOperationsInput | string
+    customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    service?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    amountKobo?: IntFieldUpdateOperationsInput | number
+    currency?: StringFieldUpdateOperationsInput | string
+    durationLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    dvaAccountNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    dvaBankName?: NullableStringFieldUpdateOperationsInput | string | null
+    dvaBankCode?: NullableStringFieldUpdateOperationsInput | string | null
+    pdfUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    paidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    sentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type InvoiceUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    invoiceNumber?: StringFieldUpdateOperationsInput | string
+    inquiryId?: NullableStringFieldUpdateOperationsInput | string | null
+    customerName?: StringFieldUpdateOperationsInput | string
+    customerEmail?: StringFieldUpdateOperationsInput | string
+    customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    service?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    amountKobo?: IntFieldUpdateOperationsInput | number
+    currency?: StringFieldUpdateOperationsInput | string
+    durationLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    dvaAccountNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    dvaBankName?: NullableStringFieldUpdateOperationsInput | string | null
+    dvaBankCode?: NullableStringFieldUpdateOperationsInput | string | null
+    pdfUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    paidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    sentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type InvoiceCreateManyInput = {
+    id?: string
+    invoiceNumber: string
+    inquiryId?: string | null
+    customerName: string
+    customerEmail: string
+    customerPhone?: string | null
+    service: string
+    description?: string | null
+    amountKobo: number
+    currency?: string
+    durationLabel?: string | null
+    dueDate?: Date | string | null
+    status?: string
+    dvaAccountNumber?: string | null
+    dvaBankName?: string | null
+    dvaBankCode?: string | null
+    pdfUrl?: string | null
+    paidAt?: Date | string | null
+    sentAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type InvoiceUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    invoiceNumber?: StringFieldUpdateOperationsInput | string
+    inquiryId?: NullableStringFieldUpdateOperationsInput | string | null
+    customerName?: StringFieldUpdateOperationsInput | string
+    customerEmail?: StringFieldUpdateOperationsInput | string
+    customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    service?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    amountKobo?: IntFieldUpdateOperationsInput | number
+    currency?: StringFieldUpdateOperationsInput | string
+    durationLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    dvaAccountNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    dvaBankName?: NullableStringFieldUpdateOperationsInput | string | null
+    dvaBankCode?: NullableStringFieldUpdateOperationsInput | string | null
+    pdfUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    paidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    sentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type InvoiceUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    invoiceNumber?: StringFieldUpdateOperationsInput | string
+    inquiryId?: NullableStringFieldUpdateOperationsInput | string | null
+    customerName?: StringFieldUpdateOperationsInput | string
+    customerEmail?: StringFieldUpdateOperationsInput | string
+    customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    service?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    amountKobo?: IntFieldUpdateOperationsInput | number
+    currency?: StringFieldUpdateOperationsInput | string
+    durationLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    dvaAccountNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    dvaBankName?: NullableStringFieldUpdateOperationsInput | string | null
+    dvaBankCode?: NullableStringFieldUpdateOperationsInput | string | null
+    pdfUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    paidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    sentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type EventRecordCreateInput = {
+    id?: string
+    type: string
+    customerEmail?: string | null
+    customerPhone?: string | null
+    eventDate: Date | string
+    relatedInvoiceId?: string | null
+    payload?: string
+    status?: string
+    processedAt?: Date | string | null
+    createdAt?: Date | string
+  }
+
+  export type EventRecordUncheckedCreateInput = {
+    id?: string
+    type: string
+    customerEmail?: string | null
+    customerPhone?: string | null
+    eventDate: Date | string
+    relatedInvoiceId?: string | null
+    payload?: string
+    status?: string
+    processedAt?: Date | string | null
+    createdAt?: Date | string
+  }
+
+  export type EventRecordUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    customerEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    eventDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    relatedInvoiceId?: NullableStringFieldUpdateOperationsInput | string | null
+    payload?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    processedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type EventRecordUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    customerEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    eventDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    relatedInvoiceId?: NullableStringFieldUpdateOperationsInput | string | null
+    payload?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    processedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type EventRecordCreateManyInput = {
+    id?: string
+    type: string
+    customerEmail?: string | null
+    customerPhone?: string | null
+    eventDate: Date | string
+    relatedInvoiceId?: string | null
+    payload?: string
+    status?: string
+    processedAt?: Date | string | null
+    createdAt?: Date | string
+  }
+
+  export type EventRecordUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    customerEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    eventDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    relatedInvoiceId?: NullableStringFieldUpdateOperationsInput | string | null
+    payload?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    processedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type EventRecordUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    customerEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    eventDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    relatedInvoiceId?: NullableStringFieldUpdateOperationsInput | string | null
+    payload?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    processedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type WhatsAppMessageCreateInput = {
+    id?: string
+    direction: string
+    toPhone?: string | null
+    fromPhone?: string | null
+    messageText?: string | null
+    mediaUrl?: string | null
+    mediaFilename?: string | null
+    relatedInvoiceId?: string | null
+    sentAt?: Date | string
+  }
+
+  export type WhatsAppMessageUncheckedCreateInput = {
+    id?: string
+    direction: string
+    toPhone?: string | null
+    fromPhone?: string | null
+    messageText?: string | null
+    mediaUrl?: string | null
+    mediaFilename?: string | null
+    relatedInvoiceId?: string | null
+    sentAt?: Date | string
+  }
+
+  export type WhatsAppMessageUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    direction?: StringFieldUpdateOperationsInput | string
+    toPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    fromPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    messageText?: NullableStringFieldUpdateOperationsInput | string | null
+    mediaUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    mediaFilename?: NullableStringFieldUpdateOperationsInput | string | null
+    relatedInvoiceId?: NullableStringFieldUpdateOperationsInput | string | null
+    sentAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type WhatsAppMessageUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    direction?: StringFieldUpdateOperationsInput | string
+    toPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    fromPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    messageText?: NullableStringFieldUpdateOperationsInput | string | null
+    mediaUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    mediaFilename?: NullableStringFieldUpdateOperationsInput | string | null
+    relatedInvoiceId?: NullableStringFieldUpdateOperationsInput | string | null
+    sentAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type WhatsAppMessageCreateManyInput = {
+    id?: string
+    direction: string
+    toPhone?: string | null
+    fromPhone?: string | null
+    messageText?: string | null
+    mediaUrl?: string | null
+    mediaFilename?: string | null
+    relatedInvoiceId?: string | null
+    sentAt?: Date | string
+  }
+
+  export type WhatsAppMessageUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    direction?: StringFieldUpdateOperationsInput | string
+    toPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    fromPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    messageText?: NullableStringFieldUpdateOperationsInput | string | null
+    mediaUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    mediaFilename?: NullableStringFieldUpdateOperationsInput | string | null
+    relatedInvoiceId?: NullableStringFieldUpdateOperationsInput | string | null
+    sentAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type WhatsAppMessageUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    direction?: StringFieldUpdateOperationsInput | string
+    toPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    fromPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    messageText?: NullableStringFieldUpdateOperationsInput | string | null
+    mediaUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    mediaFilename?: NullableStringFieldUpdateOperationsInput | string | null
+    relatedInvoiceId?: NullableStringFieldUpdateOperationsInput | string | null
     sentAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -9146,6 +14952,10 @@ export namespace Prisma {
     status?: SortOrder
     error?: SortOrder
     sentAt?: SortOrder
+    bodyText?: SortOrder
+    bodyHtml?: SortOrder
+    attachments?: SortOrder
+    invoiceId?: SortOrder
   }
 
   export type EmailLogMaxOrderByAggregateInput = {
@@ -9158,6 +14968,10 @@ export namespace Prisma {
     status?: SortOrder
     error?: SortOrder
     sentAt?: SortOrder
+    bodyText?: SortOrder
+    bodyHtml?: SortOrder
+    attachments?: SortOrder
+    invoiceId?: SortOrder
   }
 
   export type EmailLogMinOrderByAggregateInput = {
@@ -9169,6 +14983,242 @@ export namespace Prisma {
     subscriberId?: SortOrder
     status?: SortOrder
     error?: SortOrder
+    sentAt?: SortOrder
+    bodyText?: SortOrder
+    bodyHtml?: SortOrder
+    attachments?: SortOrder
+    invoiceId?: SortOrder
+  }
+
+  export type IntNullableFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | null
+    notIn?: number[] | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableFilter<$PrismaModel> | number | null
+  }
+
+  export type ReceivedEmailCountOrderByAggregateInput = {
+    id?: SortOrder
+    source?: SortOrder
+    name?: SortOrder
+    email?: SortOrder
+    phone?: SortOrder
+    subject?: SortOrder
+    message?: SortOrder
+    leadScore?: SortOrder
+    meta?: SortOrder
+    inquiryId?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type ReceivedEmailAvgOrderByAggregateInput = {
+    leadScore?: SortOrder
+  }
+
+  export type ReceivedEmailMaxOrderByAggregateInput = {
+    id?: SortOrder
+    source?: SortOrder
+    name?: SortOrder
+    email?: SortOrder
+    phone?: SortOrder
+    subject?: SortOrder
+    message?: SortOrder
+    leadScore?: SortOrder
+    meta?: SortOrder
+    inquiryId?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type ReceivedEmailMinOrderByAggregateInput = {
+    id?: SortOrder
+    source?: SortOrder
+    name?: SortOrder
+    email?: SortOrder
+    phone?: SortOrder
+    subject?: SortOrder
+    message?: SortOrder
+    leadScore?: SortOrder
+    meta?: SortOrder
+    inquiryId?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type ReceivedEmailSumOrderByAggregateInput = {
+    leadScore?: SortOrder
+  }
+
+  export type IntNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | null
+    notIn?: number[] | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableWithAggregatesFilter<$PrismaModel> | number | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _avg?: NestedFloatNullableFilter<$PrismaModel>
+    _sum?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedIntNullableFilter<$PrismaModel>
+    _max?: NestedIntNullableFilter<$PrismaModel>
+  }
+
+  export type InvoiceCountOrderByAggregateInput = {
+    id?: SortOrder
+    invoiceNumber?: SortOrder
+    inquiryId?: SortOrder
+    customerName?: SortOrder
+    customerEmail?: SortOrder
+    customerPhone?: SortOrder
+    service?: SortOrder
+    description?: SortOrder
+    amountKobo?: SortOrder
+    currency?: SortOrder
+    durationLabel?: SortOrder
+    dueDate?: SortOrder
+    status?: SortOrder
+    dvaAccountNumber?: SortOrder
+    dvaBankName?: SortOrder
+    dvaBankCode?: SortOrder
+    pdfUrl?: SortOrder
+    paidAt?: SortOrder
+    sentAt?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type InvoiceAvgOrderByAggregateInput = {
+    amountKobo?: SortOrder
+  }
+
+  export type InvoiceMaxOrderByAggregateInput = {
+    id?: SortOrder
+    invoiceNumber?: SortOrder
+    inquiryId?: SortOrder
+    customerName?: SortOrder
+    customerEmail?: SortOrder
+    customerPhone?: SortOrder
+    service?: SortOrder
+    description?: SortOrder
+    amountKobo?: SortOrder
+    currency?: SortOrder
+    durationLabel?: SortOrder
+    dueDate?: SortOrder
+    status?: SortOrder
+    dvaAccountNumber?: SortOrder
+    dvaBankName?: SortOrder
+    dvaBankCode?: SortOrder
+    pdfUrl?: SortOrder
+    paidAt?: SortOrder
+    sentAt?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type InvoiceMinOrderByAggregateInput = {
+    id?: SortOrder
+    invoiceNumber?: SortOrder
+    inquiryId?: SortOrder
+    customerName?: SortOrder
+    customerEmail?: SortOrder
+    customerPhone?: SortOrder
+    service?: SortOrder
+    description?: SortOrder
+    amountKobo?: SortOrder
+    currency?: SortOrder
+    durationLabel?: SortOrder
+    dueDate?: SortOrder
+    status?: SortOrder
+    dvaAccountNumber?: SortOrder
+    dvaBankName?: SortOrder
+    dvaBankCode?: SortOrder
+    pdfUrl?: SortOrder
+    paidAt?: SortOrder
+    sentAt?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type InvoiceSumOrderByAggregateInput = {
+    amountKobo?: SortOrder
+  }
+
+  export type EventRecordCountOrderByAggregateInput = {
+    id?: SortOrder
+    type?: SortOrder
+    customerEmail?: SortOrder
+    customerPhone?: SortOrder
+    eventDate?: SortOrder
+    relatedInvoiceId?: SortOrder
+    payload?: SortOrder
+    status?: SortOrder
+    processedAt?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type EventRecordMaxOrderByAggregateInput = {
+    id?: SortOrder
+    type?: SortOrder
+    customerEmail?: SortOrder
+    customerPhone?: SortOrder
+    eventDate?: SortOrder
+    relatedInvoiceId?: SortOrder
+    payload?: SortOrder
+    status?: SortOrder
+    processedAt?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type EventRecordMinOrderByAggregateInput = {
+    id?: SortOrder
+    type?: SortOrder
+    customerEmail?: SortOrder
+    customerPhone?: SortOrder
+    eventDate?: SortOrder
+    relatedInvoiceId?: SortOrder
+    payload?: SortOrder
+    status?: SortOrder
+    processedAt?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type WhatsAppMessageCountOrderByAggregateInput = {
+    id?: SortOrder
+    direction?: SortOrder
+    toPhone?: SortOrder
+    fromPhone?: SortOrder
+    messageText?: SortOrder
+    mediaUrl?: SortOrder
+    mediaFilename?: SortOrder
+    relatedInvoiceId?: SortOrder
+    sentAt?: SortOrder
+  }
+
+  export type WhatsAppMessageMaxOrderByAggregateInput = {
+    id?: SortOrder
+    direction?: SortOrder
+    toPhone?: SortOrder
+    fromPhone?: SortOrder
+    messageText?: SortOrder
+    mediaUrl?: SortOrder
+    mediaFilename?: SortOrder
+    relatedInvoiceId?: SortOrder
+    sentAt?: SortOrder
+  }
+
+  export type WhatsAppMessageMinOrderByAggregateInput = {
+    id?: SortOrder
+    direction?: SortOrder
+    toPhone?: SortOrder
+    fromPhone?: SortOrder
+    messageText?: SortOrder
+    mediaUrl?: SortOrder
+    mediaFilename?: SortOrder
+    relatedInvoiceId?: SortOrder
     sentAt?: SortOrder
   }
 
@@ -9190,6 +15240,14 @@ export namespace Prisma {
 
   export type IntFieldUpdateOperationsInput = {
     set?: number
+    increment?: number
+    decrement?: number
+    multiply?: number
+    divide?: number
+  }
+
+  export type NullableIntFieldUpdateOperationsInput = {
+    set?: number | null
     increment?: number
     decrement?: number
     multiply?: number
@@ -9355,6 +15413,33 @@ export namespace Prisma {
     gt?: number | FloatFieldRefInput<$PrismaModel>
     gte?: number | FloatFieldRefInput<$PrismaModel>
     not?: NestedFloatFilter<$PrismaModel> | number
+  }
+
+  export type NestedIntNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | null
+    notIn?: number[] | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableWithAggregatesFilter<$PrismaModel> | number | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _avg?: NestedFloatNullableFilter<$PrismaModel>
+    _sum?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedIntNullableFilter<$PrismaModel>
+    _max?: NestedIntNullableFilter<$PrismaModel>
+  }
+
+  export type NestedFloatNullableFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel> | null
+    in?: number[] | null
+    notIn?: number[] | null
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatNullableFilter<$PrismaModel> | number | null
   }
 
 

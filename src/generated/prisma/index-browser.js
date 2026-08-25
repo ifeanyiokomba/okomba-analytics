@@ -190,6 +190,73 @@ exports.Prisma.EmailLogScalarFieldEnum = {
   subscriberId: 'subscriberId',
   status: 'status',
   error: 'error',
+  sentAt: 'sentAt',
+  bodyText: 'bodyText',
+  bodyHtml: 'bodyHtml',
+  attachments: 'attachments',
+  invoiceId: 'invoiceId'
+};
+
+exports.Prisma.ReceivedEmailScalarFieldEnum = {
+  id: 'id',
+  source: 'source',
+  name: 'name',
+  email: 'email',
+  phone: 'phone',
+  subject: 'subject',
+  message: 'message',
+  leadScore: 'leadScore',
+  meta: 'meta',
+  inquiryId: 'inquiryId',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.InvoiceScalarFieldEnum = {
+  id: 'id',
+  invoiceNumber: 'invoiceNumber',
+  inquiryId: 'inquiryId',
+  customerName: 'customerName',
+  customerEmail: 'customerEmail',
+  customerPhone: 'customerPhone',
+  service: 'service',
+  description: 'description',
+  amountKobo: 'amountKobo',
+  currency: 'currency',
+  durationLabel: 'durationLabel',
+  dueDate: 'dueDate',
+  status: 'status',
+  dvaAccountNumber: 'dvaAccountNumber',
+  dvaBankName: 'dvaBankName',
+  dvaBankCode: 'dvaBankCode',
+  pdfUrl: 'pdfUrl',
+  paidAt: 'paidAt',
+  sentAt: 'sentAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.EventRecordScalarFieldEnum = {
+  id: 'id',
+  type: 'type',
+  customerEmail: 'customerEmail',
+  customerPhone: 'customerPhone',
+  eventDate: 'eventDate',
+  relatedInvoiceId: 'relatedInvoiceId',
+  payload: 'payload',
+  status: 'status',
+  processedAt: 'processedAt',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.WhatsAppMessageScalarFieldEnum = {
+  id: 'id',
+  direction: 'direction',
+  toPhone: 'toPhone',
+  fromPhone: 'fromPhone',
+  messageText: 'messageText',
+  mediaUrl: 'mediaUrl',
+  mediaFilename: 'mediaFilename',
+  relatedInvoiceId: 'relatedInvoiceId',
   sentAt: 'sentAt'
 };
 
@@ -210,7 +277,11 @@ exports.Prisma.ModelName = {
   Subscriber: 'Subscriber',
   Post: 'Post',
   Testimonial: 'Testimonial',
-  EmailLog: 'EmailLog'
+  EmailLog: 'EmailLog',
+  ReceivedEmail: 'ReceivedEmail',
+  Invoice: 'Invoice',
+  EventRecord: 'EventRecord',
+  WhatsAppMessage: 'WhatsAppMessage'
 };
 
 /**

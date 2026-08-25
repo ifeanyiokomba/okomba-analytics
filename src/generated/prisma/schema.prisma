@@ -80,7 +80,7 @@ model Testimonial {
 
 model EmailLog {
   id             String   @id @default(cuid())
-  type           String // post.published | subscriber.welcome | broadcast | inquiry.receipt
+  type           String // post.published | subscriber.welcome | broadcast | inquiry.created | invoice.sent
   recipientEmail String
   subject        String
   postId         String?
@@ -88,8 +88,105 @@ model EmailLog {
   status         String   @default("sent") // queued | sent | failed
   error          String?
   sentAt         DateTime @default(now())
+  // ── Phase-1 audit extensions (sent_emails contract) ──
+  bodyText       String? // plain-text version
+  bodyHtml       String? // branded HTML version
+  attachments    String   @default("[]") // JSON [{filename, size, storageUrl?}]
+  invoiceId      String? // related invoice when type=invoice.sent
 
   @@index([postId])
   @@index([subscriberId])
+  @@index([sentAt])
+  @@index([invoiceId])
+}
+
+/**
+ * ── Phase-1 Module 2: audit-trail models ────────────────────
+ * Directive asked for Mongoose models; this stack is Prisma +
+ * SQLite (deployed on Render with a persistent disk — migrating
+ * to Mongo would break the deployment kit and every preserved
+ * workflow). Equivalent Prisma models deliver the same audit
+ * goals without the regression. Mappings:
+ * received_emails → ReceivedEmail
+ * sent_emails     → EmailLog (extended above — the admin Email
+ * log UI already reads it; a duplicate table
+ * would drift)
+ * invoices        → Invoice
+ * events          → EventRecord
+ * whatsapp_messages → WhatsAppMessage
+ */
+model ReceivedEmail {
+  id        String   @id @default(cuid())
+  source    String   @default("contact") // contact | ai_chat | manual
+  name      String?
+  email     String?
+  phone     String?
+  subject   String?
+  message   String
+  leadScore Int? // 0–100, set by ai_chat qualification (Phase 3)
+  meta      String   @default("{}") // JSON: { service, budget, extra }
+  inquiryId String? // link to the Inquiry workflow row
+  createdAt DateTime @default(now())
+
+  @@index([source])
+  @@index([createdAt])
+}
+
+model Invoice {
+  id               String    @id @default(cuid())
+  invoiceNumber    String    @unique // OKO-2026-0001
+  inquiryId        String?
+  customerName     String
+  customerEmail    String
+  customerPhone    String?
+  service          String
+  description      String?
+  amountKobo       Int // NGN minor units — integer math, no float drift
+  currency         String    @default("NGN")
+  durationLabel    String? // e.g. "3 weeks"
+  dueDate          DateTime?
+  status           String    @default("draft") // draft | sent | pending | paid | overdue | cancelled
+  // Paystack Dedicated Virtual Account (populated Phase 2)
+  dvaAccountNumber String?
+  dvaBankName      String?
+  dvaBankCode      String?
+  pdfUrl           String? // Cloudinary URL (populated Phase 2)
+  paidAt           DateTime?
+  sentAt           DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  @@index([status])
+  @@index([dueDate])
+  @@index([customerEmail])
+}
+
+model EventRecord {
+  id               String    @id @default(cuid())
+  type             String // invoice.reminder_3d | proposal.sent | payment.expected
+  customerEmail    String?
+  customerPhone    String?
+  eventDate        DateTime
+  relatedInvoiceId String?
+  payload          String    @default("{}") // JSON snapshot for the handler
+  status           String    @default("scheduled") // scheduled | processed | skipped | failed
+  processedAt      DateTime?
+  createdAt        DateTime  @default(now())
+
+  @@index([eventDate])
+  @@index([status])
+}
+
+model WhatsAppMessage {
+  id               String   @id @default(cuid())
+  direction        String // inbound | outbound
+  toPhone          String?
+  fromPhone        String?
+  messageText      String?
+  mediaUrl         String?
+  mediaFilename    String?
+  relatedInvoiceId String?
+  sentAt           DateTime @default(now())
+
   @@index([sentAt])
 }
