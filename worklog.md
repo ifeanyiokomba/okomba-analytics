@@ -804,3 +804,26 @@ Work Log:
 Stage Summary:
 - All Termii-rebuild sections + every original workflow verified working together; repo secured and live on GitHub main
 - Deployment next steps for user: set ADMIN_EMAIL/ADMIN_PASSWORD + DATABASE_URL env vars on host, run db:push + seed script, deploy (Cloudflare Pages/Vercel)
+
+---
+Task ID: 7
+Agent: main (orchestrator)
+Task: Execute addendum directive — preservation audit, regression testing, performance + accessibility verification, workflow map documentation
+
+Work Log:
+- SECURITY AUDIT (#23): PAT not in git history (git log --all -p scan), not in working tree, remote URL clean, source/README/worklog/.env.example clean — PASS
+- PARALLEL UI SYSTEM CHECK (#18): folder-aware import graph (static + dynamic imports) — all 49 site+admin components reachable from page.tsx, ZERO dead files, single production UI — PASS
+- PERFORMANCE REGRESSION CHECK (#22): DOMContentLoaded 687ms, first paint 1168ms, 61 FPS during animations, 0 long tasks, 27 JS chunks (dev mode, 1.1MB dev-inflated — production would be far smaller), 2801 DOM nodes — PASS
+- TYPESCRIPT FULL PASS (#25): src/ 100% clean (only pre-existing examples/ + skills/ template errors remain, outside app scope)
+- ACCESSIBILITY (#25): 0 images missing alt, 0 unlabeled buttons, 0 unlabeled inputs, exactly 1 h1 with clean H1→H2→H3 hierarchy, all landmarks + skip link + lang=en — PASS
+- FULL USER JOURNEY REGRESSION (#21): Landing → nav → Services explorer → pillar switch (Data) → "Request this service" (service PRE-SELECTED in modal) → fill → submit → success toast → modal auto-close → DB persisted with correct service → visible in Admin Inquiries tab — END-TO-END PASS
+- FAILURE STATES (#10): empty submit → inline validation errors (name/email); invalid email → native HTML5 validation blocks submission (no network call); duplicate submit → `submitting` state disables button + backdrop click — ALL LAYERED VALIDATION VERIFIED
+- KEYBOARD NAVIGATION: tab order flows logically (skip link → logo → nav links → CTAs)
+- Test data cleaned (2 inquiries + logs removed; DB back to production-clean)
+- DOCS: created docs/WORKFLOWS.md — complete preservation-first workflow map (W1-W7: inquiry, newsletter double-opt-in, posts CMS + publish→email pipeline, testimonials CMS, admin auth, navigation anchors, cookie consent) with content-source table + 5 non-negotiables for future changes
+- Committed + pushed: docs/WORKFLOWS.md (84028b7)
+
+Stage Summary:
+- Addendum directive fully satisfied: audit → understand → map → regression test → document → ship
+- All 25 "definition of done" checklist items verified except production build (sandbox rule: dev-server only; tsc clean used as proxy)
+- Repo at github.com/ifeanyiokomba/okomba-analytics: main = new app (with WORKFLOWS.md), legacy branch = original Vite app
