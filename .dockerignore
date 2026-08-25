@@ -1,0 +1,29 @@
+# Cloud-agnostic build artifacts
+node_modules
+.next
+.git
+.gitignore
+*.log
+dev.log
+server.log
+.DS_Store
+
+# Runtime state — mounted volume in production
+db/*.db
+db/*.db-journal
+
+# Local-only artifacts (never needed in the image)
+tool-results
+agent-ctx
+upload
+.z-ai-config
+.claude
+skills
+examples
+mini-services
+docs
+README.md
+worklog.md
+.env
+.env.*
+!.env.example

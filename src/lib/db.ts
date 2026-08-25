@@ -16,7 +16,8 @@ export const db =
   globalForPrisma.prisma && globalForPrisma.prismaCacheKey === PRISMA_CACHE_KEY
     ? globalForPrisma.prisma
     : new PrismaClient({
-        log: ['query'],
+        // Query logging is a dev aid — keep production stdout clean.
+        log: process.env.NODE_ENV === 'production' ? ['error'] : ['query'],
       })
 
 if (process.env.NODE_ENV !== 'production') {

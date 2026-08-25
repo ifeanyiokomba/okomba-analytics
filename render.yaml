@@ -1,0 +1,38 @@
+# ─────────────────────────────────────────────────────────────
+# Render Blueprint — Okomba Analytics
+# One-click full-stack deploy: Node service + persistent SQLite disk.
+#
+# Deploy: Render Dashboard → New → Blueprint → point at this repo.
+# The preview URL's *.onrender.com domain is automatic; add your
+# custom domain in Settings → Custom Domains afterwards.
+# ─────────────────────────────────────────────────────────────
+services:
+  - type: web
+    name: okomba-analytics
+    runtime: node
+    plan: starter
+    region: frankfurt # closest to Nigeria among Render regions
+    buildCommand: npm install && npx prisma generate && npm run build
+    startCommand: npx prisma db push --skip-generate --accept-data-loss && node scripts/seed-testimonials.mjs && node .next/standalone/server.js
+    healthCheckPath: /api
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        value: file:/data/custom.db
+      - key: HOSTNAME
+        value: 0.0.0.0
+      - key: NEXT_TELEMETRY_DISABLED
+        value: "1"
+      # Set these in the Render dashboard after the first deploy
+      # (Blueprint files are public in the repo — never put real
+      # secrets here):
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+    disk:
+      name: okomba-sqlite
+      mountPath: /data
+      sizeGB: 1

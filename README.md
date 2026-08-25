@@ -66,12 +66,25 @@ prisma/              # Schema (Inquiry, Subscriber, Post, Testimonial, EmailLog,
 public/images/       # Brand assets, project previews, avatars
 ```
 
-## Deployment Notes
+## Deployment
 
-- Set `ADMIN_EMAIL` / `ADMIN_PASSWORD` environment variables — never rely on source defaults in production
-- The SQLite database is a local file (`db/custom.db`, git-ignored); run `bun run db:push` on fresh deploys
-- All animations respect `prefers-reduced-motion`
-- SEO: metadata, Open Graph, sitemap.xml, robots.txt included
+This is a **full-stack Next.js app** (Node.js server + API routes + Prisma/SQLite) — static hosts like Cloudflare Pages cannot run it. See **`docs/DEPLOYMENT.md`** for the complete guide.
+
+Fastest path — **Render** (the repo ships a `render.yaml` blueprint with a persistent disk):
+
+1. render.com → New → Blueprint → select this repo
+2. Set `ADMIN_EMAIL` / `ADMIN_PASSWORD` env vars after first deploy
+3. Done — DB schema + seed apply automatically on boot
+
+Docker is also supported (`Dockerfile` included):
+
+```bash
+docker build -t okomba-analytics .
+docker run -p 3000:3000 -v okomba-data:/data \
+  -e ADMIN_EMAIL=you@example.com -e ADMIN_PASSWORD='strong-secret' okomba-analytics
+```
+
+**Required env vars (production)**: `DATABASE_URL` (persistent volume path), `ADMIN_EMAIL`, `ADMIN_PASSWORD` — the admin portal returns 503 until credentials are set. All animations respect `prefers-reduced-motion`; SEO (OG tags, sitemap.xml, robots.txt) included.
 
 ## Legacy
 
