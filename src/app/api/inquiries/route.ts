@@ -140,6 +140,31 @@ export async function POST(req: Request) {
       },
     });
 
+    // received_emails audit trail (Phase-1 Module 2) — inbound record
+    // mirrors the inquiry; kept separate from the workflow table so
+    // ai_chat leads (Phase 3) and manual entries share one audit log.
+    try {
+      await db.receivedEmail.create({
+        data: {
+          source: "contact",
+          name: inquiry.name,
+          email: inquiry.email,
+          phone: inquiry.phone,
+          subject: `Inquiry — ${inquiry.service}`,
+          message: inquiry.message,
+          inquiryId: inquiry.id,
+          meta: JSON.stringify({
+            service: inquiry.service,
+            addlService: inquiry.addlService,
+            budget: inquiry.budget,
+            whatsapp: inquiry.whatsapp,
+          }),
+        },
+      });
+    } catch (err) {
+      console.error("[received_emails] audit persist failed:", err);
+    }
+
     // Fire-and-forget notification (never blocks or fails the response)
     notifyNewInquiry({
       id: inquiry.id,
