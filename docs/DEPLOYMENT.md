@@ -193,3 +193,75 @@ turns the log into real Gmail delivery, using your existing Google stack.
 > Gmail quota: Apps Script allows ~100 recipient emails/day on free accounts
 > (1,500 on Workspace). That comfortably covers a growing subscriber list
 > for a long time.
+
+---
+
+## Anti-sleep & uptime monitoring (Phase 1)
+
+Two complementary layers keep the free-tier instance warm and monitored:
+
+**1. Built-in self-ping (node-cron)** — set these env vars on your host:
+
+```
+CRON_SELF_PING_ENABLED=true
+SELF_PING_URL=https://your-site.onrender.com   # public URL
+# CRON_SELF_PING_EXPR=0 */9 * * * *            # default: every 9 min
+```
+
+The server pings its own `/api/health` every 9 minutes (no DB touch,
+instant 200). Verify registration in the host logs: `[cron] anti-sleep
+self-ping scheduled`.
+
+**2. UptimeRobot (external, recommended belt-and-braces)**
+
+1. Create a free account at [uptimerobot.com](https://uptimerobot.com)
+2. Add New Monitor → **HTTP(s)**
+3. URL: `https://your-site.onrender.com/api/health`
+4. Monitoring interval: **5 minutes**
+5. Alert contact: your email
+
+UptimeRobot's 5-minute pings also keep the instance awake, and alert you
+if the site ever goes down (the self-ping alone can't do that).
+
+---
+
+## Testing the Google Apps Script engine (Postman)
+
+After deploying `Google-apps-script/Code.gs` as a Web App (setup in the
+email section above), verify each action with Postman:
+
+**sendInvoiceEmail — branded HTML + PDF attached (no links):**
+
+```json
+POST https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID/exec
+Content-Type: application/json
+
+{
+  "action": "sendInvoiceEmail",
+  "to": "your-email@example.com",
+  "subject": "Invoice OKO-2026-0001",
+  "body": "Your invoice is attached.",
+  "html": "<p>Your <b>invoice</b> is attached.</p>",
+  "base64Pdf": "JVBERi0xLjQK...",   // base64 of any PDF
+  "filename": "Okomba_Invoice_OKO-2026-0001.pdf",
+  "invoiceSummary": {
+    "invoiceNumber": "OKO-2026-0001",
+    "customerName": "Test Client",
+    "service": "Web Development",
+    "amount": "₦250,000",
+    "dueDate": "in 14 days"
+  }
+}
+```
+
+Expect `{"success":true}`, an email with the branded template + PDF
+attached, and a new row in the **Invoices** tab of your Google Sheet.
+
+**backupToSheet — generic Sheets backup:**
+
+```json
+{ "action": "backupToSheet", "tab": "Leads", "data": [{ "Name": "Test", "Email": "t@e.com" }] }
+```
+
+Tip: run `testInvoiceEmail` directly in the Apps Script editor for a
+zero-setup PDF attachment check.

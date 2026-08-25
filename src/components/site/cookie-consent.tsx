@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Check, Cookie, Settings2, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { loadThirdPartyScripts } from "@/lib/consent-scripts";
 
 const STORAGE_KEY = "okomba_cookie_consent";
 const ACCEPTED = "accepted";
@@ -36,6 +37,8 @@ export function CookieConsent() {
       const t = setTimeout(() => show(false), 1400);
       return () => clearTimeout(t);
     }
+    // Returning visitor who already accepted → restore third-party scripts
+    if (stored === ACCEPTED) loadThirdPartyScripts();
   }, [show]);
 
   // Re-open from the footer "Cookies" link
@@ -60,6 +63,7 @@ export function CookieConsent() {
 
   const accept = () => {
     store(ACCEPTED);
+    loadThirdPartyScripts(); // GA (and Phase-2 providers) only load now
     dismiss();
   };
 
@@ -97,12 +101,12 @@ export function CookieConsent() {
                   Cookie settings
                 </>
               ) : (
-                "Cookies, kept minimal"
+                "We use cookies for the best experience on Okomba Analytics"
               )}
             </p>
             <p className="mt-1.5 text-[12px] leading-relaxed text-muted-foreground">
-              We use essential cookies to run this site and anonymous analytics to improve it.
-              No advertising trackers, no data resale — see our{" "}
+              Analytics and payment scripts only load if you accept. No advertising
+              trackers, no data resale — see our{" "}
               <button
                 onClick={() => {
                   accept();
