@@ -123,3 +123,28 @@ intentional safety gate (the source repo is public).
 - [ ] Log into `/#/admin` with the env credentials
 - [ ] Posts + Testimonials tabs show seeded content
 - [ ] Set a real admin password and remove test data
+
+---
+
+## Troubleshooting: "I retried Cloudflare and it failed again"
+
+**Check the commit hash in the first lines of the build log.** If it says:
+
+```
+HEAD is now at 221a134 …
+```
+
+…you clicked **Retry** on an *old* deployment. Retry re-runs the original
+commit — it never picks up newer pushes. The deployment kit (`381f4ad` and
+later) was never in that build. Verify the latest commit before drawing
+conclusions:
+
+```bash
+git ls-remote https://github.com/ifeanyiokomba/okomba-analytics.git main
+```
+
+**Important though:** even deploying the *latest* commit to Cloudflare Pages
+will still fail with `Output directory "dist" not found` — and if it were
+pointed at `.next/standalone` it would deploy a server Pages cannot execute.
+This is not fixable by more pushes. Retire the Pages project (Settings →
+Delete project, or just stop deploying to it) and use a Node host as above.
