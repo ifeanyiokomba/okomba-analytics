@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { Mail, X } from "lucide-react";
+import { FileSignature, Mail, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SERVICES } from "@/lib/content";
 import { INQUIRY_STATUS_STYLES, formatTimestamp, type Inquiry } from "./types";
@@ -11,10 +11,12 @@ export function InquiryDetailDialog({
   inquiry,
   onClose,
   onOpenService,
+  onCreateProposal,
 }: {
   inquiry: Inquiry | null;
   onClose: () => void;
   onOpenService: (svc: NonNullable<ReturnType<typeof SERVICES.find>>) => void;
+  onCreateProposal: (i: Inquiry) => void;
 }) {
   useEffect(() => {
     if (!inquiry) return;
@@ -123,9 +125,16 @@ export function InquiryDetailDialog({
         </div>
 
         <footer className="flex flex-col gap-2.5 border-t border-white/[0.06] bg-white/[0.015] px-6 py-5 sm:flex-row md:px-8">
+          <button
+            onClick={() => onCreateProposal(inquiry)}
+            className="btn-shine inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-gold-light to-gold px-5 py-3 text-[13px] font-semibold text-ink shadow-gold transition-transform hover:-translate-y-0.5"
+          >
+            <FileSignature size={14} aria-hidden="true" />
+            Create proposal
+          </button>
           <a
             href={mailto}
-            className="btn-shine inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-gold-light to-gold px-5 py-3 text-[13px] font-semibold text-ink shadow-gold transition-transform hover:-translate-y-0.5"
+            className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl border border-white/[0.12] bg-white/[0.04] px-5 py-3 text-[13px] font-medium text-foreground transition-colors hover:border-gold/40 hover:text-gold"
           >
             <Mail size={14} aria-hidden="true" />
             Reply by email
@@ -137,7 +146,7 @@ export function InquiryDetailDialog({
               rel="noopener noreferrer"
               className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl border border-teal/30 bg-teal-dim px-5 py-3 text-[13px] font-medium text-teal transition-colors hover:bg-teal/15"
             >
-              Reply on WhatsApp
+              WhatsApp
             </a>
           )}
         </footer>

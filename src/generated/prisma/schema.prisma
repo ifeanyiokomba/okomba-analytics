@@ -134,13 +134,14 @@ model ReceivedEmail {
 
 model Invoice {
   id               String    @id @default(cuid())
-  invoiceNumber    String    @unique // OKO-2026-0001
+  invoiceNumber    String    @unique // INV-2026-0001
   inquiryId        String?
   customerName     String
   customerEmail    String
   customerPhone    String?
   service          String
   description      String?
+  proposalJson     String? // full (admin-edited) proposal snapshot — powers PDF regeneration & reminders
   amountKobo       Int // NGN minor units — integer math, no float drift
   currency         String    @default("NGN")
   durationLabel    String? // e.g. "3 weeks"

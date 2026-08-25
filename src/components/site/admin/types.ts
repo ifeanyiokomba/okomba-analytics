@@ -37,6 +37,36 @@ export type EmailLog = {
   sentAt: string;
 };
 
+export type Invoice = {
+  id: string;
+  invoiceNumber: string;
+  inquiryId: string | null;
+  customerName: string;
+  customerEmail: string;
+  service: string;
+  amountNaira: number;
+  currency: string;
+  durationLabel: string | null;
+  dueDate: string | null;
+  status: string;
+  dvaAccountNumber: string | null;
+  dvaBankName: string | null;
+  dvaSandbox: boolean;
+  sentAt: string | null;
+  paidAt: string | null;
+  createdAt: string;
+};
+
+/* Client-side mirror of the server ProposalDraft shape. */
+export type ProposalDraft = {
+  executiveSummary: string;
+  objectives: string[];
+  scope: { title: string; items: string[] }[];
+  deliverables: string[];
+  timeline: { phase: string; duration: string; focus: string }[];
+  terms: string[];
+};
+
 export type Stats = {
   total: number;
   new: number;
@@ -91,7 +121,24 @@ export const EMAIL_TYPE_LABELS: Record<string, string> = {
   "subscriber.welcome": "Welcome / confirm",
   "post.published": "New post",
   broadcast: "Broadcast",
+  "invoice.sent": "Proposal / invoice",
 };
+
+/* ── Invoice status chips (Proposals tab) ───────────────────── */
+export const INVOICE_STATUS_STYLES: Record<string, string> = {
+  draft: "border-purple-400/35 bg-purple-400/10 text-purple-300",
+  sent: "border-gold/35 bg-gold-dim text-gold",
+  pending: "border-[#5b9eff]/35 bg-[#5b9eff]/10 text-[#5b9eff]",
+  paid: "border-teal/35 bg-teal-dim text-teal",
+  overdue: "border-red-500/30 bg-red-500/10 text-red-300",
+  cancelled: "border-white/15 bg-white/[0.04] text-muted-foreground",
+};
+
+export const INVOICE_STATUSES = ["draft", "sent", "pending", "paid", "overdue", "cancelled"] as const;
+
+export function formatNaira(n: number): string {
+  return `\u20A6${n.toLocaleString("en-NG", { maximumFractionDigits: 0 })}`;
+}
 
 /* ── Convert ISO string → "10 Mar" / "10 Mar 2025" ──────────── */
 export function formatDate(

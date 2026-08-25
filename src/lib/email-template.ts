@@ -1,36 +1,22 @@
 /**
  * Branded HTML email template — email-client-safe (tables + inline styles).
  *
- * Brand tokens are centralized here so a rebrand is a two-line change.
- * Current tokens match the live Okomba Analytics site (ink + honey gold,
- * official logo at /images/logo.png). If the brand moves to the
- * #0A2540 / #00D4FF palette, update BRAND below — every email follows.
+ * Brand tokens live in @/lib/brand (shared with the PDF engine) so a
+ * rebrand is a two-line change: edit BRAND there and every email,
+ * invoice PDF and attachment follows.
  */
 
-const BRAND = {
-  // Primary (header/footer background)
-  primary: "#0B0F1A", // Okomba ink
-  primaryText: "#FFFFFF",
-  // Accent (CTA)
-  accent: "#C9910A", // Okomba honey gold
-  accentText: "#141926",
-  // Neutrals
-  text: "#1c2333",
-  muted: "#5a6373",
-  bg: "#f7f5ef",
-  card: "#ffffff",
-  border: "#e4e1d8",
-};
+import { BRAND, CONTACT } from "@/lib/brand";
 
 const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") || "https://okomba.com";
+  process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") || CONTACT.site;
 const LOGO_URL = `${SITE_URL}/images/logo.png`;
 
 const CONTACT_FOOTER = {
-  email: "support@okomba.com",
-  phone: "+234 808 894 8657",
-  whatsapp: "https://wa.me/2348088948657",
-  address: "Nigeria",
+  email: CONTACT.email,
+  phone: CONTACT.phone,
+  whatsapp: CONTACT.whatsapp,
+  address: CONTACT.address,
 };
 
 export type EmailBlock =

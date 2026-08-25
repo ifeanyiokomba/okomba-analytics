@@ -9,6 +9,7 @@ import {
   ChevronUp,
   Download,
   ExternalLink,
+  FileSignature,
   Inbox,
   Loader2,
   Search,
@@ -38,6 +39,7 @@ export function InquiriesTab({
   onOpenInquiry,
   onOpenService,
   onClearFilters,
+  onCreateProposal,
 }: {
   inquiries: Inquiry[];
   loading: boolean;
@@ -47,6 +49,7 @@ export function InquiriesTab({
   onOpenInquiry: (i: Inquiry) => void;
   onOpenService: (svc: Service) => void;
   onClearFilters?: () => void;
+  onCreateProposal: (i: Inquiry) => void;
 }) {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
@@ -241,6 +244,7 @@ export function InquiriesTab({
                   { label: "Message", key: null },
                   { label: "Received", key: "createdAt" as const },
                   { label: "Status", key: null },
+                  { label: "Proposal", key: null },
                 ] as const).map((h) => {
                   const isSortable = h.key !== null;
                   const isActive = isSortable && sortKey === h.key;
@@ -340,6 +344,17 @@ export function InquiriesTab({
                         </option>
                       ))}
                     </select>
+                  </td>
+                  <td className="px-6 py-4">
+                    <button
+                      onClick={() => onCreateProposal(i)}
+                      title={`Create proposal for ${i.name}`}
+                      aria-label={`Create proposal for ${i.name}`}
+                      className="inline-flex items-center gap-1.5 rounded-lg border border-gold/30 bg-gold-dim px-3 py-1.5 text-[11px] font-semibold text-gold transition-colors hover:bg-gold/20"
+                    >
+                      <FileSignature size={12} aria-hidden="true" />
+                      <span className="hidden xl:inline">Propose</span>
+                    </button>
                   </td>
                 </tr>
               ))}

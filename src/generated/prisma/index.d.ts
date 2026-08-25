@@ -9225,6 +9225,7 @@ export namespace Prisma {
     customerPhone: string | null
     service: string | null
     description: string | null
+    proposalJson: string | null
     amountKobo: number | null
     currency: string | null
     durationLabel: string | null
@@ -9249,6 +9250,7 @@ export namespace Prisma {
     customerPhone: string | null
     service: string | null
     description: string | null
+    proposalJson: string | null
     amountKobo: number | null
     currency: string | null
     durationLabel: string | null
@@ -9273,6 +9275,7 @@ export namespace Prisma {
     customerPhone: number
     service: number
     description: number
+    proposalJson: number
     amountKobo: number
     currency: number
     durationLabel: number
@@ -9307,6 +9310,7 @@ export namespace Prisma {
     customerPhone?: true
     service?: true
     description?: true
+    proposalJson?: true
     amountKobo?: true
     currency?: true
     durationLabel?: true
@@ -9331,6 +9335,7 @@ export namespace Prisma {
     customerPhone?: true
     service?: true
     description?: true
+    proposalJson?: true
     amountKobo?: true
     currency?: true
     durationLabel?: true
@@ -9355,6 +9360,7 @@ export namespace Prisma {
     customerPhone?: true
     service?: true
     description?: true
+    proposalJson?: true
     amountKobo?: true
     currency?: true
     durationLabel?: true
@@ -9466,6 +9472,7 @@ export namespace Prisma {
     customerPhone: string | null
     service: string
     description: string | null
+    proposalJson: string | null
     amountKobo: number
     currency: string
     durationLabel: string | null
@@ -9509,6 +9516,7 @@ export namespace Prisma {
     customerPhone?: boolean
     service?: boolean
     description?: boolean
+    proposalJson?: boolean
     amountKobo?: boolean
     currency?: boolean
     durationLabel?: boolean
@@ -9533,6 +9541,7 @@ export namespace Prisma {
     customerPhone?: boolean
     service?: boolean
     description?: boolean
+    proposalJson?: boolean
     amountKobo?: boolean
     currency?: boolean
     durationLabel?: boolean
@@ -9557,6 +9566,7 @@ export namespace Prisma {
     customerPhone?: boolean
     service?: boolean
     description?: boolean
+    proposalJson?: boolean
     amountKobo?: boolean
     currency?: boolean
     durationLabel?: boolean
@@ -9581,6 +9591,7 @@ export namespace Prisma {
     customerPhone?: boolean
     service?: boolean
     description?: boolean
+    proposalJson?: boolean
     amountKobo?: boolean
     currency?: boolean
     durationLabel?: boolean
@@ -9596,7 +9607,7 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type InvoiceOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "invoiceNumber" | "inquiryId" | "customerName" | "customerEmail" | "customerPhone" | "service" | "description" | "amountKobo" | "currency" | "durationLabel" | "dueDate" | "status" | "dvaAccountNumber" | "dvaBankName" | "dvaBankCode" | "pdfUrl" | "paidAt" | "sentAt" | "createdAt" | "updatedAt", ExtArgs["result"]["invoice"]>
+  export type InvoiceOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "invoiceNumber" | "inquiryId" | "customerName" | "customerEmail" | "customerPhone" | "service" | "description" | "proposalJson" | "amountKobo" | "currency" | "durationLabel" | "dueDate" | "status" | "dvaAccountNumber" | "dvaBankName" | "dvaBankCode" | "pdfUrl" | "paidAt" | "sentAt" | "createdAt" | "updatedAt", ExtArgs["result"]["invoice"]>
 
   export type $InvoicePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Invoice"
@@ -9610,6 +9621,7 @@ export namespace Prisma {
       customerPhone: string | null
       service: string
       description: string | null
+      proposalJson: string | null
       amountKobo: number
       currency: string
       durationLabel: string | null
@@ -10054,6 +10066,7 @@ export namespace Prisma {
     readonly customerPhone: FieldRef<"Invoice", 'String'>
     readonly service: FieldRef<"Invoice", 'String'>
     readonly description: FieldRef<"Invoice", 'String'>
+    readonly proposalJson: FieldRef<"Invoice", 'String'>
     readonly amountKobo: FieldRef<"Invoice", 'Int'>
     readonly currency: FieldRef<"Invoice", 'String'>
     readonly durationLabel: FieldRef<"Invoice", 'String'>
@@ -12668,6 +12681,7 @@ export namespace Prisma {
     customerPhone: 'customerPhone',
     service: 'service',
     description: 'description',
+    proposalJson: 'proposalJson',
     amountKobo: 'amountKobo',
     currency: 'currency',
     durationLabel: 'durationLabel',
@@ -13334,6 +13348,7 @@ export namespace Prisma {
     customerPhone?: StringNullableFilter<"Invoice"> | string | null
     service?: StringFilter<"Invoice"> | string
     description?: StringNullableFilter<"Invoice"> | string | null
+    proposalJson?: StringNullableFilter<"Invoice"> | string | null
     amountKobo?: IntFilter<"Invoice"> | number
     currency?: StringFilter<"Invoice"> | string
     durationLabel?: StringNullableFilter<"Invoice"> | string | null
@@ -13358,6 +13373,7 @@ export namespace Prisma {
     customerPhone?: SortOrderInput | SortOrder
     service?: SortOrder
     description?: SortOrderInput | SortOrder
+    proposalJson?: SortOrderInput | SortOrder
     amountKobo?: SortOrder
     currency?: SortOrder
     durationLabel?: SortOrderInput | SortOrder
@@ -13385,6 +13401,7 @@ export namespace Prisma {
     customerPhone?: StringNullableFilter<"Invoice"> | string | null
     service?: StringFilter<"Invoice"> | string
     description?: StringNullableFilter<"Invoice"> | string | null
+    proposalJson?: StringNullableFilter<"Invoice"> | string | null
     amountKobo?: IntFilter<"Invoice"> | number
     currency?: StringFilter<"Invoice"> | string
     durationLabel?: StringNullableFilter<"Invoice"> | string | null
@@ -13409,6 +13426,7 @@ export namespace Prisma {
     customerPhone?: SortOrderInput | SortOrder
     service?: SortOrder
     description?: SortOrderInput | SortOrder
+    proposalJson?: SortOrderInput | SortOrder
     amountKobo?: SortOrder
     currency?: SortOrder
     durationLabel?: SortOrderInput | SortOrder
@@ -13441,6 +13459,7 @@ export namespace Prisma {
     customerPhone?: StringNullableWithAggregatesFilter<"Invoice"> | string | null
     service?: StringWithAggregatesFilter<"Invoice"> | string
     description?: StringNullableWithAggregatesFilter<"Invoice"> | string | null
+    proposalJson?: StringNullableWithAggregatesFilter<"Invoice"> | string | null
     amountKobo?: IntWithAggregatesFilter<"Invoice"> | number
     currency?: StringWithAggregatesFilter<"Invoice"> | string
     durationLabel?: StringNullableWithAggregatesFilter<"Invoice"> | string | null
@@ -14265,6 +14284,7 @@ export namespace Prisma {
     customerPhone?: string | null
     service: string
     description?: string | null
+    proposalJson?: string | null
     amountKobo: number
     currency?: string
     durationLabel?: string | null
@@ -14289,6 +14309,7 @@ export namespace Prisma {
     customerPhone?: string | null
     service: string
     description?: string | null
+    proposalJson?: string | null
     amountKobo: number
     currency?: string
     durationLabel?: string | null
@@ -14313,6 +14334,7 @@ export namespace Prisma {
     customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
     service?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    proposalJson?: NullableStringFieldUpdateOperationsInput | string | null
     amountKobo?: IntFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     durationLabel?: NullableStringFieldUpdateOperationsInput | string | null
@@ -14337,6 +14359,7 @@ export namespace Prisma {
     customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
     service?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    proposalJson?: NullableStringFieldUpdateOperationsInput | string | null
     amountKobo?: IntFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     durationLabel?: NullableStringFieldUpdateOperationsInput | string | null
@@ -14361,6 +14384,7 @@ export namespace Prisma {
     customerPhone?: string | null
     service: string
     description?: string | null
+    proposalJson?: string | null
     amountKobo: number
     currency?: string
     durationLabel?: string | null
@@ -14385,6 +14409,7 @@ export namespace Prisma {
     customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
     service?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    proposalJson?: NullableStringFieldUpdateOperationsInput | string | null
     amountKobo?: IntFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     durationLabel?: NullableStringFieldUpdateOperationsInput | string | null
@@ -14409,6 +14434,7 @@ export namespace Prisma {
     customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
     service?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    proposalJson?: NullableStringFieldUpdateOperationsInput | string | null
     amountKobo?: IntFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     durationLabel?: NullableStringFieldUpdateOperationsInput | string | null
@@ -15076,6 +15102,7 @@ export namespace Prisma {
     customerPhone?: SortOrder
     service?: SortOrder
     description?: SortOrder
+    proposalJson?: SortOrder
     amountKobo?: SortOrder
     currency?: SortOrder
     durationLabel?: SortOrder
@@ -15104,6 +15131,7 @@ export namespace Prisma {
     customerPhone?: SortOrder
     service?: SortOrder
     description?: SortOrder
+    proposalJson?: SortOrder
     amountKobo?: SortOrder
     currency?: SortOrder
     durationLabel?: SortOrder
@@ -15128,6 +15156,7 @@ export namespace Prisma {
     customerPhone?: SortOrder
     service?: SortOrder
     description?: SortOrder
+    proposalJson?: SortOrder
     amountKobo?: SortOrder
     currency?: SortOrder
     durationLabel?: SortOrder

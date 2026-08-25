@@ -430,10 +430,11 @@ export async function notifyBroadcast(
 }
 
 /* ─────────────────────────────────────────────────────────────
-   Invoice email (Phase-1 Module 3 plumbing; the admin Proposal
-   UI that calls this lands in Phase 2). Sends a branded HTML
-   email with the PDF ATTACHED (never a link) via the Google
+   Proposal + invoice email (Phase-2 Module 4). Sends a branded
+   HTML email with the PDF ATTACHED (never a link) via the Google
    Apps Script engine.
+   Subject format is fixed by spec:
+   "Your Proposal from Okomba Analytics - Invoice #INV-xxx"
    ───────────────────────────────────────────────────────────── */
 export type InvoiceEmailPayload = {
   invoiceId: string;
@@ -448,17 +449,18 @@ export type InvoiceEmailPayload = {
   dueDate?: string | null;
   dvaAccountNumber?: string | null;
   dvaBankName?: string | null;
+  dvaAccountName?: string | null;
   pdfBase64: string; // raw PDF bytes, base64-encoded
-  pdfFilename: string; // Okomba_Invoice_{invoiceNumber}.pdf
+  pdfFilename: string; // Okomba_Proposal_{invoiceNumber}.pdf
 };
 
-export async function sendInvoiceEmail(
+export async function sendProposalEmail(
   inv: InvoiceEmailPayload
 ): Promise<{ ok: boolean; error?: string }> {
   if (!enabled) return { ok: false, error: "notifications disabled" };
 
   const fmtNaira = (n: number) =>
-    `₦${n.toLocaleString("en-NG", { maximumFractionDigits: 0 })}`;
+    `\u20A6${n.toLocaleString("en-NG", { maximumFractionDigits: 0 })}`;
   const due = inv.dueDate
     ? new Date(inv.dueDate).toLocaleDateString("en-NG", {
         day: "numeric",
@@ -467,14 +469,14 @@ export async function sendInvoiceEmail(
       })
     : null;
 
-  const subject = `Invoice ${inv.invoiceNumber} from Okomba Analytics — ${fmtNaira(
-    inv.amountNaira
-  )}`;
+  // Exact subject per spec
+  const subject = `Your Proposal from Okomba Analytics - Invoice #${inv.invoiceNumber}`;
 
   const body = [
     `Dear ${inv.customerName},`,
     ``,
-    `Thank you for choosing Okomba Analytics. Your invoice is attached as a PDF.`,
+    `Thank you for choosing Okomba Analytics. Your proposal and invoice`,
+    `are attached to this email as a single PDF document.`,
     ``,
     `Invoice:  ${inv.invoiceNumber}`,
     `Service:  ${inv.service}`,
@@ -487,18 +489,21 @@ export async function sendInvoiceEmail(
           `Payment account (Paystack Dedicated Virtual Account):`,
           `  Bank:    ${inv.dvaBankName ?? ""}`,
           `  Account: ${inv.dvaAccountNumber}`,
-          `  Name:    OKOMBA ANALYTICS`,
+          `  Name:    ${inv.dvaAccountName ?? "Okomba Analytics"}`,
         ]
       : []),
     ``,
-    `The PDF attached to this email is your official invoice.`,
+    `The PDF attached to this email is your official proposal and invoice.`,
   ].join("\n");
 
   const html = brandedEmailHtml({
-    title: `Invoice ${inv.invoiceNumber}`,
+    title: `Your Proposal — ${inv.invoiceNumber}`,
     preheader: `${inv.service} — ${fmtNaira(inv.amountNaira)}${due ? ` · due ${due}` : ""}`,
     blocks: [
-      { kind: "text", text: `Dear ${inv.customerName},\nThank you for choosing Okomba Analytics. Your invoice is attached to this email as a PDF.` },
+      {
+        kind: "text",
+        text: `Dear ${inv.customerName},\nThank you for choosing Okomba Analytics. Your proposal and invoice are attached to this email as a single PDF document.`,
+      },
       {
         kind: "kv",
         rows: [
@@ -515,14 +520,14 @@ export async function sendInvoiceEmail(
         ? ([
             {
               kind: "text",
-              text: `Payment account (Paystack Dedicated Virtual Account):\nBank: ${inv.dvaBankName ?? ""}\nAccount: ${inv.dvaAccountNumber}\nAccount name: OKOMBA ANALYTICS`,
+              text: `Payment account (Paystack Dedicated Virtual Account):\nBank: ${inv.dvaBankName ?? ""}\nAccount: ${inv.dvaAccountNumber}\nAccount name: ${inv.dvaAccountName ?? "Okomba Analytics"}`,
             },
           ] as EmailBlock[])
         : []),
       ...(inv.description ? ([{ kind: "text", text: inv.description }] as EmailBlock[]) : []),
-      { kind: "text", text: "The PDF attached to this email is your official invoice." },
+      { kind: "text", text: "The PDF attached to this email is your official proposal and invoice." },
     ],
-    footerNote: "Questions about this invoice? Reply to this email or reach us on WhatsApp.",
+    footerNote: "Questions about this proposal? Reply to this email or reach us on WhatsApp.",
   });
 
   const attachment: EmailAttachment = {

@@ -115,6 +115,35 @@ intentional safety gate (the source repo is public).
 
 ---
 
+## Phase 2 · Module 4 — AI Proposal Sender (invoices)
+
+The admin portal now turns any inquiry into a branded proposal + invoice in
+three steps: **AI draft → commercial terms → send**. On send, the system
+creates the invoice (`INV-YYYY-NNNN`), generates a Paystack Dedicated Virtual
+Account, builds a branded PDF (Ink + Honey Gold), emails it as an
+**attachment** (subject: `Your Proposal from Okomba Analytics - Invoice
+#INV-xxxx`), schedules payment reminders, and queues the WhatsApp caption
+`Hi {name}, here is your proposal and invoice from Okomba Analytics`.
+
+| Variable | Purpose |
+|---|---|
+| `PAYSTACK_SECRET_KEY` | Live DVA creation. **Unset = sandbox DVA** (clearly labelled "Paystack Test Bank (Sandbox)") so the whole pipeline still works pre-launch. Keys: dashboard.paystack.com → Settings → API Keys. |
+| `WHATSAPP_SERVICE_URL` | Optional. The WhatsApp mini-service (Module 6) — when set, proposal captions dispatch immediately instead of staying queued. |
+
+Notes:
+
+- **The AI never writes pricing.** Drafts are generated server-side
+  (z-ai SDK) with price-leak scrubbing; the admin sets the amount separately.
+- The emailed PDF is the only invoice artifact — no Cloudinary needed. The
+  admin can re-download the exact PDF any time from the Proposals tab
+  (`/api/admin/invoices/[id]/pdf`).
+- Google Apps Script v3 `sendInvoiceEmail` action delivers the email with
+  the base64 PDF via `MailApp` — no links, per spec.
+- Fonts: `public/fonts/NotoSans-*.ttf` ships with the repo (₦ naira glyph
+  support in PDFs). The generator falls back to Helvetica + "NGN" if absent.
+
+---
+
 ## Post-deploy checklist
 
 - [ ] Visit `/` — hero animations, all 16 sections render

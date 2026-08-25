@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ArrowLeft,
+  FileSignature,
   FileText,
   Inbox,
   LayoutDashboard,
@@ -30,13 +31,23 @@ import { SubscribersTab } from "./subscribers-tab";
 import { PostsTab } from "./posts-tab";
 import { TestimonialsTab } from "./testimonials-tab";
 import { EmailLogTab } from "./email-log-tab";
-import type { EmailLog, Inquiry, Stats, Subscriber } from "./types";
+import { InvoicesTab } from "./invoices-tab";
+import { ProposalComposerDialog } from "./proposal-composer-dialog";
+import type { EmailLog, Inquiry, Invoice, Stats, Subscriber } from "./types";
 
-type Tab = "overview" | "inquiries" | "subscribers" | "posts" | "testimonials" | "email";
+type Tab =
+  | "overview"
+  | "inquiries"
+  | "proposals"
+  | "subscribers"
+  | "posts"
+  | "testimonials"
+  | "email";
 
 const TABS: { id: Tab; label: string; icon: typeof Inbox }[] = [
   { id: "overview", label: "Overview", icon: LayoutDashboard },
   { id: "inquiries", label: "Inquiries", icon: Inbox },
+  { id: "proposals", label: "Proposals", icon: FileSignature },
   { id: "subscribers", label: "Subscribers", icon: Users },
   { id: "posts", label: "Posts", icon: FileText },
   { id: "testimonials", label: "Testimonials", icon: MessageSquareQuote },
@@ -58,6 +69,7 @@ export function AdminDashboard({
   const [posts, setPosts] = useState<Post[]>([]);
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
   const [emailLogs, setEmailLogs] = useState<EmailLog[]>([]);
+  const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [stats, setStats] = useState<Stats | null>(null);
 
   // Loading / error
@@ -76,6 +88,7 @@ export function AdminDashboard({
     { testimonial: Testimonial | null; mode: "create" | "edit" } | null
   >(null);
   const [showBroadcast, setShowBroadcast] = useState(false);
+  const [composing, setComposing] = useState<Inquiry | null>(null);
 
   // Toast (simple inline notification for action feedback)
   const [toast, setToast] = useState<{ text: string; type: "ok" | "err" } | null>(null);
@@ -89,13 +102,14 @@ export function AdminDashboard({
   const load = useCallback(async () => {
     setError(null);
     try {
-      const [listRes, statsRes, subsRes, postsRes, logRes, testimonialsRes] = await Promise.all([
+      const [listRes, statsRes, subsRes, postsRes, logRes, testimonialsRes, invoicesRes] = await Promise.all([
         fetch("/api/inquiries"),
         fetch("/api/inquiries?stats=1"),
         fetch("/api/subscribers"),
         fetch("/api/admin/posts"),
         fetch("/api/admin/email-log?limit=50"),
         fetch("/api/admin/testimonials"),
+        fetch("/api/admin/invoices"),
       ]);
       if (!listRes.ok || !statsRes.ok) throw new Error("Failed to load data — session may have expired");
       const list = await listRes.json();
@@ -118,6 +132,10 @@ export function AdminDashboard({
       if (testimonialsRes.ok) {
         const tm = await testimonialsRes.json();
         setTestimonials(tm.testimonials ?? []);
+      }
+      if (invoicesRes.ok) {
+        const inv = await invoicesRes.json();
+        setInvoices(inv.invoices ?? []);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load");
@@ -501,6 +519,17 @@ export function AdminDashboard({
                 updatingId={updatingId}
                 onOpenInquiry={(i) => setDetailInquiry(i)}
                 onOpenService={(svc) => setDetailService(svc)}
+                onCreateProposal={(i) => {
+                  setDetailInquiry(null);
+                  setComposing(i);
+                }}
+              />
+            )}
+            {tab === "proposals" && (
+              <InvoicesTab
+                invoices={invoices}
+                loading={false}
+                onCreateFromInquiries={() => setTab("inquiries")}
               />
             )}
             {tab === "subscribers" && (
@@ -549,6 +578,10 @@ export function AdminDashboard({
           setDetailInquiry(null);
           setDetailService(svc);
         }}
+        onCreateProposal={(i) => {
+          setDetailInquiry(null);
+          setComposing(i);
+        }}
       />
       {editingPost && (
         <PostEditorDialog
@@ -579,6 +612,21 @@ export function AdminDashboard({
           }}
         />
       )}
+      <ProposalComposerDialog
+        inquiry={composing}
+        onClose={() => setComposing(null)}
+        onSent={({ invoiceNumber, emailSent }) => {
+          setComposing(null);
+          setToast({
+            text: emailSent
+              ? `Proposal ${invoiceNumber} sent — PDF attached`
+              : `Proposal ${invoiceNumber} saved (email failed — see Email log)`,
+            type: emailSent ? "ok" : "err",
+          });
+          load();
+          setTab("proposals");
+        }}
+      />
     </div>
   );
 }

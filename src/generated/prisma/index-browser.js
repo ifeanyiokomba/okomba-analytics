@@ -220,6 +220,7 @@ exports.Prisma.InvoiceScalarFieldEnum = {
   customerPhone: 'customerPhone',
   service: 'service',
   description: 'description',
+  proposalJson: 'proposalJson',
   amountKobo: 'amountKobo',
   currency: 'currency',
   durationLabel: 'durationLabel',

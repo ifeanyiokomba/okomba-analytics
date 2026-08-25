@@ -59,3 +59,4 @@ server.log
 /upload/
 db/custom.db
 db/*.db
+screenshots/
