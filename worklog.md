@@ -876,3 +876,32 @@ Work Log:
 Stage Summary:
 - Google Apps Script email pattern is now FULLY reconnected and extended: inquiries (Sheets + dual emails, original behavior), subscriber double-opt-in with working confirm links, post-published blasts, broadcasts — all via the owner's existing free Google stack, all still logged in the admin Email audit
 - User action: deploy Code.gs v2 per docs/DEPLOYMENT.md, set NOTIFY_WEBHOOK_URL on host. Until then site works log-only with zero errors.
+
+---
+Task ID: 10 (CTO directive — Phase 1 of 3)
+Agent: main (orchestrator)
+Task: Execute Phase 1 (Foundation + Stability) of the 3-phase CTO directive — cookies/anti-sleep, storage/Sheets backup, Apps Script email engine. Gated delivery: STOP at Checkpoint 1.
+
+Work Log:
+- AUDIT FIRST: inventory documented — 20 API routes, 33 site + 14 admin components, 6 Prisma models (now 10), 7 env vars, workflow map (docs/WORKFLOWS.md) reviewed
+- MODULE 1 (cookies + anti-sleep):
+  - RESEARCH DECISION: kept bespoke consent banner over react-cookie-consent (custom banner persists both choices, reopens from footer, a11y-complete; library would regress) — rationale in consent-scripts.ts
+  - consent-scripts.ts: GA4 injects ONLY after accept (verified live: no-consent → zero scripts; essential → zero; accepted → gtag+config with test ID G-TEST123); Paystack (Phase 2) registers in same gate
+  - Banner copy → directive text "We use cookies for the best experience on Okomba Analytics" (verified fresh-visit)
+  - /api/health: instant 200 endpoint (tested)
+  - node-cron self-ping: instrumentation.ts → src/lib/cron.ts, env-gated, 9-min default; TESTED live with 1-min expr (self-ping → 200 in dev.log), then reverted; UptimeRobot guide added to docs/DEPLOYMENT.md
+- MODULE 2 (storage + Sheets backup):
+  - Prisma models (Mongoose→Prisma decision documented in schema — Mongo migration would break the Render deployment kit + all preserved workflows): ReceivedEmail, Invoice (kobo-integer money, DVA/Paystack fields for Phase 2), EventRecord, WhatsAppMessage; EmailLog extended (bodyText/bodyHtml/attachments/invoiceId) = sent_emails contract without duplicating the table the admin Email-log UI reads
+  - POST /api/inquiries now writes ReceivedEmail audit row (non-blocking) — VERIFIED: row created with source=contact + inquiryId link + meta JSON
+- MODULE 3 (Apps Script email engine):
+  - src/lib/email-template.ts: email-client-safe branded HTML (logo, ink header, gold CTA, contact footer); BRAND tokens centralized (rebrand = 2-line change — flagged directive's #0A2540/#00D4FF vs live gold brand for user decision)
+  - notify.ts: all notifications compose HTML (3.6KB welcome, 4.9KB invoice verified); EmailLog persists bodyHtml+attachments; webhook forward = action:sendEmail with html+attachments
+  - sendInvoiceEmail(): branded invoice + base64 PDF ATTACHED (no links); VERIFIED end-to-end with generated 593-byte PDF → capture server: payload keys action/to/subject/body/html/base64Pdf(792)/filename/invoiceSummary exactly match Code.gs contract
+  - Code.gs v3: action router (sendEmail/sendInvoiceEmail/backupToSheet/improveWithAI-error), sendSimpleEmail + htmlBody + MailApp blob attachments, backupToSheet(tab,rows) generic Sheets backup w/ auto-headers, auto Invoices-tab backup on invoice email, testInvoiceEmail editor test; braces balanced, all functions present
+- REGRESSIONS: admin Email-log tab renders new invoice.sent type (API select unaffected); 16 sections render; lint + tsc src clean; console clean
+- Test data cleaned (1 inquiry, 1 received, 1 sub, 5 logs); test env vars reverted
+- Commits: b4883a8 (db), 47af694 (email), d9772b0 (ops), a805c3a (merge) → pushed to GitHub main
+
+Stage Summary:
+- Phase 1 complete and verified: consent-gated analytics, uptime/anti-sleep, full audit-trail data layer, branded-HTML email engine with PDF attachments through the owner's Google Apps Script
+- OPEN FLAGS for Checkpoint 1: (1) directive brand colors #0A2540/#00D4FF + /public/logo.png conflict with live gold brand + /images/logo.png — awaiting user decision; (2) Mongoose→Prisma deviation documented; (3) improveWithAI runs server-side (z-ai SDK) not in GAS; (4) Phase 2 modules (proposals/Paystack/WhatsApp/Cloudinary) scoped, NOT started — gated on approval
