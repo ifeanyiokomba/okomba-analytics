@@ -1,15 +1,25 @@
 /**
- * OKOMBA ANALYTICS — Google Apps Script Webhook (v2)
+ * OKOMBA ANALYTICS — Google Apps Script Engine (v3)
  * ------------------------------------------------
- * Receives notifications from the Next.js app, saves inquiries to
- * Google Sheets, and sends every email type through Gmail:
+ * The email + backup engine. The Next.js app POSTs here; this script
+ * sends branded HTML email through your Gmail and backs data up to
+ * Google Sheets.
  *
- *   • inquiry.created     → Sheets row + admin alert + user confirmation
- *   • subscriber.welcome  → double-opt-in email with confirm link
- *   • post.published      → new-post blast to confirmed subscribers
- *   • broadcast           → free-form admin broadcast
+ * ACTIONS (Phase-1 Module 3 contract):
+ *   action: "sendEmail"        → generic branded email (html + optional attachments)
+ *   action: "sendInvoiceEmail" → branded invoice email with base64 PDF ATTACHED
+ *                                (MailApp attachment — never a link)
+ *   action: "backupToSheet"    → append JSON rows to any named Sheet tab
  *
- * Backward compatible with the original v1 inquiry format.
+ * Legacy notification format (no action field) still routes exactly as
+ * v2 did — inquiry.created gets the Sheets row + dual emails, and the
+ * v1 raw-inquiry format from the original Vite app still works.
+ *
+ * NOTE on "improveWithAI": AI refinement runs on the Next.js server
+ * (z-ai SDK) BEFORE anything is sent here — the script only delivers.
+ *
+ * AUTO-BACKUP: every new enquiry adds a row to the "Inquiries" tab;
+ * every invoice email adds a row to the "Invoices" tab.
  *
  * SETUP (first time):
  * 1. Go to https://script.google.com → New project → "Okomba Webhook"
@@ -48,14 +58,41 @@ function doPost(e) {
   try {
     const data = JSON.parse(e.postData.contents);
 
-    // v2 format: { type, recipient, subject, body, ...payload }
-    if (data.type) {
-      handleNotification(data);
-    } else if (data.name || data.email) {
-      // v1 legacy format: raw inquiry from the original Vite app
-      handleLegacyInquiry(data);
-    } else {
-      throw new Error("Unrecognized payload");
+    switch (data.action) {
+      case "sendInvoiceEmail":
+        sendInvoiceEmail(data);
+        break;
+      case "backupToSheet":
+        backupToSheet(data.tab, data.data || data.rows || []);
+        break;
+      case "sendEmail":
+      case undefined:
+      case null:
+        // v2 notification format (or v1 legacy inquiry)
+        if (data.type) {
+          handleNotification(data);
+        } else if (data.name || data.email) {
+          handleLegacyInquiry(data);
+        } else if (data.subject && data.recipient) {
+          // bare sendEmail without a type
+          sendSimpleEmail({
+            to: data.recipient,
+            subject: data.subject,
+            body: (data.body || "") + "\n\n" + footerBlock(),
+            html: data.html,
+            attachments: data.attachments,
+          });
+        } else {
+          throw new Error("Unrecognized payload");
+        }
+        break;
+      case "improveWithAI":
+        throw new Error(
+          "improveWithAI runs on the Next.js server before delivery " +
+          "— POST the refined content with action:sendEmail instead."
+        );
+      default:
+        throw new Error("Unknown action: " + data.action);
     }
 
     return ok();
@@ -85,6 +122,8 @@ function handleNotification(data) {
         to: data.recipient,
         subject: data.subject,
         body: data.body + "\n\n" + footerBlock(),
+        html: data.html, // branded HTML from the Next.js template
+        attachments: data.attachments, // [{filename, contentType, base64}]
       });
       break;
   }
@@ -238,12 +277,81 @@ function footerBlock() {
   ].join("\n");
 }
 
-// ─── GMAIL SENDER ────────────────────────────────────────────
 function sendSimpleEmail(opts) {
   if (!opts.to) return;
   const mail = { to: opts.to, subject: opts.subject, body: opts.body };
   if (opts.replyTo) mail.replyTo = opts.replyTo;
+  if (opts.html) mail.htmlBody = opts.html;
+  if (opts.attachments && opts.attachments.length) {
+    mail.attachments = opts.attachments.map(function (a) {
+      return Utilities.newBlob(
+        Utilities.base64Decode(a.base64),
+        a.contentType || "application/octet-stream",
+        a.filename
+      );
+    });
+  }
   MailApp.sendEmail(mail);
+}
+
+// INVOICE EMAIL (action: sendInvoiceEmail) — branded HTML + base64 PDF
+// ATTACHED via MailApp. No links, per spec.
+function sendInvoiceEmail(data) {
+  sendSimpleEmail({
+    to: data.to,
+    subject: data.subject,
+    body: data.body,
+    html: data.html,
+    attachments: [
+      {
+        base64: data.base64Pdf,
+        contentType: "application/pdf",
+        filename: data.filename || "Okomba_Invoice.pdf",
+      },
+    ],
+  });
+
+  // Auto-backup: every invoice email gets a row in the "Invoices" tab
+  const s = data.invoiceSummary || {};
+  backupToSheet("Invoices", [
+    {
+      SentAt: new Date().toLocaleString(),
+      InvoiceNumber: s.invoiceNumber || "",
+      Customer: s.customerName || "",
+      Service: s.service || "",
+      Amount: s.amount || "",
+      DueDate: s.dueDate || "",
+      Recipient: data.to || "",
+    },
+  ]);
+}
+
+// GENERIC SHEET BACKUP (action: backupToSheet) — backupToSheet(tab, rows)
+// Creates the tab on first use with headers from the first row's keys,
+// then appends. Idempotent and schema-free.
+function backupToSheet(tab, rows) {
+  if (!tab || !rows || !rows.length) return;
+  if (!CONFIG.SHEET_ID || CONFIG.SHEET_ID.indexOf("YOUR_") === 0) return; // not configured
+  const ss = SpreadsheetApp.openById(CONFIG.SHEET_ID);
+  let sheet = ss.getSheetByName(tab);
+  if (!sheet) {
+    sheet = ss.insertSheet(tab);
+  }
+  if (sheet.getLastRow() === 0) {
+    const headers = Object.keys(rows[0]);
+    sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
+    sheet.getRange(1, 1, 1, headers.length)
+      .setFontWeight("bold")
+      .setBackground("#F0A500")
+      .setFontColor("#0B0F1A");
+    sheet.setFrozenRows(1);
+  }
+  const values = rows.map(function (r) {
+    return Object.keys(rows[0]).map(function (k) {
+      return r[k] === undefined || r[k] === null ? "" : r[k];
+    });
+  });
+  sheet.getRange(sheet.getLastRow() + 1, 1, values.length, values[0].length).setValues(values);
 }
 
 // ─── TEST (run manually in the editor) ───────────────────────
@@ -262,4 +370,25 @@ function testWebhook() {
   };
   handleNotification(sample);
   Logger.log("Test sent to " + CONFIG.ADMIN_EMAIL);
+}
+
+// Test the invoice path from the editor (PDF attached check).
+function testInvoiceEmail() {
+  const pdfBlob = Utilities.newBlob("OKOMBA TEST INVOICE", "application/pdf", "test.pdf");
+  sendInvoiceEmail({
+    to: CONFIG.ADMIN_EMAIL,
+    subject: "Test invoice — PDF attachment check",
+    body: "Test invoice body. A PDF should be attached to this email.",
+    html: "<p>Test <b>invoice</b> body. A PDF should be attached.</p>",
+    base64Pdf: Utilities.base64Encode(pdfBlob.getBytes()),
+    filename: "Okomba_Invoice_TEST.pdf",
+    invoiceSummary: {
+      invoiceNumber: "OKO-TEST-0001",
+      customerName: "Test User",
+      service: "Web Development",
+      amount: "₦250,000",
+      dueDate: "in 14 days",
+    },
+  });
+  Logger.log("Test invoice sent to " + CONFIG.ADMIN_EMAIL);
 }
