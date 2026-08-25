@@ -850,3 +850,29 @@ Stage Summary:
 - Deployment failure root-caused and fixed with a proper full-stack path; repo now deploys to Render in ~10 min (Blueprint) or any Docker host in one command
 - Cloudflare honest guidance: keep domain on CF + proxy to Node host (zero code change), or commission a D1 migration as a separate project
 - User action required: create Render account → New Blueprint → set ADMIN_EMAIL/ADMIN_PASSWORD in dashboard
+
+---
+Task ID: 9
+Agent: main (orchestrator)
+Task: Answer + refix — Google Apps Script email pattern status; reconnect and extend it to all notification types
+
+Work Log:
+- AUDIT: original Code.gs recovered from legacy branch — v1 pattern was: Vite frontend POST → Apps Script webhook → Google Sheets row + admin alert + user confirmation via Gmail (MailApp)
+- HONEST STATUS: the new app had (a) all notification TRIGGERS built and extended to every new feature, (b) a NOTIFY_WEBHOOK_URL forward hook already in deliverOne, (c) but no Apps Script wired in and physical delivery stubbed; ALSO found real bug — notifyNewSubscriber(email) was called WITHOUT the confirm token, so a real welcome email could never have confirmed anyone
+- REFIX IMPLEMENTED:
+  - notify.ts: SubscriberNotificationPayload gains confirmUrl/unsubscribeUrl; welcome body embeds the real confirm link; notifyNewSubscriber(email, links?)
+  - subscribe route: builds absolute links (NEXT_PUBLIC_SITE_URL or request host) and passes them
+  - Google-apps-script/Code.gs v2 (new file in repo): routes all 4 notification types — inquiry.created (admin copy → Sheets + alert; submitter copy → confirmation; distinguished by recipient), subscriber.welcome / post.published / broadcast (Gmail send with brand footer); backward compatible with v1 legacy format; testWebhook() function for editor verification; skips Sheets if SHEET_ID unconfigured
+  - .env.example: NOTIFY_WEBHOOK_URL / NEXT_PUBLIC_SITE_URL / NOTIFICATIONS_ENABLED documented
+  - docs/DEPLOYMENT.md: 15-min Apps Script setup guide + notification matrix table + Gmail quota note
+  - BUGFIX: .env.example was silently ignored by .env* gitignore glob (never actually shipped) — added !.env.example negation, now tracked
+- E2E VERIFIED with local capture server on :9999:
+  - welcome payload: type/recipient/subject/body + confirmUrl + unsubscribeUrl present ✓
+  - inquiry: forwarded TWICE exactly as designed (recipient=insights@okomba.com admin copy; recipient=inquirer submitter copy) ✓
+  - log-only fallback regression-tested (webhook unset → subscribe still works, DB row created) ✓
+  - test data cleaned; lint clean; 16 sections render
+- Committed 79e493a + pushed to GitHub main
+
+Stage Summary:
+- Google Apps Script email pattern is now FULLY reconnected and extended: inquiries (Sheets + dual emails, original behavior), subscriber double-opt-in with working confirm links, post-published blasts, broadcasts — all via the owner's existing free Google stack, all still logged in the admin Email audit
+- User action: deploy Code.gs v2 per docs/DEPLOYMENT.md, set NOTIFY_WEBHOOK_URL on host. Until then site works log-only with zero errors.
