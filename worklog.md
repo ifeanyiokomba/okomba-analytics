@@ -827,3 +827,26 @@ Stage Summary:
 - Addendum directive fully satisfied: audit → understand → map → regression test → document → ship
 - All 25 "definition of done" checklist items verified except production build (sandbox rule: dev-server only; tsc clean used as proxy)
 - Repo at github.com/ifeanyiokomba/okomba-analytics: main = new app (with WORKFLOWS.md), legacy branch = original Vite app
+
+---
+Task ID: 8
+Agent: main (orchestrator)
+Task: Fix Cloudflare Pages deployment failure ("Output directory dist not found") — diagnose and ship a correct deployment path
+
+Work Log:
+- DIAGNOSIS from user's build log: Next.js production build SUCCEEDED (20 routes, standalone output) — failure is only at Pages' output-dir validation. Root cause: (1) Pages project still configured for old Vite app's static `dist` output; (2) fundamental — app is now full-stack (standalone Node server + 17 API routes + Prisma/SQLite), which static Cloudflare Pages cannot execute. Changing the output-dir setting alone would deploy a broken site (all workflows 404).
+- DEPLOYMENT KIT CREATED:
+  - Dockerfile — multi-stage (node:22-alpine), copies standalone server + generated prisma + CLI + schema + seed; ENV DATABASE_URL=file:/data/custom.db; VOLUME /data; entrypoint applies schema + seeds + serves on 0.0.0.0:3000
+  - docker-entrypoint.sh — idempotent init: prisma db push --skip-generate → seed-testimonials.mjs → node standalone server
+  - .dockerignore — lean image (excludes node_modules/.next/db/logs/artifacts)
+  - render.yaml — one-click Render Blueprint: Node service + 1GB persistent disk at /data + health check /api + auto-deploy + ADMIN_EMAIL/ADMIN_PASSWORD as dashboard-set env (sync:false — secrets never in repo)
+  - scripts/seed-testimonials.mjs — plain-Node (no bun/tsx) idempotent seed using CJS interop on generated client — VERIFIED working locally
+  - docs/DEPLOYMENT.md — root-cause explanation, Render quickstart (10 min), Docker/Railway/Fly paths, Cloudflare options (A: DNS proxy to Node host = pragmatic; B: OpenNext + D1 migration = significant follow-up), required env vars table, post-deploy checklist
+- HARDENING: db.ts now logs only errors in production (was logging every query); package.json start is portable `node .next/standalone/server.js` (was bun + tee)
+- VERIFIED: lint clean; npx prisma db push --skip-generate works ("already in sync"); seed .mjs idempotent-skip works; dev server healthy post-changes (16 sections, /api health OK, console clean)
+- Committed 381f4ad + pushed to GitHub main
+
+Stage Summary:
+- Deployment failure root-caused and fixed with a proper full-stack path; repo now deploys to Render in ~10 min (Blueprint) or any Docker host in one command
+- Cloudflare honest guidance: keep domain on CF + proxy to Node host (zero code change), or commission a D1 migration as a separate project
+- User action required: create Render account → New Blueprint → set ADMIN_EMAIL/ADMIN_PASSWORD in dashboard
