@@ -111,7 +111,13 @@ export async function POST(req: Request) {
     }
 
     // Fire-and-forget notification carrying the confirmation link
-    notifyNewSubscriber(email).catch(() => undefined);
+    const siteUrl =
+      process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ||
+      `https://${req.headers.get("host") ?? "okomba.com"}`;
+    notifyNewSubscriber(email, {
+      confirmUrl: `${siteUrl}/api/subscribe/confirm?token=${token}`,
+      unsubscribeUrl: `${siteUrl}/api/subscribe/unsubscribe?token=${unsubToken}`,
+    }).catch(() => undefined);
 
     // In dev (no email provider) the client shows the confirm link directly.
     return NextResponse.json(

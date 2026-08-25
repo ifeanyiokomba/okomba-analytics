@@ -148,3 +148,48 @@ will still fail with `Output directory "dist" not found` — and if it were
 pointed at `.next/standalone` it would deploy a server Pages cannot execute.
 This is not fixable by more pushes. Retire the Pages project (Settings →
 Delete project, or just stop deploying to it) and use a Node host as above.
+
+---
+
+## Email notifications — Google Apps Script (your original pattern, extended)
+
+The original site sent inquiry emails through a Google Apps Script webhook
+(Google Sheets + Gmail). That pattern is **preserved and extended** to every
+notification the new system generates:
+
+| Notification | Trigger | What the script does |
+|---|---|---|
+| `inquiry.created` (admin copy) | Inquiry form submitted | Saves row to **Google Sheets** + emails you the alert |
+| `inquiry.created` (submitter copy) | " | Emails the client a confirmation receipt |
+| `subscriber.welcome` | Newsletter signup | Emails the **double-opt-in confirmation link** |
+| `post.published` | You publish a post | Emails every confirmed subscriber |
+| `broadcast` | Admin → Compose broadcast | Emails your free-form message to subscribers |
+
+Every notification is **also recorded in the admin Email log** regardless —
+the webhook only adds physical delivery.
+
+### Setup (15 minutes, one time)
+
+1. Open [script.google.com](https://script.google.com) → New project → name it **Okomba Webhook**
+2. Paste the contents of **`Google-apps-script/Code.gs`** (in this repo) into the editor
+3. Fill the `CONFIG` block: your Google Sheet ID, admin email, site URL
+4. Run the `testWebhook` function once → authorize Gmail/Sheets access when prompted
+5. **Deploy → New deployment → Web app** — "Execute as: Me", "Who has access: Anyone"
+6. Copy the Web App URL
+7. On Render (or any host) set the environment variable:
+
+   ```
+   NOTIFY_WEBHOOK_URL=https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID/exec
+   ```
+
+8. Redeploy. Test by submitting an inquiry — you should get the admin alert
+   and the row should appear in your Google Sheet.
+
+**Without the webhook**, the site still works perfectly — inquiries and
+subscribers are saved to the database and visible in the admin portal, and
+the Email log shows exactly what *would* have been sent. The webhook simply
+turns the log into real Gmail delivery, using your existing Google stack.
+
+> Gmail quota: Apps Script allows ~100 recipient emails/day on free accounts
+> (1,500 on Workspace). That comfortably covers a growing subscriber list
+> for a long time.

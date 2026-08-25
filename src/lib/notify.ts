@@ -32,6 +32,8 @@ export type SubscriberNotificationPayload = {
   type: "subscriber.welcome";
   email: string;
   receivedAt: string;
+  confirmUrl?: string;
+  unsubscribeUrl?: string;
 };
 
 export type PostPublishedNotificationPayload = {
@@ -104,7 +106,14 @@ function composeBody(payload: NotificationPayload): string {
         `Please confirm your subscription to start receiving our latest posts,`,
         `product updates and field notes from our digital operations work.`,
         ``,
-        `Confirm link will be appended automatically by the caller.`,
+        payload.confirmUrl
+          ? `Confirm your subscription:\n${payload.confirmUrl}`
+          : `Use the confirmation link sent to this address.`,
+        ``,
+        `You will only receive emails you asked for — one-tap unsubscribe is`,
+        `included at the bottom of every message.`,
+        ``,
+        `— Okomba Analytics`,
       ].join("\n");
     case "post.published":
       return [
@@ -209,13 +218,17 @@ export async function notifyNewInquiry(
   }
 }
 
-export async function notifyNewSubscriber(email: string): Promise<void> {
+export async function notifyNewSubscriber(
+  email: string,
+  links?: { confirmUrl?: string; unsubscribeUrl?: string }
+): Promise<void> {
   try {
     await deliverOne(
       {
         type: "subscriber.welcome",
         email,
         receivedAt: new Date().toISOString(),
+        ...links,
       },
       { email }
     );
