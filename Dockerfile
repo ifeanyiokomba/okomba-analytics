@@ -32,24 +32,42 @@ ENV NODE_ENV=production \
     PORT=3000 \
     DATABASE_URL=file:/data/custom.db
 
-# Prisma CLI (runtime dependency) + generated client + schema
-# + standalone server + static assets + public files + seed
+# Install ONLY production deps at runtime. This is necessary because Prisma 6's
+# CLI has transitive runtime deps that live OUTSIDE the `prisma/` and `@prisma/`
+# packages — specifically `@prisma/config` requires `effect`, `c12`,
+# `deepmerge-ts`, `empathic`, and `c12` itself pulls in `chokidar`, `confbox`,
+# `defu`, `dotenv`, `exsolve`, `giget`, `jiti`, `ohash`, `pathe`,
+# `perfect-debounce`, `pkg-types`, `rc9`, each with their own transitive deps.
 #
-# NOTE: we deliberately do NOT `COPY --from=builder .../node_modules/.bin/prisma`
-# here. In a normal `npm install`, `node_modules/.bin/prisma` is a *symlink* →
-# `../prisma/build/index.js`, and Prisma's bundled launcher resolves its
-# `prisma_schema_build_bg.wasm` (and the per-engine `query_compiler_bg.*.wasm`
-# files) via `__dirname`. Docker's `COPY` dereferences symlinks — so copying
-# the symlink would land a *regular file* at `.bin/prisma`, making `__dirname`
-# resolve to `.bin/` instead of `prisma/build/`, and the wasm lookup fails with
-# `ENOENT: ... prisma_schema_build_bg.wasm` (see Render deploy log
-# 2026-08-25T22:30:06Z). We recreate the symlink ourselves below so `npx prisma`
-# (used by docker-entrypoint.sh and render.yaml startCommand) keeps working,
-# AND the entrypoint also calls prisma directly via
-# `node ./node_modules/prisma/build/index.js` as a belt-and-suspenders fallback.
-COPY --from=builder /app/node_modules/prisma ./node_modules/prisma
-COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
-RUN mkdir -p node_modules/.bin && ln -sf ../prisma/build/index.js node_modules/.bin/prisma
+# Our previous "slim" Dockerfile (commits ceb45ad / a9fe579) copied only the
+# `prisma` and `@prisma` packages from the builder — which worked for Prisma 5
+# (no external runtime deps) but broke on Prisma 6 with:
+#     Error: Cannot find module 'effect'
+#     Require stack:
+#     - /app/node_modules/@prisma/config/dist/index.js
+#     - /app/node_modules/prisma/build/index.js
+# (see Render deploy log 2026-08-26T18:19:19Z).
+#
+# Copying each transitive dep piecemeal would be whack-a-mole. `npm install
+# --omit=dev` resolves the full production dep tree (~70 direct deps + all
+# transitive, ~300MB) and creates the `.bin/prisma` symlink via npm's standard
+# bin-linking — so `npx prisma`, `node_modules/.bin/prisma`, AND the entrypoint's
+# `node ./node_modules/prisma/build/index.js` call all work correctly.
+#
+# `--no-package-lock` because the project ships `bun.lock` (not
+# `package-lock.json`) — Render's Node runtime ships npm, not bun, so we let npm
+# resolve fresh (no lockfile to drive `npm ci`).
+#
+# This install is SOLELY for the Prisma CLI invocation in docker-entrypoint.sh
+# (`prisma db push`). The Next.js standalone server in `.next/standalone/`
+# has its own bundled `node_modules/` (Next.js traces imports at build time and
+# inlines them there) — it does NOT depend on this top-level install.
+COPY package.json ./
+RUN npm install --omit=dev --no-audit --no-fund --no-package-lock
+
+# Generated Prisma client (self-contained at src/generated/prisma/ — no
+# external deps per its package.json) + schema + standalone Next.js server
+# (has its own bundled node_modules) + seed script.
 COPY --from=builder /app/src/generated ./src/generated
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/.next/standalone ./.next/standalone
