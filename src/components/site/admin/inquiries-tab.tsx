@@ -14,6 +14,7 @@ import {
   Loader2,
   Search,
   SearchX,
+  Sparkles,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { exportInquiriesCsv } from "@/lib/csv-export";
@@ -297,6 +298,14 @@ export function InquiriesTab({
                       />
                     </button>
                     <p className="mt-0.5 text-[11.5px] text-muted-foreground">{i.email}</p>
+                    {i.source === "ai_chat" && (
+                      <span
+                        title="Lead captured by the AI Service Finder widget"
+                        className="mt-1 inline-flex items-center gap-1 rounded-full border border-purple-400/35 bg-purple-400/10 px-2 py-0.5 font-mono text-[9px] uppercase tracking-wider text-purple-300"
+                      >
+                        <Sparkles size={9} aria-hidden="true" /> AI chat
+                      </span>
+                    )}
                     {i.whatsapp && <p className="text-[11px] text-muted-foreground/70">WA: {i.whatsapp}</p>}
                   </td>
                   <td className="px-6 py-4">

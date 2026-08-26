@@ -1,8 +1,11 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ArrowLeft,
+  BarChart3,
+  BellRing,
+  CreditCard,
   FileSignature,
   FileText,
   Inbox,
@@ -10,6 +13,7 @@ import {
   Loader2,
   LogOut,
   Mail,
+  MessageCircle,
   MessageSquareQuote,
   RefreshCw,
   Send,
@@ -32,25 +36,42 @@ import { PostsTab } from "./posts-tab";
 import { TestimonialsTab } from "./testimonials-tab";
 import { EmailLogTab } from "./email-log-tab";
 import { InvoicesTab } from "./invoices-tab";
+import { WhatsAppTab } from "./whatsapp-tab";
+import { PaymentsTab } from "./payments-tab";
+import { AnalyticsTab } from "./analytics-tab";
 import { ProposalComposerDialog } from "./proposal-composer-dialog";
-import type { EmailLog, Inquiry, Invoice, Stats, Subscriber } from "./types";
+import type {
+  DraftProposalRow,
+  EmailLog,
+  Inquiry,
+  Invoice,
+  Stats,
+  Subscriber,
+  WhatsAppServiceStatus,
+} from "./types";
 
 type Tab =
   | "overview"
   | "inquiries"
   | "proposals"
+  | "payments"
+  | "analytics"
   | "subscribers"
   | "posts"
   | "testimonials"
+  | "whatsapp"
   | "email";
 
 const TABS: { id: Tab; label: string; icon: typeof Inbox }[] = [
   { id: "overview", label: "Overview", icon: LayoutDashboard },
   { id: "inquiries", label: "Inquiries", icon: Inbox },
   { id: "proposals", label: "Proposals", icon: FileSignature },
+  { id: "payments", label: "Payments", icon: CreditCard },
+  { id: "analytics", label: "Analytics", icon: BarChart3 },
   { id: "subscribers", label: "Subscribers", icon: Users },
   { id: "posts", label: "Posts", icon: FileText },
   { id: "testimonials", label: "Testimonials", icon: MessageSquareQuote },
+  { id: "whatsapp", label: "WhatsApp", icon: MessageCircle },
   { id: "email", label: "Email log", icon: Mail },
 ];
 
@@ -70,6 +91,7 @@ export function AdminDashboard({
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
   const [emailLogs, setEmailLogs] = useState<EmailLog[]>([]);
   const [invoices, setInvoices] = useState<Invoice[]>([]);
+  const [drafts, setDrafts] = useState<DraftProposalRow[]>([]);
   const [stats, setStats] = useState<Stats | null>(null);
 
   // Loading / error
@@ -89,6 +111,7 @@ export function AdminDashboard({
   >(null);
   const [showBroadcast, setShowBroadcast] = useState(false);
   const [composing, setComposing] = useState<Inquiry | null>(null);
+  const [composingDraft, setComposingDraft] = useState<DraftProposalRow | null>(null);
 
   // Toast (simple inline notification for action feedback)
   const [toast, setToast] = useState<{ text: string; type: "ok" | "err" } | null>(null);
@@ -98,11 +121,47 @@ export function AdminDashboard({
     return () => clearTimeout(t);
   }, [toast]);
 
+  const notify = useCallback((text: string, type: "ok" | "err" = "ok") => {
+    setToast({ text, type });
+  }, []);
+
+  /* ── WhatsApp live status (Module 6) ─────────────────── */
+  const [waStatus, setWaStatus] = useState<WhatsAppServiceStatus | null>(null);
+  const prevWaRef = useRef<WhatsAppServiceStatus | null>(null);
+
+  useEffect(() => {
+    let alive = true;
+    const check = async () => {
+      try {
+        const res = await fetch("/api/admin/whatsapp/status");
+        if (!res.ok) return;
+        const j = await res.json();
+        const s = (j.status ?? null) as WhatsAppServiceStatus | null;
+        if (!alive || !s) return;
+        const prev = prevWaRef.current;
+        prevWaRef.current = s;
+        setWaStatus(s);
+        // Spec toast: session drop → "WhatsApp disconnected. Scan QR again"
+        if (prev?.status === "connected" && s.status === "disconnected") {
+          setToast({ text: "WhatsApp disconnected. Scan QR again", type: "err" });
+        }
+      } catch {
+        /* service offline — badge shows "No service" */
+      }
+    };
+    void check();
+    const t = setInterval(check, 20000);
+    return () => {
+      alive = false;
+      clearInterval(t);
+    };
+  }, []);
+
   /* ── Data loader ─────────────────────────────────────────── */
   const load = useCallback(async () => {
     setError(null);
     try {
-      const [listRes, statsRes, subsRes, postsRes, logRes, testimonialsRes, invoicesRes] = await Promise.all([
+      const [listRes, statsRes, subsRes, postsRes, logRes, testimonialsRes, invoicesRes, draftsRes] = await Promise.all([
         fetch("/api/inquiries"),
         fetch("/api/inquiries?stats=1"),
         fetch("/api/subscribers"),
@@ -110,6 +169,7 @@ export function AdminDashboard({
         fetch("/api/admin/email-log?limit=50"),
         fetch("/api/admin/testimonials"),
         fetch("/api/admin/invoices"),
+        fetch("/api/admin/proposal-drafts"),
       ]);
       if (!listRes.ok || !statsRes.ok) throw new Error("Failed to load data — session may have expired");
       const list = await listRes.json();
@@ -136,6 +196,10 @@ export function AdminDashboard({
       if (invoicesRes.ok) {
         const inv = await invoicesRes.json();
         setInvoices(inv.invoices ?? []);
+      }
+      if (draftsRes.ok) {
+        const d = await draftsRes.json();
+        setDrafts(d.drafts ?? []);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load");
@@ -345,6 +409,69 @@ export function AdminDashboard({
     onLogout();
   };
 
+  /* ── Module 5: manual reminder scan ───────────────────── */
+  const [runningReminders, setRunningReminders] = useState(false);
+  const runReminders = useCallback(async () => {
+    setRunningReminders(true);
+    try {
+      const res = await fetch("/api/admin/reminders/run", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({}),
+      });
+      const j = await res.json().catch(() => null);
+      if (!res.ok || !j?.ok) throw new Error(j?.error ?? "Scan failed");
+      const r = j.report as {
+        sentCount: number;
+        skipped: unknown[];
+        lagosToday: string;
+      };
+      notify(
+        r.sentCount > 0
+          ? `Reminder scan — ${r.sentCount} nudges sent (email + WhatsApp, PDF attached)`
+          : `Reminder scan — nothing due today (${r.lagosToday})`,
+        "ok"
+      );
+      await load();
+    } catch (err) {
+      notify(err instanceof Error ? err.message : "Reminder scan failed", "err");
+    } finally {
+      setRunningReminders(false);
+    }
+  }, [load, notify]);
+
+  /* ── Module 7: AI-chat draft proposal handlers ──── */
+  const openDraft = useCallback(
+    (draft: DraftProposalRow) => {
+      const inquiry = inquiries.find((i) => i.id === draft.inquiryId) ?? null;
+      if (!inquiry) {
+        notify("Linked inquiry not found — it may have been removed.", "err");
+        return;
+      }
+      setComposingDraft(draft);
+      setComposing(inquiry);
+    },
+    [inquiries, notify]
+  );
+
+  const discardDraft = useCallback(
+    async (id: string) => {
+      try {
+        const res = await fetch("/api/admin/proposal-drafts", {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id }),
+        });
+        if (!res.ok) throw new Error("Discard failed");
+        notify("Draft discarded", "ok");
+        await load();
+      } catch {
+        notify("Could not discard draft", "err");
+      }
+    },
+    [load, notify]
+  );
+
   /* ── Derived data for overview ──────────────────────────── */
   const recentInquiries = useMemo(
     () =>
@@ -435,13 +562,17 @@ export function AdminDashboard({
             const badge =
               t.id === "inquiries"
                 ? stats?.new
-                : t.id === "subscribers"
-                  ? confirmedSubs
-                  : t.id === "posts"
-                    ? posts.filter((p) => p.status === "draft").length
-                    : t.id === "testimonials"
-                      ? testimonials.filter((t2) => t2.status === "draft").length
-                      : undefined;
+                : t.id === "proposals"
+                  ? drafts.filter((d) => d.status === "draft").length
+                  : t.id === "subscribers"
+                    ? confirmedSubs
+                    : t.id === "posts"
+                      ? posts.filter((p) => p.status === "draft").length
+                      : t.id === "testimonials"
+                        ? testimonials.filter((t2) => t2.status === "draft").length
+                        : undefined;
+            const waDot =
+              t.id === "whatsapp" ? (waStatus?.status ?? "unknown") : null;
             return (
               <button
                 key={t.id}
@@ -456,6 +587,22 @@ export function AdminDashboard({
               >
                 <Icon size={14} aria-hidden="true" />
                 <span>{t.label}</span>
+                {waDot && (
+                  <span
+                    aria-label={`WhatsApp ${waDot}`}
+                    title={`WhatsApp ${waDot}`}
+                    className={cn(
+                      "h-1.5 w-1.5 rounded-full",
+                      waDot === "connected"
+                        ? "bg-teal"
+                        : waDot === "connecting"
+                          ? "animate-pulse bg-gold"
+                          : waDot === "disconnected"
+                            ? "bg-red-400"
+                            : "bg-white/25"
+                    )}
+                  />
+                )}
                 {badge !== undefined && badge > 0 && (
                   <span
                     className={cn(
@@ -521,6 +668,7 @@ export function AdminDashboard({
                 onOpenService={(svc) => setDetailService(svc)}
                 onCreateProposal={(i) => {
                   setDetailInquiry(null);
+                  setComposingDraft(null);
                   setComposing(i);
                 }}
               />
@@ -530,8 +678,17 @@ export function AdminDashboard({
                 invoices={invoices}
                 loading={false}
                 onCreateFromInquiries={() => setTab("inquiries")}
+                onRunReminders={runReminders}
+                runningReminders={runningReminders}
+                drafts={drafts}
+                onOpenDraft={openDraft}
+                onDiscardDraft={(id) => void discardDraft(id)}
               />
             )}
+            {tab === "payments" && (
+              <PaymentsTab invoices={invoices} notify={notify} />
+            )}
+            {tab === "analytics" && <AnalyticsTab />}
             {tab === "subscribers" && (
               <SubscribersTab
                 subscribers={subscribers}
@@ -561,6 +718,9 @@ export function AdminDashboard({
                 onDelete={deleteTestimonial}
                 deletingId={deletingTestimonialId}
               />
+            )}
+            {tab === "whatsapp" && (
+              <WhatsAppTab notify={notify} onMessagesChanged={load} />
             )}
             {tab === "email" && (
               <EmailLogTab logs={emailLogs} loading={false} total={emailLogs.length} />
@@ -614,7 +774,12 @@ export function AdminDashboard({
       )}
       <ProposalComposerDialog
         inquiry={composing}
-        onClose={() => setComposing(null)}
+        preloadedDraft={composingDraft?.draft ?? null}
+        draftProposalId={composingDraft?.id ?? null}
+        onClose={() => {
+          setComposing(null);
+          setComposingDraft(null);
+        }}
         onSent={({ invoiceNumber, emailSent }) => {
           setComposing(null);
           setToast({

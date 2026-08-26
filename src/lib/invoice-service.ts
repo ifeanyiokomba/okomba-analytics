@@ -11,8 +11,11 @@ import { db } from "@/lib/db";
 import { createInvoiceDva } from "@/lib/paystack";
 import { generateProposalPdf } from "@/lib/pdf/proposal-pdf";
 import { sendProposalEmail } from "@/lib/notify";
+import { dispatchWhatsApp } from "@/lib/whatsapp";
 import type { ProposalDraft } from "@/lib/proposal";
 import { DVA_ACCOUNT_NAME } from "@/lib/brand";
+import { generatePortalToken, portalUrlFor } from "@/lib/portal";
+import { uploadProposalPdf } from "@/lib/cloudinary";
 
 export type SendProposalInput = {
   inquiryId: string;
@@ -69,6 +72,7 @@ export async function sendProposal(input: SendProposalInput): Promise<SendPropos
 
   const invoiceNumber = await nextInvoiceNumber();
   const now = new Date();
+  const secureToken = generatePortalToken();
 
   // 1. Paystack Dedicated Virtual Account (real or sandbox fallback)
   const dva = await createInvoiceDva({
@@ -99,6 +103,10 @@ export async function sendProposal(input: SendProposalInput): Promise<SendPropos
   const pdfBase64 = pdfBuffer.toString("base64");
   const pdfFilename = `Okomba_Proposal_${invoiceNumber}.pdf`;
 
+  // 2b. Upload to Cloudinary (Module 8B) — falls back to local storage
+  //     when unconfigured; never breaks the send pipeline.
+  const cloudUpload = await uploadProposalPdf(invoiceNumber, pdfBuffer);
+
   // 3. Persist the invoice row (status: sent)
   const invoice = await db.invoice.create({
     data: {
@@ -117,9 +125,13 @@ export async function sendProposal(input: SendProposalInput): Promise<SendPropos
       status: "sent",
       dvaAccountNumber: dva.accountNumber,
       dvaBankName: dva.bankName,
+      secureToken,
+      pdfUrl: cloudUpload.url,
+      pdfStorage: cloudUpload.storage,
       sentAt: now,
     },
   });
+  const portalUrl = portalUrlFor(secureToken);
 
   // 4. Email with the PDF attached (subject fixed by spec)
   const emailResult = await sendProposalEmail({
@@ -138,6 +150,7 @@ export async function sendProposal(input: SendProposalInput): Promise<SendPropos
     dvaAccountName: dva.accountName || DVA_ACCOUNT_NAME,
     pdfBase64,
     pdfFilename,
+    portalUrl,
   });
 
   // 5. Nudge the inquiry into "contacted" once a proposal went out
@@ -186,46 +199,29 @@ export async function sendProposal(input: SendProposalInput): Promise<SendPropos
     console.error("[invoice-service] scheduling reminders failed:", err);
   }
 
-  // 7. Queue the WhatsApp caption (spec text) — dispatched by the
-  //    WhatsApp mini-service (Module 6) when connected.
+  // 7. Queue + dispatch the WhatsApp caption (spec text) through the
+  //    shared helper — the row lands in whatsapp_messages so it shows
+  //    in the admin chat widget, and the mini-service transports it
+  //    when connected (queued + flushed on reconnect otherwise).
+  //    Module 8B: when Cloudinary uploaded OK, send the link (no bytes);
+  //    otherwise keep the base64 attachment behaviour.
   const caption = `Hi ${inquiry.name.split(" ")[0]}, here is your proposal and invoice from Okomba Analytics`;
   const waPhone = inquiry.whatsapp ?? inquiry.phone ?? null;
   let whatsappQueued = false;
   if (waPhone) {
     try {
-      await db.whatsAppMessage.create({
-        data: {
-          direction: "outbound",
-          toPhone: waPhone,
-          messageText: caption,
-          mediaFilename: pdfFilename,
-          relatedInvoiceId: invoice.id,
-        },
+      const wa = await dispatchWhatsApp({
+        to: waPhone,
+        caption,
+        pdfBase64: cloudUpload.storage === "cloudinary" ? null : pdfBase64,
+        pdfUrl: cloudUpload.storage === "cloudinary" ? cloudUpload.url : null,
+        filename: pdfFilename,
+        invoiceId: invoice.id,
+        source: "proposal",
       });
-      whatsappQueued = true;
+      whatsappQueued = wa.status === "sent" || wa.status === "queued";
     } catch (err) {
-      console.error("[invoice-service] whatsapp queue failed:", err);
-    }
-
-    // Best-effort immediate dispatch if the WhatsApp mini-service is up
-    const waUrl = process.env.WHATSAPP_SERVICE_URL;
-    if (waUrl) {
-      try {
-        await fetch(`${waUrl.replace(/\/$/, "")}/send`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            to: waPhone,
-            caption,
-            pdfBase64,
-            filename: pdfFilename,
-            invoiceId: invoice.id,
-          }),
-          signal: AbortSignal.timeout(12000),
-        });
-      } catch {
-        /* stays queued — Module 6 retries */
-      }
+      console.error("[invoice-service] whatsapp dispatch failed:", err);
     }
   }
 

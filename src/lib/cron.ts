@@ -1,16 +1,19 @@
 import cron from "node-cron";
 
 /**
- * Background jobs (Phase-1 Module 1).
+ * Background jobs.
  *
  * Library choice (2026): node-cron — zero-infrastructure in-process
  * scheduling. Heavier queues (BullMQ + Redis) only pay off with
  * multi-instance deploys; this app is a single Node host (Render),
  * so node-cron is the right-sized tool.
  *
- * Anti-sleep: free-tier hosts idle sleeping services; a 9-minute
- * self-ping keeps the instance warm. UptimeRobot (external) is the
- * belt-and-braces option — see docs/DEPLOYMENT.md.
+ * Jobs:
+ *   1. Anti-sleep self-ping (Phase-1 Module 1) — free-tier hosts idle
+ *      sleeping services; a 9-minute self-ping keeps the instance warm.
+ *   2. Payment reminders (Phase-2 Module 5) — daily 09:00 Africa/Lagos.
+ *      Nudges customers 3 days before due, on the due date, and 1 day
+ *      overdue — email + WhatsApp, PDF re-attached every time.
  */
 
 let started = false;
@@ -27,12 +30,62 @@ export function startCronJobs(): void {
     const expr = process.env.CRON_SELF_PING_EXPR || "0 */9 * * * *"; // every 9 min
     if (!cron.validate(expr)) {
       console.error(`[cron] invalid CRON_SELF_PING_EXPR: ${expr}`);
+    } else {
+      cron.schedule(expr, () => {
+        void pingHealthOnce(base);
+      });
+      console.log(`[cron] anti-sleep self-ping scheduled (${expr}) → ${base}/api/health`);
+    }
+  }
+
+  /* ── Module 5: daily reminder scan, 09:00 Africa/Lagos ── */
+  if (process.env.REMINDER_CRON_ENABLED !== "false") {
+    const expr = process.env.REMINDER_CRON_EXPR || "0 9 * * *"; // 09:00 daily
+    if (!cron.validate(expr)) {
+      console.error(`[cron] invalid REMINDER_CRON_EXPR: ${expr}`);
       return;
     }
-    cron.schedule(expr, () => {
-      void pingHealthOnce(base);
-    });
-    console.log(`[cron] anti-sleep self-ping scheduled (${expr}) → ${base}/api/health`);
+    cron.schedule(
+      expr,
+      async () => {
+        try {
+          const { runReminderScan } = await import("@/lib/reminders");
+          const report = await runReminderScan({ trigger: "cron" });
+          console.log(
+            `[cron] reminder scan — ${report.sentCount} sent, ${report.skipped.length} skipped (${report.lagosToday})`
+          );
+        } catch (err) {
+          console.error("[cron] reminder scan failed:", err);
+        }
+      },
+      { timezone: "Africa/Lagos" }
+    );
+    console.log(`[cron] payment reminders scheduled (${expr} Africa/Lagos)`);
+  }
+
+  /* ── Module 8B: daily 02:00 WAT database backup ── */
+  if (process.env.BACKUP_CRON_ENABLED !== "false") {
+    const expr = process.env.BACKUP_CRON_EXPR || "0 2 * * *"; // 02:00 daily
+    if (!cron.validate(expr)) {
+      console.error(`[cron] invalid BACKUP_CRON_EXPR: ${expr}`);
+    } else {
+      cron.schedule(
+        expr,
+        async () => {
+          try {
+            const { runDbBackup } = await import("@/lib/backup");
+            const r = await runDbBackup({ trigger: "cron" });
+            console.log(
+              `[cron] db backup — ${r.ok ? "ok" : "FAILED"} (${r.target}, ${r.fileName}, ${Math.max(1, Math.round(r.sizeBytes / 1024))} KB)`
+            );
+          } catch (err) {
+            console.error("[cron] db backup failed:", err);
+          }
+        },
+        { timezone: "Africa/Lagos" }
+      );
+      console.log(`[cron] daily db backup scheduled (${expr} Africa/Lagos)`);
+    }
   }
 }
 

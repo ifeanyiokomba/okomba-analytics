@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 
 /**
  * Floating back-to-top button — appears after scrolling past the hero,
- * sits above the bottom-right corner, respects the success toast area.
+ * sits above the AI chat launcher in the bottom-right corner (Module 7).
  */
 export function BackToTop() {
   const [visible, setVisible] = useState(false);
@@ -23,7 +23,7 @@ export function BackToTop() {
       onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
       aria-label="Back to top"
       className={cn(
-        "fixed bottom-6 right-6 z-[70] flex h-11 w-11 items-center justify-center rounded-2xl border border-gold/40 bg-white/90 text-gold shadow-gold backdrop-blur-xl transition-all duration-300",
+        "fixed bottom-[5.75rem] right-6 z-[70] flex h-11 w-11 items-center justify-center rounded-2xl border border-gold/40 bg-white/90 text-gold shadow-gold backdrop-blur-xl transition-all duration-300",
         visible
           ? "translate-y-0 opacity-100"
           : "pointer-events-none translate-y-4 opacity-0"

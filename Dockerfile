@@ -34,9 +34,22 @@ ENV NODE_ENV=production \
 
 # Prisma CLI (runtime dependency) + generated client + schema
 # + standalone server + static assets + public files + seed
+#
+# NOTE: we deliberately do NOT `COPY --from=builder .../node_modules/.bin/prisma`
+# here. In a normal `npm install`, `node_modules/.bin/prisma` is a *symlink* →
+# `../prisma/build/index.js`, and Prisma's bundled launcher resolves its
+# `prisma_schema_build_bg.wasm` (and the per-engine `query_compiler_bg.*.wasm`
+# files) via `__dirname`. Docker's `COPY` dereferences symlinks — so copying
+# the symlink would land a *regular file* at `.bin/prisma`, making `__dirname`
+# resolve to `.bin/` instead of `prisma/build/`, and the wasm lookup fails with
+# `ENOENT: ... prisma_schema_build_bg.wasm` (see Render deploy log
+# 2026-08-25T22:30:06Z). We recreate the symlink ourselves below so `npx prisma`
+# (used by docker-entrypoint.sh and render.yaml startCommand) keeps working,
+# AND the entrypoint also calls prisma directly via
+# `node ./node_modules/prisma/build/index.js` as a belt-and-suspenders fallback.
 COPY --from=builder /app/node_modules/prisma ./node_modules/prisma
 COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
-COPY --from=builder /app/node_modules/.bin/prisma ./node_modules/.bin/prisma
+RUN mkdir -p node_modules/.bin && ln -sf ../prisma/build/index.js node_modules/.bin/prisma
 COPY --from=builder /app/src/generated ./src/generated
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/.next/standalone ./.next/standalone

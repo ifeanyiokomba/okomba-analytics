@@ -1,0 +1,17 @@
+{
+  "name": "okomba-whatsapp-service",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "WhatsApp transport mini-service (whatsapp-web.js) for Okomba Analytics — Module 6",
+  "scripts": {
+    "dev": "node --watch index.js",
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "qrcode": "^1.5.4",
+    "socket.io": "^4.8.3",
+    "whatsapp-web.js": "^1.15.17"
+  }
+}

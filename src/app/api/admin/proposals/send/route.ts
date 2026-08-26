@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { db } from "@/lib/db";
 import { isAdminAuthorized } from "@/lib/admin-auth";
 import { isProposalDraftValid } from "@/lib/proposal";
 import { sendProposal } from "@/lib/invoice-service";
@@ -45,6 +46,7 @@ const schema = z.object({
   durationLabel: z.string().trim().max(60).optional().or(z.literal("")),
   dueDate: z.string().optional().or(z.literal("")),
   description: z.string().trim().max(2000).optional().or(z.literal("")),
+  draftProposalId: z.string().optional(), // Module 7: mark the AI-chat draft as sent
 });
 
 export async function POST(req: Request) {
@@ -97,6 +99,13 @@ export async function POST(req: Request) {
       dueDate,
       description: d.description || null,
     });
+
+    // Module 7: the AI-chat draft this proposal came from is now sent
+    if (result.ok && d.draftProposalId) {
+      await db.draftProposal
+        .update({ where: { id: d.draftProposalId }, data: { status: "sent" } })
+        .catch(() => {});
+    }
 
     const status = result.ok ? 200 : 502;
     return NextResponse.json(result, { status });

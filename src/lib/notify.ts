@@ -430,6 +430,159 @@ export async function notifyBroadcast(
 }
 
 /* ─────────────────────────────────────────────────────────────
+   Payment reminder email (Phase-2 Module 5). Re-attaches the
+   proposal+invoice PDF. Subject format is fixed by spec:
+   "Reminder: Invoice #INV-xxxx Due {date}"
+   ───────────────────────────────────────────────────────────── */
+export type ReminderEmailPayload = {
+  invoiceId: string;
+  invoiceNumber: string;
+  kind: "friendly" | "due" | "overdue";
+  customerName: string;
+  customerEmail: string;
+  service: string;
+  amountNaira: number;
+  dueLabel: string; // "14 February 2026"
+  dueDate?: string | null;
+  dvaAccountNumber?: string | null;
+  dvaBankName?: string | null;
+  dvaAccountName?: string | null;
+  bodyText: string; // AI-refined body prose
+  pdfBase64: string;
+  pdfFilename: string;
+  portalUrl?: string | null; // Module 8A — /portal/{secureToken} link
+};
+
+const REMINDER_TYPE: Record<ReminderEmailPayload["kind"], string> = {
+  friendly: "invoice.reminder_3d",
+  due: "invoice.reminder_due",
+  overdue: "invoice.reminder_overdue",
+};
+
+export async function sendReminderEmail(
+  rem: ReminderEmailPayload
+): Promise<{ ok: boolean; error?: string }> {
+  if (!enabled) return { ok: false, error: "notifications disabled" };
+
+  const fmtNaira = (n: number) =>
+    `\u20A6${n.toLocaleString("en-NG", { maximumFractionDigits: 0 })}`;
+
+  // Exact subject per spec
+  const subject = `Reminder: Invoice #${rem.invoiceNumber} Due ${rem.dueLabel}`;
+
+  const body = [
+    rem.bodyText,
+    ``,
+    `Invoice:  ${rem.invoiceNumber}`,
+    `Amount:   ${fmtNaira(rem.amountNaira)}`,
+    `Due date: ${rem.dueLabel}`,
+    ...(rem.dvaAccountNumber
+      ? [
+          ``,
+          `Pay by bank transfer to:`,
+          `  Bank:    ${rem.dvaBankName ?? ""}`,
+          `  Account: ${rem.dvaAccountNumber}`,
+          `  Name:    ${rem.dvaAccountName ?? "Okomba Analytics"}`,
+        ]
+      : []),
+    ``,
+    ...(rem.portalUrl ? [`View your proposal: ${rem.portalUrl}`, ``] : []),
+    `The PDF attached to this email contains the full proposal, invoice and`,
+    `payment details for your records.`,
+  ].join("\n");
+
+  const html = brandedEmailHtml({
+    title: `Reminder — ${rem.invoiceNumber}`,
+    preheader: `${fmtNaira(rem.amountNaira)} · due ${rem.dueLabel}`,
+    blocks: [
+      { kind: "text", text: rem.bodyText },
+      {
+        kind: "kv",
+        rows: [
+          ["Invoice", rem.invoiceNumber],
+          ["Amount", fmtNaira(rem.amountNaira)],
+          ["Due date", rem.dueLabel],
+        ],
+      },
+      ...(rem.dvaAccountNumber
+        ? ([
+            {
+              kind: "text",
+              text: `Pay by bank transfer:\nBank: ${rem.dvaBankName ?? ""}\nAccount: ${rem.dvaAccountNumber}\nAccount name: ${rem.dvaAccountName ?? "Okomba Analytics"}`,
+            },
+          ] as EmailBlock[])
+        : []),
+      { kind: "text", text: "The PDF attached to this email contains the full proposal, invoice and payment details." },
+    ],
+    ...(rem.portalUrl ? { ctaText: "View & pay in your portal", ctaUrl: rem.portalUrl } : {}),
+    footerNote: "Already paid? Reply to this email and we will confirm right away.",
+  });
+
+  // Audit row (sent_emails contract)
+  try {
+    await db.emailLog.create({
+      data: {
+        type: REMINDER_TYPE[rem.kind],
+        recipientEmail: rem.customerEmail,
+        subject,
+        status: "sent",
+        bodyText: body,
+        bodyHtml: html,
+        attachments: JSON.stringify([{ filename: rem.pdfFilename, size: rem.pdfBase64.length }]),
+        invoiceId: rem.invoiceId,
+      },
+    });
+  } catch (err) {
+    console.error("[notify:reminder] log persist failed:", err);
+  }
+
+  // Real delivery via Google Apps Script (same action as proposals —
+  // attaches the base64 PDF, never a link)
+  const webhookUrl = process.env.NOTIFY_WEBHOOK_URL;
+  if (!webhookUrl) {
+    console.info(
+      `[notify:reminder] stub — ${rem.invoiceNumber} (${rem.kind}) to ${rem.customerEmail} (${rem.pdfFilename})`
+    );
+    return { ok: true };
+  }
+  try {
+    const res = await fetch(webhookUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "sendInvoiceEmail",
+        to: rem.customerEmail,
+        subject,
+        body,
+        html,
+        base64Pdf: rem.pdfBase64,
+        filename: rem.pdfFilename,
+        invoiceSummary: {
+          invoiceNumber: rem.invoiceNumber,
+          customerName: rem.customerName,
+          service: rem.service,
+          amount: fmtNaira(rem.amountNaira),
+          dueDate: rem.dueLabel,
+        },
+      }),
+      signal: AbortSignal.timeout(30000),
+    });
+    if (!res.ok) throw new Error(`webhook responded ${res.status}`);
+    return { ok: true };
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "webhook delivery failed";
+    console.error("[notify:reminder] delivery failed:", msg);
+    try {
+      await db.emailLog.updateMany({
+        where: { invoiceId: rem.invoiceId, type: REMINDER_TYPE[rem.kind], status: "sent" },
+        data: { status: "failed", error: msg },
+      });
+    } catch {}
+    return { ok: false, error: msg };
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────
    Proposal + invoice email (Phase-2 Module 4). Sends a branded
    HTML email with the PDF ATTACHED (never a link) via the Google
    Apps Script engine.
@@ -452,6 +605,7 @@ export type InvoiceEmailPayload = {
   dvaAccountName?: string | null;
   pdfBase64: string; // raw PDF bytes, base64-encoded
   pdfFilename: string; // Okomba_Proposal_{invoiceNumber}.pdf
+  portalUrl?: string | null; // Module 8A — /portal/{secureToken} link
 };
 
 export async function sendProposalEmail(
@@ -478,6 +632,7 @@ export async function sendProposalEmail(
     `Thank you for choosing Okomba Analytics. Your proposal and invoice`,
     `are attached to this email as a single PDF document.`,
     ``,
+    ...(inv.portalUrl ? [`View your proposal: ${inv.portalUrl}`, ``] : []),
     `Invoice:  ${inv.invoiceNumber}`,
     `Service:  ${inv.service}`,
     `Amount:   ${fmtNaira(inv.amountNaira)}`,
@@ -527,6 +682,9 @@ export async function sendProposalEmail(
       ...(inv.description ? ([{ kind: "text", text: inv.description }] as EmailBlock[]) : []),
       { kind: "text", text: "The PDF attached to this email is your official proposal and invoice." },
     ],
+    ...(inv.portalUrl
+      ? { ctaText: "View your proposal online", ctaUrl: inv.portalUrl }
+      : {}),
     footerNote: "Questions about this proposal? Reply to this email or reach us on WhatsApp.",
   });
 
@@ -595,6 +753,267 @@ export async function sendProposalEmail(
     try {
       await db.emailLog.updateMany({
         where: { invoiceId: inv.invoiceId, type: "invoice.sent", status: "sent" },
+        data: { status: "failed", error: msg },
+      });
+    } catch {}
+    return { ok: false, error: msg };
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Admin alert email (Phase-2 Module 8) — internal operational
+   alerts: Cloudinary failures, backup failures, payment-proof
+   uploads. Rate-limited per key so a repeat incident never spams.
+   ───────────────────────────────────────────────────────────── */
+export type AdminAlertPayload = {
+  key: string; // dedupe/rate-limit key, e.g. "cloudinary.unconfigured"
+  subject: string;
+  bodyText: string;
+  blocks?: EmailBlock[];
+  ctaText?: string;
+  ctaUrl?: string;
+};
+
+const ALERT_COOLDOWN_MS = 60 * 60 * 1000; // 1 hour
+const alertLastSent = new Map<string, number>();
+
+export function adminAlertRecipient(): string {
+  return process.env.ADMIN_EMAIL || "support@okomba.com";
+}
+
+export async function sendAdminAlertEmail(p: AdminAlertPayload): Promise<{ ok: boolean; skipped?: boolean }> {
+  if (!enabled) return { ok: false, skipped: true };
+
+  const last = alertLastSent.get(p.key) ?? 0;
+  if (Date.now() - last < ALERT_COOLDOWN_MS) return { ok: true, skipped: true };
+  alertLastSent.set(p.key, Date.now());
+
+  const blocks: EmailBlock[] = p.blocks?.length
+    ? p.blocks
+    : [{ kind: "text", text: p.bodyText }];
+
+  const html = brandedEmailHtml({
+    title: p.subject,
+    preheader: p.bodyText.split("\n")[0]?.slice(0, 120) ?? p.subject,
+    blocks,
+    ...(p.ctaText && p.ctaUrl ? { ctaText: p.ctaText, ctaUrl: p.ctaUrl } : {}),
+    footerNote: "Automated operational alert from the Okomba Analytics platform.",
+  });
+
+  const to = adminAlertRecipient();
+
+  // Audit row
+  try {
+    await db.emailLog.create({
+      data: {
+        type: "system.alert",
+        recipientEmail: to,
+        subject: p.subject,
+        status: "sent",
+        bodyText: p.bodyText,
+        bodyHtml: html,
+      },
+    });
+  } catch (err) {
+    console.error("[notify:admin-alert] log persist failed:", err);
+  }
+
+  const webhookUrl = process.env.NOTIFY_WEBHOOK_URL;
+  if (!webhookUrl) {
+    console.info(`[notify:admin-alert] stub — ${p.subject} → ${to}`);
+    return { ok: true };
+  }
+  try {
+    const res = await fetch(webhookUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "sendEmail",
+        to,
+        subject: p.subject,
+        body: p.bodyText,
+        html,
+        attachments: [],
+      }),
+      signal: AbortSignal.timeout(15000),
+    });
+    if (!res.ok) throw new Error(`webhook responded ${res.status}`);
+    return { ok: true };
+  } catch (err) {
+    console.error("[notify:admin-alert] delivery failed:", err instanceof Error ? err.message : err);
+    return { ok: false };
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Payment proof uploaded alert (Module 8A "I've Paid" button).
+   ───────────────────────────────────────────────────────────── */
+export async function notifyPaymentProofUploaded(a: {
+  invoiceNumber: string;
+  customerName: string;
+  customerEmail: string;
+  amountNaira: number;
+  fileName: string;
+  sizeBytes: number;
+  portalUrl: string;
+}): Promise<void> {
+  const fmtNaira = (n: number) =>
+    `\u20A6${n.toLocaleString("en-NG", { maximumFractionDigits: 0 })}`;
+  await sendAdminAlertEmail({
+    key: `payment.proof.${a.invoiceNumber}`,
+    subject: `Payment proof uploaded — ${a.invoiceNumber} (${a.customerName})`,
+    bodyText: [
+      `${a.customerName} just uploaded a payment proof via the client portal.`,
+      ``,
+      `Invoice:  ${a.invoiceNumber}`,
+      `Amount:   ${fmtNaira(a.amountNaira)}`,
+      `Email:    ${a.customerEmail}`,
+      `Proof:    ${a.fileName} (${Math.max(1, Math.round(a.sizeBytes / 1024))} KB)`,
+      ``,
+      `Open the Payments tab to verify, then confirm the invoice when the`,
+      `bank/Paystack record lands. Portal: ${a.portalUrl}`,
+    ].join("\n"),
+    blocks: [
+      { kind: "text", text: `${a.customerName} just uploaded a payment proof via the client portal.` },
+      {
+        kind: "kv",
+        rows: [
+          ["Invoice", a.invoiceNumber],
+          ["Amount", fmtNaira(a.amountNaira)],
+          ["Customer email", a.customerEmail],
+          ["Proof file", `${a.fileName} (${Math.max(1, Math.round(a.sizeBytes / 1024))} KB)`],
+        ],
+      },
+    ],
+    ctaText: "Open admin Payments",
+    ctaUrl: `${BASE_URL}/#/admin`,
+  });
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Payment thank-you email (Phase-2 Module 7 — Paystack webhook).
+   Sent automatically when charge.success flips an invoice to
+   `paid`. The official RECEIPT PDF is attached (never a link).
+   ───────────────────────────────────────────────────────────── */
+export type PaymentEmailPayload = {
+  invoiceId: string;
+  invoiceNumber: string;
+  receiptNumber: string;
+  customerName: string;
+  customerEmail: string;
+  service: string;
+  amountNaira: number;
+  paidLabel: string; // "17 February 2026"
+  paystackReference?: string | null;
+  bodyText: string; // AI-written thank-you prose
+  pdfBase64: string;
+  pdfFilename: string;
+};
+
+export async function sendPaymentThankYouEmail(
+  p: PaymentEmailPayload
+): Promise<{ ok: boolean; error?: string }> {
+  if (!enabled) return { ok: false, error: "notifications disabled" };
+
+  const fmtNaira = (n: number) =>
+    `\u20A6${n.toLocaleString("en-NG", { maximumFractionDigits: 0 })}`;
+
+  const subject = `Thank You — Payment Received for Invoice #${p.invoiceNumber}`;
+
+  const body = [
+    p.bodyText,
+    ``,
+    `Receipt:      ${p.receiptNumber}`,
+    `Invoice:      ${p.invoiceNumber}`,
+    `Amount paid:  ${fmtNaira(p.amountNaira)}`,
+    `Date paid:    ${p.paidLabel}`,
+    ...(p.paystackReference ? [`Reference:    ${p.paystackReference}`] : []),
+    ``,
+    `The PDF attached to this email is your official receipt. Your`,
+    `project kickoff is scheduled within 24 hours.`,
+  ].join("\n");
+
+  const html = brandedEmailHtml({
+    title: `Payment Received — ${p.receiptNumber}`,
+    preheader: `${fmtNaira(p.amountNaira)} · invoice ${p.invoiceNumber} settled`,
+    blocks: [
+      { kind: "text", text: p.bodyText },
+      {
+        kind: "kv",
+        rows: [
+          ["Receipt", p.receiptNumber],
+          ["Invoice", p.invoiceNumber],
+          ["Amount paid", fmtNaira(p.amountNaira)],
+          ["Date paid", p.paidLabel],
+          ...(p.paystackReference
+            ? ([["Paystack ref", p.paystackReference]] as [string, string][])
+            : []),
+        ],
+      },
+      {
+        kind: "text",
+        text: "The PDF attached to this email is your official receipt. Your project kickoff is scheduled within 24 hours — a start confirmation is on its way.",
+      },
+    ],
+    footerNote: "Questions about this payment? Reply to this email or reach us on WhatsApp.",
+  });
+
+  // Audit row (sent_emails contract)
+  try {
+    await db.emailLog.create({
+      data: {
+        type: "payment.received",
+        recipientEmail: p.customerEmail,
+        subject,
+        status: "sent",
+        bodyText: body,
+        bodyHtml: html,
+        attachments: JSON.stringify([{ filename: p.pdfFilename, size: p.pdfBase64.length }]),
+        invoiceId: p.invoiceId,
+      },
+    });
+  } catch (err) {
+    console.error("[notify:payment] log persist failed:", err);
+  }
+
+  // Delivery via Google Apps Script — same attachment engine
+  const webhookUrl = process.env.NOTIFY_WEBHOOK_URL;
+  if (!webhookUrl) {
+    console.info(
+      `[notify:payment] stub — receipt ${p.receiptNumber} to ${p.customerEmail} (${p.pdfFilename})`
+    );
+    return { ok: true };
+  }
+  try {
+    const res = await fetch(webhookUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "sendInvoiceEmail",
+        to: p.customerEmail,
+        subject,
+        body,
+        html,
+        base64Pdf: p.pdfBase64,
+        filename: p.pdfFilename,
+        invoiceSummary: {
+          invoiceNumber: p.invoiceNumber,
+          customerName: p.customerName,
+          service: p.service,
+          amount: fmtNaira(p.amountNaira),
+          dueDate: `PAID ${p.paidLabel}`,
+        },
+      }),
+      signal: AbortSignal.timeout(30000),
+    });
+    if (!res.ok) throw new Error(`webhook responded ${res.status}`);
+    return { ok: true };
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "webhook delivery failed";
+    console.error("[notify:payment] delivery failed:", msg);
+    try {
+      await db.emailLog.updateMany({
+        where: { invoiceId: p.invoiceId, type: "payment.received", status: "sent" },
         data: { status: "failed", error: msg },
       });
     } catch {}

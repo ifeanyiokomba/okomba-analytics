@@ -1,9 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { isAdminAuthorized } from "@/lib/admin-auth";
-import { generateProposalPdf } from "@/lib/pdf/proposal-pdf";
-import type { ProposalDraft } from "@/lib/proposal";
-import { DVA_ACCOUNT_NAME } from "@/lib/brand";
+import { regenerateInvoicePdf } from "@/lib/invoice-pdf";
 
 export const runtime = "nodejs";
 
@@ -28,44 +26,7 @@ export async function GET(
       return NextResponse.json({ ok: false, error: "Invoice not found" }, { status: 404 });
     }
 
-    let proposal: ProposalDraft;
-    try {
-      proposal = JSON.parse(invoice.proposalJson ?? "{}") as ProposalDraft;
-    } catch {
-      proposal = {
-        executiveSummary: `${invoice.service} engagement proposal.`,
-        objectives: [],
-        scope: [],
-        deliverables: [],
-        timeline: [],
-        terms: [],
-      };
-    }
-
-    const pdf = await generateProposalPdf({
-      invoiceNumber: invoice.invoiceNumber,
-      date: invoice.sentAt ?? invoice.createdAt,
-      dueDate: invoice.dueDate,
-      durationLabel: invoice.durationLabel,
-      client: {
-        name: invoice.customerName,
-        email: invoice.customerEmail,
-        phone: invoice.customerPhone,
-      },
-      service: invoice.service,
-      description: invoice.description,
-      amountNaira: Math.round(invoice.amountKobo / 100),
-      currency: invoice.currency,
-      proposal,
-      dva: invoice.dvaAccountNumber
-        ? {
-            accountNumber: invoice.dvaAccountNumber,
-            bankName: invoice.dvaBankName ?? "Paystack",
-            accountName: DVA_ACCOUNT_NAME,
-            sandbox: invoice.dvaBankName?.includes("Sandbox") ?? false,
-          }
-        : null,
-    });
+    const pdf = await regenerateInvoicePdf(invoice);
 
     const url = new URL(req.url);
     const download = url.searchParams.get("download") === "1";

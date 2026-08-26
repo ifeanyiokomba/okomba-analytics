@@ -2,13 +2,18 @@
 
 import { useMemo, useState } from "react";
 import {
+  BellRing,
+  Check,
   Download,
   ExternalLink,
   FileSignature,
+  Link2,
   Loader2,
   ReceiptText,
   Search,
   SearchX,
+  Sparkles,
+  Trash2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -16,22 +21,61 @@ import {
   INVOICE_STATUS_STYLES,
   formatDate,
   formatNaira,
+  timeAgo,
+  type DraftProposalRow,
   type Invoice,
 } from "./types";
 
-/* Proposals tab — every sent proposal/invoice with PDF access. */
+/* Proposals tab — AI-chat draft proposals (Module 7), every sent
+   proposal/invoice with PDF access, plus the Module-5 reminder
+   engine trigger. */
 
 export function InvoicesTab({
   invoices,
   loading,
   onCreateFromInquiries,
+  onRunReminders,
+  runningReminders,
+  drafts = [],
+  onOpenDraft,
+  onDiscardDraft,
 }: {
   invoices: Invoice[];
   loading: boolean;
   onCreateFromInquiries: () => void;
+  onRunReminders?: () => void;
+  runningReminders?: boolean;
+  drafts?: DraftProposalRow[];
+  onOpenDraft?: (draft: DraftProposalRow) => void;
+  onDiscardDraft?: (id: string) => void;
 }) {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  // Module 8A — per-row portal-token fetch + copy feedback
+  const [portalLoadingId, setPortalLoadingId] = useState<string | null>(null);
+  const [portalCopiedId, setPortalCopiedId] = useState<string | null>(null);
+
+  const portalAppPath = (token: string) =>
+    `${typeof window !== "undefined" ? window.location.origin : ""}/#/portal/${token}`;
+
+  const ensureAndCopyPortal = async (inv: Invoice) => {
+    setPortalLoadingId(inv.id);
+    try {
+      const res = await fetch(`/api/admin/invoices/${inv.id}/portal-token`, {
+        method: "POST",
+      });
+      const j = (await res.json().catch(() => null)) as { token?: string } | null;
+      if (!res.ok || !j?.token) throw new Error("token failed");
+      const url = portalAppPath(j.token);
+      await navigator.clipboard.writeText(url).catch(() => {});
+      setPortalCopiedId(inv.id);
+      setTimeout(() => setPortalCopiedId((id) => (id === inv.id ? null : id)), 1800);
+    } catch {
+      setPortalCopiedId(null);
+    } finally {
+      setPortalLoadingId(null);
+    }
+  };
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -82,6 +126,85 @@ export function InvoicesTab({
         ))}
       </div>
 
+      {/* AI chat draft proposals (Module 7) */}
+      {drafts.length > 0 && (
+        <div className="surface-card overflow-hidden">
+          <div className="flex items-center justify-between border-b border-white/[0.06] px-6 py-4">
+            <h2 className="flex items-center gap-2 text-[14.5px] font-semibold text-foreground">
+              <Sparkles size={15} className="text-gold" aria-hidden="true" />
+              AI chat drafts{" "}
+              <span className="ml-1.5 font-mono text-[11px] font-normal text-muted-foreground">
+                ready to review &amp; send ({drafts.length})
+              </span>
+            </h2>
+          </div>
+          <ul className="divide-y divide-white/[0.04]">
+            {drafts.map((d) => (
+              <li
+                key={d.id}
+                className="flex flex-col gap-3 px-6 py-4 transition-colors hover:bg-white/[0.025] sm:flex-row sm:items-center sm:justify-between"
+              >
+                <div className="flex min-w-0 items-start gap-3">
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-gold/25 bg-gold-dim text-gold">
+                    <Sparkles size={14} aria-hidden="true" />
+                  </span>
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="truncate text-[13px] font-medium text-foreground">{d.customerName}</p>
+                      {d.leadScore != null && (
+                        <span
+                          title="AI lead score"
+                          className={cn(
+                            "rounded-full border px-2 py-0.5 font-mono text-[9px] uppercase tracking-wider",
+                            d.leadScore >= 7
+                              ? "border-teal/30 bg-teal-dim text-teal"
+                              : d.leadScore >= 4
+                                ? "border-gold/35 bg-gold-dim text-gold"
+                                : "border-white/15 bg-white/[0.04] text-muted-foreground"
+                          )}
+                        >
+                          lead {d.leadScore}/10
+                        </span>
+                      )}
+                      {d.status === "sent" && (
+                        <span className="rounded-full border border-teal/30 bg-teal-dim px-2 py-0.5 font-mono text-[9px] uppercase tracking-wider text-teal">
+                          sent
+                        </span>
+                      )}
+                    </div>
+                    <p className="mt-0.5 truncate text-[11.5px] text-muted-foreground">
+                      {d.customerEmail} · {d.service} · captured {timeAgo(d.createdAt)}
+                    </p>
+                  </div>
+                </div>
+                {d.status !== "sent" && d.status !== "discarded" && (
+                  <div className="flex shrink-0 items-center gap-2">
+                    {onDiscardDraft && (
+                      <button
+                        onClick={() => onDiscardDraft(d.id)}
+                        aria-label={`Discard draft for ${d.customerName}`}
+                        title="Discard draft"
+                        className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-white/[0.09] bg-white/[0.03] text-muted-foreground transition-colors hover:border-red-500/40 hover:text-red-300"
+                      >
+                        <Trash2 size={13} aria-hidden="true" />
+                      </button>
+                    )}
+                    {onOpenDraft && (
+                      <button
+                        onClick={() => onOpenDraft(d)}
+                        className="inline-flex items-center gap-2 rounded-xl bg-gold px-4 py-2.5 text-[12px] font-semibold text-[#141926] transition-colors hover:bg-gold-light"
+                      >
+                        <FileSignature size={13} aria-hidden="true" /> Review &amp; send
+                      </button>
+                    )}
+                  </div>
+                )}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
       <div className="surface-card overflow-hidden">
         {/* Toolbar */}
         <div className="flex flex-col gap-4 border-b border-white/[0.06] px-6 py-5 md:flex-row md:items-center md:justify-between">
@@ -94,6 +217,21 @@ export function InvoicesTab({
           </h2>
 
           <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center">
+            {onRunReminders && (
+              <button
+                onClick={onRunReminders}
+                disabled={runningReminders}
+                title="Run the payment-reminder scan now (also runs daily at 09:00 WAT)"
+                className="inline-flex items-center gap-2 rounded-xl border border-gold/40 bg-gold-dim px-4 py-2.5 text-[12px] font-semibold text-gold transition-colors hover:bg-gold/20 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {runningReminders ? (
+                  <Loader2 size={13} className="animate-spin" aria-hidden="true" />
+                ) : (
+                  <BellRing size={13} aria-hidden="true" />
+                )}
+                Run reminders
+              </button>
+            )}
             <div className="relative">
               <Search
                 size={14}
@@ -161,7 +299,7 @@ export function InvoicesTab({
             <table className="w-full min-w-[760px] text-left">
               <thead>
                 <tr className="border-b border-white/[0.06] bg-white/[0.02]">
-                  {["Invoice", "Client", "Service", "Amount", "Due", "Status", "PDF"].map((h) => (
+                  {["Invoice", "Client", "Service", "Amount", "Due", "Status", "Actions"].map((h) => (
                     <th
                       key={h}
                       className="px-6 py-3.5 text-[10.5px] font-semibold uppercase tracking-wider text-muted-foreground"
@@ -214,6 +352,22 @@ export function InvoicesTab({
                     </td>
                     <td className="whitespace-nowrap px-6 py-4">
                       <div className="flex items-center gap-1.5">
+                        {/* Module 8A — client portal link (ensure token + copy hash route) */}
+                        <button
+                          onClick={() => ensureAndCopyPortal(inv)}
+                          disabled={portalLoadingId === inv.id}
+                          aria-label={`Copy client portal link for ${inv.invoiceNumber}`}
+                          title="Copy client portal link"
+                          className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-white/[0.09] bg-white/[0.03] text-muted-foreground transition-colors hover:border-gold/40 hover:text-gold disabled:opacity-50"
+                        >
+                          {portalLoadingId === inv.id ? (
+                            <Loader2 size={13} className="animate-spin" aria-hidden="true" />
+                          ) : portalCopiedId === inv.id ? (
+                            <Check size={13} className="text-teal" aria-hidden="true" />
+                          ) : (
+                            <Link2 size={13} aria-hidden="true" />
+                          )}
+                        </button>
                         <a
                           href={`/api/admin/invoices/${inv.id}/pdf`}
                           target="_blank"
@@ -233,6 +387,11 @@ export function InvoicesTab({
                           <Download size={13} aria-hidden="true" />
                         </a>
                       </div>
+                      {portalCopiedId === inv.id && (
+                        <p className="mt-1 truncate font-mono text-[9.5px] text-teal" title="Portal link copied">
+                          portal link copied
+                        </p>
+                      )}
                     </td>
                   </tr>
                 ))}

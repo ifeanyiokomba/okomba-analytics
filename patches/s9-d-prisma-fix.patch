@@ -1,0 +1,197 @@
+diff --git a/Dockerfile b/Dockerfile
+index 4d86cbf..a1791ab 100755
+--- a/Dockerfile
++++ b/Dockerfile
+@@ -34,9 +34,22 @@ ENV NODE_ENV=production \
+ 
+ # Prisma CLI (runtime dependency) + generated client + schema
+ # + standalone server + static assets + public files + seed
++#
++# NOTE: we deliberately do NOT `COPY --from=builder .../node_modules/.bin/prisma`
++# here. In a normal `npm install`, `node_modules/.bin/prisma` is a *symlink* →
++# `../prisma/build/index.js`, and Prisma's bundled launcher resolves its
++# `prisma_schema_build_bg.wasm` (and the per-engine `query_compiler_bg.*.wasm`
++# files) via `__dirname`. Docker's `COPY` dereferences symlinks — so copying
++# the symlink would land a *regular file* at `.bin/prisma`, making `__dirname`
++# resolve to `.bin/` instead of `prisma/build/`, and the wasm lookup fails with
++# `ENOENT: ... prisma_schema_build_bg.wasm` (see Render deploy log
++# 2026-08-25T22:30:06Z). We recreate the symlink ourselves below so `npx prisma`
++# (used by docker-entrypoint.sh and render.yaml startCommand) keeps working,
++# AND the entrypoint also calls prisma directly via
++# `node ./node_modules/prisma/build/index.js` as a belt-and-suspenders fallback.
+ COPY --from=builder /app/node_modules/prisma ./node_modules/prisma
+ COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
+-COPY --from=builder /app/node_modules/.bin/prisma ./node_modules/.bin/prisma
++RUN mkdir -p node_modules/.bin && ln -sf ../prisma/build/index.js node_modules/.bin/prisma
+ COPY --from=builder /app/src/generated ./src/generated
+ COPY --from=builder /app/prisma ./prisma
+ COPY --from=builder /app/.next/standalone ./.next/standalone
+diff --git a/docker-entrypoint.sh b/docker-entrypoint.sh
+index 39b41dc..0836029 100755
+--- a/docker-entrypoint.sh
++++ b/docker-entrypoint.sh
+@@ -1,8 +1,17 @@
+ #!/bin/sh
+ set -e
+ 
++# We invoke prisma via `node ./node_modules/prisma/build/index.js` instead of
++# `npx prisma` (or `node_modules/.bin/prisma`) on purpose:
++#   • `npx` would resolve to `node_modules/.bin/prisma`, which Docker's COPY
++#     dereferences from a symlink into a *regular file*, breaking Prisma's
++#     runtime `__dirname`-based wasm lookup (`prisma_schema_build_bg.wasm`).
++#   • Calling the entrypoint JS directly keeps `__dirname` =
++#     `node_modules/prisma/build/`, which is where the wasm files actually
++#     live, so the lookup succeeds. (See Dockerfile for the full rationale.)
++#   • This works regardless of whether the `.bin/prisma` symlink was recreated.
+ echo "[entrypoint] applying database schema (idempotent)…"
+-npx prisma db push --skip-generate --accept-data-loss
++node ./node_modules/prisma/build/index.js db push --skip-generate --accept-data-loss
+ 
+ echo "[entrypoint] seeding initial content (idempotent)…"
+ node scripts/seed-testimonials.mjs || echo "[entrypoint] seed skipped/failed — continuing (site still runs)"
+diff --git a/render.yaml b/render.yaml
+index 3a4d5f7..41cb9e8 100755
+--- a/render.yaml
++++ b/render.yaml
+@@ -1,10 +1,16 @@
+ # ─────────────────────────────────────────────────────────────
+-# Render Blueprint — Okomba Analytics
+-# One-click full-stack deploy: Node service + persistent SQLite disk.
++# Render Blueprint — Okomba Analytics V2 (Stage 9 launch config)
++# One-click full-stack deploy:
++#   • web      — Next.js app + persistent SQLite disk (port 3000)
++#   • whatsapp — whatsapp-web.js mini-service (Module 6) with its
++#                own session disk; the app dispatches to it over the
++#                private Render internal network. Express API on
++#                3004, socket.io on 3005 (same process).
+ #
+ # Deploy: Render Dashboard → New → Blueprint → point at this repo.
+-# The preview URL's *.onrender.com domain is automatic; add your
+-# custom domain in Settings → Custom Domains afterwards.
++# Add custom domain (okomba.com + www) in
++# Settings → Custom Domains AFTER first deploy. Render issues free
++# Let's Encrypt SSL automatically.
+ # ─────────────────────────────────────────────────────────────
+ services:
+   - type: web
+@@ -13,26 +19,115 @@ services:
+     plan: starter
+     region: frankfurt # closest to Nigeria among Render regions
+     buildCommand: npm install && npx prisma generate && npm run build
+-    startCommand: npx prisma db push --skip-generate --accept-data-loss && node scripts/seed-testimonials.mjs && node .next/standalone/server.js
+-    healthCheckPath: /api
++    # NOTE: startCommand runs prisma via `node ./node_modules/prisma/build/index.js`
++    # instead of `npx prisma`. In Docker-based deploys the Dockerfile's own
++    # ENTRYPOINT (docker-entrypoint.sh) runs first and `exec`s the server, so
++    # this startCommand is effectively a fallback — kept in sync defensively.
++    # Calling prisma's entrypoint JS directly keeps `__dirname` =
++    # `node_modules/prisma/build/`, which is where the wasm files live, so
++    # Prisma's runtime lookup of `prisma_schema_build_bg.wasm` succeeds. (With
++    # `npx prisma`, Docker's COPY dereferenced the .bin/prisma symlink into a
++    # regular file and the wasm lookup failed with ENOENT.)
++    startCommand: node ./node_modules/prisma/build/index.js db push --skip-generate --accept-data-loss && (node scripts/seed-testimonials.mjs || true) && exec node .next/standalone/server.js
++    healthCheckPath: /api/health
+     autoDeploy: true
+     envVars:
+       - key: NODE_ENV
+         value: production
+       - key: DATABASE_URL
+-        value: file:/data/custom.db
++        value: file:/data/dev.db
+       - key: HOSTNAME
+         value: 0.0.0.0
+       - key: NEXT_TELEMETRY_DISABLED
+         value: "1"
+-      # Set these in the Render dashboard after the first deploy
++      # ── Public site URLs (Stage 9A — domain okomba.com) ──
++      - key: NEXT_PUBLIC_SITE_URL
++        value: https://okomba.com
++      - key: PORTAL_BASE_URL
++        value: https://okomba.com
++      # ── Email notifications (Google Apps Script Web App) ──
++      # Deploy Google-apps-script/Code.gs, paste the /exec URL.
++      - key: NOTIFY_WEBHOOK_URL
++        sync: false
++      - key: NOTIFICATIONS_ENABLED
++        value: "true"
++      # ── WhatsApp mini-service (Module 6/7) — internal URL of the
++      #    service below on Render's private network:
++      - key: WHATSAPP_SERVICE_URL
++        value: http://okomba-whatsapp:3004
++      # ── Secrets — set in Render dashboard after first deploy ──
+       # (Blueprint files are public in the repo — never put real
+-      # secrets here):
++      # secrets here). sync:false keeps them out of GIT-synced pulls.
+       - key: ADMIN_EMAIL
+         sync: false
+       - key: ADMIN_PASSWORD
+         sync: false
++      - key: WHATSAPP_INTERNAL_TOKEN
++        sync: false
++      # ── Paystack (Stage 9A — LIVE mode) ──
++      # Same secret key you set in the Paystack dashboard webhook
++      # page (https://dashboard.paystack.com/#/settings/webhooks).
++      - key: PAYSTACK_SECRET_KEY
++        sync: false
++      - key: PAYSTACK_PUBLIC_KEY
++        sync: false
++      - key: PAYSTACK_WEBHOOK_SECRET
++        sync: false
++      # ── Cloudinary (Module 8B) — proposal PDF storage ──
++      # Preferred form: cloudinary://API_KEY:API_SECRET@CLOUD_NAME
++      - key: CLOUDINARY_URL
++        sync: false
++      # ── Google Drive daily backup (Module 8B) ──
++      # Service account JSON (the full file contents) + the Drive
++      # folder ID where backups land. The hand-rolled JWT path in
++      # src/lib/backup.ts accepts either raw JSON or base64-encoded.
++      - key: GOOGLE_SERVICE_ACCOUNT_JSON
++        sync: false
++      - key: GOOGLE_DRIVE_FOLDER_ID
++        sync: false
++      - key: BACKUP_CRON_ENABLED
++        value: "true"
++      # ── GA4 (Module 8C) — measurement ID G-XXXX ──
++      - key: NEXT_PUBLIC_GA4_MEASUREMENT_ID
++        sync: false
++      # ── Google Apps Script sheet (legacy — Google Sheet writeback) ──
++      - key: GOOGLE_SCRIPT_URL
++        sync: false
+     disk:
+       name: okomba-sqlite
+       mountPath: /data
+       sizeGB: 1
++
++  # ── WhatsApp mini-service (Module 6) ──────────────────────
++  # whatsapp-web.js + Express :3004 + socket.io :3005. The QR is
++  # scanned from the admin WhatsApp tab; the browser session lives
++  # on the dedicated disk so it survives deploys/restarts.
++  - type: web
++    name: okomba-whatsapp
++    runtime: node
++    plan: starter
++    region: frankfurt
++    rootDir: mini-services/whatsapp-service
++    buildCommand: npm install
++    startCommand: npm start
++    healthCheckPath: /status
++    autoDeploy: true
++    envVars:
++      - key: NODE_ENV
++        value: production
++      - key: WHATSAPP_PORT
++        value: "3004"
++      - key: SOCKET_PORT
++        value: "3005"
++      - key: WHATSAPP_MODE
++        value: auto
++      # The main app's public URL (inbound messages + service events
++      # are POSTed here with this shared token):
++      - key: MAIN_APP_URL
++        value: http://okomba-analytics:3000
++      - key: WHATSAPP_INTERNAL_TOKEN
++        sync: false
++    disk:
++      name: okomba-whatsapp-session
++      mountPath: /data
++      sizeGB: 1

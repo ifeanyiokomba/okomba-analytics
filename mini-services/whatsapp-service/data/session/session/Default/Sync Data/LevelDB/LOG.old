@@ -1,0 +1,3 @@
+2026/08/25-13:34:43.022 322d Reusing MANIFEST /home/z/my-project/mini-services/whatsapp-service/data/session/session/Default/Sync Data/LevelDB/MANIFEST-000001
+2026/08/25-13:34:43.023 322d Recovering log #3
+2026/08/25-13:34:43.024 322d Reusing old log /home/z/my-project/mini-services/whatsapp-service/data/session/session/Default/Sync Data/LevelDB/000003.log 

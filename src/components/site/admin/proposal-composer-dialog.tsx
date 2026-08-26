@@ -46,10 +46,15 @@ export function ProposalComposerDialog({
   inquiry,
   onClose,
   onSent,
+  preloadedDraft,
+  draftProposalId,
 }: {
   inquiry: Inquiry | null;
   onClose: () => void;
   onSent: (result: { invoiceNumber: string; emailSent: boolean }) => void;
+  /** Module 7: draft auto-created by the AI chat — loaded instantly. */
+  preloadedDraft?: ProposalDraft | null;
+  draftProposalId?: string | null;
 }) {
   const [step, setStep] = useState<Step>(1);
   const [draft, setDraft] = useState<ProposalDraft>(EMPTY_DRAFT);
@@ -100,6 +105,17 @@ export function ProposalComposerDialog({
       setSentResult(null);
     }
   }, [inquiry]);
+
+  // Module 7: an AI-chat draft arrives pre-generated — load instantly
+  useEffect(() => {
+    if (inquiry && preloadedDraft) {
+      setDraft(preloadedDraft);
+      setHasDraft(true);
+      setGenNote(
+        "AI chat draft loaded — captured by the website assistant, ready to review and send."
+      );
+    }
+  }, [inquiry, preloadedDraft]);
 
   const generate = useCallback(async () => {
     if (!inquiry) return;
@@ -154,6 +170,7 @@ export function ProposalComposerDialog({
           durationLabel: duration.trim() || undefined,
           dueDate: dueDate || undefined,
           description: lineItem.trim() || undefined,
+          ...(draftProposalId ? { draftProposalId } : {}),
         }),
       });
       const j = await res.json().catch(() => null);
@@ -164,7 +181,7 @@ export function ProposalComposerDialog({
     } finally {
       setSending(false);
     }
-  }, [inquiry, canSend, draft, amountNaira, duration, dueDate, lineItem]);
+  }, [inquiry, canSend, draft, amountNaira, duration, dueDate, lineItem, draftProposalId]);
 
   if (!inquiry) return null;
 

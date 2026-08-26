@@ -129,8 +129,44 @@ exports.Prisma.InquiryScalarFieldEnum = {
   budget: 'budget',
   message: 'message',
   status: 'status',
+  source: 'source',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
+};
+
+exports.Prisma.DraftProposalScalarFieldEnum = {
+  id: 'id',
+  source: 'source',
+  customerName: 'customerName',
+  customerEmail: 'customerEmail',
+  service: 'service',
+  draftJson: 'draftJson',
+  leadScore: 'leadScore',
+  inquiryId: 'inquiryId',
+  receivedEmailId: 'receivedEmailId',
+  status: 'status',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.WebhookLogScalarFieldEnum = {
+  id: 'id',
+  provider: 'provider',
+  event: 'event',
+  paystackId: 'paystackId',
+  reference: 'reference',
+  invoiceId: 'invoiceId',
+  invoiceNumber: 'invoiceNumber',
+  amountKobo: 'amountKobo',
+  currency: 'currency',
+  signatureValid: 'signatureValid',
+  source: 'source',
+  status: 'status',
+  result: 'result',
+  payload: 'payload',
+  error: 'error',
+  receivedAt: 'receivedAt',
+  processedAt: 'processedAt'
 };
 
 exports.Prisma.AdminSessionScalarFieldEnum = {
@@ -230,6 +266,12 @@ exports.Prisma.InvoiceScalarFieldEnum = {
   dvaBankName: 'dvaBankName',
   dvaBankCode: 'dvaBankCode',
   pdfUrl: 'pdfUrl',
+  pdfStorage: 'pdfStorage',
+  secureToken: 'secureToken',
+  portalViewedAt: 'portalViewedAt',
+  paymentProofUrl: 'paymentProofUrl',
+  paymentProofName: 'paymentProofName',
+  paymentProofUploadedAt: 'paymentProofUploadedAt',
   paidAt: 'paidAt',
   sentAt: 'sentAt',
   createdAt: 'createdAt',
@@ -246,6 +288,7 @@ exports.Prisma.EventRecordScalarFieldEnum = {
   payload: 'payload',
   status: 'status',
   processedAt: 'processedAt',
+  lastSentAt: 'lastSentAt',
   createdAt: 'createdAt'
 };
 
@@ -258,7 +301,30 @@ exports.Prisma.WhatsAppMessageScalarFieldEnum = {
   mediaUrl: 'mediaUrl',
   mediaFilename: 'mediaFilename',
   relatedInvoiceId: 'relatedInvoiceId',
+  status: 'status',
   sentAt: 'sentAt'
+};
+
+exports.Prisma.AnalyticsEventScalarFieldEnum = {
+  id: 'id',
+  type: 'type',
+  invoiceId: 'invoiceId',
+  secureToken: 'secureToken',
+  sessionId: 'sessionId',
+  meta: 'meta',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.BackupLogScalarFieldEnum = {
+  id: 'id',
+  kind: 'kind',
+  target: 'target',
+  status: 'status',
+  fileName: 'fileName',
+  sizeBytes: 'sizeBytes',
+  durationMs: 'durationMs',
+  error: 'error',
+  createdAt: 'createdAt'
 };
 
 exports.Prisma.SortOrder = {
@@ -274,6 +340,8 @@ exports.Prisma.NullsOrder = {
 
 exports.Prisma.ModelName = {
   Inquiry: 'Inquiry',
+  DraftProposal: 'DraftProposal',
+  WebhookLog: 'WebhookLog',
   AdminSession: 'AdminSession',
   Subscriber: 'Subscriber',
   Post: 'Post',
@@ -282,7 +350,9 @@ exports.Prisma.ModelName = {
   ReceivedEmail: 'ReceivedEmail',
   Invoice: 'Invoice',
   EventRecord: 'EventRecord',
-  WhatsAppMessage: 'WhatsAppMessage'
+  WhatsAppMessage: 'WhatsAppMessage',
+  AnalyticsEvent: 'AnalyticsEvent',
+  BackupLog: 'BackupLog'
 };
 
 /**

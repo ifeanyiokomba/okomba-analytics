@@ -15,6 +15,7 @@ export type Inquiry = {
   budget?: string | null;
   message: string;
   status: string;
+  source?: string | null; // website | ai_chat (Module 7)
   createdAt: string;
 };
 
@@ -43,6 +44,7 @@ export type Invoice = {
   inquiryId: string | null;
   customerName: string;
   customerEmail: string;
+  customerPhone?: string | null;
   service: string;
   amountNaira: number;
   currency: string;
@@ -56,6 +58,112 @@ export type Invoice = {
   paidAt: string | null;
   createdAt: string;
 };
+
+/* ── AI chat drafts (Module 7 — Proposals tab) ────────────── */
+export type DraftProposalRow = {
+  id: string;
+  source: string;
+  customerName: string;
+  customerEmail: string;
+  service: string;
+  leadScore: number | null;
+  inquiryId: string | null;
+  receivedEmailId: string | null;
+  status: string; // draft | sent | discarded
+  createdAt: string;
+  draft: ProposalDraft;
+};
+
+/* ── Paystack webhook log (Module 7 — Payments tab) ─────────── */
+export type WebhookLogRow = {
+  id: string;
+  provider: string;
+  event: string;
+  paystackId: string | null;
+  reference: string | null;
+  invoiceId: string | null;
+  invoiceNumber: string | null;
+  amountKobo: number | null;
+  currency: string | null;
+  signatureValid: boolean;
+  source: string; // webhook | admin-test
+  status: string; // received | processed | failed | ignored | duplicate
+  result: string; // JSON detail
+  error: string | null;
+  receivedAt: string;
+  processedAt: string | null;
+};
+
+export type PaidInvoiceRow = {
+  id: string;
+  invoiceNumber: string;
+  customerName: string;
+  customerEmail: string;
+  service: string;
+  amountKobo: number;
+  currency: string;
+  paidAt: string;
+};
+
+export type KickoffEventRow = {
+  id: string;
+  customerEmail: string | null;
+  eventDate: string;
+  relatedInvoiceId: string | null;
+  payload: string;
+  status: string;
+};
+
+/* ── WhatsApp widget (Module 6) ───────────────────────────── */
+export type WhatsAppChat = {
+  phone: string;
+  name: string;
+  service: string | null;
+  lastMessage: {
+    text: string | null;
+    direction: string;
+    sentAt: string;
+    media: string | null;
+  } | null;
+  lastActivityAt: string;
+  unread: number;
+  totalMessages: number;
+  latestInvoice: {
+    id: string;
+    invoiceNumber: string;
+    amountNaira: number;
+    dueDate: string | null;
+    status: string;
+  } | null;
+};
+
+export type WhatsAppMessage = {
+  id: string;
+  direction: "inbound" | "outbound" | string;
+  toPhone: string | null;
+  fromPhone: string | null;
+  messageText: string | null;
+  mediaFilename: string | null;
+  relatedInvoiceId: string | null;
+  status: string;
+  sentAt: string;
+};
+
+export type WhatsAppServiceStatus = {
+  mode: "real" | "demo" | "unknown" | string;
+  status: "connected" | "disconnected" | "connecting" | "unknown" | string;
+  phone?: string | null;
+  qr?: string | null;
+  serviceUp: boolean;
+};
+
+export function formatPhoneDisplay(msisdn: string): string {
+  const n = msisdn.replace(/\D/g, "");
+  if (n.startsWith("234") && n.length === 13) {
+    return `+234 ${n.slice(3, 6)} ${n.slice(6, 9)} ${n.slice(9)}`;
+  }
+  return `+${n}`;
+}
 
 /* Client-side mirror of the server ProposalDraft shape. */
 export type ProposalDraft = {
@@ -122,6 +230,10 @@ export const EMAIL_TYPE_LABELS: Record<string, string> = {
   "post.published": "New post",
   broadcast: "Broadcast",
   "invoice.sent": "Proposal / invoice",
+  "invoice.reminder_3d": "Reminder · friendly",
+  "invoice.reminder_due": "Reminder · due today",
+  "invoice.reminder_overdue": "Reminder · overdue",
+  "payment.received": "Payment thank-you",
 };
 
 /* ── Invoice status chips (Proposals tab) ───────────────────── */
@@ -135,6 +247,15 @@ export const INVOICE_STATUS_STYLES: Record<string, string> = {
 };
 
 export const INVOICE_STATUSES = ["draft", "sent", "pending", "paid", "overdue", "cancelled"] as const;
+
+/* ── Webhook log status chips (Payments tab) ────────────── */
+export const WEBHOOK_STATUS_STYLES: Record<string, string> = {
+  received: "border-gold/35 bg-gold-dim text-gold",
+  processed: "border-teal/35 bg-teal-dim text-teal",
+  failed: "border-red-500/30 bg-red-500/10 text-red-300",
+  ignored: "border-white/15 bg-white/[0.04] text-muted-foreground",
+  duplicate: "border-purple-400/35 bg-purple-400/10 text-purple-300",
+};
 
 export function formatNaira(n: number): string {
   return `\u20A6${n.toLocaleString("en-NG", { maximumFractionDigits: 0 })}`;

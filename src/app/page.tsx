@@ -26,6 +26,7 @@ import { Footer } from "@/components/site/footer";
 import { ScrollProgress } from "@/components/site/scroll-progress";
 import { BackToTop } from "@/components/site/back-to-top";
 import { CookieConsent } from "@/components/site/cookie-consent";
+import { AiChatWidget } from "@/components/site/ai-chat-widget";
 
 /* ── Lazy-loaded: only fetched when actually opened ── */
 const InquiryModal = dynamic(
@@ -38,18 +39,37 @@ const AdminPortal = dynamic(
   >,
   { ssr: false, loading: () => <div className="flex min-h-screen items-center justify-center bg-background" aria-label="Loading admin portal"><div className="h-8 w-8 animate-spin rounded-full border-2 border-gold border-t-transparent" /></div> }
 );
+const ClientPortal = dynamic(
+  () => import("@/components/portal/client-portal").then((m) => m.ClientPortal) as Promise<
+    React.ComponentType<{ token: string }>
+  >,
+  { ssr: false, loading: () => <div className="flex min-h-screen items-center justify-center bg-[#0B0F1A]" aria-label="Loading client portal"><div className="h-8 w-8 animate-spin rounded-full border-2 border-gold border-t-transparent" /></div> }
+);
 
 type ToastData = { msg: string };
 
 export default function Home() {
-  const [route, setRoute] = useState<"home" | "admin">("home");
+  const [route, setRoute] = useState<"home" | "admin" | { portal: string }>("home");
   const [modalService, setModalService] = useState<Service | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [toast, setToast] = useState<ToastData | null>(null);
 
-  // Hash routing for the admin portal (preserves original /#/admin workflow)
+  // Hash routing for the admin portal + client portal (sandbox preview).
+  // Production serves /portal/[secureToken] as a real Next route; in the
+  // sandbox preview we expose the same UI via #/portal/{token} so the
+  // admin "copy portal link" button always opens a working URL.
   useEffect(() => {
-    const sync = () => setRoute(window.location.hash === "#/admin" ? "admin" : "home");
+    const sync = () => {
+      const h = window.location.hash;
+      if (h.startsWith("#/portal/")) {
+        const token = h.slice("#/portal/".length).split(/[?&]/)[0] || "";
+        setRoute(token ? { portal: token } : "home");
+      } else if (h === "#/admin") {
+        setRoute("admin");
+      } else {
+        setRoute("home");
+      }
+    };
     sync();
     window.addEventListener("hashchange", sync);
     return () => window.removeEventListener("hashchange", sync);
@@ -90,6 +110,11 @@ export default function Home() {
     return <AdminPortal onExit={() => (window.location.hash = "")} />;
   }
 
+  // ── Client portal view (Module 8A — hash routing for sandbox preview) ──
+  if (typeof route === "object" && route !== null && "portal" in route) {
+    return <ClientPortal token={route.portal} />;
+  }
+
   // ── Marketing site ──
   return (
     <div className="flex min-h-screen flex-col">
@@ -128,6 +153,9 @@ export default function Home() {
 
       <Footer onNavigate={scrollTo} onGetStarted={() => openInquiry(null)} />
 
+      {/* AI Service Finder (Module 7) — floating bottom-right */}
+      <AiChatWidget />
+
       {modalOpen && (
         <InquiryModal
           service={modalService}
@@ -141,7 +169,7 @@ export default function Home() {
         <div
           role="status"
           aria-live="polite"
-          className="section-dark fixed bottom-5 right-5 z-[150] flex max-w-sm items-start gap-3 rounded-2xl border border-teal/30 bg-[#0b101c]/95 p-4 pr-5 shadow-float backdrop-blur-xl [animation:slide-in-right_0.4s_cubic-bezier(0.22,1,0.36,1)]"
+          className="section-dark fixed bottom-[6.5rem] right-5 z-[150] flex max-w-sm items-start gap-3 rounded-2xl border border-teal/30 bg-[#0b101c]/95 p-4 pr-5 shadow-float backdrop-blur-xl [animation:slide-in-right_0.4s_cubic-bezier(0.22,1,0.36,1)]"
         >
           <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-teal-dim text-teal">
             <CheckCircle2 size={18} aria-hidden="true" />

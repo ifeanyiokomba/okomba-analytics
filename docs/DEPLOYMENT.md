@@ -144,6 +144,50 @@ Notes:
 
 ---
 
+## Phase 2 · Module 7 — AI Service Finder + Paystack Webhook
+
+**AI chat widget (bottom-right, "Talk Through Your Ideas 💡")**: visitors
+describe their need, the assistant recommends only REAL services from the
+live catalog, qualifies in ≤3 messages, asks for an email, and — once
+captured — files a `received_emails` lead (source `ai_chat`, lead score
+1–10), creates an inquiry, and auto-drafts a proposal that appears in the
+admin **Proposals → AI chat drafts** strip, ready to review & send.
+
+**Paystack webhook (the money hook)**: `POST /api/paystack/webhook`
+verifies the `x-paystack-signature` (HMAC-SHA512) and, on
+`charge.success`, flips the invoice to `paid`, stops all reminders,
+sends the AI-written "Thanks for payment" email + WhatsApp with the
+official receipt PDF attached, and schedules a `project.kickoff` event
+24 hours out. `transfer.success` is logged for accounting. Every event
+is auditable in the admin **Payments** tab.
+
+| Variable | Purpose |
+|---|---|
+| `PAYSTACK_WEBHOOK_SECRET` | Webhook signature secret. In production set it to your Paystack **secret key** (test or live mode). Falls back to `PAYSTACK_SECRET_KEY` when unset. A dev-only value lets you exercise the signed test flow while DVAs stay in sandbox. |
+| `WHATSAPP_SERVICE_URL` | Mini-service URL (Module 6). On Render, `http://okomba-whatsapp:3004` (see render.yaml — the WhatsApp service now deploys as its own Render web service with a persistent session disk). |
+
+Paystack dashboard setup (production):
+
+1. Settings → API Keys & Webhooks → **Webhooks URL**:
+   `https://your-domain/api/paystack/webhook`
+2. Set `PAYSTACK_WEBHOOK_SECRET` in Render to the **secret key of the
+   same mode** your account is operating in (test secret signs test
+   webhooks; live secret signs live webhooks).
+
+Testing without a Paystack account:
+
+```bash
+bun run scripts/test-paystack-webhook.ts --list          # unpaid invoices
+bun run scripts/test-paystack-webhook.ts INV-2026-0003   # signed charge.success over HTTP
+bun run scripts/test-paystack-webhook.ts INV-2026-0003 --replay   # dedup check
+```
+
+Or from the admin → **Payments** tab → "Fire test webhook" (signs a
+realistic payload server-side and runs it through the identical
+pipeline).
+
+---
+
 ## Post-deploy checklist
 
 - [ ] Visit `/` — hero animations, all 16 sections render

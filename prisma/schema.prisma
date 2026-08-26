@@ -19,8 +19,60 @@ model Inquiry {
   budget      String?
   message     String
   status      String   @default("new") // new | contacted | in_progress | closed
+  source      String   @default("website") // website | ai_chat (Module 7 AI Service Finder)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+/* ── Phase-2 Module 7: AI Service Finder leads ────────────────
+   When the AI chat widget qualifies a visitor and captures their
+   email, a draft proposal is auto-created so it appears in the
+   admin Proposals tab ready to review and send.                    */
+model DraftProposal {
+  id              String   @id @default(cuid())
+  source          String   @default("ai_chat") // ai_chat | admin
+  customerName    String
+  customerEmail   String
+  service         String   // primary recommended service (title)
+  draftJson       String   // ProposalDraft JSON snapshot (price-scrubbed)
+  leadScore       Int?     // 1–10, rated by the AI from chat signals
+  inquiryId       String?  @unique // link into the Inquiries workflow
+  receivedEmailId String?  // link to the received_emails lead row
+  status          String   @default("draft") // draft | sent | discarded
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([status])
+  @@index([customerEmail])
+  @@index([createdAt])
+}
+
+/* ── Phase-2 Module 7: Paystack webhook audit log ─────────────
+   Every incoming webhook (charge.success, transfer.success, …)
+   is persisted here — the money trail the admin can inspect.       */
+model WebhookLog {
+  id             String    @id @default(cuid())
+  provider       String    @default("paystack")
+  event          String
+  paystackId     String? // data.id — Paystack event id (dedup key)
+  reference      String? // data.reference
+  invoiceId      String?
+  invoiceNumber  String?
+  amountKobo     Int?
+  currency       String?
+  signatureValid Boolean   @default(false)
+  source         String    @default("webhook") // webhook | admin-test
+  status         String    @default("received") // received | processed | failed | ignored | duplicate
+  result         String    @default("{}") // JSON outcome detail
+  payload        String    @default("{}") // JSON snapshot (trimmed)
+  error          String?
+  receivedAt     DateTime  @default(now())
+  processedAt    DateTime?
+
+  @@unique([provider, event, paystackId])
+  @@index([receivedAt])
+  @@index([invoiceId])
+  @@index([status])
 }
 
 model AdminSession {
@@ -149,7 +201,15 @@ model Invoice {
   dvaAccountNumber String?
   dvaBankName      String?
   dvaBankCode      String?
-  pdfUrl           String?   // Cloudinary URL (populated Phase 2)
+  pdfUrl           String?   // Cloudinary URL (Module 8B) or local fallback label
+  pdfStorage       String?   // cloudinary | local
+  // ── Module 8A: Client Portal (/portal/{secureToken}) ──
+  secureToken          String?   @unique // 192-bit random URL token (no auth by design)
+  portalViewedAt       DateTime? // first portal visit timestamp
+  // ── Module 8A: "I've Paid" proof upload ──
+  paymentProofUrl      String?   // stored file path/label
+  paymentProofName     String?
+  paymentProofUploadedAt DateTime?
   paidAt           DateTime?
   sentAt           DateTime?
   createdAt        DateTime  @default(now())
@@ -170,10 +230,12 @@ model EventRecord {
   payload          String    @default("{}") // JSON snapshot for the handler
   status           String    @default("scheduled") // scheduled | processed | skipped | failed
   processedAt      DateTime?
+  lastSentAt       DateTime? // last time a reminder for this event actually went out
   createdAt        DateTime  @default(now())
 
   @@index([eventDate])
   @@index([status])
+  @@index([relatedInvoiceId, type])
 }
 
 model WhatsAppMessage {
@@ -185,7 +247,48 @@ model WhatsAppMessage {
   mediaUrl         String?
   mediaFilename    String?
   relatedInvoiceId String?
+  status           String   @default("queued") // queued | sent | failed (outbound only)
   sentAt           DateTime @default(now())
 
   @@index([sentAt])
+  @@index([toPhone])
+  @@index([fromPhone])
+  @@index([relatedInvoiceId])
+}
+
+/* ── Phase-2 Module 8C: first-party analytics events ─────────
+   GA4 receives the same names via dataLayer/gtag; this table is
+   the source of truth the Admin Analytics dashboard queries
+   (works with or without a GA4 property configured).               */
+model AnalyticsEvent {
+  id          String   @id @default(cuid())
+  type        String   // ai_chat_start | portal_visit | proposal_view | pdf_download | payment_click | payment_proof_uploaded
+  invoiceId   String?
+  secureToken String?
+  sessionId   String? // AI chat session grouping
+  meta        String   @default("{}") // JSON: { service, source, … }
+  createdAt   DateTime @default(now())
+
+  @@index([type])
+  @@index([createdAt])
+  @@index([invoiceId])
+  @@index([sessionId])
+}
+
+/* ── Phase-2 Module 8B: daily 02:00 backup audit trail ────────
+   Every backup run (Google Drive target when credentials exist,
+   local rotation fallback otherwise) is recorded here.             */
+model BackupLog {
+  id         String   @id @default(cuid())
+  kind       String   @default("db") // db | uploads
+  target     String   @default("gdrive") // gdrive | local
+  status     String   @default("success") // success | failed
+  fileName   String?
+  sizeBytes  Int?
+  durationMs Int?
+  error      String?
+  createdAt  DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([status])
 }
