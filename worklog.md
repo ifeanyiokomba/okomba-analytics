@@ -2138,3 +2138,146 @@ Unresolved issues / risks:
        AnalyticsEvent table is recording events.
     6. UptimeRobot monitor on https://okomba.com/api/health
        (5-min interval) — confirm green.
+
+---
+Task ID: Phase 18
+Agent: main
+Task: Three asks: (1) push the new commits to GitHub using a
+user-supplied PAT (ghp_...), (2) confirm Code.gs status — does
+the founder still need to copy/update it manually, (3) swap the
+favicon to the brand WORDMARK "Okomba" (not the abstract Z mark
+or single-letter "O" abbreviation).
+
+Work Log:
+- PUSH: one-shot URL-embedded PAT push succeeded.
+  `git push https://x-access-token:ghp_...@github.com/ifeanyiokomba/
+  okomba-analytics.git main` → "8d64373..5e5cda9 main -> main".
+  5 commits pushed on top of Phase 16's tip:
+    • 2adc83e — Phase 16 worklog (was made AFTER Phase 16's push)
+    • 447633d — cron-job auto-commit (worklog append)
+    • 0d60002 — Phase 17 prod-readiness cross-check + env hygiene
+    • 6fa4c0e — Phase 17 worklog
+    • 5e5cda9 — favicon now shows full "Okomba" wordmark
+  GitHub origin/main is now at 5e5cda9. PAT redacted from all
+  log output via sed; not written to .git/config (no credential
+  helper used). CRITICAL founder action: revoke this PAT now too
+  (same exposure risk as Phase 16 — it has now been in chat twice).
+  Recommend SSH deploy key for future pushes (see Phase 16 steps).
+
+- CODE.GS STATUS — confirmed at v5 (latest), pre-filled for the
+  Okomba setup, ready to paste. File: Google-apps-script/Code.gs
+  (32KB, 810+ lines). All CONFIG values pre-filled:
+    • SHEET_ID = 14ocJfSFpsm2MOaI8eAPJ8E4VMh84aJQ1GgoQu7v57sY
+    • FROM_EMAIL = REPLY_TO_EMAIL = ADMIN_EMAIL = support@okomba.com
+    • SITE_URL = https://www.okomba.com
+  Zero manual edits required. The founder still needs to do the
+  Google-side steps (this sandbox can't reach Google Apps Script):
+    1. Open https://script.google.com as the SENDER HOST Gmail
+       account (the one with support@okomba.com as a "Send mail
+       as" alias).
+    2. New project → name "Okomba Webhook".
+    3. Paste the ENTIRE Code.gs file (Ctrl+A → Delete, then
+       Ctrl+V the file contents).
+    4. Run listSheetTabs() — see existing tabs + headers.
+    5. Run syncSheetColumns() — extends the Inquiries header row
+       to the right with any missing standard columns (existing
+       rows untouched; new inquiries fill every column).
+    6. Run verifySetup() — must be green: Sheet access OK, alias
+       OK, test email delivered to support@okomba.com.
+    7. Deploy → New deployment → Web app → Execute as: Me,
+       Who has access: Anyone.
+    8. Copy the /exec URL.
+    9. Set it as NOTIFY_WEBHOOK_URL on Render (dashboard →
+       okomba-analytics → Environment → save → trigger redeploy).
+  Until step 9 is done, the website will run in log-only email
+  mode (inquiry submissions land in the Sheet via the Next.js
+  API route, but no branded email goes out — that path requires
+  NOTIFY_WEBHOOK_URL). The site is functional either way; email
+  delivery is the only thing waiting on this step.
+
+- FAVICON WORDMARK SWAP:
+  - Inspected public/favicon.svg + public/logo.svg (Phase 15
+    had set both to the abstract Z-mark from the original Vite
+    app — NOT the brand wordmark). The founder's directive:
+    favicon should be the BRAND NAME "Okomba" in full, exactly
+    as the brand lockup, not an abbreviation.
+  - Rewrote public/logo.svg as a brand squircle badge:
+    • viewBox 0 0 100 100 (square, scales to any favicon size)
+    • Squircle background: rounded rect rx=22, fill #0B0F1A
+      (brand navy-black), gold hairline stroke rgba(240,165,0,
+      0.55), strokeWidth 1.6
+    • "Okomba" wordmark in Georgia serif (white, fontSize 22,
+      letter-spacing -0.4px, centered) — the brand name in full
+    • "ANALYTICS" italic caption (Georgia serif italic, fontSize
+      6.5, letter-spacing 2.2px, color #B8B8C8, centered below
+      the wordmark) — adds context without being an abbreviation
+    • Gold dot accent (cx=80, cy=20, r=4, fill #F0A500) with a
+      soft halo (r=6.5, opacity 0.35) — brand identity preserved
+    • z-breathe pulse animation on the dot halo preserved
+      (2.5s ease-in-out infinite, opacity 0.7 → 1)
+  - Copied the same content to public/favicon.svg (the asset
+    served as the primary SVG favicon via layout.tsx icons.icon
+    array, position 0 with type image/svg+xml).
+  - Ran scripts/render-favicon.mjs to regenerate PNG fallbacks
+    via sharp (SVG → PNG aspect-fit):
+    • public/apple-touch-icon.png (180×180, navy bg) — iOS
+      home-screen icon (square, no letterboxing)
+    • public/favicon-32.png (32×32, transparent bg) — legacy
+      browsers (Chrome/Firefox fallback when SVG unsupported)
+    • public/favicon-16.png (16×16, transparent bg) — tiny tab
+      in older browsers
+    • public/og-image-logo.png (512×512, navy bg) — alternative
+      social card showing just the badge (not used in OG tags,
+      kept as asset for future use)
+  - Verified: GET /favicon.svg → 200, content-type image/svg+xml,
+    serves the new wordmark SVG. agent-browser page-load green
+    (no console errors, no hydration mismatches).
+  - Note on font rendering: this Linux sandbox has Liberation
+    Serif (Times-compatible) but NOT Georgia installed. The SVG's
+    font-family "Georgia, 'Times New Roman', 'Liberation Serif',
+    serif" cascades to Liberation Serif in the sharp/librsvg PNG
+    render. In the user's browser, Georgia renders natively (it's
+    a system font on macOS + Windows). Both produce a serif
+    wordmark — visually equivalent for brand recognition.
+
+Stage Summary:
+- PUSH COMPLETE. GitHub origin/main = 5e5cda9. 5 commits landed
+  on top of Phase 16's tip (Phase 16 + 17 worklogs + Phase 17
+  prod-readiness + the favicon wordmark swap).
+- Code.gs is ready at v5 — no further code updates from this
+  side. The remaining Apps Script deploy is the founder's
+  Google-side action (paste → syncSheetColumns → verifySetup →
+  deploy → set NOTIFY_WEBHOOK_URL on Render).
+- Favicon now shows the full "Okomba" wordmark (Georgia serif)
+  + italic "ANALYTICS" caption inside the brand squircle badge,
+  with gold dot accent + z-breathe pulse preserved. PNG
+  fallbacks regenerated at 16/32/180/512. Renders in browser
+  tab via /favicon.svg.
+
+Unresolved issues / risks:
+- CRITICAL: revoke the PAT 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
+  IMMEDIATELY. It has been pasted into chat twice now (this
+  phase + Phase 16 was a different PAT also exposed). Even with
+  sed-redaction in command output, the original bytes are in
+  this conversation transcript + IM gateway metadata logs.
+  Revoke at github.com/settings/tokens → find the token → Revoke.
+  Then for future pushes, set up an SSH deploy key per Phase 16
+  instructions (one-repo scope, no PAT paste in chat ever again).
+- Code.gs deploy is still pending founder action (5 Google-side
+  steps + 1 Render env update). Until done, email delivery is
+  in log-only mode (inquiry submissions still land in the
+  Sheet; no branded email confirmation goes out).
+- Render auto-redeploy: if the Render webhook is configured to
+  auto-deploy on push to main, the new favicon + Phase 17 fixes
+  will be live within minutes. If not, trigger a manual redeploy
+  at dashboard.render.com → okomba-analytics → Manual Deploy →
+  Deploy latest commit.
+- Post-deploy verification checklist (founder-side):
+    1. Visit https://okomba.com — confirm the browser tab shows
+       the new "Okomba" wordmark squircle favicon (hard refresh
+       with Cmd/Ctrl+Shift+R if cached).
+    2. Visit https://okomba.com/api/health — confirm 200.
+    3. View page source — confirm <link rel="icon" type=
+       "image/svg+xml" href="/favicon.svg"> is in the <head>.
+    4. iOS Safari: Add to Home Screen → confirm the
+       apple-touch-icon shows the squircle with "Okomba" wordmark.
