@@ -1,5 +1,13 @@
 /**
- * OKOMBA ANALYTICS — Google Apps Script Engine (v4)
+ * OKOMBA ANALYTICS — Google Apps Script Engine (v5)
+ *
+ * v5 change: saveToSheet() + backupToSheet() now AUTO-ADD any
+ * missing standard columns to the RIGHT of your existing sheet
+ * headers. Your existing rows + data are NEVER touched — the
+ * header row is just extended (blank cells fill the new columns
+ * in old rows). New rows from this point fill every column.
+ * Run syncSheetColumns() from the editor to preview the upgrade
+ * before deploying.
  * ------------------------------------------------
  * The email + backup engine. The Next.js app POSTs here; this script
  * sends branded HTML email through your Gmail and backs data up to
@@ -51,15 +59,20 @@
  *    verify is that SHEET_ID matches your Sheet URL.
  * 6. Run listSheetTabs() to see what tabs + headers already exist
  *    on your Sheet (so you know which tab inquiries will land in).
- * 7. Run verifySetup() from the function dropdown — confirm all
+ * 7. Run syncSheetColumns() — adds any missing standard Okomba
+ *    columns to your EXISTING Inquiries tab by extending the
+ *    header row to the right. Your existing rows + data are
+ *    NEVER touched (they just have blank cells in the new
+ *    columns). New inquiries from this point fill every column.
+ * 8. Run verifySetup() from the function dropdown — confirm all
  *    checks pass (Sheet access OK + FROM_EMAIL alias OK + test
  *    email delivered to support@okomba.com → forwarded to your
  *    reading inbox). DO NOT deploy until verifySetup() is green.
- * 8. Deploy → New deployment → Web app
+ * 9. Deploy → New deployment → Web app
  *      Execute as:  Me
  *      Who has access:  Anyone
- * 9. Copy the Web App URL (/exec).
- * 10. Set it as NOTIFY_WEBHOOK_URL on Render (Render dashboard →
+ * 10. Copy the Web App URL (/exec).
+ * 11. Set it as NOTIFY_WEBHOOK_URL on Render (Render dashboard →
  *    okomba-analytics → Environment).
  *
  * Quota ceiling: the SENDER HOST account's daily MailApp quota is
@@ -106,6 +119,22 @@ const CONFIG = {
   // Your live site URL (used in email footers)
   SITE_URL: "https://www.okomba.com",
 };
+
+// ─── STANDARD INQUIRIES HEADER LAYOUT ───────────────────────
+// The canonical Okomba Inquiries tab columns, in order. New columns
+// added in later versions are appended to the END so existing sheet
+// layouts are never reordered (reordering would shift your old data
+// into the wrong columns).
+//
+// When the Inquiries tab already has data, saveToSheet() and
+// syncSheetColumns() auto-ADD any of these that are missing to the
+// RIGHT of your existing headers (your existing rows + data are
+// NEVER touched — they just have blank cells in the new columns).
+// New inquiries then fill every column going forward.
+const STANDARD_INQUIRY_HEADERS = [
+  "Timestamp", "Name", "Email", "Phone", "WhatsApp",
+  "Service", "Additional Service", "Message", "Source"
+];
 
 // ─── MAIN HANDLER ────────────────────────────────────────────
 function doPost(e) {
@@ -229,46 +258,34 @@ function handleLegacyInquiry(data) {
 }
 
 // ─── GOOGLE SHEETS — SMART INQUIRY PERSISTENCE ───────────────
-// Detects your existing tab + headers and appends rows matching that
-// exact structure. Your existing records are NEVER touched — the
-// script only appends new rows below the existing data, mapping each
-// inquiry field to the column it belongs to (case-insensitive).
+// Detects your existing tab + headers and APPENDS any missing standard
+// columns to the RIGHT of your existing layout (your existing rows +
+// data are NEVER touched — the header row is just extended). New
+// inquiries are then appended below, mapping each field to its column
+// (case-insensitive). Columns the script doesn't recognize (e.g., your
+// custom "Company" or "Budget" columns) are preserved untouched.
 //
 // Scenarios handled:
 //   A) "Inquiries" tab exists with your custom headers → read them,
-//      map each new inquiry field to the matching column, append.
-//      Columns the script doesn't recognize are left blank (your
-//      custom layout is preserved without corruption).
-//   B) "Inquiries" tab doesn't exist yet → create it with the
-//      standard Okomba header layout (Timestamp, Name, Email, Phone,
-//      WhatsApp, Service, Additional Service, Message, Source) and
-//      a bold gold-on-ink header row + frozen first row.
+//      auto-add any missing STANDARD_INQUIRY_HEADERS to the right
+//      (styled gold-on-ink), then append each new inquiry mapped to
+//      the full header set. Your old rows stay where they are with
+//      blank cells in the new columns.
+//   B) "Inquiries" tab doesn't exist yet → create it with the standard
+//      Okomba header layout (bold gold-on-ink header + frozen first
+//      row), then append.
+//
+// Run syncSheetColumns() from the editor to preview exactly which
+// columns will be added without writing any new rows.
 function saveToSheet(data) {
   if (!CONFIG.SHEET_ID || CONFIG.SHEET_ID.indexOf("YOUR_") === 0) return;
   const ss = SpreadsheetApp.openById(CONFIG.SHEET_ID);
   let sheet = ss.getSheetByName(CONFIG.SHEET_NAME);
-  let headers = [];
+  if (!sheet) sheet = ss.insertSheet(CONFIG.SHEET_NAME);
 
-  // Scenario A: tab exists with data → use its existing headers
-  if (sheet && sheet.getLastRow() > 0 && sheet.getLastColumn() > 0) {
-    headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0]
-      .map(function (h) { return String(h || "").trim(); });
-  }
-
-  // Scenario B: tab missing or empty → create with standard headers
-  if (!sheet) {
-    sheet = ss.insertSheet(CONFIG.SHEET_NAME);
-  }
-  if (headers.length === 0) {
-    headers = ["Timestamp", "Name", "Email", "Phone", "WhatsApp",
-               "Service", "Additional Service", "Message", "Source"];
-    sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
-    sheet.getRange(1, 1, 1, headers.length)
-      .setFontWeight("bold")
-      .setBackground("#F0A500")
-      .setFontColor("#0B0F1A");
-    sheet.setFrozenRows(1);
-  }
+  // Ensure all standard headers exist (auto-adds missing ones to the
+  // right of any existing custom headers — old data untouched).
+  const headers = ensureInquiryHeaders_(sheet);
 
   // Map inquiry payload to the existing headers (case-insensitive).
   // Includes common header variants so this works whether your
@@ -315,6 +332,48 @@ function saveToSheet(data) {
   });
 
   sheet.appendRow(row);
+}
+
+// Helper — ensures the Inquiries tab has all STANDARD_INQUIRY_HEADERS.
+// Missing columns are appended to the RIGHT of the existing header row
+// (your old rows + data are NEVER touched — they just have blank cells
+// in the new columns). Returns the final header array in use.
+function ensureInquiryHeaders_(sheet) {
+  let headers = [];
+  if (sheet.getLastRow() > 0 && sheet.getLastColumn() > 0) {
+    headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0]
+      .map(function (h) { return String(h || "").trim(); });
+  }
+  if (headers.length === 0) {
+    // Empty tab → seed with the standard layout
+    headers = STANDARD_INQUIRY_HEADERS.slice();
+    sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
+    sheet.getRange(1, 1, 1, headers.length)
+      .setFontWeight("bold")
+      .setBackground("#F0A500")
+      .setFontColor("#0B0F1A");
+    sheet.setFrozenRows(1);
+  } else {
+    // Existing tab — auto-add any missing standard columns (to the
+    // right). Old rows remain as-is (blank cells in the new columns);
+    // new rows will fill both old and new columns.
+    const existingLower = headers.map(function (h) {
+      return String(h || "").toLowerCase().trim();
+    });
+    const missing = STANDARD_INQUIRY_HEADERS.filter(function (h) {
+      return existingLower.indexOf(h.toLowerCase()) === -1;
+    });
+    if (missing.length > 0) {
+      const startCol = sheet.getLastColumn() + 1;
+      sheet.getRange(1, startCol, 1, missing.length).setValues([missing]);
+      sheet.getRange(1, startCol, 1, missing.length)
+        .setFontWeight("bold")
+        .setBackground("#F0A500")
+        .setFontColor("#0B0F1A");
+      headers = headers.concat(missing);
+    }
+  }
+  return headers;
 }
 
 // ─── EMAIL BODIES ────────────────────────────────────────────
@@ -454,8 +513,10 @@ function sendInvoiceEmail(data) {
 
 // GENERIC SHEET BACKUP (action: backupToSheet) — backupToSheet(tab, rows)
 // Smart-matches existing tab headers if the tab already exists, otherwise
-// creates it with the row's keys as headers. Idempotent and safe with
-// existing data — never touches prior rows.
+// creates it with the row's keys as headers. AUTO-ADDS any columns from
+// the incoming rows that aren't already in the header (extended to the
+// right — existing rows + data are never touched). Idempotent and safe
+// with existing data — never touches prior rows.
 function backupToSheet(tab, rows) {
   if (!tab || !rows || !rows.length) return;
   if (!CONFIG.SHEET_ID || CONFIG.SHEET_ID.indexOf("YOUR_") === 0) return;
@@ -474,6 +535,12 @@ function backupToSheet(tab, rows) {
     sheet = ss.insertSheet(tab);
   }
 
+  // Normalise keys for matching (lowercase + strip spaces/underscores/hyphens)
+  // so "InvoiceNumber" matches "Invoice Number" / "invoice_number" / "INVOICE-NUMBER".
+  const normalize = function (s) {
+    return String(s || "").toLowerCase().replace(/[\s_\-]+/g, "");
+  };
+
   // Empty tab → write headers from the first row's keys (styled)
   if (headers.length === 0) {
     headers = Object.keys(rows[0]);
@@ -483,13 +550,35 @@ function backupToSheet(tab, rows) {
       .setBackground("#F0A500")
       .setFontColor("#0B0F1A");
     sheet.setFrozenRows(1);
+  } else {
+    // Existing tab — auto-add any columns from the incoming rows that
+    // aren't already in the header (to the right). Existing rows are
+    // untouched (blank cells in the new columns); new rows fill every
+    // column.
+    const existingNorm = headers.map(normalize);
+    const seen = {};
+    existingNorm.forEach(function (n) { seen[n] = true; });
+    const missing = [];
+    rows.forEach(function (r) {
+      Object.keys(r).forEach(function (k) {
+        const n = normalize(k);
+        if (!seen[n]) {
+          seen[n] = true;
+          missing.push(k);
+        }
+      });
+    });
+    if (missing.length > 0) {
+      const startCol = sheet.getLastColumn() + 1;
+      sheet.getRange(1, startCol, 1, missing.length).setValues([missing]);
+      sheet.getRange(1, startCol, 1, missing.length)
+        .setFontWeight("bold")
+        .setBackground("#F0A500")
+        .setFontColor("#0B0F1A");
+      headers = headers.concat(missing);
+    }
   }
 
-  // Normalise keys for matching (lowercase + strip spaces/underscores/hyphens)
-  // so "InvoiceNumber" matches "Invoice Number" / "invoice_number" / "INVOICE-NUMBER".
-  const normalize = function (s) {
-    return String(s || "").toLowerCase().replace(/[\s_\-]+/g, "");
-  };
   const headerNorm = headers.map(normalize);
 
   const values = rows.map(function (r) {
@@ -536,6 +625,56 @@ function listSheetTabs() {
   Logger.log("\nCONFIG.SHEET_NAME = '" + CONFIG.SHEET_NAME +
     "' — inquiries will be appended to this tab if it exists, " +
     "or a new one created with the standard header layout.");
+}
+
+// ─── PRE-DEPLOY COLUMN SYNC (run from the editor) ───────────
+// Manually triggers the column auto-add on the Inquiries tab. Run this
+// BEFORE deploying to see exactly which standard columns will be added
+// to your existing sheet — extends the header row to the right, your
+// existing rows + data are NEVER touched (blank cells fill the new
+// columns in old rows). New rows from this point fill both old and
+// new columns. Useful for previewing the upgrade without waiting for
+// the first live inquiry to trigger it.
+function syncSheetColumns() {
+  if (!CONFIG.SHEET_ID || CONFIG.SHEET_ID.indexOf("YOUR_") === 0) {
+    Logger.log("SHEET_ID not configured.");
+    return;
+  }
+  const ss = SpreadsheetApp.openById(CONFIG.SHEET_ID);
+
+  // Inquiries tab (auto-creates if missing)
+  let sheet = ss.getSheetByName(CONFIG.SHEET_NAME);
+  if (!sheet) sheet = ss.insertSheet(CONFIG.SHEET_NAME);
+
+  const before = (sheet.getLastRow() > 0 && sheet.getLastColumn() > 0)
+    ? sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0]
+        .map(function (h) { return String(h || "").trim(); })
+    : [];
+  const after = ensureInquiryHeaders_(sheet);
+
+  Logger.log("── INQUIRIES TAB (CONFIG.SHEET_NAME = '" + CONFIG.SHEET_NAME + "') ──");
+  Logger.log("Header BEFORE: " + (before.length ? JSON.stringify(before) : "(empty/none)"));
+  Logger.log("Header AFTER:  " + JSON.stringify(after));
+
+  if (before.length === 0) {
+    Logger.log("  ✓ Tab was empty → seeded with standard Okomba header layout.");
+    return;
+  }
+
+  const beforeLower = before.map(function (h) {
+    return String(h || "").toLowerCase().trim();
+  });
+  const added = after.filter(function (h) {
+    return beforeLower.indexOf(h.toLowerCase()) === -1;
+  });
+
+  if (added.length > 0) {
+    Logger.log("  ✓ Added " + added.length + " new column(s) to the RIGHT: " + JSON.stringify(added));
+    Logger.log("  ✓ Your existing rows + data are untouched (blank cells in the new columns).");
+    Logger.log("  ✓ New inquiries will fill every column going forward.");
+  } else {
+    Logger.log("  ✓ No new columns needed — sheet already has every standard header.");
+  }
 }
 
 // ─── SETUP VERIFICATION (run once after CONFIG is filled) ─────
