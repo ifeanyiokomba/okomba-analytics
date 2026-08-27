@@ -1783,3 +1783,88 @@ Unresolved issues / risks:
   Domains AFTER first deploy (auto-provisions Let's Encrypt SSL).
 - The 15-min webDevReview cron (job 339379) will keep monitoring the
   live site once the deploy lands.
+
+---
+Task ID: 13
+Agent: main (orchestrator)
+Task: Stage 13 — Reconfigure Google-apps-script/Code.gs for the
+multi-account email architecture (support@okomba.com is a custom-
+domain Google account, NOT Workspace; receives via forwarding; sends
+via Google SMTP alias on a different Gmail account; the Sheet is owned
+by yet another account).
+
+Work Log:
+- DIAGNOSED the gap: the previous Code.gs used MailApp.sendEmail()
+  WITHOUT an explicit `from:` parameter. This means every email went
+  out as the account running the script — NOT as support@okomba.com.
+  The founder's reply inbox and branded identity wouldn't match.
+- Updated Code.gs (3 targeted edits + 1 insert, ~150 lines added,
+  total now 549 lines):
+  • Expanded CONFIG with FROM_EMAIL ("support@okomba.com"),
+    REPLY_TO_EMAIL ("support@okomba.com"), and kept ADMIN_EMAIL.
+    The CONFIG comment explains each must be a registered "Send mail
+    as" alias of the account running the script.
+  • Updated sendSimpleEmail() to pass `from: CONFIG.FROM_EMAIL` so
+    every outbound email is branded as support@okomba.com. Added
+    replyTo fallback to CONFIG.REPLY_TO_EMAIL when no per-call
+    replyTo is provided.
+  • Added verifySetup() function (~90 lines) that probes every
+    dependency BEFORE deploy:
+      (1) Sheet access — verifies SpreadsheetApp.openById() works
+          with the configured SHEET_ID; otherwise instructs to share
+          the Sheet with the running account as Editor.
+      (2) Aliases — calls MailApp.getAliases() and lists all
+          configured "Send mail as" addresses so the founder can see
+          which account is running and what aliases are available.
+      (3) FROM_EMAIL alias check — confirms CONFIG.FROM_EMAIL is in
+          the aliases list (or matches the running account's primary
+          email); otherwise instructs how to add it via Gmail
+          Settings → Accounts and Import → Send mail as (with
+          smtp.gmail.com:465 + support@okomba.com credentials + a
+          Google App Password).
+      (4) Test email — sends a real email to ADMIN_EMAIL with the
+          configured FROM_EMAIL + REPLY_TO_EMAIL, so the founder can
+          confirm the full send path works AND that the forwarder
+          delivers to their reading inbox.
+    All checks log clearly with ✓ / ✗ markers; returns a JSON
+    results object.
+  • Rewrote the header SETUP comments (lines 24-66) to document the
+    three-account architecture (SENDER ALIAS / SENDER HOST / SHEET
+    OWNER) with explicit steps:
+      1. Confirm support@okomba.com is a "Send mail as" alias of the
+         SENDER HOST Gmail account.
+      2. Share the Sheet with the SENDER HOST account as Editor.
+      3. Log into Apps Script as the SENDER HOST account.
+      4. Paste Code.gs, fill SHEET_ID only.
+      5. Run verifySetup() — DO NOT deploy until green.
+      6-9. Deploy → Web app → copy /exec URL → set as
+           NOTIFY_WEBHOOK_URL on Render.
+    Also documents the quota ceiling: the SENDER HOST account's daily
+    MailApp quota counts (100/day for personal Gmail, 1500/day for
+    Workspace).
+- Verified Code.gs parses cleanly via `node --check` (copied to
+  /tmp/code-check.js since node doesn't recognize the .gs extension).
+- About to commit + push this update so Render can rebuild with the
+  new code available (though the actual deployment is the founder's
+  Google account action, not Render).
+
+Stage Summary:
+- Code.gs is now multi-account-aware: sends AS support@okomba.com
+  via the SENDER HOST account's alias, with explicit reply-to
+  routing through the forwarder.
+- The verifySetup() function is the founder's preflight check — it
+  must be run BEFORE deploying as a Web App. If it returns green,
+  the deploy is safe.
+- Three-account architecture documented in-code so future agents /
+  handover can reason about it without re-discovery.
+
+Unresolved issues / risks:
+- The SENDER HOST account's identity is still unconfirmed — verifySetup()
+  will reveal it (Session.getActiveUser().getEmail()). If it turns out
+  to be a personal Gmail account, the 100/day quota ceiling stands. If
+  it's a Workspace account, 1500/day.
+- If support@okomba.com is NOT yet configured as a "Send mail as"
+  alias on the SENDER HOST account, verifySetup() will fail at step 3
+  with explicit instructions on how to add it.
+- If the Sheet is NOT yet shared with the SENDER HOST account,
+  verifySetup() will fail at step 1 with explicit instructions.

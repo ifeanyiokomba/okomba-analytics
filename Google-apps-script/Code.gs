@@ -21,29 +21,76 @@
  * AUTO-BACKUP: every new enquiry adds a row to the "Inquiries" tab;
  * every invoice email adds a row to the "Invoices" tab.
  *
- * SETUP (first time):
- * 1. Go to https://script.google.com → New project → "Okomba Webhook"
- * 2. Paste this entire file into the editor
- * 3. Fill the CONFIG section below
- * 4. Deploy → New deployment → Web app
+ * SETUP (multi-account architecture — read this carefully):
+ *
+ * The Okomba email setup uses THREE accounts (deliberately):
+ *   • SENDER ALIAS  = support@okomba.com  (custom-domain address,
+ *                     NOT a Workspace account; receives mail via
+ *                     forwarding to the inbox you actually read)
+ *   • SENDER HOST    = a Gmail account where support@okomba.com is
+ *                     configured as a "Send mail as" alias using
+ *                     Google SMTP (smtp.gmail.com + the support@
+ *                     okomba.com credentials). THIS is the account
+ *                     that should RUN this Apps Script.
+ *   • SHEET OWNER    = a different Google account that owns the
+ *                     Google Sheet. Share the sheet with the SENDER
+ *                     HOST account as Editor.
+ *
+ * Steps:
+ * 1. In the SENDER HOST Gmail account → Settings → Accounts and
+ *    Import → Send mail as → confirm support@okomba.com is listed.
+ *    (If missing: "Add another email address" → SMTP server
+ *    smtp.gmail.com:465 → support@okomba.com username + a Google
+ *    App Password for that account.)
+ * 2. In the SHEET OWNER account → open the Sheet → Share → add the
+ *    SENDER HOST email as Editor.
+ * 3. Log into https://script.google.com as the SENDER HOST account
+ *    → New project → name it "Okomba Webhook".
+ * 4. Paste this entire file into the editor.
+ * 5. Fill the CONFIG section below (only SHEET_ID needs changing).
+ * 6. Run verifySetup() from the function dropdown — confirm all
+ *    checks pass (Sheet access OK + FROM_EMAIL alias OK + test
+ *    email delivered to support@okomba.com → forwarded to your
+ *    reading inbox). DO NOT deploy until verifySetup() is green.
+ * 7. Deploy → New deployment → Web app
  *      Execute as:  Me
  *      Who has access:  Anyone
- * 5. Copy the Web App URL
- * 6. Set it as the NOTIFY_WEBHOOK_URL environment variable on your
- *    Next.js host (Render dashboard → Environment).
+ * 8. Copy the Web App URL (/exec).
+ * 9. Set it as NOTIFY_WEBHOOK_URL on Render (Render dashboard →
+ *    okomba-analytics → Environment).
  *
- * The app then forwards every notification here automatically.
+ * Quota ceiling: the SENDER HOST account's daily MailApp quota is
+ * what counts. Personal Gmail = 100/day; Workspace = 1500/day.
+ * If you exceed, emails silently fail past the cap (no customer-
+ * facing error). See verifySetup() output for the active account.
  */
 
 // ─── CONFIG — UPDATE THESE VALUES ───────────────────────────
+// Only SHEET_ID needs to change in the common case. The other fields
+// are pre-filled for the Okomba setup. Run verifySetup() to confirm
+// everything is wired before deploying.
 const CONFIG = {
-  // Google Sheet ID (from /spreadsheets/d/YOUR_ID_HERE/edit)
+  // Google Sheet ID (from /spreadsheets/d/YOUR_ID_HERE/edit).
+  // The Sheet is owned by a different account; share it as Editor with
+  // the account running this script (the SENDER HOST) before deploying.
   SHEET_ID: "YOUR_GOOGLE_SHEET_ID_HERE",
 
-  // Sheet tab name for inquiries
+  // Sheet tab name for inquiries (auto-created on first use).
   SHEET_NAME: "Inquiries",
 
-  // Admin email — receives inquiry alerts
+  // The address every email is SENT FROM. Must be a "Send mail as"
+  // alias of the account running this script — otherwise MailApp will
+  // throw "Invalid argument: from". Run verifySetup() to confirm.
+  FROM_EMAIL: "support@okomba.com",
+
+  // Where replies should land. Defaults to support@okomba.com, which
+  // forwards to the inbox you actually read. Set to the same value
+  // unless you want replies routed elsewhere.
+  REPLY_TO_EMAIL: "support@okomba.com",
+
+  // Destination for admin alerts (inquiry notifications, system
+  // alerts). Same as FROM_EMAIL by default — your forwarder delivers
+  // it to the inbox you actually read.
   ADMIN_EMAIL: "support@okomba.com",
 
   // Business identity for email templates
@@ -279,8 +326,24 @@ function footerBlock() {
 
 function sendSimpleEmail(opts) {
   if (!opts.to) return;
-  const mail = { to: opts.to, subject: opts.subject, body: opts.body };
-  if (opts.replyTo) mail.replyTo = opts.replyTo;
+  const mail = {
+    to: opts.to,
+    subject: opts.subject,
+    body: opts.body,
+    // Send FROM the configured business address. This requires
+    // CONFIG.FROM_EMAIL to be a registered "Send mail as" alias of
+    // the account running this script — verify with MailApp.getAliases()
+    // (or run verifySetup()) before deploying.
+    from: CONFIG.FROM_EMAIL,
+  };
+  // replyTo: explicit per-call value wins; otherwise fall back to
+  // CONFIG.REPLY_TO_EMAIL so replies route to support@okomba.com
+  // (which forwards to your reading inbox).
+  if (opts.replyTo) {
+    mail.replyTo = opts.replyTo;
+  } else if (CONFIG.REPLY_TO_EMAIL) {
+    mail.replyTo = CONFIG.REPLY_TO_EMAIL;
+  }
   if (opts.html) mail.htmlBody = opts.html;
   if (opts.attachments && opts.attachments.length) {
     mail.attachments = opts.attachments.map(function (a) {
@@ -352,6 +415,98 @@ function backupToSheet(tab, rows) {
     });
   });
   sheet.getRange(sheet.getLastRow() + 1, 1, values.length, values[0].length).setValues(values);
+}
+
+// ─── SETUP VERIFICATION (run once after CONFIG is filled) ─────
+// Probes every dependency before going live. Run from the editor
+// function dropdown after pasting this file + filling SHEET_ID.
+// DO NOT deploy as a Web App until all checks are green.
+function verifySetup() {
+  const results = {
+    runningAs: Session.getActiveUser().getEmail(),
+    sheetAccessible: false,
+    aliases: [],
+    fromIsAlias: false,
+    testEmailSent: false,
+    errors: [],
+  };
+
+  // 1. Sheet access (must be shared with the running account)
+  try {
+    if (!CONFIG.SHEET_ID || CONFIG.SHEET_ID.indexOf("YOUR_") === 0) {
+      results.errors.push(
+        "SHEET_ID not configured — still 'YOUR_GOOGLE_SHEET_ID_HERE'. " +
+        "Get it from the Sheet URL: /spreadsheets/d/THIS_PART/edit"
+      );
+    } else {
+      const ss = SpreadsheetApp.openById(CONFIG.SHEET_ID);
+      ss.getRange("A1").getValue(); // probe read
+      results.sheetAccessible = true;
+    }
+  } catch (e) {
+    results.errors.push(
+      "Sheet access failed: " + e.message + " — Share the Sheet (owned by " +
+      "the SHEET OWNER account) with the running account " + results.runningAs +
+      " as Editor."
+    );
+  }
+
+  // 2. List configured "Send mail as" aliases
+  try {
+    results.aliases = MailApp.getAliases();
+  } catch (e) {
+    results.errors.push("MailApp.getAliases() failed: " + e.message);
+  }
+
+  // 3. Is CONFIG.FROM_EMAIL a registered alias of this account?
+  results.fromIsAlias =
+    results.aliases.indexOf(CONFIG.FROM_EMAIL) >= 0 ||
+    results.runningAs.toLowerCase() === CONFIG.FROM_EMAIL.toLowerCase();
+  if (!results.fromIsAlias) {
+    results.errors.push(
+      "FROM_EMAIL ('" + CONFIG.FROM_EMAIL + "') is NOT a registered alias of " +
+      results.runningAs + ". Configure it under Gmail Settings → Accounts and " +
+      "Import → Send mail as (use SMTP smtp.gmail.com:465 + support@okomba.com " +
+      "credentials + a Google App Password). Available aliases on this account: [" +
+      (results.aliases.length ? results.aliases.join(", ") : "none — primary only") + "]"
+    );
+  }
+
+  // 4. Send a real test email to confirm the full send path works.
+  if (results.fromIsAlias) {
+    try {
+      MailApp.sendEmail({
+        to: CONFIG.ADMIN_EMAIL,
+        from: CONFIG.FROM_EMAIL,
+        replyTo: CONFIG.REPLY_TO_EMAIL,
+        subject: "✓ Okomba Webhook — verifySetup() passed",
+        body:
+          "All checks passed — you are ready to receive live POSTs from " +
+          "the Next.js app.\n\n" +
+          "Running as:  " + results.runningAs + "\n" +
+          "FROM:        " + CONFIG.FROM_EMAIL + "\n" +
+          "REPLY-TO:    " + CONFIG.REPLY_TO_EMAIL + "\n" +
+          "ADMIN:       " + CONFIG.ADMIN_EMAIL + "\n" +
+          "SHEET_ID:    " + CONFIG.SHEET_ID + "\n\n" +
+          "Aliases on this account (" + results.aliases.length + " total):\n" +
+          (results.aliases.length ? results.aliases.map(a => "  • " + a).join("\n") : "  (primary only)") + "\n\n" +
+          "Next: Deploy → New deployment → Web app (Execute as: Me, Access: Anyone) " +
+          "→ copy the /exec URL → paste into Render as NOTIFY_WEBHOOK_URL.",
+      });
+      results.testEmailSent = true;
+    } catch (e) {
+      results.errors.push("Test email send failed: " + e.message);
+    }
+  }
+
+  Logger.log("verifySetup() results:\n" + JSON.stringify(results, null, 2));
+  if (results.errors.length === 0) {
+    Logger.log("\n✓ ALL CHECKS PASSED — safe to deploy.");
+  } else {
+    Logger.log("\n✗ " + results.errors.length + " issue(s) to fix:");
+    results.errors.forEach(function (err) { Logger.log("  - " + err); });
+  }
+  return results;
 }
 
 // ─── TEST (run manually in the editor) ───────────────────────
