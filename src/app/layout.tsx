@@ -45,8 +45,17 @@ export const metadata: Metadata = {
   authors: [{ name: "Okomba Analytics" }],
   creator: "Okomba Analytics",
   icons: {
-    icon: "/favicon.svg",
-    apple: "/favicon.svg",
+    // SVG brand mark is primary (modern browsers + Chrome/Firefox
+    // support animated SVG favicons — the z-breathe pulse lives on).
+    icon: [
+      { url: "/favicon.svg", type: "image/svg+xml" },
+      { url: "/favicon-32.png", sizes: "32x32", type: "image/png" },
+      { url: "/favicon-16.png", sizes: "16x16", type: "image/png" },
+    ],
+    // Apple requests a square PNG (180x180 ideal). SVG doesn't render
+    // for apple-touch-icon in iOS Safari, so use the PNG render.
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
+    shortcut: ["/favicon.svg"],
   },
   openGraph: {
     title: "Okomba Analytics — Digital Products, Systems & Experiences",
