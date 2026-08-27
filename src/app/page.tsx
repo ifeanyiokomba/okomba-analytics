@@ -27,10 +27,15 @@ import { ScrollProgress } from "@/components/site/scroll-progress";
 import { BackToTop } from "@/components/site/back-to-top";
 import { CookieConsent } from "@/components/site/cookie-consent";
 import { AiChatWidget } from "@/components/site/ai-chat-widget";
+import { AmbientBackground } from "@/components/site/ambient-background";
 
 /* ── Lazy-loaded: only fetched when actually opened ── */
 const InquiryModal = dynamic(
   () => import("@/components/site/inquiry-modal").then((m) => m.InquiryModal),
+  { ssr: false }
+);
+const ServicesShowcase = dynamic(
+  () => import("@/components/site/services-showcase").then((m) => m.ServicesShowcase),
   { ssr: false }
 );
 const AdminPortal = dynamic(
@@ -52,6 +57,7 @@ export default function Home() {
   const [route, setRoute] = useState<"home" | "admin" | { portal: string }>("home");
   const [modalService, setModalService] = useState<Service | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
+  const [showcaseOpen, setShowcaseOpen] = useState(false);
   const [toast, setToast] = useState<ToastData | null>(null);
 
   // Hash routing for the admin portal + client portal (sandbox preview).
@@ -118,6 +124,7 @@ export default function Home() {
   // ── Marketing site ──
   return (
     <div className="flex min-h-screen flex-col">
+      <AmbientBackground />
       <a
         href="#main"
         className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[300] focus:rounded-lg focus:bg-gold focus:px-4 focus:py-2 focus:font-semibold focus:text-ink"
@@ -131,7 +138,10 @@ export default function Home() {
       <CookieConsent />
 
       <main id="main" className="flex-1">
-        <Hero onGetStarted={() => openInquiry(null)} />
+        <Hero
+          onGetStarted={() => openInquiry(null)}
+          onViewServices={() => setShowcaseOpen(true)}
+        />
         <CapabilityTicker />
         <StatsBand />
         <ProblemSection />
@@ -161,6 +171,15 @@ export default function Home() {
           service={modalService}
           onClose={closeModal}
           onSuccess={handleSuccess}
+        />
+      )}
+
+      {/* Services Showcase (Stage 10) — opened from Hero secondary CTA */}
+      {showcaseOpen && (
+        <ServicesShowcase
+          open={showcaseOpen}
+          onClose={() => setShowcaseOpen(false)}
+          onRequestService={(svc) => openInquiry(svc)}
         />
       )}
 

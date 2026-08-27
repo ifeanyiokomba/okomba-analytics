@@ -12,9 +12,17 @@
  * Contract: third-party scripts (analytics, payments) only inject after
  * the visitor accepts cookies. "Essential only" and undecided visitors
  * get zero third-party requests.
+ *
+ * Stage 10 audit fix: the env var name is now aligned with
+ * layout.tsx / analytics.ts — NEXT_PUBLIC_GA4_MEASUREMENT_ID. Previously
+ * this read the non-existent NEXT_PUBLIC_GA_MEASUREMENT_ID, so the
+ * consent-gated GA4 injection NEVER fired even after the visitor
+ * accepted. The single source of truth for the GA4 ID lives here now;
+ * layout.tsx no longer unconditionally injects GA4 (it relied on the
+ * wrong gate and bypassed consent entirely).
  */
 
-const GA_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
+const GA_ID = process.env.NEXT_PUBLIC_GA4_MEASUREMENT_ID;
 export const CONSENT_STORAGE_KEY = "okomba_cookie_consent";
 export const CONSENT_ACCEPTED = "accepted";
 
@@ -51,10 +59,10 @@ export function loadThirdPartyScripts(): void {
   // Google Analytics 4 — only when a measurement ID is configured
   if (GA_ID) {
     injectScript("ga-gtag-src", `https://www.googletagmanager.com/gtag/js?id=${GA_ID}`);
-    const init = document.createElement("script");
-    init.id = "ga-gtag-init";
     if (!document.getElementById("ga-gtag-init")) {
-      init.text = `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${GA_ID}',{anonymize_ip:true});`;
+      const init = document.createElement("script");
+      init.id = "ga-gtag-init";
+      init.text = `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}window.gtag=gtag;gtag('js',new Date());gtag('config','${GA_ID}',{anonymize_ip:true});`;
       document.head.appendChild(init);
     }
   }

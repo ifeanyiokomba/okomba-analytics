@@ -1,6 +1,5 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Space_Grotesk, JetBrains_Mono } from "next/font/google";
-import Script from "next/script";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 
@@ -85,8 +84,6 @@ export const viewport: Viewport = {
   initialScale: 1,
 };
 
-const GA4_ID = process.env.NEXT_PUBLIC_GA4_MEASUREMENT_ID || "";
-
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -99,18 +96,15 @@ export default function RootLayout({
       >
         {children}
         <Toaster />
-        {/* Google Analytics 4 (Module 8C) — only loads when configured */}
-        {GA4_ID && (
-          <>
-            <Script
-              src={`https://www.googletagmanager.com/gtag/js?id=${GA4_ID}`}
-              strategy="afterInteractive"
-            />
-            <Script id="ga4-init" strategy="afterInteractive">
-              {`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}window.gtag=gtag;gtag('js',new Date());gtag('config','${GA4_ID}',{anonymize_ip:true});`}
-            </Script>
-          </>
-        )}
+        {/*
+          Google Analytics 4 (Module 8C) is NOT loaded here unconditionally.
+          It is consent-gated: the CookieConsent component calls
+          loadThirdPartyScripts() (src/lib/consent-scripts.ts) only after
+          the visitor accepts cookies. This honours the cookie contract
+          and the original Phase-1 Module-1 design. trackEvent() in
+          src/lib/analytics.ts still pushes to window.dataLayer so the
+          funnel stays debuggable before consent.
+        */}
       </body>
     </html>
   );

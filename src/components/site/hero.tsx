@@ -1,12 +1,13 @@
 "use client";
 
-import { ArrowRight, CheckCircle2, MessageCircle } from "lucide-react";
+import { ArrowRight, CheckCircle2, LayoutGrid } from "lucide-react";
 import { Reveal } from "./reveal";
 import { AnimatedHeadline } from "./animated-headline";
 import { HeroVisual } from "./hero-visual";
 
 type HeroProps = {
   onGetStarted: () => void;
+  onViewServices: () => void;
 };
 
 const HERO_PROOF = ["14 service lines", "6-step delivery", "Post-launch support"];
@@ -18,11 +19,16 @@ const ROTATING_WORDS = ["automate.", "scale.", "connect.", "see clearly.", "move
  * headline with typing rotation → supporting copy → CTAs → micro-trust.
  * Right: live-UI cards cycling through real Okomba service workflows.
  * Mobile-first: copy stacks above a compact visual.
+ *
+ * Stage 10 CTA redesign (Termii-inspired, mobile-first):
+ *   • Primary CTA "Start a Project" — full-width on mobile, gold gradient
+ *     fill, larger padding → unambiguously the most important action.
+ *   • Secondary CTA "Explore our services" — opens the new ServicesShowcase
+ *     modal; shorter, dark-ink outlined, contrasting colour. Sits inline
+ *     on desktop (primary wider than secondary) and full-width under the
+ *     primary on mobile.
  */
-export function Hero({ onGetStarted }: HeroProps) {
-  const scrollTo = (id: string) =>
-    document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
-
+export function Hero({ onGetStarted, onViewServices }: HeroProps) {
   return (
     <section
       id="hero"
@@ -65,27 +71,30 @@ export function Hero({ onGetStarted }: HeroProps) {
               </p>
             </Reveal>
 
-            {/* CTAs — stacked full-width on mobile, inline from sm */}
+            {/* CTAs — Termii-style: primary full-width + larger on mobile,
+                secondary shorter & contrasting; primary wider on desktop. */}
             <Reveal delay={270}>
-              <div className="mt-9 flex flex-col items-stretch justify-center gap-3.5 sm:flex-row sm:items-center lg:justify-start">
+              <div className="mt-9 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center lg:justify-start">
+                {/* Primary — most important, gold gradient, wider */}
                 <button
                   onClick={onGetStarted}
-                  className="btn-shine group inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-ink px-8 py-4 text-[15px] font-semibold text-white shadow-[0_14px_38px_-12px_rgba(20,25,38,0.5)] transition-all hover:-translate-y-0.5 hover:bg-[#1d2436] active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold sm:w-auto"
+                  className="btn-shine group inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-gold-light to-gold px-8 py-4 text-[15.5px] font-bold text-ink shadow-gold-lg transition-all hover:-translate-y-0.5 hover:shadow-gold active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold sm:w-auto sm:px-9 sm:py-4"
                 >
                   Start a Project
                   <ArrowRight
                     size={17}
-                    strokeWidth={2.4}
+                    strokeWidth={2.6}
                     className="transition-transform group-hover:translate-x-1"
                     aria-hidden="true"
                   />
                 </button>
+                {/* Secondary — contrasting dark ink outlined, shorter */}
                 <button
-                  onClick={() => scrollTo("contact")}
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-black/12 bg-white px-8 py-4 text-[15px] font-medium text-foreground shadow-sm transition-all hover:-translate-y-0.5 hover:border-gold/40 hover:text-gold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold sm:w-auto"
+                  onClick={onViewServices}
+                  className="group inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-ink/15 bg-ink px-6 py-3.5 text-[14.5px] font-semibold text-white shadow-[0_12px_32px_-14px_rgba(20,25,38,0.5)] transition-all hover:-translate-y-0.5 hover:border-gold/50 hover:text-gold-light focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold sm:w-auto sm:px-7"
                 >
-                  <MessageCircle size={16} aria-hidden="true" />
-                  Talk through your idea
+                  <LayoutGrid size={16} aria-hidden="true" />
+                  Explore our services
                 </button>
               </div>
             </Reveal>

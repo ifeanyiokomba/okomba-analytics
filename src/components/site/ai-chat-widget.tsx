@@ -1,20 +1,26 @@
 "use client";
 
 /**
- * AI Service Finder widget (Phase-2 Module 7).
+ * AI Service Finder widget (Phase-2 Module 7 — redesigned Stage 10).
  *
- * Floating bottom-right launcher — "Talk Through Your Ideas 💡"
- * (label fixed by spec). Opens a mobile-first chat panel powered
- * by /api/ai/chat (z-ai runs server-side; the model only ever
- * recommends real services from the live catalog).
+ * Launcher is now a compact floating chat-icon FAB on the right edge
+ * (replaces the long "Talk Through Your Ideas 💡" pill that was
+ * covering content). The FAB:
+ *   • floats fixed and travels with scroll
+ *   • runs a gentle bounce + ping-ring animation at intervals to
+ *     draw the eye (respects prefers-reduced-motion)
+ *   • emits a soft two-note chime at intervals (Web Audio API —
+ *     no asset, ~0.4kb). Autoplay-policy compliant: chime only
+ *     arms after the visitor's first interaction with the page.
+ *     A mute toggle lives in the chat header.
  *
- * Chat history persists in localStorage so a returning visitor
- * sees their conversation. Typing dots while the model thinks.
+ * Chat panel logic (history, /api/ai/chat, lead capture, GA4)
+ * is unchanged from the previous implementation.
  */
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Lightbulb, Send, Sparkles, X, CheckCircle2, ShieldCheck, ExternalLink } from "lucide-react";
+import { MessageCircle, Send, Sparkles, X, CheckCircle2, ShieldCheck, ExternalLink, Volume2, VolumeX } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { trackEvent, aiChatServiceHref } from "@/lib/analytics";
 
@@ -22,6 +28,7 @@ type ChatMessage = { role: "user" | "assistant"; content: string; at?: number; s
 
 const STORAGE_KEY = "okomba-ai-chat-v1";
 const SESSION_KEY = "okomba-ai-chat-session";
+const SOUND_PREF_KEY = "okomba-ai-chat-sound";
 
 const SUGGESTIONS = [
   "I need a website for my school",
@@ -69,6 +76,52 @@ function loadSessionId(): string {
   return id;
 }
 
+function loadSoundPref(): boolean {
+  if (typeof window === "undefined") return false;
+  try {
+    return window.localStorage.getItem(SOUND_PREF_KEY) !== "off";
+  } catch {
+    return false;
+  }
+}
+
+/* ── Web Audio chime (generated, no asset) ─────────────────── */
+function playChime(): void {
+  if (typeof window === "undefined") return;
+  try {
+    const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+    if (!AudioCtx) return;
+    const ctx = new AudioCtx();
+    const now = ctx.currentTime;
+    // Soft two-note sine arpeggio (G5 → C6), low gain, short release
+    const notes = [
+      { f: 784.0, t: 0.0, d: 0.12 },   // G5
+      { f: 1046.5, t: 0.11, d: 0.18 }, // C6
+    ];
+    const master = ctx.createGain();
+    master.gain.value = 0.06; // quiet
+    master.connect(ctx.destination);
+    for (const n of notes) {
+      const osc = ctx.createOscillator();
+      osc.type = "sine";
+      osc.frequency.value = n.f;
+      const g = ctx.createGain();
+      const start = now + n.t;
+      g.gain.setValueAtTime(0, start);
+      g.gain.linearRampToValueAtTime(1, start + 0.015);
+      g.gain.exponentialRampToValueAtTime(0.0001, start + n.d);
+      osc.connect(g);
+      g.connect(master);
+      osc.start(start);
+      osc.stop(start + n.d + 0.02);
+    }
+    // Close the context after the tail to free the AudioContext slot
+    setTimeout(() => { try { ctx.close(); } catch { /* noop */ } }, 600);
+  } catch {
+    /* audio must never break UX */
+  }
+}
+
 export function AiChatWidget() {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([WELCOME]);
@@ -77,16 +130,20 @@ export function AiChatWidget() {
   const [typing, setTyping] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [nudge, setNudge] = useState(false);
+  const [bouncing, setBouncing] = useState(false);
+  const [soundOn, setSoundOn] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const sessionIdRef = useRef<string>("ssr");
+  const interactedRef = useRef(false);
 
-  // Restore history + session
+  // Restore history + session + sound pref
   useEffect(() => {
     const { messages: m, captured: c } = loadHistory();
     setMessages(m);
     setCaptured(c);
     sessionIdRef.current = loadSessionId();
+    setSoundOn(loadSoundPref());
     // Gentle nudge after 14s on first visit (never for returning visitors)
     if (m.length <= 1) {
       const t = setTimeout(() => setNudge(true), 14000);
@@ -112,6 +169,69 @@ export function AiChatWidget() {
       setTimeout(() => inputRef.current?.focus(), 250);
     }
   }, [open]);
+
+  // ── Attention loop: bounce + chime at intervals ──────────────
+  // Bounce runs visually whether or not sound is on; chime only when
+  // sound is enabled AND the visitor has interacted with the page at
+  // least once (browser autoplay-policy compliance).
+  useEffect(() => {
+    if (open) return; // no attention loop while the panel is open
+    if (typeof window === "undefined") return;
+
+    const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
+
+    // First attention pulse ~9s after mount (if not opened), then every ~28s
+    let bounceTimer: ReturnType<typeof setTimeout>;
+    let chimeTimer: ReturnType<typeof setTimeout>;
+
+    const scheduleBounce = (delay: number) => {
+      bounceTimer = setTimeout(() => {
+        if (reduce) return;
+        setBouncing(true);
+        setTimeout(() => setBouncing(false), 1600);
+        scheduleBounce(28000);
+      }, delay);
+    };
+
+    const scheduleChime = (delay: number) => {
+      chimeTimer = setTimeout(() => {
+        if (soundOn && interactedRef.current) playChime();
+        scheduleChime(32000);
+      }, delay);
+    };
+
+    scheduleBounce(9000);
+    scheduleChime(9000);
+
+    return () => {
+      clearTimeout(bounceTimer);
+      clearTimeout(chimeTimer);
+    };
+  }, [open, soundOn]);
+
+  // Mark first user interaction (anywhere on the page) to arm the chime
+  useEffect(() => {
+    const arm = () => { interactedRef.current = true; };
+    const opts: AddEventListenerOptions = { once: true, passive: true };
+    window.addEventListener("pointerdown", arm, opts);
+    window.addEventListener("keydown", arm, opts);
+    window.addEventListener("scroll", arm, opts);
+    return () => {
+      window.removeEventListener("pointerdown", arm);
+      window.removeEventListener("keydown", arm);
+      window.removeEventListener("scroll", arm);
+    };
+  }, []);
+
+  const toggleSound = useCallback(() => {
+    setSoundOn((prev) => {
+      const next = !prev;
+      try { window.localStorage.setItem(SOUND_PREF_KEY, next ? "on" : "off"); } catch { /* noop */ }
+      // Play a confirming chime immediately when enabling (user gesture → allowed)
+      if (next) playChime();
+      return next;
+    });
+  }, []);
 
   const send = useCallback(
     async (text: string) => {
@@ -193,7 +313,7 @@ export function AiChatWidget() {
 
   return (
     <>
-      {/* ── Launcher ── */}
+      {/* ── Floating chat-icon launcher (compact FAB) ── */}
       <AnimatePresence>
         {!open && (
           <motion.div
@@ -201,33 +321,49 @@ export function AiChatWidget() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 24, scale: 0.9 }}
             transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-            className="fixed bottom-6 right-6 z-[80]"
+            className="fixed bottom-5 right-4 z-[80] sm:bottom-6 sm:right-6"
           >
+            {/* Attention ping ring — runs during the bounce window */}
+            <span
+              className={cn(
+                "pointer-events-none absolute inset-0 rounded-full bg-gold/40 transition-opacity duration-300",
+                bouncing ? "opacity-100 animate-ping-slow" : "opacity-0"
+              )}
+              aria-hidden="true"
+            />
+
+            {/* Dismissible text nudge bubble (first visit only) */}
             {nudge && !captured && (
-              <div className="mb-3 max-w-[240px] rounded-2xl rounded-br-sm border border-gold/30 bg-white px-3.5 py-2.5 text-[12.5px] font-medium text-[#1c2333] shadow-gold">
-                Not sure where to start? Let&apos;s talk through your ideas.
+              <div className="absolute bottom-full right-0 mb-3 w-[210px] rounded-2xl rounded-br-sm border border-gold/30 bg-white px-3.5 py-2.5 text-[12px] font-medium text-[#1c2333] shadow-gold">
+                <div className="flex items-start gap-2">
+                  <Sparkles size={13} className="mt-0.5 shrink-0 text-gold" aria-hidden="true" />
+                  <span>Not sure where to start? Let&apos;s talk through your ideas.</span>
+                </div>
                 <button
                   onClick={() => setNudge(false)}
                   aria-label="Dismiss"
-                  className="ml-1.5 text-[#5a6373] hover:text-[#1c2333]"
+                  className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full border border-black/10 bg-white text-[#5a6373] shadow-sm hover:text-[#1c2333]"
                 >
                   ✕
                 </button>
               </div>
             )}
+
             <button
               onClick={() => setOpen(true)}
               aria-label="Open the Okomba AI chat — talk through your ideas"
-              className="group relative flex items-center gap-2.5 rounded-full border border-gold/50 bg-[#0B0F1A] py-3 pl-4 pr-5 text-[13.5px] font-semibold text-white shadow-float transition-all duration-300 hover:border-gold hover:shadow-gold-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/60"
+              className={cn(
+                "group relative flex h-14 w-14 items-center justify-center rounded-full border border-gold/50 bg-[#0B0F1A] text-white shadow-float transition-all duration-300 hover:border-gold hover:shadow-gold-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/60",
+                bouncing && "animate-chat-bounce"
+              )}
             >
-              <span className="relative flex h-8 w-8 items-center justify-center rounded-full bg-gold/20">
-                <Lightbulb size={16} className="text-gold-light" aria-hidden="true" />
-                <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full border-2 border-[#0B0F1A] bg-teal animate-status-pulse" aria-hidden="true" />
-              </span>
-              <span>
-                Talk Through Your Ideas <span aria-hidden="true">💡</span>
-              </span>
-              <span className="pointer-events-none absolute inset-0 -z-10 rounded-full bg-gold/25 opacity-0 blur-xl transition-opacity duration-300 group-hover:opacity-100" aria-hidden="true" />
+              {/* Ambient gold glow */}
+              <span className="pointer-events-none absolute inset-0 -z-10 rounded-full bg-gold/30 opacity-0 blur-lg transition-opacity duration-300 group-hover:opacity-100" aria-hidden="true" />
+              {/* Pulsing status dot */}
+              <span className="absolute -right-0.5 -top-0.5 h-3 w-3 rounded-full border-2 border-[#0B0F1A] bg-teal animate-status-pulse" aria-hidden="true" />
+              <MessageCircle size={22} strokeWidth={2.2} className="text-gold-light" aria-hidden="true" />
+              {/* Tiny unread-style count chip showing we're alive */}
+              <span className="sr-only">Okomba AI is online</span>
             </button>
           </motion.div>
         )}
@@ -258,6 +394,16 @@ export function AiChatWidget() {
                   Service finder · replies instantly
                 </p>
               </div>
+              {/* Sound toggle */}
+              <button
+                onClick={toggleSound}
+                aria-pressed={soundOn}
+                aria-label={soundOn ? "Mute chat notification sound" : "Enable chat notification sound"}
+                title={soundOn ? "Notification sound on" : "Notification sound off"}
+                className="rounded-lg p-1.5 text-[#8a93a5] transition-colors hover:bg-white/10 hover:text-white"
+              >
+                {soundOn ? <Volume2 size={16} aria-hidden="true" /> : <VolumeX size={16} aria-hidden="true" />}
+              </button>
               <button
                 onClick={clearChat}
                 className="hidden rounded-lg px-2 py-1 text-[11px] font-medium text-[#8a93a5] transition-colors hover:text-white sm:block"
