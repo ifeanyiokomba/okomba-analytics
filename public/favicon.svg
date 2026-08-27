@@ -1,29 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
 <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-	 viewBox="0 0 30 30" style="enable-background:new 0 0 30 30;" xml:space="preserve">
-<defs>
-  <style type="text/css">
-    .st194{fill:#2D2D2D;stroke:#FFFFFF;stroke-width:0.6317;stroke-miterlimit:10;}
-    .st23{fill:#FFFFFF;}
+   viewBox="0 0 100 100" style="enable-background:new 0 0 100 100;" xml:space="preserve">
+  <defs>
+    <style type="text/css">
+      .badge-bg { fill: #0B0F1A; }
+      .badge-stroke { fill: none; stroke: #F0A500; stroke-opacity: 0.55; stroke-width: 1.6; }
+      .wordmark {
+        fill: #FFFFFF;
+        font-family: Georgia, 'Times New Roman', 'Liberation Serif', serif;
+        font-weight: 700;
+        font-size: 22px;
+        letter-spacing: -0.4px;
+      }
+      .analytics-cap {
+        fill: #B8B8C8;
+        font-family: Georgia, 'Times New Roman', 'Liberation Serif', serif;
+        font-style: italic;
+        font-weight: 400;
+        font-size: 6.5px;
+        letter-spacing: 2.2px;
+      }
+      .dot { fill: #F0A500; }
+      .dot-shadow { fill: #F0A500; opacity: 0.35; }
 
-    .z-breathe {
-      animation: breathe 2.5s ease-in-out infinite;
-    }
+      .z-breathe {
+        animation: breathe 2.5s ease-in-out infinite;
+        transform-origin: center;
+        transform-box: fill-box;
+      }
+      @keyframes breathe {
+        0%, 100% { opacity: 0.7; }
+        50%      { opacity: 1; }
+      }
+    </style>
+  </defs>
 
-    @keyframes breathe {
-      0%, 100% { opacity: 0.7; }
-      50% { opacity: 1; }
-    }
-  </style>
-</defs>
+  <!-- Brand squircle badge -->
+  <rect class="badge-bg" x="3" y="3" width="94" height="94" rx="22" ry="22" />
+  <rect class="badge-stroke" x="3.8" y="3.8" width="92.4" height="92.4" rx="21.2" ry="21.2" />
 
-<g>
-  <path class="st194" d="M24.51,28.51H5.49c-2.21,0-4-1.79-4-4V5.49c0-2.21,1.79-4,4-4h19.03c2.21,0,4,1.79,4,4v19.03
-    C28.51,26.72,26.72,28.51,24.51,28.51z"/>
-  <g class="z-breathe">
-    <path class="st23" d="M15.47,7.1l-1.3,1.85c-0.2,0.29-0.54,0.47-0.9,0.47h-7.1V7.09C6.16,7.1,15.47,7.1,15.47,7.1z"/>
-    <polygon class="st23" points="24.3,7.1 13.14,22.91 5.7,22.91 16.86,7.1"/>
-    <path class="st23" d="M14.53,22.91l1.31-1.86c0.2-0.29,0.54-0.47,0.9-0.47h7.09v2.33H14.53z"/>
-  </g>
-</g>
+  <!-- Okomba wordmark (Georgia serif, white) -->
+  <text class="wordmark" x="50" y="52" text-anchor="middle">Okomba</text>
+
+  <!-- Italic ANALYTICS caption -->
+  <text class="analytics-cap" x="50" y="68" text-anchor="middle">ANALYTICS</text>
+
+  <!-- Gold dot accent with z-breathe pulse -->
+  <circle class="dot-shadow z-breathe" cx="80" cy="20" r="6.5" />
+  <circle class="dot" cx="80" cy="20" r="4" />
 </svg>
