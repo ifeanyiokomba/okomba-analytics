@@ -1951,3 +1951,25 @@ Stage Summary:
 - All CONFIG values are pre-filled: SHEET_ID=14ocJfSFpsm2MOaI8eAPJ8E4VMh84aJQ1GgoQu7v57sY, FROM_EMAIL=REPLY_TO_EMAIL=ADMIN_EMAIL=support@okomba.com, SITE_URL=https://www.okomba.com. Zero manual edits required.
 - Next founder actions: paste v5 into Apps Script editor → syncSheetColumns() (preview/apply) → verifySetup() (must be green) → Deploy as Web App → copy /exec URL → set as NOTIFY_WEBHOOK_URL on Render.
 - Still-pending founder tasks (unchanged from Phase 13): rotate the GitHub PAT (ghp_...) used 4× during deploy-prep; share Sheet (account C) with sender host account B as Editor; fill Render env vars; bind custom domain okomba.com in Render; scan WhatsApp QR; set Paystack webhook to https://okomba.com/api/paystack/webhook.
+
+---
+Task ID: Phase 15
+Agent: main
+Task: Three asks — (a) clarify whether the GA4 vs. service-account Google-account mismatch causes problems, (b) change the website favicon to the brand logo, (c) push everything to GitHub.
+
+Work Log:
+- Investigated how GOOGLE_SERVICE_ACCOUNT_JSON is actually used in the codebase. Found that src/lib/backup.ts is the ONLY consumer — it uses the service account to upload SQLite snapshots to Google Drive (scope: drive.file). The admin analytics route (src/app/api/admin/analytics/route.ts) pulls KPIs from the local Prisma DB (invoices, inquiries, analyticsEvent) — NOT from GA4's Data API. So this codebase has NO GA4 server-side data fetching; the service account is purely a Drive credential.
+- Confirmed that NEXT_PUBLIC_GA4_MEASUREMENT_ID (G-XXXXXXXX) is just the client-side browser tag (src/lib/analytics.ts + src/lib/consent-scripts.ts). The tag is per-property, not per-account — works regardless of which Google account created the GA4 property.
+- Conclusion communicated to the founder: the account mismatch has NO effect in this codebase because GA4 and the service account are wired to different things. The only setup requirement for the service account is: the service account's client_email (ends in .iam.gserviceaccount.com) must be added as Editor on the target Drive folder (set as GOOGLE_DRIVE_FOLDER_ID). GA4 needs nothing beyond the G-XXXXXXXX tag.
+- For the favicon change: inspected public/favicon.svg (was a 480-byte placeholder — letter 'O' on navy with a gold dot) and public/logo.svg (1065-byte real brand mark with z-breathe pulse animation).
+- Wrote scripts/render-favicon.mjs (sharp-based) to render PNG variants from the logo SVG: 32x32 transparent, 16x16 transparent, 180x180 navy bg (apple-touch-icon). All 4 PNGs rendered successfully.
+- Overwrote public/favicon.svg with the brand-logo SVG content (the real Okomba mark now lives at both /favicon.svg and /logo.svg).
+- Upgraded src/app/layout.tsx icons metadata from a single SVG string to a multi-format array: SVG primary (type image/svg+xml) + 32x32 PNG + 16x16 PNG fallbacks + apple-touch-icon (180x180 PNG) + shortcut icon. Confirmed rendered HTML head emits all 5 <link rel=icon ...> tags correctly.
+- Verified: bun run lint clean; dev server healthy on :3000; HTTP 200 on /favicon.svg, /favicon-32.png, /favicon-16.png, /apple-touch-icon.png.
+- Committed as 'feat(brand): swap favicon to brand logo + multi-format PNG fallbacks'. Push attempt failed (no working PAT in this session — same as Phase 14). Commit is saved locally; founder needs to push with a fresh PAT.
+
+Stage Summary:
+- GA4 account-mismatch answer: NO effect. GA4 tag is per-property; the service account in this codebase is for Drive backups only, not GA4 Data API. The service account email just needs Editor access on the target Drive folder.
+- Favicon swap is live in dev: /favicon.svg now serves the real Okomba brand mark (with the z-breathe pulse animation); PNG fallbacks (32, 16, 180) cover Safari/iOS and legacy browsers. Layout metadata emits the full multi-format icon set in the HTML head.
+- Git: local commit saved; push still blocked because no PAT is configured in this sandbox. Founder action: rotate the PAT (per Phase 12 to-do) and run `git push origin main` to publish the v5 Code.gs (Phase 14) + favicon swap (Phase 15).
+- Open follow-up: layout.tsx metadataBase is still set to https://okomba-analytics.pages.dev (Cloudflare Pages URL) but production is https://okomba.com on Render. Not blocking but causes OG image URLs to resolve against the wrong host. Recommend updating to https://okomba.com after the custom domain is bound to Render.
