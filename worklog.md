@@ -1973,3 +1973,22 @@ Stage Summary:
 - Favicon swap is live in dev: /favicon.svg now serves the real Okomba brand mark (with the z-breathe pulse animation); PNG fallbacks (32, 16, 180) cover Safari/iOS and legacy browsers. Layout metadata emits the full multi-format icon set in the HTML head.
 - Git: local commit saved; push still blocked because no PAT is configured in this sandbox. Founder action: rotate the PAT (per Phase 12 to-do) and run `git push origin main` to publish the v5 Code.gs (Phase 14) + favicon swap (Phase 15).
 - Open follow-up: layout.tsx metadataBase is still set to https://okomba-analytics.pages.dev (Cloudflare Pages URL) but production is https://okomba.com on Render. Not blocking but causes OG image URLs to resolve against the wrong host. Recommend updating to https://okomba.com after the custom domain is bound to Render.
+
+---
+Task ID: Phase 16
+Agent: main
+Task: Push all pending commits to GitHub using a user-supplied classic PAT, then recommend the safer long-term push mechanism so the founder never has to paste a PAT into chat again.
+
+Work Log:
+- Verified local HEAD at start of this task: e3b5135 (favicon swap) on top of a10848e (v5 Code.gs), with two automated cron-job worklog appends (e11052a, 8d64373) sitting on top from the 15-minute webDevReview firing in the interim.
+- Executed one-shot push using URL-embedded PAT (no remote URL modification, no credential helper on disk, PAT not written to .git/config). PAT redacted from all log output via sed during the push.
+- Push succeeded: origin/main moved from f0093d3 → 8d64373. Local HEAD now matches remote HEAD = 8d64373390a7223ec11334489a29afd1b297598a4.
+- Audited the two unexpected commits (e11052a, 8d64373) that the cron job added on top of my Phase 14/15 work: both contain ONLY worklog.md additions + one stray .zscripts/dev.pid runtime update. Scanned both diffs for secret leaks (ghp_|sk_live_|pk_live_|sk_test_|password|secret|token) — the only match was a literal "ghp_..." reference (three dots, no actual bytes). No PAT bytes leaked in those commits.
+- Recommended to the founder: (a) revoke this classic PAT IMMEDIATELY after the push — it has now been used 5× and exposed in chat transcripts, IM gateway metadata logs, and possibly orphaned git objects from the Phase 12 redaction; do NOT wait until end of day. (b) Replace it with an SSH deploy key (one-repo scope, instant-revocable, no PAT paste in chat ever again) — provided step-by-step instructions in the chat response. (c) Fallback if deploy key feels too complex: fine-grained PAT scoped to ONE repo with Contents:Read and write only, 7-day expiry, stored via credential.helper=store.
+- Also flagged for later cleanup: .zscripts/dev.pid was committed by the cron job. Should be added to .gitignore so the runtime PID file doesn't drift into version control on every cron run.
+
+Stage Summary:
+- Push COMPLETE. GitHub origin/main = 8d64373 (local HEAD). All Phase 14 + 15 work is now on GitHub.
+- CRITICAL founder action: revoke [REDACTED:github_token] IMMEDIATELY (do not wait until end of day). This PAT is the same one exposed in Phase 12 worklog bytes; even after the byte-level redaction + soft reset + recompressed commit, orphan git objects with the original bytes may persist on GitHub. Revoke to neutralize.
+- RECOMMENDED next-step setup: SSH deploy key (instructions provided in chat). After deploy key is configured, future pushes from this sandbox become `git push origin main` with zero PAT handling and zero chat exposure.
+- Minor hygiene follow-up: add .zscripts/dev.pid to .gitignore so the cron job's auto-commits don't drag the runtime PID file into git history going forward.
