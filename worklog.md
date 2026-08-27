@@ -1868,3 +1868,63 @@ Unresolved issues / risks:
   with explicit instructions on how to add it.
 - If the Sheet is NOT yet shared with the SENDER HOST account,
   verifySetup() will fail at step 1 with explicit instructions.
+
+---
+Task ID: 14
+Agent: main (orchestrator)
+Task: Stage 14 — Finalize Code.gs for production paste-and-go.
+Founder provided the actual Sheet URL (Sheet ID
+14ocJfSFpsm2MOaI8eAPJ8E4VMh84aJQ1GgoQu7v57sY, owned by Account C,
+contains existing records). Founder wants a "perfect" Code.gs that
+requires no editing after paste — just save and deploy.
+
+Work Log:
+- Pre-filled SHEET_ID on line 79 with
+  14ocJfSFpsm2MOaI8eAPJ8E4VMh84aJQ1GgoQu7v57sY (founder's Sheet).
+- Rewrote saveToSheet() to be SMART about existing data:
+  • Scenario A: tab "Inquiries" exists with the founder's custom
+    headers → reads them, maps inquiry payload to those headers
+    (case-insensitive), appends a row matching the existing layout.
+    Columns the script doesn't recognize (e.g., "Company", "Budget")
+    are left blank — existing custom columns preserved without
+    corruption.
+  • Scenario B: tab doesn't exist → creates it with the standard
+    Okomba header layout (Timestamp, Name, Email, Phone, WhatsApp,
+    Service, Additional Service, Message, Source) + gold-on-ink bold
+    header row + frozen first row.
+  • Critical: existing rows are NEVER touched. Only new rows are
+    appended below the existing data.
+- Rewrote backupToSheet() (for Invoices tab) with the same smart-
+  matching approach. Also normalizes keys (lowercase + strip
+  spaces/underscores/hyphens) so "InvoiceNumber" matches
+  "Invoice Number" / "invoice_number" / "INVOICE-NUMBER".
+- Added listSheetTabs() debug helper — runs before verifySetup() to
+  show what tabs exist on the Sheet + what header row each one has.
+  Useful for the founder to confirm the smart saveToSheet will
+  append to the right tab + match the right headers.
+- Bumped version comment from v3 to v4.
+- Verified: node --check passes (valid JS syntax), 670 lines total,
+  16 functions present, 0 secret-shaped byte patterns.
+
+Stage Summary:
+- Code.gs is now production-ready, paste-and-go. The founder copies
+  the entire 670-line file, pastes into the Apps Script editor under
+  Account B (the SENDER HOST), runs listSheetTabs() + verifySetup()
+  to confirm everything is wired, then deploys as a Web App.
+- The script handles the founder's existing Sheet records safely:
+  never touches existing rows, appends new rows matching existing
+  headers, preserves any custom columns the founder has added.
+- Smart matching also covers the Invoices tab (created on first
+  invoice email) with the same safety guarantees.
+
+Unresolved issues / risks:
+- The SENDER HOST account identity still unconfirmed — verifySetup()
+  will reveal it (Session.getActiveUser().getEmail()). If it's a
+  personal Gmail account, the 100/day quota ceiling stands.
+- If the existing "Inquiries" tab has headers the smart-matcher
+  doesn't recognize (e.g., "Form Submit Timestamp"), those columns
+  will be left blank in appended rows. The founder can either:
+    (a) rename those columns to match the recognized variants
+        (e.g., "Timestamp" instead of "Form Submit Timestamp"), or
+    (b) extend the `fields` lookup table in saveToSheet() to add
+        the new variant.

@@ -1,5 +1,5 @@
 /**
- * OKOMBA ANALYTICS — Google Apps Script Engine (v3)
+ * OKOMBA ANALYTICS — Google Apps Script Engine (v4)
  * ------------------------------------------------
  * The email + backup engine. The Next.js app POSTs here; this script
  * sends branded HTML email through your Gmail and backs data up to
@@ -47,16 +47,19 @@
  * 3. Log into https://script.google.com as the SENDER HOST account
  *    → New project → name it "Okomba Webhook".
  * 4. Paste this entire file into the editor.
- * 5. Fill the CONFIG section below (only SHEET_ID needs changing).
- * 6. Run verifySetup() from the function dropdown — confirm all
+ * 5. CONFIG is pre-filled for the Okomba setup. The only thing to
+ *    verify is that SHEET_ID matches your Sheet URL.
+ * 6. Run listSheetTabs() to see what tabs + headers already exist
+ *    on your Sheet (so you know which tab inquiries will land in).
+ * 7. Run verifySetup() from the function dropdown — confirm all
  *    checks pass (Sheet access OK + FROM_EMAIL alias OK + test
  *    email delivered to support@okomba.com → forwarded to your
  *    reading inbox). DO NOT deploy until verifySetup() is green.
- * 7. Deploy → New deployment → Web app
+ * 8. Deploy → New deployment → Web app
  *      Execute as:  Me
  *      Who has access:  Anyone
- * 8. Copy the Web App URL (/exec).
- * 9. Set it as NOTIFY_WEBHOOK_URL on Render (Render dashboard →
+ * 9. Copy the Web App URL (/exec).
+ * 10. Set it as NOTIFY_WEBHOOK_URL on Render (Render dashboard →
  *    okomba-analytics → Environment).
  *
  * Quota ceiling: the SENDER HOST account's daily MailApp quota is
@@ -65,17 +68,21 @@
  * facing error). See verifySetup() output for the active account.
  */
 
-// ─── CONFIG — UPDATE THESE VALUES ───────────────────────────
-// Only SHEET_ID needs to change in the common case. The other fields
-// are pre-filled for the Okomba setup. Run verifySetup() to confirm
-// everything is wired before deploying.
+// ─── CONFIG — pre-filled for the Okomba setup ─────────────────
+// Every value is already set for production. The only field you
+// might need to change is SHEET_ID (if you swap Sheets later).
+// Run verifySetup() to confirm everything is wired before deploying.
 const CONFIG = {
   // Google Sheet ID (from /spreadsheets/d/YOUR_ID_HERE/edit).
-  // The Sheet is owned by a different account; share it as Editor with
-  // the account running this script (the SENDER HOST) before deploying.
-  SHEET_ID: "YOUR_GOOGLE_SHEET_ID_HERE",
+  // This is the Sheet owned by the SHEET OWNER account; share it
+  // as Editor with the SENDER HOST account running this script.
+  SHEET_ID: "14ocJfSFpsm2MOaI8eAPJ8E4VMh84aJQ1GgoQu7v57sY",
 
-  // Sheet tab name for inquiries (auto-created on first use).
+  // Sheet tab name for inquiries. If a tab with this name already
+  // exists in your Sheet, the script appends new rows to it (matching
+  // whatever headers that tab has — your existing records are never
+  // touched). If the tab doesn't exist, it's created with the
+  // standard Okomba header layout.
   SHEET_NAME: "Inquiries",
 
   // The address every email is SENT FROM. Must be a "Send mail as"
@@ -221,37 +228,93 @@ function handleLegacyInquiry(data) {
   });
 }
 
-// ─── GOOGLE SHEETS ───────────────────────────────────────────
+// ─── GOOGLE SHEETS — SMART INQUIRY PERSISTENCE ───────────────
+// Detects your existing tab + headers and appends rows matching that
+// exact structure. Your existing records are NEVER touched — the
+// script only appends new rows below the existing data, mapping each
+// inquiry field to the column it belongs to (case-insensitive).
+//
+// Scenarios handled:
+//   A) "Inquiries" tab exists with your custom headers → read them,
+//      map each new inquiry field to the matching column, append.
+//      Columns the script doesn't recognize are left blank (your
+//      custom layout is preserved without corruption).
+//   B) "Inquiries" tab doesn't exist yet → create it with the
+//      standard Okomba header layout (Timestamp, Name, Email, Phone,
+//      WhatsApp, Service, Additional Service, Message, Source) and
+//      a bold gold-on-ink header row + frozen first row.
 function saveToSheet(data) {
-  if (!CONFIG.SHEET_ID || CONFIG.SHEET_ID.indexOf("YOUR_") === 0) return; // not configured
+  if (!CONFIG.SHEET_ID || CONFIG.SHEET_ID.indexOf("YOUR_") === 0) return;
   const ss = SpreadsheetApp.openById(CONFIG.SHEET_ID);
   let sheet = ss.getSheetByName(CONFIG.SHEET_NAME);
+  let headers = [];
 
+  // Scenario A: tab exists with data → use its existing headers
+  if (sheet && sheet.getLastRow() > 0 && sheet.getLastColumn() > 0) {
+    headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0]
+      .map(function (h) { return String(h || "").trim(); });
+  }
+
+  // Scenario B: tab missing or empty → create with standard headers
   if (!sheet) {
     sheet = ss.insertSheet(CONFIG.SHEET_NAME);
-    sheet.getRange(1, 1, 1, 9).setValues([[
-      "Timestamp", "Name", "Email", "Phone",
-      "WhatsApp", "Service", "Additional Service",
-      "Message", "Source",
-    ]]);
-    sheet.getRange(1, 1, 1, 9)
+  }
+  if (headers.length === 0) {
+    headers = ["Timestamp", "Name", "Email", "Phone", "WhatsApp",
+               "Service", "Additional Service", "Message", "Source"];
+    sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
+    sheet.getRange(1, 1, 1, headers.length)
       .setFontWeight("bold")
       .setBackground("#F0A500")
       .setFontColor("#0B0F1A");
     sheet.setFrozenRows(1);
   }
 
-  sheet.appendRow([
-    new Date(),
-    data.name || "",
-    data.email || "",
-    data.phone || "",
-    data.whatsapp || "",
-    data.service || "",
-    data.addlService || "",
-    data.message || "",
-    "okomba.com",
-  ]);
+  // Map inquiry payload to the existing headers (case-insensitive).
+  // Includes common header variants so this works whether your
+  // existing tab uses "Name", "Full Name", "Client Name", etc.
+  const fields = {
+    "timestamp": new Date(),
+    "date": new Date(),
+    "time": new Date(),
+    "submitted": new Date(),
+    "submitted at": new Date(),
+    "name": data.name || "",
+    "full name": data.name || "",
+    "client name": data.name || "",
+    "customer name": data.name || "",
+    "email": data.email || "",
+    "email address": data.email || "",
+    "phone": data.phone || "",
+    "phone number": data.phone || "",
+    "tel": data.phone || "",
+    "whatsapp": data.whatsapp || "",
+    "whatsapp number": data.whatsapp || "",
+    "service": data.service || "",
+    "service requested": data.service || "",
+    "service type": data.service || "",
+    "additional service": data.addlService || data.additionalService || "",
+    "addl service": data.addlService || data.additionalService || "",
+    "extra service": data.addlService || data.additionalService || "",
+    "message": data.message || "",
+    "comments": data.message || "",
+    "notes": data.message || "",
+    "details": data.message || "",
+    "source": "okomba.com",
+    "referrer": "okomba.com",
+    "site": "okomba.com",
+  };
+
+  // Build the row: for each existing header column, find the matching
+  // field in the inquiry payload; leave unrecognised columns blank so
+  // your existing custom columns (e.g., "Company", "Budget") are
+  // preserved without corruption.
+  const row = headers.map(function (h) {
+    const key = String(h || "").toLowerCase().trim();
+    return fields[key] !== undefined ? fields[key] : "";
+  });
+
+  sheet.appendRow(row);
 }
 
 // ─── EMAIL BODIES ────────────────────────────────────────────
@@ -390,18 +453,30 @@ function sendInvoiceEmail(data) {
 }
 
 // GENERIC SHEET BACKUP (action: backupToSheet) — backupToSheet(tab, rows)
-// Creates the tab on first use with headers from the first row's keys,
-// then appends. Idempotent and schema-free.
+// Smart-matches existing tab headers if the tab already exists, otherwise
+// creates it with the row's keys as headers. Idempotent and safe with
+// existing data — never touches prior rows.
 function backupToSheet(tab, rows) {
   if (!tab || !rows || !rows.length) return;
-  if (!CONFIG.SHEET_ID || CONFIG.SHEET_ID.indexOf("YOUR_") === 0) return; // not configured
+  if (!CONFIG.SHEET_ID || CONFIG.SHEET_ID.indexOf("YOUR_") === 0) return;
   const ss = SpreadsheetApp.openById(CONFIG.SHEET_ID);
   let sheet = ss.getSheetByName(tab);
+  let headers = [];
+
+  // Read existing headers if the tab already has data
+  if (sheet && sheet.getLastRow() > 0 && sheet.getLastColumn() > 0) {
+    headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0]
+      .map(function (h) { return String(h || "").trim(); });
+  }
+
+  // Tab doesn't exist → create it
   if (!sheet) {
     sheet = ss.insertSheet(tab);
   }
-  if (sheet.getLastRow() === 0) {
-    const headers = Object.keys(rows[0]);
+
+  // Empty tab → write headers from the first row's keys (styled)
+  if (headers.length === 0) {
+    headers = Object.keys(rows[0]);
     sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
     sheet.getRange(1, 1, 1, headers.length)
       .setFontWeight("bold")
@@ -409,12 +484,58 @@ function backupToSheet(tab, rows) {
       .setFontColor("#0B0F1A");
     sheet.setFrozenRows(1);
   }
+
+  // Normalise keys for matching (lowercase + strip spaces/underscores/hyphens)
+  // so "InvoiceNumber" matches "Invoice Number" / "invoice_number" / "INVOICE-NUMBER".
+  const normalize = function (s) {
+    return String(s || "").toLowerCase().replace(/[\s_\-]+/g, "");
+  };
+  const headerNorm = headers.map(normalize);
+
   const values = rows.map(function (r) {
-    return Object.keys(rows[0]).map(function (k) {
-      return r[k] === undefined || r[k] === null ? "" : r[k];
+    // Pre-build a normalized → value lookup from the row's keys
+    const rowByNorm = {};
+    Object.keys(r).forEach(function (k) {
+      rowByNorm[normalize(k)] = (r[k] === undefined || r[k] === null) ? "" : r[k];
+    });
+    // For each existing header column, pull the matching value (or blank)
+    return headerNorm.map(function (hn) {
+      return rowByNorm[hn] !== undefined ? rowByNorm[hn] : "";
     });
   });
-  sheet.getRange(sheet.getLastRow() + 1, 1, values.length, values[0].length).setValues(values);
+
+  sheet.getRange(sheet.getLastRow() + 1, 1, values.length, headers.length).setValues(values);
+}
+
+// ─── DEBUG: list all tabs + their headers (run from editor) ─────
+// Diagnostic helper — run BEFORE verifySetup() if you want to see
+// what tabs exist on the Sheet and what header row each one has.
+// Useful for confirming your existing data layout matches what the
+// smart saveToSheet() will append to.
+function listSheetTabs() {
+  if (!CONFIG.SHEET_ID || CONFIG.SHEET_ID.indexOf("YOUR_") === 0) {
+    Logger.log("SHEET_ID not configured.");
+    return;
+  }
+  const ss = SpreadsheetApp.openById(CONFIG.SHEET_ID);
+  const sheets = ss.getSheets();
+  Logger.log("Sheet: " + ss.getName());
+  Logger.log("Tabs (" + sheets.length + "):");
+  sheets.forEach(function (s) {
+    const rows = s.getLastRow();
+    const cols = s.getLastColumn();
+    let headers = [];
+    if (rows > 0 && cols > 0) {
+      headers = s.getRange(1, 1, 1, cols).getValues()[0]
+        .map(function (h) { return String(h || "").trim(); });
+    }
+    Logger.log("  • " + s.getSheetName() +
+      " — " + rows + " rows × " + cols + " cols" +
+      (headers.length ? "\n    headers: " + JSON.stringify(headers) : ""));
+  });
+  Logger.log("\nCONFIG.SHEET_NAME = '" + CONFIG.SHEET_NAME +
+    "' — inquiries will be appended to this tab if it exists, " +
+    "or a new one created with the standard header layout.");
 }
 
 // ─── SETUP VERIFICATION (run once after CONFIG is filled) ─────
@@ -489,7 +610,7 @@ function verifySetup() {
           "ADMIN:       " + CONFIG.ADMIN_EMAIL + "\n" +
           "SHEET_ID:    " + CONFIG.SHEET_ID + "\n\n" +
           "Aliases on this account (" + results.aliases.length + " total):\n" +
-          (results.aliases.length ? results.aliases.map(a => "  • " + a).join("\n") : "  (primary only)") + "\n\n" +
+          (results.aliases.length ? results.aliases.map(function (a) { return "  • " + a; }).join("\n") : "  (primary only)") + "\n\n" +
           "Next: Deploy → New deployment → Web app (Execute as: Me, Access: Anyone) " +
           "→ copy the /exec URL → paste into Render as NOTIFY_WEBHOOK_URL.",
       });
