@@ -1928,3 +1928,26 @@ Unresolved issues / risks:
         (e.g., "Timestamp" instead of "Form Submit Timestamp"), or
     (b) extend the `fields` lookup table in saveToSheet() to add
         the new variant.
+
+---
+Task ID: Phase 14
+Agent: main
+Task: Founder asked whether to manually add the new columns to their existing Google Sheet, let the script auto-add them, or wipe the sheet and start fresh — wanted to keep existing historical rows AND get the new standard columns.
+
+Work Log:
+- Analyzed current saveToSheet() (v4): it only READ existing headers and mapped new rows to them; it did NOT add new standard columns to an existing sheet. New rows would just have empty cells in unmapped standard columns.
+- Designed the v5 behaviour: auto-ADD any missing STANDARD_INQUIRY_HEADERS to the RIGHT of the existing header row (preserves existing layout, no reordering, old rows untouched with blank cells in the new columns).
+- Refactored saveToSheet() to delegate header-ensure logic to a new helper ensureInquiryHeaders_(sheet) which both seeds an empty tab AND auto-extends an existing tab.
+- Added top-level STANDARD_INQUIRY_HEADERS constant ["Timestamp","Name","Email","Phone","WhatsApp","Service","Additional Service","Message","Source"] for clarity.
+- Applied the same auto-add pattern to backupToSheet(): any column from incoming rows that isn't already in the existing header gets appended to the right (handles the Invoices tab the same way).
+- Added a new syncSheetColumns() function the founder can run from the Apps Script editor BEFORE deploying — it extends the Inquiries header row to the right (no new rows written) and logs BEFORE vs AFTER headers + exactly which columns were added. This is the preview path.
+- Bumped header to v5, documented the v5 change in the file header, renumbered SETUP steps (now 1-11 with syncSheetColumns at step 7 and verifySetup at step 8).
+- Verified syntax with node --check (passed). Confirmed all 18 functions present and no leftover YOUR_* placeholders in actual values (the YOUR_ matches are all defensive guards + the verifySetup error message).
+- Committed as v5 and pushed to origin/main.
+
+Stage Summary:
+- Code.gs is now 810 lines (was 671). New functions: ensureInquiryHeaders_, syncSheetColumns.
+- Direct answer to founder's question: DO NOT delete the existing sheet. Just paste v5 Code.gs, run syncSheetColumns() once to preview/apply the new columns (extends the Inquiries header row to the right, old rows untouched), then run verifySetup() and deploy.
+- All CONFIG values are pre-filled: SHEET_ID=14ocJfSFpsm2MOaI8eAPJ8E4VMh84aJQ1GgoQu7v57sY, FROM_EMAIL=REPLY_TO_EMAIL=ADMIN_EMAIL=support@okomba.com, SITE_URL=https://www.okomba.com. Zero manual edits required.
+- Next founder actions: paste v5 into Apps Script editor → syncSheetColumns() (preview/apply) → verifySetup() (must be green) → Deploy as Web App → copy /exec URL → set as NOTIFY_WEBHOOK_URL on Render.
+- Still-pending founder tasks (unchanged from Phase 13): rotate the GitHub PAT (ghp_...) used 4× during deploy-prep; share Sheet (account C) with sender host account B as Editor; fill Render env vars; bind custom domain okomba.com in Render; scan WhatsApp QR; set Paystack webhook to https://okomba.com/api/paystack/webhook.
