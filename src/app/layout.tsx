@@ -21,7 +21,13 @@ const jetbrainsMono = JetBrains_Mono({
   display: "swap",
 });
 
-const siteUrl = "https://okomba-analytics.pages.dev";
+// Production-aware metadataBase: prefer NEXT_PUBLIC_SITE_URL (Render
+// env var set to https://okomba.com in production). Fall back to the
+// Cloudflare Pages URL only for legacy/preview deploys. Without this,
+// OG image URLs resolve against the wrong host in production.
+const siteUrl =
+  process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ||
+  "https://okomba.com";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),

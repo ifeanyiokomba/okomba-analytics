@@ -60,3 +60,9 @@ server.log
 db/custom.db
 db/*.db
 screenshots/
+
+# Runtime PID / state files (auto-updated by dev.sh + cron job)
+.zscripts/dev.pid
+.zscripts/*.pid
+mini-services/**/data/
+mini-services/**/node_modules/
