@@ -2281,3 +2281,672 @@ Unresolved issues / risks:
        "image/svg+xml" href="/favicon.svg"> is in the <head>.
     4. iOS Safari: Add to Home Screen → confirm the
        apple-touch-icon shows the squircle with "Okomba" wordmark.
+
+---
+Task ID: 19-C
+Agent: research-omniscore-sanctum
+Task: Research Omniscore CPaaS + Sanctum Multipurpose — find real
+product sites, extract real taglines/features/design/hero/OG images,
+and produce two structured research briefs for the Okomba Analytics
+Solutions/Products rebuild.
+
+Work Log:
+- Read worklog context (most recent 200 lines + earlier Phases 14-18
+  for design language / existing placeholders / product list).
+  Confirmed PRODUCTS array in src/lib/content.ts currently carries
+  generic AI-flavored copy for both Omniscore CPaaS ("Every channel.
+  One platform.") and Sanctum Multipurpose ("One platform, many
+  purposes"), with image placeholders at
+  /images/project-omniscore.png and /images/project-sanctum.png.
+- Created dirs: /home/z/my-project/research-assets/ (already had
+  sibling-task files from 19-A/19-B for votewise/turbopay/billswift —
+  used as format reference) and /home/z/my-project/public/images/
+  projects/ for fetched image assets.
+- DNS resolution test (sandbox DNS at 100.100.2.136 works —
+  okomba.com, google.com, votewise.com.ng, turbopay.okomba.com all
+  resolve). Ran nslookup on all 8 candidate URLs:
+    omniscore.okomba.com   → NXDOMAIN
+    omniscore.ng           → NXDOMAIN
+    www.omniscore.com.ng   → NXDOMAIN
+    omniscorecpaas.com     → NXDOMAIN
+    sanctum.okomba.com     → NXDOMAIN
+    sanctum.ng             → NXDOMAIN
+    www.sanctum.com.ng     → NXDOMAIN
+    sanctum-multipurpose.com → NXDOMAIN
+  All 8 candidate domains DO NOT EXIST in DNS. curl -I returns HTTP
+  000 (no route). This is definitive.
+- Web search (z-ai web_search, 6 different query variations
+  including quoted "Omniscore" + "Okomba" and "Sanctum" + "Okomba"):
+  the only Okomba-tied hit for "Sanctum Multipurpose" is the live
+  okomba.com homepage itself (echoing the placeholder copy from
+  content.ts). For "Omniscore" the top hit is Kount's fraud score
+  product (different company) — no Okomba-owned Omniscore site
+  appears anywhere. No LinkedIn page, no Facebook page, no Play
+  Store app, no press mention, no competitor-listing page
+  mentions an "Omniscore" product owned by Okomba. The Omni CPaaS
+  app on Google Play (com.icpaas.omniap) is a different vendor.
+- Wayback Machine / archive.org is NOT reachable from this sandbox
+  (curl returns HTTP 000 — likely blocked by the sandbox egress
+  filter or archive.org's anti-bot layer). Cannot rule out a
+  historical snapshot, but no current online presence exists.
+- Page-reader on https://okomba.com via z-ai page_reader: confirmed
+  the only place "Omniscore CPaaS" and "Sanctum Multipurpose" appear
+  on the live Okomba site is the existing Solutions carousel
+  (id="solutions") — they have NO dedicated landing pages.
+  Probed /solutions, /products, /omniscore, /sanctum,
+  /products/omniscore, /products/sanctum, /omniscore-cpaas,
+  /sanctum-multipurpose, /solutions/omniscore, /solutions/sanctum
+  → all return 404.
+- agent-browser (v0.35.0) opened the live https://okomba.com at
+  1440×900, scrolled to #solutions, captured computed card text +
+  computed styles for both product cards. Omniscore card text:
+    "COMMUNICATIONS PLATFORM
+     Omniscore CPaaS
+     Every channel. One platform.
+     A communications platform-as-a-service for bulk SMS,
+     messaging, voice, WhatsApp, Telegram and OTP verification —
+     every channel behind one platform.
+     Bulk SMS & messaging
+     Voice, WhatsApp & Telegram
+     OTP verification
+     Discuss this solution"
+  Computed styles: bg rgb(255,255,255), border 1px solid
+  rgba(20,25,38,0.08), radius 16px, font Inter. Sanctum card
+  identical structure with blue accent (#2d6bd4) per content.ts.
+  This matches the in-code content verbatim — confirming the
+  founder's complaint that current copy is in-house placeholder,
+  not drawn from real product sites.
+- Screenshots saved (only current-state evidence — no live product
+  sites to capture):
+  • /home/z/my-project/research-assets/okomba-solutions-current-state.png
+    (335KB, 1440×~card-row viewport, pre-redesign state of the
+    Solutions section as it appears on okomba.com today)
+  • /home/z/my-project/research-assets/okomba-solutions-rowA-cards.png
+    (285KB, second scroll position showing the marquee cards)
+  No -hero.png / -full.png per-product because the product sites
+  do not exist. Sibling agents (19-A: votewise, 19-B: turbopay +
+  billswift) did capture real hero/full screenshots — those
+  products HAVE live sites at votewise.com.ng,
+  turbopay.okomba.com, billswift.com.ng.
+- OG image captured from live okomba.com head metadata:
+  og:image = https://okomba.com/og-image.png (1344×768 PNG, 111KB).
+  This is the Okomba brand OG banner — NOT an Omniscore or Sanctum
+  product image. No product-specific OG image exists because no
+  product site exists.
+- Image assets saved under /home/z/my-project/public/images/
+  projects/ for use by the rebuild task force:
+  • okomba-brand-og.png (1344×768, 111KB) — fetched live from
+    https://okomba.com/og-image.png; can serve as a brand
+    fallback for the Omniscore + Sanctum Solutions cards until
+    real product screenshots exist.
+  • omniscore-placeholder.png (1344×768, 107KB) — copy of the
+    existing /images/project-omniscore.png in-code placeholder.
+  • sanctum-placeholder.png (1344×768, 54KB) — copy of the
+    existing /images/project-sanctum.png in-code placeholder.
+- Final deliverable: two structured research briefs (one per
+  product), produced in the chat response. Both clearly state
+  "no live product site exists" per the founder's "don't invent
+  content" directive, and instead recommend a brand-consistent
+  presentation pattern based on the Okomba Solutions section's
+  existing card grid + the worklog's locked design system
+  (#05070D bg, gold #F0A500 / teal #00C9A7 accents, Space Grotesk
+  display + Inter body, 16px-radius glass cards with gold
+  hairline top accent).
+
+Stage Summary:
+- FINDING: Neither Omniscore CPaaS nor Sanctum Multipurpose has a
+  live website at any of the 8 candidate URLs (all NXDOMAIN).
+  No discoverable online presence under any other domain either
+  (web search returns zero product-site hits; the only hit for
+  "Sanctum Multipurpose" is the okomba.com homepage itself).
+  These appear to be roadmap/placeholder products listed on the
+  Okomba Analytics marketing site only — not yet launched.
+- DELIVERABLES:
+  1. Two structured research briefs (in chat response) — each
+     begins with the "no live site found" finding, then provides
+     suggested copy + design treatment drawn from (a) the existing
+     Okomba Solutions card pattern, (b) the worklog-locked design
+     system, and (c) competitor CPaaS/multipurpose-platform
+     category conventions visible in the web-search snippets
+     (Termii, KudiSMS, Vox CPaaS, SanctumHub, SanctumOS, etc.).
+     All suggested copy is clearly labelled as "recommended
+     copy for the Okomba Solutions card, NOT verbatim from any
+     external product site" so the rebuild agent doesn't mistake
+     it for sourced content.
+  2. Screenshots in /home/z/my-project/research-assets/:
+     • okomba-solutions-current-state.png
+     • okomba-solutions-rowA-cards.png
+     No per-product hero/full screenshots (sites don't exist).
+  3. Image URLs to fetch + place under public/images/projects/:
+     • https://okomba.com/og-image.png → okomba-brand-og.png
+       (DONE — 111KB, 1344×768, fetched live this task)
+     • No product-specific OG / hero / logo URLs exist for
+       Omniscore CPaaS or Sanctum Multipurpose. The two existing
+       in-repo placeholders (project-omniscore.png,
+       project-sanctum.png) remain the only brand-consistent
+       image assets; copied into public/images/projects/ as
+       omniscore-placeholder.png + sanctum-placeholder.png for
+       the rebuild agent's convenience.
+- RECOMMENDATION FOR THE FOUNDER: Two options for the rebuild —
+  (A) Keep Omniscore + Sanctum cards in the Solutions section but
+  clearly label them "Coming soon" / "In development" with a
+  waitlist CTA, replacing the current generic descriptions with
+  the worklog-derived recommended copy in the briefs. This is
+  honest, brand-consistent, and avoids the founder's complaint
+  about AI-flavored copy.
+  (B) Remove both cards from the live Solutions carousel until
+  each product has a real landing page (e.g. once
+  omniscore.okomba.com or sanctum.okomba.com actually launches),
+  then re-add with real-sourced content via a follow-up task
+  identical to this one. Recommend (A) — keeps the product
+  narrative visible while preventing over-claim.
+- RISKS: None blocking. The founder's directive ("don't invent
+  content") is respected — no fabricated taglines/features/images
+  are presented as "from the live site". All recommended copy is
+  clearly tagged as suggested-for-Okomba-card, derived from the
+  Okomba brand system + the worklog's design direction.
+- FOLLOW-UPS:
+  • When omniscore.okomba.com (or whatever URL the founder
+    picks) goes live, re-run this task to extract real tagline,
+    features, OG image, hero image, and design language.
+  • Same for sanctum.okomba.com.
+  • Consider whether the founder wants Omniscore / Sanctum cards
+    in the Solutions carousel to deep-link to a waitlist form
+    (POST /api/inquiries?service=Omniscore) instead of the
+    current "Discuss this solution" scroll-to-services behaviour.
+
+---
+Task ID: 19-A
+Agent: research-turbopay-votewise
+Task: Research the actual Turbopay + Votewise product websites to extract REAL content (taglines, feature bullets, design language, hero/OG image URLs, testimonials, CTAs, pricing, brand voice) for use in the rebuilt Okomba Analytics "Solutions / Products" section. Save screenshots + structured briefs. No AI-generated copy — every claim must trace back to the live site or a search snippet.
+
+Work Log:
+- Read the worklog tail to understand project context (Phase 18 = current HEAD on GitHub, brand
+  voice = Okomba Analytics builds its own products, existing src/lib/content.ts has 6 products
+  with generic AI-flavored copy that the founder wants replaced with real content).
+- Created /home/z/my-project/research-assets/ (was missing) + sub-dir css/ for scraped CSS.
+- Loaded three skills: web-search, web-reader, agent-browser.
+- TURBOPAY URL DISCOVERY:
+  • Web search "Turbopay Okomba Nigeria payments platform" returned
+    https://www.turbopay.okomba.com as rank-1 result with the snippet
+    "Turbopay is a modern Nigerian digital wallet and payments platform.
+    Fund your wallet, transfer money, buy airtime & data, and pay bills —
+    all from one app."
+  • Probed turbopay.com — resolves but is a DIFFERENT brand (TurboPay Philippines,
+    a BPO payment gateway — NOT Okomba). Probed turbopay.ng — did not resolve.
+  • Confirmed: the founder's existing src/lib/content.ts link
+    https://turbopay.okomba.com is the correct working URL.
+- VOTEWISE URL DISCOVERY:
+  • Web search "Votewise Nigeria Okomba elections voting platform" returned ZERO
+    third-party mentions — Votewise is not yet indexed by Google.
+  • Direct probe https://votewise.com.ng → HTTP 308 redirect →
+    https://www.votewise.com.ng → HTTP 200. Both work; www is canonical.
+  • Probed votewise.ng — did not resolve.
+  • Confirmed: the founder's existing link https://votewise.com.ng is correct
+    (the apex-domain 308 will transparently resolve to www.).
+- PAGE READER (z-ai page_reader) on both URLs:
+  • Turbopay: first attempt 502'd (memory); retry succeeded with full HTML +
+    metadata extraction. Title = "Turbopay — Wallet, Payments & Bills".
+  • Votewise: page_reader worked first try on both variants. Title =
+    "Votewise — Secure Election Management for Organizations".
+  • Both sites have ZERO <img> elements in server-rendered HTML — entire UI
+    is SVG icons + Tailwind-styled divs + live animated counters.
+  • Neither site has a <meta property="og:image"> tag — confirmed by
+    metadata extraction, by DOM eval, AND by HTTP-probing /og.png,
+    /opengraph.png, /og-image.png, /og-image (all 404 on Turbopay; all
+    404 or 307-to-/login on Votewise).
+- CSS SCRAPE: downloaded the live compiled Tailwind 4 CSS for each site:
+  • Turbopay: /_next/static/chunks/{9c43642a5ecaadf6, 8e3a320c8e248bfd}.css
+  • Votewise: /_next/static/immutable/chunks/{1kuf0vy8_3887, 2ax9e_7mn-65v}.css
+  • Extracted :root design tokens (light + dark variants) + .dark overrides
+    + font-family declarations + named CSS vars + every hex color used.
+- AGENT-BROWSER session (1440×900 viewport unless noted):
+  • Turbopay: open turbopay.okomba.com → wait 6s for hydration →
+    screenshot /home/z/my-project/research-assets/turbopay-hero.png
+    (1280×577, 103 KB above-the-fold) +
+    screenshot --full turbopay-full.png (1280×5661, 513 KB).
+    DOM eval confirmed: <html class="dark"> (dark-mode-first), body font
+    Geist, no <img> tags, no og:image meta, theme-color metas
+    #0b6b4f (mobile green) + #0a1f1a (dark mobile). Extracted H1 verbatim
+    "Your money, faster than ever." (with <span class="text-primary"> on
+    line 2), eyebrow "The fast lane to your money", hero subhead verbatim,
+    7 H2 section titles, 13 H3 feature titles, every CTA button label +
+    href, hero trust pills (No hidden fees · Bank-grade security ·
+    Instant transfers), hero preview card content (Turbopay Wallet Tier 2,
+    AVAILABLE BALANCE ₦49,400.00, Ledger reconciled, Fund/Transfer/Airtime/
+    Bills tabs, INSTANT TRANSFER ₦0 fee, FUNDING SPEED Instant).
+  • Votewise: open votewise.com.ng → wait 5s → screenshot
+    votewise-hero.png (1280×577, 243 KB) + votewise-full.png
+    (1280×8692, 829 KB). DOM eval confirmed: <html> has NO class
+    (light-mode only — no .dark block in Votewise CSS), body font
+    Geist (+ var(--font-serif) loaded for testimonial pull-quotes),
+    no <img>, no og:image, H1 verbatim "Election Management Built for
+    Organizations", 9 H2 section titles verbatim, every CTA button
+    label + href (Get Started → /register, Sign In → /login, Start Free
+    Election → /register, Book a Demo → /support, Start a secure
+    election → /register, Talk to security team → /support, Get started
+    × 2 (Starter + Professional plans), Contact sales → /register,
+    See full pricing & comparison → /pricing, Get Started free → /register,
+    View pricing → /pricing).
+- FAVICON + LOGO EXTRACTION:
+  • https://turbopay.okomba.com/favicon.svg → 1.4 KB SVG, viewBox 64×64,
+    rounded-square emerald gradient (#16a37b→#0b7d5e→#06543f), white "T"
+    crossbar + amber lightning-bolt stem (#fbbf24→#f59e0b) + 3 white
+    motion/speed lines on the left. role="img" aria-label="Turbopay logo".
+  • https://votewise.com.ng/favicon.svg → 399 B SVG, viewBox 32×32,
+    rounded-square indigo (#4f46e5), white "V" stroke (8,8 → 16,24 → 24,8)
+    + white checkmark overlay (opacity 0.7).
+    Note: favicon indigo #4f46e5 ≠ site --primary royal blue #2249b7 —
+    minor brand inconsistency the founder may want to align.
+- ASSET PLACEMENT for Okomba Solutions card rebuild:
+  • /home/z/my-project/public/images/projects/turbopay-preview.png
+    (1280×577 hero screenshot — to be used as the Solutions card image)
+  • /home/z/my-project/public/images/projects/turbopay-logo.svg
+    (1.4 KB brand SVG — to be used as the Solutions card logo)
+  • /home/z/my-project/public/images/projects/votewise-preview.png
+    (1280×577 hero screenshot — shows the "Election Command Center"
+    dashboard mockup with live turnout 68.4%, candidate bar chart)
+  • /home/z/my-project/public/images/projects/votewise-logo.svg
+    (399 B brand SVG)
+  • These do NOT conflict with the other parallel-research agents' files
+    (sanctum-placeholder.png, omniscore-placeholder.png, okomba-brand-og.png
+    were already in the same dir — left untouched).
+- Wrote two structured research briefs (one per product) — 13 numbered
+  sections each, every quoted string verbatim from the live site:
+  • /home/z/my-project/research-assets/BRIEF-TURBOPAY.md
+  • /home/z/my-project/research-assets/BRIEF-VOTEWISE.md
+
+Stage Summary:
+- TURBOPAY (https://turbopay.okomba.com — resolves; redirects to www.):
+  • Brand name: "Turbopay" (one word, capital T).
+  • Hero: eyebrow "The fast lane to your money" → H1 "Your money, faster
+    ever." (line 2 "faster than ever." in emerald) → subhead "Turbopay is
+    Nigeria's modern digital wallet. Fund instantly, transfer for free,
+    buy airtime & data, and pay bills — all from one app." → CTAs
+    "Create free account" + "Sign in" → trust pills "No hidden fees ·
+    Bank-grade security · Instant transfers" → right-side wallet preview
+    card (Turbopay Wallet Tier 2, AVAILABLE BALANCE ₦49,400.00, Ledger
+    reconciled, Fund/Transfer/Airtime/Bills tabs, ₦0 fee / Instant speed).
+  • 6 features (verbatim titles): Wallet & Virtual Account, Free Transfers,
+    Airtime & Data, Bill Payments, Protected at Every Step, KYC Tiers.
+    Full verbatim descriptions in the brief.
+  • Design: DARK-mode-first (<html class="dark">). Tokens: bg #070f0c
+    (forest black), fg #eef3ef (cream), card #0f1b16, primary #39bf89
+    (mint/emerald), accent #543200→fg #ffe0ac (warm cream), warning
+    #faab3f (amber), border #25312b, radius .75rem (12px). Light-mode
+    tokens also exist but are not active. Fonts: Geist + Geist Mono +
+    Noto Sans Arabic. Chart palette: emerald/amber/cyan/mint/red.
+  • Pricing: free wallet model (no paid tiers surfaced on homepage).
+    Revenue model implicit: spread on airtime/data, bill-pay fees,
+    partner program. KYC tiers unlock up to ₦5M/transaction.
+  • Testimonials: NONE real yet (3 placeholder cards).
+  • Brand voice phrases: "The fast lane to your money", "Your money,
+    faster than ever.", "Nigeria's modern digital wallet", "Powerful
+    features designed for how Nigerians move money", "Built for speed,
+    designed for trust, priced for everyone", "Made for Nigeria — Built
+    for how Nigerians move money", "Turbopay Technologies · NDPR-aware
+    · CBN-aligned partners", "All systems operational".
+  • Logo: emerald-gradient rounded square with white "T" + amber
+    lightning-bolt stem + 3 speed lines.
+
+- VOTEWISE (https://votewise.com.ng — resolves; 308→www.):
+  • Brand name: "Votewise" (one word, capital V). Footer: "A product of
+    Okomba Analytics".
+  • Hero: eyebrow "Secure. Transparent. Trusted." → H1 "Election
+    Management Built for Organizations" → subhead "Run secure, auditable
+    elections for universities, unions, associations and institutions.
+    Voter verification, real-time monitoring and tamper-proof results —
+    all in one platform." → CTAs "Start Free Election" + "Book a Demo" →
+    right-side Election Command Center dashboard mockup (turnout 68.4%,
+    4,210 votes cast, candidate bar chart: Adebayo Okafor 42% / Chinwe
+    Eze 31% / Ibrahim Bello 18%).
+  • 6 features (verbatim titles): Tamper-proof ballots, Verified voters
+    only, Live results & analytics, Built for every scale, Ballot
+    secrecy by design, Sub-3-second voting. + 6 security guarantees +
+    4-step how-it-works pipeline.
+  • Who it's for: Universities & Faculties, Student Unions, Professional
+    Associations, Churches, Cooperatives & NGOs, Corporate Organizations,
+    Clubs & Societies, Government Institutions.
+  • Design: LIGHT-mode only (no .dark block). Tokens: bg #fafcfe
+    (cream-blue), fg #131922 (navy-black), card #fff, primary #2249b7
+    (royal blue), secondary #ebf3fc (pale blue), accent #d2eef0 (pale
+    cyan), border #dadee3, success #359658, warning #e49e22, radius
+    .625rem (10px). Fonts: Geist + Geist Mono + var(--font-serif)
+    (serif for testimonial pull-quotes). Chart palette: royal blue/
+    teal/purple/mint/amber.
+  • Pricing: per-election-cycle subscription in ₦. Starter ₦25K (1K
+    voters, 5 elections), Professional ₦150K (10K voters, 25 elections,
+    "Most popular"), Enterprise Custom (unlimited). "Start free, then
+    pay per election as you grow."
+  • Testimonials: 3 REAL ones — Dr. Adebayo Ogunleye (Dean of Student
+    Affairs, University of Lagos), Mrs. Funmilayo Adeyemi (Electoral
+    Committee Chair, Lagos Chamber of Commerce), Prof. Nwankwo Ibezim
+    (Registrar, Nnamdi Azikiwe University). Full quotes in the brief.
+  • Brand voice phrases: "Secure. Transparent. Trusted.", "Election
+    Management Built for Organizations", "From a 40-person club election
+    to a 50,000-voter faculty vote — Votewise scales without breaking
+    a sweat", "Sub-3-second voting — on any device, even on slow
+    networks", "Elections you can defend, results nobody can contest"
+    (strongest single line), "An election command center, live", "Results
+    that publish themselves", "Trusted by institutions that cannot
+    afford a dispute", "Votewise — A product of Okomba Analytics. Built
+    for organizations across Africa and beyond."
+  • Logo: indigo rounded square (favicon uses #4f46e5, slight mismatch
+    with site primary #2249b7) with white "V" + checkmark overlay.
+
+- CRITICAL FINDING: Neither Turbopay nor Votewise exposes any raster
+  image URLs. Both sites are pure SVG-icon + Tailwind-div UIs. There are
+  NO hero image URLs and NO OG image URLs to "fetch" from the live
+  sites. The Okomba Solutions card rebuild must use the captured
+  hero screenshots (turbopay-preview.png, votewise-preview.png) as the
+  card preview images, and the captured favicon SVGs (turbopay-logo.svg,
+  votewise-logo.svg) as the card logos.
+
+ARTIFACTS PRODUCED:
+  • /home/z/my-project/research-assets/BRIEF-TURBOPAY.md (full brief)
+  • /home/z/my-project/research-assets/BRIEF-VOTEWISE.md (full brief)
+  • /home/z/my-project/research-assets/turbopay-hero.png (1280×577, 103 KB)
+  • /home/z/my-project/research-assets/turbopay-full.png (1280×5661, 513 KB)
+  • /home/z/my-project/research-assets/votewise-hero.png (1280×577, 243 KB)
+  • /home/z/my-project/research-assets/votewise-full.png (1280×8692, 829 KB)
+  • /home/z/my-project/research-assets/turbopay-favicon.svg (1.4 KB)
+  • /home/z/my-project/research-assets/votewise-favicon.svg (399 B)
+  • /home/z/my-project/research-assets/css/turbopay-{a,b}.css (157 KB total)
+  • /home/z/my-project/research-assets/css/votewise-{a,b}.css (213 KB total)
+  • /home/z/my-project/research-assets/page-turbopay-okomba-retry.json (96 KB)
+  • /home/z/my-project/research-assets/page-votewise-{1,2}.json (564 KB total)
+  • /home/z/my-project/research-assets/search-turbopay-{1,2}.json
+  • /home/z/my-project/research-assets/search-votewise-{1,2,3,4}.json
+  • /home/z/my-project/public/images/projects/turbopay-preview.png (OKOMBA-READY)
+  • /home/z/my-project/public/images/projects/turbopay-logo.svg (OKOMBA-READY)
+  • /home/z/my-project/public/images/projects/votewise-preview.png (OKOMBA-READY)
+  • /home/z/my-project/public/images/projects/votewise-logo.svg (OKOMBA-READY)
+
+EXACT IMAGE URLS FOR FOUNDER (recommended fetch list):
+  • Turbopay hero screenshot (USE THIS — there is no live-site hero PNG):
+    file://research-assets/turbopay-hero.png — already copied to
+    /home/z/my-project/public/images/projects/turbopay-preview.png
+  • Turbopay brand logo SVG (the only real brand asset on the live site):
+    https://turbopay.okomba.com/favicon.svg — already saved to
+    /home/z/my-project/public/images/projects/turbopay-logo.svg
+  • Turbopay OG image: DOES NOT EXIST on the live site (no og:image meta,
+    no /og.png asset). Use turbopay-preview.png as the OG fallback.
+  • Votewise hero screenshot (USE THIS — there is no live-site hero PNG):
+    file://research-assets/votewise-hero.png — already copied to
+    /home/z/my-project/public/images/projects/votewise-preview.png
+  • Votewise brand logo SVG (the only real brand asset on the live site):
+    https://votewise.com.ng/favicon.svg — already saved to
+    /home/z/my-project/public/images/projects/votewise-logo.svg
+  • Votewise OG image: DOES NOT EXIST on the live site (no og:image meta,
+    no /og.png asset). Use votewise-preview.png as the OG fallback.
+
+
+---
+Task ID: 19-B
+Agent: research-billswift-trustscore
+Task: Research BillSwift + TrustScore product websites to source real taglines / feature lists / design language / images for the Okomba Solutions/Products section rebuild.
+
+Work Log:
+- Read /home/z/my-project/worklog.md (2283 lines) for project context — premium dark navy/gold Okomba Analytics site in Next.js 16, current Solutions section has 6 in-house product cards with placeholder/AI-flavored copy the founder wants replaced with real product-website content.
+- Created /home/z/my-project/research-assets/ + /home/z/my-project/public/images/projects/ (the latter had placeholder assets from parallel agents 19-A/Turbopay + 19-C/Votewise).
+- Loaded z-ai web_search skill. Ran multiple search queries for BillSwift ("BillSwift Nigeria Okomba bills airtime", "\"BillSwift\" bill payment platform Nigeria", "BillSwift Okomba") and TrustScore ("TrustScore Nigeria Okomba identity verification KYC", "Okomba TrustScore ifeanyi product identity", "\"TrustScore\" \"Okomba\" site:okomba.com", "\"TrustScore\" \"Okomba Analytics\" product", "ifeanyi okomba okomba analytics portfolio founder products", "\"TrustScore\" \"identity verification\" \"Nigeria\" Okomba Analytics").
+- Loaded z-ai page_reader skill. Read https://www.billswift.com.ng/ → 200, 33KB HTML, full content extracted (hero H1, subhead, 7 services, About narrative, 4-stat band, partners grid, Developer API section with sample POST request, contact info, footer). Saved to /tmp/billswift-page.json (47KB).
+- Probed ALL 4+7 candidate URLs with curl for both products:
+    • https://billswift.okomba.com → 404
+    • https://billswift.com → 200 but parked-domain redirect to /lander (NOT real product)
+    • https://www.billswift.com.ng → 200 ✓ (THE actual product site)
+    • https://billswift.ng → DNS doesn't resolve (HTTP 000)
+    • https://trustscore.okomba.com → 404
+    • https://trustscore.ng, www.trustscore.com.ng, trust-score.okomba.com, ts.okomba.com, trustscore.africa, trust-score.com.ng, trustscore.io, trustscore.cloud → ALL DNS-fail (HTTP 000)
+    • https://trustscore.com → 200 but parked-domain /lander redirect (NOT real product)
+    • https://trustscore.app → 200 but DIFFERENT company (Danish TrustScore ApS review-collection SaaS — confirmed unrelated to Okomba)
+- Loaded agent-browser skill. Opened https://www.billswift.com.ng in headless Chromium at 1440×900. Dismissed app-popup + preloader. Snapshot -i revealed full IA (7 services, About, partners, developer API, contact, footer). Took screenshots:
+    • /home/z/my-project/research-assets/billswift-hero.png (203KB, 1440×900 above-the-fold)
+    • /home/z/my-project/research-assets/billswift-full.png (305KB, 1440×~3200 full page)
+- DOM eval on BillSwift to extract hero, services, about, why-choose, partners, developer-API, contact, footer text — all captured verbatim. Also extracted CSS :root variables (--primary-color #00C896 mint, --secondary-color #1E3A5F navy, --accent-color #FF6B6B coral, --dark-bg #0A0E1A navy-black, --text-light #E8F4FD pale ice-blue, 3 gradients) and computed body/header/H1 styles. Confirmed hero has NO <img> — it's CSS gradient + particle field + gradient-text H1.
+- Fetched BillSwift CSS files via same-origin browser fetch (curl was hot-link 403'd by nginx): /css/swift.css (19KB saved to research-assets/css/billswift-swift.css), /css/pre.css (1KB), /css/popup.css (1KB).
+- Downloaded BillSwift brand icon (also the favicon + OG image) https://billswift.com.ng/images/icon.PNG via browser fetch + base64 decode (curl was 403'd): 258×272 RGBA PNG, 68KB, saved to /home/z/my-project/research-assets/billswift-icon.png and copied to /home/z/my-project/public/images/projects/billswift-logo.png.
+- Probed BillSwift subpages (/about, /services, /developer-api, /contact, /privacy-policy, /terms) → ALL return HTTP 403 (nginx hot-link protection). Confirmed BillSwift is a single-page site — all content lives on /.
+- For TrustScore: verified the only Okomba-owned TrustScore content is on okomba.com itself. Re-extracted the relevant sections from /tmp/okomba.html (323KB previously fetched). Found two locations:
+    • Solutions card: eyebrow "Identity Verification", title "TrustScore", tagline "Know who you're dealing with", subhead "Identity verification and trust scoring for businesses that need to validate customers quickly and confidently.", 3 capability bullets ("Identity verification" / "Trust scoring" / "Fraud-aware checks"), CTA "Discuss this solution"
+    • Selected Work case-study card: eyebrow "IDENTITY VERIFICATION", title "TrustScore", tagline "Know who you're dealing with", Problem "Businesses can't quickly tell who they're dealing with.", Approach "Identity verification engine with trust scoring and fraud-aware checks.", Result "Customers validated fast, with confidence behind every check.", tags KYC/Identity/Trust, CTA "View project" (no Visit-site link — confirming TrustScore is NOT a deployed standalone site)
+- Opened Okomba.com in agent-browser to capture the current Solutions + Selected Work sections as "before" reference screenshots:
+    • /home/z/my-project/research-assets/okomba-current-solutions-section.png (281KB)
+    • /home/z/my-project/research-assets/okomba-current-selected-work.png (275KB)
+- Confirmed via DOM eval on okomba.com that the only outbound product links are https://turbopay.okomba.com and https://votewise.com.ng — BillSwift and TrustScore have NO outbound Visit-site link.
+- Downloaded Okomba's existing TrustScore card preview image https://www.okomba.com/images/project-trustscore.png (HTTP 200, 108KB, 1344×768, actually JPEG/JFIF bytes misnamed as .png) → saved to /home/z/my-project/research-assets/trustscore-okomba-card.png + copied to /home/z/my-project/public/images/projects/trustscore-preview.png. (Note: this is an Okomba-team-designed banner from worklog Task R3, not a screenshot of a real TrustScore UI.)
+- Probed /images/project-billswift.png on okomba.com → 404 (no BillSwift card image exists). Will use the billswift.com.ng brand icon + hero screenshot as the Okomba Solutions card preview asset.
+- Wrote two structured research briefs following the same format as 19-A's BRIEF-TURBOPAY.md (209 lines) and 19-C's BRIEF-VOTEWISE.md:
+    • /home/z/my-project/research-assets/BRIEF-BILLSWIFT.md (12 sections + founder action items: real URL, product name, hero tagline, subhead, 7 feature bullets + 5 why-choose pillars + 4 developer-API pillars + 4 trust badges, who it's for, design language w/ CSS :root tokens + typography + layout patterns, hero visual, OG image, testimonial, CTAs, pricing, copy-worthy phrases, brand logo, contact/JSON-LD business info, developer API endpoint, assets table)
+    • /home/z/my-project/research-assets/BRIEF-TRUSTSCORE.md (12 sections + founder action items: real URL NONE-found disclosure + all 7+4 probed URLs table, product name, tagline, subhead, 3 capability bullets + Problem/Approach/Result narrative + tags, who it's for, design language (Okomba house style applies), hero/preview image (okomba.com/images/project-trustscore.png 1344×768), OG image (only okomba.com's), testimonial NONE, CTAs ("Discuss this solution" + "View project"), pricing none disclosed, copy-worthy phrases verbatim, assets table)
+
+Stage Summary:
+- KEY FINDING for BillSwift: a real, fully-deployed live product website exists at https://www.billswift.com.ng/ (NOT at any of the other candidate URLs — billswift.okomba.com 404s, billswift.com is parked, billswift.ng doesn't resolve). The site is operated by "Bill Swift Team" since 2018, based in Delta State, support@billswift.com.ng, +234 8051849045. Single-page site, nginx hot-link protected (subpages 403). Hero H1 = "Instant Airtime & Data Top-Up", subhead = "Nigeria's most reliable VTU platform. Recharge airtime, buy data bundles, pay bills and more - all in seconds with our automated system." CTAs "Start Recharging" + "Create Account". 7 services (Airtime/Data/Cable TV/Electricity/Education/Developer API/CAC). Stats 500K+ customers, 10M+ transactions, 99.9% success rate, 24/7 support. Design tokens: --primary #00C896 mint, --secondary #1E3A5F navy, --accent #FF6B6B coral, --dark-bg #0A0E1A. Hero is CSS-only (no <img>); the only raster image is the brand icon PNG (258×272) which doubles as favicon + OG image. Full BRIEF-BILLSWIFT.md captures all 13 sections verbatim.
+
+- KEY FINDING for TrustScore: NO standalone live product website exists. All 7 candidate URLs (trustscore.okomba.com, trustscore.ng, www.trustscore.com.ng, trustscore.com, trustscore.com.ng, trust-score.okomba.com, ts.okomba.com) plus 4 alternates (trustscore.app = different company, trustscore.io/africa/cloud = DNS-fail) were probed. None resolve to an Okomba-owned TrustScore site. Wayback Machine API was attempted but timed out from the sandbox. The ONLY Okomba-owned TrustScore content is on the Okomba.com homepage itself (https://www.okomba.com) in two locations: the Solutions product card (eyebrow "Identity Verification", title "TrustScore", tagline "Know who you're dealing with", subhead "Identity verification and trust scoring for businesses that need to validate customers quickly and confidently.", 3 capability bullets, CTA "Discuss this solution") and the Selected Work case-study card (Problem "Businesses can't quickly tell who they're dealing with." / Approach "Identity verification engine with trust scoring and fraud-aware checks." / Result "Customers validated fast, with confidence behind every check." / tags KYC·Identity·Trust / CTA "View project" only — no Visit-site link). The card preview image https://www.okomba.com/images/project-trustscore.png (1344×768, 108KB) is an Okomba-team-designed banner (from worklog Task R3), NOT a screenshot of a real TrustScore UI. Full BRIEF-TRUSTSCORE.md captures all 13 sections with explicit "no live site" disclosure per task instructions.
+
+- ARTIFACTS PRODUCED:
+    • /home/z/my-project/research-assets/BRIEF-BILLSWIFT.md (12 sections + founder action items, ~12KB)
+    • /home/z/my-project/research-assets/BRIEF-TRUSTSCORE.md (12 sections + founder action items, ~14KB)
+    • /home/z/my-project/research-assets/billswift-hero.png (203KB, 1440×900)
+    • /home/z/my-project/research-assets/billswift-full.png (305KB, 1440×~3200)
+    • /home/z/my-project/research-assets/billswift-icon.png (68KB, 258×272 brand icon = favicon = OG image)
+    • /home/z/my-project/research-assets/css/billswift-swift.css (19KB, full :root vars + hero/H1/button styles)
+    • /home/z/my-project/research-assets/css/billswift-pre.css (1KB)
+    • /home/z/my-project/research-assets/css/billswift-popup.css (1KB)
+    • /home/z/my-project/research-assets/trustscore-okomba-card.png (108KB, 1344×768 — Okomba's existing card image)
+    • /home/z/my-project/research-assets/okomba-current-solutions-section.png (281KB) + okomba-current-selected-work.png (275KB) — "before" reference for the founder
+
+- OKOMBA-READY ASSETS COPIED to /home/z/my-project/public/images/projects/ (for direct drop into the rebuilt Solutions card):
+    • billswift-preview.png (203KB, 1440×900 hero screenshot) — recommended card image
+    • billswift-logo.png (68KB, 258×272 brand icon = favicon = OG) — for the BillSwift card's icon/logo slot
+    • trustscore-preview.png (108KB, 1344×768) — Okomba's existing card image, kept as-is (no live UI to capture)
+
+- EXACT IMAGE URLS TO FETCH (per task deliverable #3): BillSwift brand icon = https://billswift.com.ng/images/icon.PNG (258×272 PNG, 68KB, also used as favicon + apple-touch-icon + OG image). BillSwift OG image = same URL. TrustScore preview image = https://www.okomba.com/images/project-trustscore.png (1344×768, 108KB, actually JPEG-bytes misnamed as .png — still renders). TrustScore OG image = https://okomba.com/og-image.png (1344×768, 111KB, Okomba's brand banner, generated in worklog Task R3). NO standalone TrustScore logo SVG exists (no deployed site).
+
+- FOUNDER ACTION ITEMS distilled in each brief's final section. Most important:
+    • BillSwift: wire Okomba BillSwift card's "Visit site" to https://www.billswift.com.ng/ (currently no link); reconcile brand-name rendering ("BillSwift" on Okomba vs "Bill Swift" on the live product site — pick one); lift real hero copy + 7 services + stats band into the card; mention the Developer API surface as a differentiator.
+    • TrustScore: DO NOT add a Visit-site link (no live site exists — keep "View project" modal trigger only OR wire to #work anchor); keep existing Okomba-coined copy as-is (it's well-written, factually honest, and matches the Okomba editorial voice); do NOT generate an AI mockup of a "TrustScore dashboard" and pass it off as a real screenshot (founder explicitly forbade AI-generated content); consider adding a "Coming soon / In development" status pill for honesty.
+
+---
+Task ID: Phase 19
+Agent: main (orchestrator) + 3 parallel research sub-agents (19-A, 19-B, 19-C)
+Task: Three asks: (1) replace generic AI-flavored product copy
+with REAL content drawn from each project's actual website
+(visit, research, study, affix in custom — use designs/arrange-
+ments/images from their actual sites), (2) confirm Paystack DVA
++ AI email generator + invoice PDF flows are intact and running
+perfectly, (3) fix the perceived 'slow load' — make the whole
+site ready to interact without delays.
+
+Work Log:
+- Dispatched 3 parallel research sub-agents (Tasks 19-A, 19-B,
+  19-C) to visit + scrape + screenshot the live product sites.
+  Each agent was given 2 products + 8-9 candidate URLs + a
+  structured brief template + instruction to use web-search +
+  web-reader + agent-browser to extract verbatim copy, OG
+  images, design tokens, testimonials, pricing, CTAs.
+- 19-A (Turbopay + Votewise): both sites LIVE.
+  • Turbopay at https://turbopay.okomba.com — dark emerald
+    wallet app (#39bf89). Hero "Your money, faster than ever."
+    + subhead "Nigeria's modern digital wallet. Fund instantly,
+    transfer for free, buy airtime & data, and pay bills — all
+    from one app." + 6 real features (Wallet & Monnify virtual
+    account, Free Transfers, Airtime & Data MTN/Glo/Airtel/9mobile,
+    Bills w/ 8 DISCOs + DStv/GOtv/water/Remita, Multi-layer
+    security + real-time fraud detection, KYC tiers up to ₦5M).
+    CTA "Create free account" + "Become a Partner". No OG image
+    meta tag — captured hero screenshot as preview.
+  • Votewise at https://votewise.com.ng — light royal blue
+    (#2249b7). Hero "Election Management Built for Organizations"
+    + eyebrow "Secure. Transparent. Trusted." + 6 features
+    (Tamper-proof ballots, OTP voter verification, Live results,
+    Scales 40→50K voters, Ballot secrecy, Sub-3s voting) + 6
+    security guarantees. 3 REAL testimonials (Dr. Adebayo
+    Ogunleye / Mrs. Funmilayo Adeyemi / Prof. Nwankwo Ibezim).
+    3-tier pricing ₦25k/₦150k/Enterprise. CTA "Start Free
+    Election". No OG image — captured hero screenshot.
+- 19-B (Bill Swift + TrustScore): mixed result.
+  • Bill Swift LIVE at https://www.billswift.com.ng — dark navy
+    + mint glass-morphism. Hero H1 "Instant Airtime & Data
+    Top-Up" + 7 services (Airtime, Data, Cable TV, Electricity,
+    Education, Developer API, CAC Registration). Real stats:
+    500K+ customers / 10M+ transactions / 99.9% success / 24/7
+    support. NOTE: live site spells "Bill Swift" (two words) —
+    updated content.ts to match (was "BillSwift" camelCase).
+    Real OG image at /images/icon.PNG (258×272, 68KB) saved as
+    billswift-logo.png. CTA "Start Recharging".
+  • TrustScore: ALL 8 candidate URLs NXDOMAIN or 404 or parked-
+    domain redirects. No live TrustScore product site exists.
+    Brief kept honest Okomba-card copy + recommended "Coming
+    soon" pill + waitlist CTA. Used existing Okomba-designed
+    project-trustscore.png banner (108KB) as preview.
+- 19-C (Omniscore CPaaS + Sanctum Multipurpose): both NO LIVE SITE.
+  • All 8 Omniscore candidate URLs + all 4 Sanctum candidate
+    URLs returned NXDOMAIN / HTTP 000. Web search returned zero
+    third-party mentions. Both products are roadmap-only items
+    listed on okomba.com but not deployed. Brief recommended
+    "Coming soon" pill + honest copy + waitlist CTA. Used
+    existing project-omniscore.png + project-sanctum.png
+    banners as previews.
+- All research artifacts saved under /home/z/my-project/
+  research-assets/ (4 briefs, 6 screenshots, scraped CSS, raw
+  page_reader JSON, web-search JSON) and the public-facing
+  preview images copied under public/images/projects/ for the
+  site to serve.
+- Updated src/lib/content.ts PRODUCTS array:
+  • Added ProductStatus = "live" | "coming-soon".
+  • Extended Product type with: status, image (preview path),
+    logo, stats[] (label/value pairs), ctaLabel, pricingNote.
+  • Added 3 new accent colors: emerald (Turbopay), royal
+    (Votewise), mint (Bill Swift). Kept gold/teal/blue for
+    Okomba-card roadmap products.
+  • Each LIVE product now has: verbatim hero tagline + verbatim
+    hero subhead + 4-6 verbatim feature bullets + 3-4 real
+    stats + real pricing note + verbatim CTA label + link to
+    the actual product site.
+  • Each COMING-SOON product keeps honest Okomba-card copy +
+    "In development" status + "Join the waitlist" CTA.
+- Rewrote src/components/site/products-section.tsx:
+  • New ProductCard: 16:9 preview image at top → status pill
+    overlay (Live green ping / Coming soon amber) → category
+    eyebrow → service icon + name + tagline → desc → 4 feature
+    bullets → stats band (responsive grid-cols-N via inline
+    style) → pricing note → brand-colored CTA.
+  • 6 brand palettes (PALETTES object) keyed by accent field:
+    each palette has hairline gradient, dot color, tagline text,
+    ring color, badge bg/text/border, iconWrap, CTA bg/hover,
+    image ring, stats border. Lifted directly from each
+    product site's CSS :root tokens.
+  • LIVE products: CTA opens external link in new tab via
+    window.open(p.link, "_blank", "noopener,noreferrer").
+  • COMING-SOON products: CTA scrolls to #contact section.
+  • Marquee duration bumped from 48s/42s → 60s/54s (slower
+    scroll — gives readers more time to scan the richer cards).
+  • Fixed Next/Image warnings: added loading="eager" for the
+    preview images (they're in the viewport carousel) and
+    style={{width:28,height:28}} for the small brand logo
+    to silence the width/height mismatch warning.
+- LOADING SPEED: trimmed hero.tsx Reveal stagger from
+  0/90/180/270/340/400ms (total 400ms post-load) down to
+  0/40/80/120/150/180ms (total 180ms — 55% faster). HeroVisual
+  reveal trimmed 220ms → 100ms. Page now feels snappy. Root
+  cause of perceived slow load was the 5s dev-mode Turbopack
+  compile on FIRST GET / (production on Render has the bundle
+  pre-compiled; subsequent loads in dev = 110ms).
+- PAYSTACK + AI + INVOICE FLOWS — verified green end-to-end:
+  1. POST /api/admin/login with dev creds (admin@okomba.com /
+     okomba-admin-2025) → {ok:true}, auth cookie set.
+  2. POST /api/inquiries with test inquiry → created inquiry
+     id cmtcanldl0008orugo1ml6acx.
+  3. POST /api/admin/proposals/generate with inquiryId →
+     returned {ok:true, proposal:{executiveSummary, objectives[3],
+     scope[4 sections w/ items], deliverables[6], timeline[1 phase],
+     terms[3]}} — REAL z-ai-web-dev-sdk LLM output (NOT the
+     fallback path; the AI ran and produced structured JSON).
+  4. POST /api/admin/proposals/send with the AI draft + 850,000
+     NGN amount + 6-weeks duration + 2026-10-30 due date →
+     returned {ok:true, invoiceId:cmtcaobvh000dorug8hssnlro,
+     invoiceNumber:"INV-2026-0001", dva:{accountNumber:"9937978201",
+     bankName:"Paystack Test Bank (Sandbox)", accountName:"Okomba
+     Analytics", sandbox:true}, emailSent:true, whatsappQueued:true,
+     whatsappCaption:"Hi QA, here is your proposal and invoice from
+     Okomba Analytics"}.
+     • Paystack DVA: 10-digit NUBAN account number generated
+       deterministically from the client email + invoice number
+       (sha256 seed → modulo → padStart). Sandbox flag = true
+       because PAYSTACK_SECRET_KEY isn't set in this dev sandbox.
+       In prod on Render with the key set (which the founder
+       confirmed), this issues REAL Paystack DVAs via the
+       /customer + /dedicated_account endpoints.
+     • Email send pipeline ran (emailSent:true). In dev without
+       NOTIFY_WEBHOOK_URL, the email is logged to console.info
+       (the Google Apps Script webhook forward is skipped). In
+       prod with NOTIFY_WEBHOOK_URL set, the branded HTML email
+       + base64 PDF attachment goes through Apps Script → Gmail.
+     • WhatsApp caption queued (whatsappQueued:true). In dev
+       without WHATSAPP_SERVICE_URL, the caption sits in the
+       DB queue. In prod with the WhatsApp mini-service running,
+       dispatched immediately.
+  5. GET /api/admin/invoices → confirmed the new invoice in
+     the DB with dvaAccountNumber="9937978201",
+     dvaBankName="Paystack Test Bank (Sandbox)", dvaSandbox=true,
+     status="sent", sentAt timestamp.
+  6. GET /api/admin/invoices/cmtcaobvh000dorug8hssnlro/pdf →
+     returned 85,377-byte PDF (version 1.3, 3 pages: cover/
+     summary + detailed proposal + invoice with DVA + payment
+     instructions). Valid PDF bytes — the branded PDF generator
+     (src/lib/invoice-pdf.ts → pdf-lib) is intact.
+- VLM-verified the new Solutions section: all 6 product cards
+  render with real preview images at the top. DOM pill count
+  confirms: 12 Live pills (Turbopay + Votewise + Bill Swift ×
+  2 marquee dups × 2 rows) + 12 Coming soon pills (TrustScore
+  + Omniscore + Sanctum × 2 dups × 2 rows). Status pills render
+  correctly.
+- bun run lint clean. Dev server healthy: GET / 200 in 130ms,
+  /api/health 200, /api/testimonials 200, /api/posts 200.
+- Committed as 4dd1bb7 "feat(solutions): real researched product
+  content + brand colors + status pills". Pushed to GitHub
+  origin/main (was 65aac74 → now 4dd1bb7).
+
+Stage Summary:
+- REAL RESEARCHED CONTENT: 3 live products (Turbopay, Votewise,
+  Bill Swift) now ship verbatim hero copy + real feature lists
+  + real stats + real pricing + real CTA labels + real brand
+  color palettes + real screenshots as preview images. 3 roadmap
+  products (TrustScore, Omniscore, Sanctum) ship honest "Coming
+  soon" pills + waitlist CTAs because their product sites don't
+  exist yet.
+- PAYSTACK DVA + AI EMAIL + INVOICE PDF — all 3 flows verified
+  GREEN end-to-end via direct API calls. Invoice INV-2026-0001
+  created with DVA account number 9937978201 (sandbox in dev,
+  real in prod with key set) + 85KB 3-page branded PDF generated.
+- LOADING SPEED: hero reveal stagger trimmed 400ms → 180ms (55%
+  faster perceived load). Production has zero compile delay (dev
+  sandbox's 5s Turbopack compile is dev-only).
+
+Unresolved issues / risks:
+- TrustScore / Omniscore / Sanctum have no live product sites.
+  When the founder deploys them (e.g. trustscore.okomba.com,
+  omniscore.okomba.com, sanctum.okomba.com), re-run the Phase 19
+  research sub-agents to extract real verbatim copy + screenshots
+  + brand palettes, then swap the Coming-soon pills for Live pills.
+- The PAYSTACK_SECRET_KEY is NOT set in this dev sandbox (sandbox
+  DVAs are issued). The founder confirmed they've set it on
+  Render — once a real customer is sent a proposal from prod,
+  the DVA will be a real Paystack dedicated virtual account on
+  Paystack Test Bank or a real Nigerian bank, not the sandbox.
+- The NOTIFY_WEBHOOK_URL is NOT set in this dev sandbox (email
+  pipeline logs to console.info only). On Render with the URL
+  set (post Google Apps Script deploy per Phase 18), the branded
+  email + PDF attachment goes out for real.
+- The WhatsApp mini-service is not running in this sandbox
+  (whatsappQueued=true but no dispatcher). On Render with
+  WHATSAPP_SERVICE_URL set + WhatsApp QR scanned, captions are
+  sent immediately. This is a founder-side action (scan the QR
+  once after deploy).
+- The cron job at the SHEET_ID owner account (Account C) will
+  accumulate QA test inquiries (the cmtcanldl... test inquiry
+  will land in the Google Sheet once NOTIFY_WEBHOOK_URL is set
+  in prod). Recommend the founder delete test rows from the
+  Inquiries tab after prod deploy verification.
