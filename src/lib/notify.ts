@@ -256,9 +256,7 @@ async function deliverOne(
         subscriberId: recipient.id ?? null,
         bodyText: body,
         bodyHtml: html,
-        attachments: JSON.stringify(
-          attachments.map((a) => ({ filename: a.filename, size: a.base64.length }))
-        ),
+        attachments: attachments.map((a) => ({ filename: a.filename, size: a.base64.length })),
         invoiceId: opts?.invoiceId ?? null,
       },
     });
@@ -528,7 +526,7 @@ export async function sendReminderEmail(
         status: "sent",
         bodyText: body,
         bodyHtml: html,
-        attachments: JSON.stringify([{ filename: rem.pdfFilename, size: rem.pdfBase64.length }]),
+        attachments: [{ filename: rem.pdfFilename, size: rem.pdfBase64.length }],
         invoiceId: rem.invoiceId,
       },
     });
@@ -704,9 +702,9 @@ export async function sendProposalEmail(
         status: "sent",
         bodyText: body,
         bodyHtml: html,
-        attachments: JSON.stringify([
+        attachments: [
           { filename: inv.pdfFilename, size: inv.pdfBase64.length },
-        ]),
+        ],
         invoiceId: inv.invoiceId,
       },
     });
@@ -968,7 +966,7 @@ export async function sendPaymentThankYouEmail(
         status: "sent",
         bodyText: body,
         bodyHtml: html,
-        attachments: JSON.stringify([{ filename: p.pdfFilename, size: p.pdfBase64.length }]),
+        attachments: [{ filename: p.pdfFilename, size: p.pdfBase64.length }],
         invoiceId: p.invoiceId,
       },
     });

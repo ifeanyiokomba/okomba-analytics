@@ -87,7 +87,7 @@ export async function GET(
       title: string;
       subtitle?: string;
       body?: string;
-      meta?: Record<string, string | number | null | undefined>;
+      meta?: Record<string, unknown>;
       at: string; // ISO timestamp
     };
 
@@ -133,7 +133,7 @@ export async function GET(
         body: e.bodyText ?? undefined,
         meta: {
           status: e.status,
-          attachments: e.attachments,
+          attachments: Array.isArray(e.attachments) ? e.attachments : [],
           invoiceId: e.invoiceId ?? null,
         },
         at: e.sentAt.toISOString(),
@@ -183,7 +183,7 @@ export async function GET(
         status: c.status,
         source: c.source,
         leadScore: c.leadScore,
-        tags: JSON.parse(c.tags || "[]") as string[],
+        tags: Array.isArray(c.tags) ? (c.tags as string[]) : [],
         notes: c.notes,
         createdAt: c.createdAt.toISOString(),
         updatedAt: c.updatedAt.toISOString(),
@@ -247,7 +247,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
         ...(body.company !== undefined ? { company: body.company.trim() || null } : {}),
         ...(body.role !== undefined ? { role: body.role.trim() || null } : {}),
         ...(body.status !== undefined ? { status: body.status } : {}),
-        ...(body.tags !== undefined ? { tags: JSON.stringify(body.tags.filter(Boolean)) } : {}),
+        ...(body.tags !== undefined ? { tags: body.tags.filter(Boolean) } : {}),
         ...(body.notes !== undefined ? { notes: body.notes } : {}),
         ...(body.leadScore !== undefined ? { leadScore: body.leadScore } : {}),
       },

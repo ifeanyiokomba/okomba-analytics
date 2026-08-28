@@ -17,6 +17,7 @@
  */
 
 import { db } from "@/lib/db";
+import type { InputJsonValue } from "@prisma/client/runtime/library";
 
 export const ANALYTICS_EVENT_TYPES = [
   "ai_chat_start",
@@ -50,7 +51,7 @@ export async function recordAnalyticsEvent(input: RecordEventInput): Promise<voi
         invoiceId: input.invoiceId ?? null,
         secureToken: input.secureToken ?? null,
         sessionId: input.sessionId ?? null,
-        meta: JSON.stringify(input.meta ?? {}),
+        meta: (input.meta ?? {}) as InputJsonValue,
       },
     });
   } catch (err) {

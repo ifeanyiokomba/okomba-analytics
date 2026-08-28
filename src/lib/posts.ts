@@ -1,6 +1,9 @@
 /* ─────────────────────────────────────────────────────────────
    Posts — shared types, tag (de)serialization, and seed helper.
-   SQLite cannot store primitive lists, so we serialize tags as JSON.
+   Phase 28: tags column is now native PostgreSQL jsonb, so we no
+   longer serialize to/from JSON strings in the app — the Prisma
+   client returns an already-parsed array. The helpers below still
+   guard against bad shapes (null / non-array / mixed contents).
    ───────────────────────────────────────────────────────────── */
 
 import { db } from "@/lib/db";
@@ -38,32 +41,37 @@ export type NewPostInput = {
 
 export type UpdatePostInput = Partial<NewPostInput> & { id: string };
 
-/* ── JSON tag (de)serialization ───────────────────────────── */
-export function parseTags(raw: string | null | undefined): string[] {
+/* ── Tag (de)normalization (Phase 28: tags column is Json array) ── */
+export function parseTags(raw: unknown): string[] {
   if (!raw) return [];
-  try {
-    const parsed = JSON.parse(raw);
-    if (Array.isArray(parsed)) {
-      return parsed
-        .filter((t): t is string => typeof t === "string")
-        .map((t) => t.trim())
-        .filter(Boolean);
-    }
-    return [];
-  } catch {
-    // Fall back to comma-separated if it isn't valid JSON
-    return String(raw)
-      .split(",")
+  if (Array.isArray(raw)) {
+    return raw
+      .filter((t): t is string => typeof t === "string")
       .map((t) => t.trim())
       .filter(Boolean);
   }
+  // Backwards-compat: if an old row slipped through as a JSON string,
+  // try to parse it.
+  if (typeof raw === "string") {
+    try {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) {
+        return parsed
+          .filter((t): t is string => typeof t === "string")
+          .map((t) => t.trim())
+          .filter(Boolean);
+      }
+    } catch {
+      return raw.split(",").map((t) => t.trim()).filter(Boolean);
+    }
+  }
+  return [];
 }
 
-export function serializeTags(tags: string[] | null | undefined): string {
-  const clean = (tags ?? [])
+export function serializeTags(tags: string[] | null | undefined): string[] {
+  return (tags ?? [])
     .map((t) => (typeof t === "string" ? t.trim() : ""))
     .filter(Boolean);
-  return JSON.stringify(clean);
 }
 
 /* ── Map a DB row to a typed Post (for API responses) ────── */
@@ -74,7 +82,7 @@ export function toPost(row: {
   excerpt: string;
   content: string;
   category: string;
-  tags: string;
+  tags: unknown; // Phase 28: jsonb column → already-parsed array
   author: string;
   status: string;
   publishedAt: Date | null;

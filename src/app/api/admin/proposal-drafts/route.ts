@@ -34,7 +34,7 @@ export async function GET() {
         receivedEmailId: d.receivedEmailId,
         status: d.status,
         createdAt: d.createdAt.toISOString(),
-        draft: JSON.parse(d.draftJson || "{}") as unknown,
+        draft: (d.draftJson && typeof d.draftJson === "object") ? d.draftJson : {},
       })),
     });
   } catch (err) {

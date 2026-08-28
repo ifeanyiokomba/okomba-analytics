@@ -153,12 +153,12 @@ export async function POST(req: Request) {
           subject: `Inquiry — ${inquiry.service}`,
           message: inquiry.message,
           inquiryId: inquiry.id,
-          meta: JSON.stringify({
+          meta: {
             service: inquiry.service,
             addlService: inquiry.addlService,
             budget: inquiry.budget,
             whatsapp: inquiry.whatsapp,
-          }),
+          },
         },
       });
     } catch (err) {

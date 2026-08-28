@@ -166,13 +166,13 @@ export async function runReminderScan(opts?: {
           customerPhone: inv.customerPhone,
           eventDate: due,
           relatedInvoiceId: inv.id,
-          payload: JSON.stringify({
+          payload: {
             invoiceNumber: inv.invoiceNumber,
             customerName: inv.customerName,
             amountNaira: Math.round(inv.amountKobo / 100),
             service: inv.service,
             catchUp: true,
-          }),
+          },
           status: "scheduled",
         },
       });
@@ -282,14 +282,14 @@ export async function runReminderScan(opts?: {
           status: "processed",
           processedAt: new Date(),
           lastSentAt: new Date(),
-          payload: JSON.stringify({
-            ...JSON.parse(event.payload || "{}"),
+          payload: {
+            ...(event.payload && typeof event.payload === "object" && !Array.isArray(event.payload) ? event.payload as Record<string, unknown> : {}),
             lastOutcome: {
               email: outcome.email,
               whatsapp: outcome.whatsapp,
               sentAt: now.toISOString(),
             },
-          }),
+          },
         },
       });
 

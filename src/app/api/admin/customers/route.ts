@@ -37,7 +37,7 @@ export async function GET(req: Request) {
       where: {
         ...(status !== "all" ? { status } : {}),
         ...(source !== "all" ? { source } : {}),
-        ...(tag ? { tags: { contains: `"${tag}"` } } : {}),
+        ...(tag ? { tags: { array_contains: tag } } : {}),
         ...(q
           ? {
               OR: [
@@ -114,7 +114,7 @@ export async function GET(req: Request) {
         status: c.status,
         source: c.source,
         leadScore: c.leadScore,
-        tags: JSON.parse(c.tags || "[]") as string[],
+        tags: Array.isArray(c.tags) ? (c.tags as string[]) : [],
         notes: c.notes,
         lastContactAt: c.lastContactAt?.toISOString() ?? null,
         createdAt: c.createdAt.toISOString(),
@@ -181,7 +181,7 @@ export async function POST(req: Request) {
         company: body.company?.trim() || null,
         role: body.role?.trim() || null,
         status: body.status ?? "lead",
-        tags: JSON.stringify(tagList),
+        tags: tagList,
         notes: body.notes ?? null,
         source: body.source ?? "manual",
         leadScore: body.leadScore ?? null,
@@ -193,7 +193,7 @@ export async function POST(req: Request) {
         company: body.company?.trim() || null,
         role: body.role?.trim() || null,
         status: body.status ?? undefined,
-        tags: tagList.length ? JSON.stringify(tagList) : undefined,
+        tags: tagList.length ? tagList : undefined,
         notes: body.notes ?? undefined,
         leadScore: body.leadScore ?? undefined,
       },

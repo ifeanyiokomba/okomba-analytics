@@ -3300,6 +3300,7 @@ export namespace Prisma {
      * The data used to create many Inquiries.
      */
     data: InquiryCreateManyInput | InquiryCreateManyInput[]
+    skipDuplicates?: boolean
   }
 
   /**
@@ -3318,6 +3319,7 @@ export namespace Prisma {
      * The data used to create many Inquiries.
      */
     data: InquiryCreateManyInput | InquiryCreateManyInput[]
+    skipDuplicates?: boolean
   }
 
   /**
@@ -3485,7 +3487,6 @@ export namespace Prisma {
     customerName: string | null
     customerEmail: string | null
     service: string | null
-    draftJson: string | null
     leadScore: number | null
     inquiryId: string | null
     receivedEmailId: string | null
@@ -3500,7 +3501,6 @@ export namespace Prisma {
     customerName: string | null
     customerEmail: string | null
     service: string | null
-    draftJson: string | null
     leadScore: number | null
     inquiryId: string | null
     receivedEmailId: string | null
@@ -3540,7 +3540,6 @@ export namespace Prisma {
     customerName?: true
     customerEmail?: true
     service?: true
-    draftJson?: true
     leadScore?: true
     inquiryId?: true
     receivedEmailId?: true
@@ -3555,7 +3554,6 @@ export namespace Prisma {
     customerName?: true
     customerEmail?: true
     service?: true
-    draftJson?: true
     leadScore?: true
     inquiryId?: true
     receivedEmailId?: true
@@ -3672,7 +3670,7 @@ export namespace Prisma {
     customerName: string
     customerEmail: string
     service: string
-    draftJson: string
+    draftJson: JsonValue
     leadScore: number | null
     inquiryId: string | null
     receivedEmailId: string | null
@@ -3771,7 +3769,7 @@ export namespace Prisma {
       customerName: string
       customerEmail: string
       service: string
-      draftJson: string
+      draftJson: Prisma.JsonValue
       leadScore: number | null
       inquiryId: string | null
       receivedEmailId: string | null
@@ -4206,7 +4204,7 @@ export namespace Prisma {
     readonly customerName: FieldRef<"DraftProposal", 'String'>
     readonly customerEmail: FieldRef<"DraftProposal", 'String'>
     readonly service: FieldRef<"DraftProposal", 'String'>
-    readonly draftJson: FieldRef<"DraftProposal", 'String'>
+    readonly draftJson: FieldRef<"DraftProposal", 'Json'>
     readonly leadScore: FieldRef<"DraftProposal", 'Int'>
     readonly inquiryId: FieldRef<"DraftProposal", 'String'>
     readonly receivedEmailId: FieldRef<"DraftProposal", 'String'>
@@ -4418,6 +4416,7 @@ export namespace Prisma {
      * The data used to create many DraftProposals.
      */
     data: DraftProposalCreateManyInput | DraftProposalCreateManyInput[]
+    skipDuplicates?: boolean
   }
 
   /**
@@ -4436,6 +4435,7 @@ export namespace Prisma {
      * The data used to create many DraftProposals.
      */
     data: DraftProposalCreateManyInput | DraftProposalCreateManyInput[]
+    skipDuplicates?: boolean
   }
 
   /**
@@ -4610,8 +4610,6 @@ export namespace Prisma {
     signatureValid: boolean | null
     source: string | null
     status: string | null
-    result: string | null
-    payload: string | null
     error: string | null
     receivedAt: Date | null
     processedAt: Date | null
@@ -4630,8 +4628,6 @@ export namespace Prisma {
     signatureValid: boolean | null
     source: string | null
     status: string | null
-    result: string | null
-    payload: string | null
     error: string | null
     receivedAt: Date | null
     processedAt: Date | null
@@ -4680,8 +4676,6 @@ export namespace Prisma {
     signatureValid?: true
     source?: true
     status?: true
-    result?: true
-    payload?: true
     error?: true
     receivedAt?: true
     processedAt?: true
@@ -4700,8 +4694,6 @@ export namespace Prisma {
     signatureValid?: true
     source?: true
     status?: true
-    result?: true
-    payload?: true
     error?: true
     receivedAt?: true
     processedAt?: true
@@ -4827,8 +4819,8 @@ export namespace Prisma {
     signatureValid: boolean
     source: string
     status: string
-    result: string
-    payload: string
+    result: JsonValue
+    payload: JsonValue
     error: string | null
     receivedAt: Date
     processedAt: Date | null
@@ -4951,8 +4943,8 @@ export namespace Prisma {
       signatureValid: boolean
       source: string
       status: string
-      result: string
-      payload: string
+      result: Prisma.JsonValue
+      payload: Prisma.JsonValue
       error: string | null
       receivedAt: Date
       processedAt: Date | null
@@ -5391,8 +5383,8 @@ export namespace Prisma {
     readonly signatureValid: FieldRef<"WebhookLog", 'Boolean'>
     readonly source: FieldRef<"WebhookLog", 'String'>
     readonly status: FieldRef<"WebhookLog", 'String'>
-    readonly result: FieldRef<"WebhookLog", 'String'>
-    readonly payload: FieldRef<"WebhookLog", 'String'>
+    readonly result: FieldRef<"WebhookLog", 'Json'>
+    readonly payload: FieldRef<"WebhookLog", 'Json'>
     readonly error: FieldRef<"WebhookLog", 'String'>
     readonly receivedAt: FieldRef<"WebhookLog", 'DateTime'>
     readonly processedAt: FieldRef<"WebhookLog", 'DateTime'>
@@ -5601,6 +5593,7 @@ export namespace Prisma {
      * The data used to create many WebhookLogs.
      */
     data: WebhookLogCreateManyInput | WebhookLogCreateManyInput[]
+    skipDuplicates?: boolean
   }
 
   /**
@@ -5619,6 +5612,7 @@ export namespace Prisma {
      * The data used to create many WebhookLogs.
      */
     data: WebhookLogCreateManyInput | WebhookLogCreateManyInput[]
+    skipDuplicates?: boolean
   }
 
   /**
@@ -6581,6 +6575,7 @@ export namespace Prisma {
      * The data used to create many AdminSessions.
      */
     data: AdminSessionCreateManyInput | AdminSessionCreateManyInput[]
+    skipDuplicates?: boolean
   }
 
   /**
@@ -6599,6 +6594,7 @@ export namespace Prisma {
      * The data used to create many AdminSessions.
      */
     data: AdminSessionCreateManyInput | AdminSessionCreateManyInput[]
+    skipDuplicates?: boolean
   }
 
   /**
@@ -7613,6 +7609,7 @@ export namespace Prisma {
      * The data used to create many Subscribers.
      */
     data: SubscriberCreateManyInput | SubscriberCreateManyInput[]
+    skipDuplicates?: boolean
   }
 
   /**
@@ -7631,6 +7628,7 @@ export namespace Prisma {
      * The data used to create many Subscribers.
      */
     data: SubscriberCreateManyInput | SubscriberCreateManyInput[]
+    skipDuplicates?: boolean
   }
 
   /**
@@ -7789,7 +7787,6 @@ export namespace Prisma {
     excerpt: string | null
     content: string | null
     category: string | null
-    tags: string | null
     author: string | null
     status: string | null
     publishedAt: Date | null
@@ -7805,7 +7802,6 @@ export namespace Prisma {
     excerpt: string | null
     content: string | null
     category: string | null
-    tags: string | null
     author: string | null
     status: string | null
     publishedAt: Date | null
@@ -7839,7 +7835,6 @@ export namespace Prisma {
     excerpt?: true
     content?: true
     category?: true
-    tags?: true
     author?: true
     status?: true
     publishedAt?: true
@@ -7855,7 +7850,6 @@ export namespace Prisma {
     excerpt?: true
     content?: true
     category?: true
-    tags?: true
     author?: true
     status?: true
     publishedAt?: true
@@ -7960,7 +7954,7 @@ export namespace Prisma {
     excerpt: string
     content: string
     category: string
-    tags: string
+    tags: JsonValue
     author: string
     status: string
     publishedAt: Date | null
@@ -8062,7 +8056,7 @@ export namespace Prisma {
       excerpt: string
       content: string
       category: string
-      tags: string
+      tags: Prisma.JsonValue
       author: string
       status: string
       publishedAt: Date | null
@@ -8498,7 +8492,7 @@ export namespace Prisma {
     readonly excerpt: FieldRef<"Post", 'String'>
     readonly content: FieldRef<"Post", 'String'>
     readonly category: FieldRef<"Post", 'String'>
-    readonly tags: FieldRef<"Post", 'String'>
+    readonly tags: FieldRef<"Post", 'Json'>
     readonly author: FieldRef<"Post", 'String'>
     readonly status: FieldRef<"Post", 'String'>
     readonly publishedAt: FieldRef<"Post", 'DateTime'>
@@ -8710,6 +8704,7 @@ export namespace Prisma {
      * The data used to create many Posts.
      */
     data: PostCreateManyInput | PostCreateManyInput[]
+    skipDuplicates?: boolean
   }
 
   /**
@@ -8728,6 +8723,7 @@ export namespace Prisma {
      * The data used to create many Posts.
      */
     data: PostCreateManyInput | PostCreateManyInput[]
+    skipDuplicates?: boolean
   }
 
   /**
@@ -9819,6 +9815,7 @@ export namespace Prisma {
      * The data used to create many Testimonials.
      */
     data: TestimonialCreateManyInput | TestimonialCreateManyInput[]
+    skipDuplicates?: boolean
   }
 
   /**
@@ -9837,6 +9834,7 @@ export namespace Prisma {
      * The data used to create many Testimonials.
      */
     data: TestimonialCreateManyInput | TestimonialCreateManyInput[]
+    skipDuplicates?: boolean
   }
 
   /**
@@ -10000,7 +9998,6 @@ export namespace Prisma {
     sentAt: Date | null
     bodyText: string | null
     bodyHtml: string | null
-    attachments: string | null
     invoiceId: string | null
   }
 
@@ -10016,7 +10013,6 @@ export namespace Prisma {
     sentAt: Date | null
     bodyText: string | null
     bodyHtml: string | null
-    attachments: string | null
     invoiceId: string | null
   }
 
@@ -10050,7 +10046,6 @@ export namespace Prisma {
     sentAt?: true
     bodyText?: true
     bodyHtml?: true
-    attachments?: true
     invoiceId?: true
   }
 
@@ -10066,7 +10061,6 @@ export namespace Prisma {
     sentAt?: true
     bodyText?: true
     bodyHtml?: true
-    attachments?: true
     invoiceId?: true
   }
 
@@ -10171,7 +10165,7 @@ export namespace Prisma {
     sentAt: Date
     bodyText: string | null
     bodyHtml: string | null
-    attachments: string
+    attachments: JsonValue
     invoiceId: string | null
     _count: EmailLogCountAggregateOutputType | null
     _min: EmailLogMinAggregateOutputType | null
@@ -10273,7 +10267,7 @@ export namespace Prisma {
       sentAt: Date
       bodyText: string | null
       bodyHtml: string | null
-      attachments: string
+      attachments: Prisma.JsonValue
       invoiceId: string | null
     }, ExtArgs["result"]["emailLog"]>
     composites: {}
@@ -10709,7 +10703,7 @@ export namespace Prisma {
     readonly sentAt: FieldRef<"EmailLog", 'DateTime'>
     readonly bodyText: FieldRef<"EmailLog", 'String'>
     readonly bodyHtml: FieldRef<"EmailLog", 'String'>
-    readonly attachments: FieldRef<"EmailLog", 'String'>
+    readonly attachments: FieldRef<"EmailLog", 'Json'>
     readonly invoiceId: FieldRef<"EmailLog", 'String'>
   }
     
@@ -10916,6 +10910,7 @@ export namespace Prisma {
      * The data used to create many EmailLogs.
      */
     data: EmailLogCreateManyInput | EmailLogCreateManyInput[]
+    skipDuplicates?: boolean
   }
 
   /**
@@ -10934,6 +10929,7 @@ export namespace Prisma {
      * The data used to create many EmailLogs.
      */
     data: EmailLogCreateManyInput | EmailLogCreateManyInput[]
+    skipDuplicates?: boolean
   }
 
   /**
@@ -11104,7 +11100,6 @@ export namespace Prisma {
     subject: string | null
     message: string | null
     leadScore: number | null
-    meta: string | null
     inquiryId: string | null
     createdAt: Date | null
   }
@@ -11118,7 +11113,6 @@ export namespace Prisma {
     subject: string | null
     message: string | null
     leadScore: number | null
-    meta: string | null
     inquiryId: string | null
     createdAt: Date | null
   }
@@ -11156,7 +11150,6 @@ export namespace Prisma {
     subject?: true
     message?: true
     leadScore?: true
-    meta?: true
     inquiryId?: true
     createdAt?: true
   }
@@ -11170,7 +11163,6 @@ export namespace Prisma {
     subject?: true
     message?: true
     leadScore?: true
-    meta?: true
     inquiryId?: true
     createdAt?: true
   }
@@ -11285,7 +11277,7 @@ export namespace Prisma {
     subject: string | null
     message: string
     leadScore: number | null
-    meta: string
+    meta: JsonValue
     inquiryId: string | null
     createdAt: Date
     _count: ReceivedEmailCountAggregateOutputType | null
@@ -11379,7 +11371,7 @@ export namespace Prisma {
       subject: string | null
       message: string
       leadScore: number | null
-      meta: string
+      meta: Prisma.JsonValue
       inquiryId: string | null
       createdAt: Date
     }, ExtArgs["result"]["receivedEmail"]>
@@ -11813,7 +11805,7 @@ export namespace Prisma {
     readonly subject: FieldRef<"ReceivedEmail", 'String'>
     readonly message: FieldRef<"ReceivedEmail", 'String'>
     readonly leadScore: FieldRef<"ReceivedEmail", 'Int'>
-    readonly meta: FieldRef<"ReceivedEmail", 'String'>
+    readonly meta: FieldRef<"ReceivedEmail", 'Json'>
     readonly inquiryId: FieldRef<"ReceivedEmail", 'String'>
     readonly createdAt: FieldRef<"ReceivedEmail", 'DateTime'>
   }
@@ -12021,6 +12013,7 @@ export namespace Prisma {
      * The data used to create many ReceivedEmails.
      */
     data: ReceivedEmailCreateManyInput | ReceivedEmailCreateManyInput[]
+    skipDuplicates?: boolean
   }
 
   /**
@@ -12039,6 +12032,7 @@ export namespace Prisma {
      * The data used to create many ReceivedEmails.
      */
     data: ReceivedEmailCreateManyInput | ReceivedEmailCreateManyInput[]
+    skipDuplicates?: boolean
   }
 
   /**
@@ -12209,7 +12203,6 @@ export namespace Prisma {
     customerPhone: string | null
     service: string | null
     description: string | null
-    proposalJson: string | null
     amountKobo: number | null
     currency: string | null
     durationLabel: string | null
@@ -12241,7 +12234,6 @@ export namespace Prisma {
     customerPhone: string | null
     service: string | null
     description: string | null
-    proposalJson: string | null
     amountKobo: number | null
     currency: string | null
     durationLabel: string | null
@@ -12315,7 +12307,6 @@ export namespace Prisma {
     customerPhone?: true
     service?: true
     description?: true
-    proposalJson?: true
     amountKobo?: true
     currency?: true
     durationLabel?: true
@@ -12347,7 +12338,6 @@ export namespace Prisma {
     customerPhone?: true
     service?: true
     description?: true
-    proposalJson?: true
     amountKobo?: true
     currency?: true
     durationLabel?: true
@@ -12498,7 +12488,7 @@ export namespace Prisma {
     customerPhone: string | null
     service: string
     description: string | null
-    proposalJson: string | null
+    proposalJson: JsonValue | null
     amountKobo: number
     currency: string
     durationLabel: string | null
@@ -12682,7 +12672,7 @@ export namespace Prisma {
       customerPhone: string | null
       service: string
       description: string | null
-      proposalJson: string | null
+      proposalJson: Prisma.JsonValue | null
       amountKobo: number
       currency: string
       durationLabel: string | null
@@ -13134,7 +13124,7 @@ export namespace Prisma {
     readonly customerPhone: FieldRef<"Invoice", 'String'>
     readonly service: FieldRef<"Invoice", 'String'>
     readonly description: FieldRef<"Invoice", 'String'>
-    readonly proposalJson: FieldRef<"Invoice", 'String'>
+    readonly proposalJson: FieldRef<"Invoice", 'Json'>
     readonly amountKobo: FieldRef<"Invoice", 'Int'>
     readonly currency: FieldRef<"Invoice", 'String'>
     readonly durationLabel: FieldRef<"Invoice", 'String'>
@@ -13360,6 +13350,7 @@ export namespace Prisma {
      * The data used to create many Invoices.
      */
     data: InvoiceCreateManyInput | InvoiceCreateManyInput[]
+    skipDuplicates?: boolean
   }
 
   /**
@@ -13378,6 +13369,7 @@ export namespace Prisma {
      * The data used to create many Invoices.
      */
     data: InvoiceCreateManyInput | InvoiceCreateManyInput[]
+    skipDuplicates?: boolean
   }
 
   /**
@@ -13536,7 +13528,6 @@ export namespace Prisma {
     customerPhone: string | null
     eventDate: Date | null
     relatedInvoiceId: string | null
-    payload: string | null
     status: string | null
     processedAt: Date | null
     lastSentAt: Date | null
@@ -13550,7 +13541,6 @@ export namespace Prisma {
     customerPhone: string | null
     eventDate: Date | null
     relatedInvoiceId: string | null
-    payload: string | null
     status: string | null
     processedAt: Date | null
     lastSentAt: Date | null
@@ -13580,7 +13570,6 @@ export namespace Prisma {
     customerPhone?: true
     eventDate?: true
     relatedInvoiceId?: true
-    payload?: true
     status?: true
     processedAt?: true
     lastSentAt?: true
@@ -13594,7 +13583,6 @@ export namespace Prisma {
     customerPhone?: true
     eventDate?: true
     relatedInvoiceId?: true
-    payload?: true
     status?: true
     processedAt?: true
     lastSentAt?: true
@@ -13695,7 +13683,7 @@ export namespace Prisma {
     customerPhone: string | null
     eventDate: Date
     relatedInvoiceId: string | null
-    payload: string
+    payload: JsonValue
     status: string
     processedAt: Date | null
     lastSentAt: Date | null
@@ -13787,7 +13775,7 @@ export namespace Prisma {
       customerPhone: string | null
       eventDate: Date
       relatedInvoiceId: string | null
-      payload: string
+      payload: Prisma.JsonValue
       status: string
       processedAt: Date | null
       lastSentAt: Date | null
@@ -14221,7 +14209,7 @@ export namespace Prisma {
     readonly customerPhone: FieldRef<"EventRecord", 'String'>
     readonly eventDate: FieldRef<"EventRecord", 'DateTime'>
     readonly relatedInvoiceId: FieldRef<"EventRecord", 'String'>
-    readonly payload: FieldRef<"EventRecord", 'String'>
+    readonly payload: FieldRef<"EventRecord", 'Json'>
     readonly status: FieldRef<"EventRecord", 'String'>
     readonly processedAt: FieldRef<"EventRecord", 'DateTime'>
     readonly lastSentAt: FieldRef<"EventRecord", 'DateTime'>
@@ -14431,6 +14419,7 @@ export namespace Prisma {
      * The data used to create many EventRecords.
      */
     data: EventRecordCreateManyInput | EventRecordCreateManyInput[]
+    skipDuplicates?: boolean
   }
 
   /**
@@ -14449,6 +14438,7 @@ export namespace Prisma {
      * The data used to create many EventRecords.
      */
     data: EventRecordCreateManyInput | EventRecordCreateManyInput[]
+    skipDuplicates?: boolean
   }
 
   /**
@@ -15489,6 +15479,7 @@ export namespace Prisma {
      * The data used to create many WhatsAppMessages.
      */
     data: WhatsAppMessageCreateManyInput | WhatsAppMessageCreateManyInput[]
+    skipDuplicates?: boolean
   }
 
   /**
@@ -15507,6 +15498,7 @@ export namespace Prisma {
      * The data used to create many WhatsAppMessages.
      */
     data: WhatsAppMessageCreateManyInput | WhatsAppMessageCreateManyInput[]
+    skipDuplicates?: boolean
   }
 
   /**
@@ -15664,7 +15656,6 @@ export namespace Prisma {
     invoiceId: string | null
     secureToken: string | null
     sessionId: string | null
-    meta: string | null
     createdAt: Date | null
   }
 
@@ -15674,7 +15665,6 @@ export namespace Prisma {
     invoiceId: string | null
     secureToken: string | null
     sessionId: string | null
-    meta: string | null
     createdAt: Date | null
   }
 
@@ -15696,7 +15686,6 @@ export namespace Prisma {
     invoiceId?: true
     secureToken?: true
     sessionId?: true
-    meta?: true
     createdAt?: true
   }
 
@@ -15706,7 +15695,6 @@ export namespace Prisma {
     invoiceId?: true
     secureToken?: true
     sessionId?: true
-    meta?: true
     createdAt?: true
   }
 
@@ -15799,7 +15787,7 @@ export namespace Prisma {
     invoiceId: string | null
     secureToken: string | null
     sessionId: string | null
-    meta: string
+    meta: JsonValue
     createdAt: Date
     _count: AnalyticsEventCountAggregateOutputType | null
     _min: AnalyticsEventMinAggregateOutputType | null
@@ -15871,7 +15859,7 @@ export namespace Prisma {
       invoiceId: string | null
       secureToken: string | null
       sessionId: string | null
-      meta: string
+      meta: Prisma.JsonValue
       createdAt: Date
     }, ExtArgs["result"]["analyticsEvent"]>
     composites: {}
@@ -16301,7 +16289,7 @@ export namespace Prisma {
     readonly invoiceId: FieldRef<"AnalyticsEvent", 'String'>
     readonly secureToken: FieldRef<"AnalyticsEvent", 'String'>
     readonly sessionId: FieldRef<"AnalyticsEvent", 'String'>
-    readonly meta: FieldRef<"AnalyticsEvent", 'String'>
+    readonly meta: FieldRef<"AnalyticsEvent", 'Json'>
     readonly createdAt: FieldRef<"AnalyticsEvent", 'DateTime'>
   }
     
@@ -16508,6 +16496,7 @@ export namespace Prisma {
      * The data used to create many AnalyticsEvents.
      */
     data: AnalyticsEventCreateManyInput | AnalyticsEventCreateManyInput[]
+    skipDuplicates?: boolean
   }
 
   /**
@@ -16526,6 +16515,7 @@ export namespace Prisma {
      * The data used to create many AnalyticsEvents.
      */
     data: AnalyticsEventCreateManyInput | AnalyticsEventCreateManyInput[]
+    skipDuplicates?: boolean
   }
 
   /**
@@ -17591,6 +17581,7 @@ export namespace Prisma {
      * The data used to create many BackupLogs.
      */
     data: BackupLogCreateManyInput | BackupLogCreateManyInput[]
+    skipDuplicates?: boolean
   }
 
   /**
@@ -17609,6 +17600,7 @@ export namespace Prisma {
      * The data used to create many BackupLogs.
      */
     data: BackupLogCreateManyInput | BackupLogCreateManyInput[]
+    skipDuplicates?: boolean
   }
 
   /**
@@ -17779,7 +17771,6 @@ export namespace Prisma {
     company: string | null
     role: string | null
     status: string | null
-    tags: string | null
     notes: string | null
     source: string | null
     leadScore: number | null
@@ -17797,7 +17788,6 @@ export namespace Prisma {
     company: string | null
     role: string | null
     status: string | null
-    tags: string | null
     notes: string | null
     source: string | null
     leadScore: number | null
@@ -17843,7 +17833,6 @@ export namespace Prisma {
     company?: true
     role?: true
     status?: true
-    tags?: true
     notes?: true
     source?: true
     leadScore?: true
@@ -17861,7 +17850,6 @@ export namespace Prisma {
     company?: true
     role?: true
     status?: true
-    tags?: true
     notes?: true
     source?: true
     leadScore?: true
@@ -17984,7 +17972,7 @@ export namespace Prisma {
     company: string | null
     role: string | null
     status: string
-    tags: string
+    tags: JsonValue
     notes: string | null
     source: string
     leadScore: number | null
@@ -18098,7 +18086,7 @@ export namespace Prisma {
       company: string | null
       role: string | null
       status: string
-      tags: string
+      tags: Prisma.JsonValue
       notes: string | null
       source: string
       leadScore: number | null
@@ -18536,7 +18524,7 @@ export namespace Prisma {
     readonly company: FieldRef<"Customer", 'String'>
     readonly role: FieldRef<"Customer", 'String'>
     readonly status: FieldRef<"Customer", 'String'>
-    readonly tags: FieldRef<"Customer", 'String'>
+    readonly tags: FieldRef<"Customer", 'Json'>
     readonly notes: FieldRef<"Customer", 'String'>
     readonly source: FieldRef<"Customer", 'String'>
     readonly leadScore: FieldRef<"Customer", 'Int'>
@@ -18748,6 +18736,7 @@ export namespace Prisma {
      * The data used to create many Customers.
      */
     data: CustomerCreateManyInput | CustomerCreateManyInput[]
+    skipDuplicates?: boolean
   }
 
   /**
@@ -18766,6 +18755,7 @@ export namespace Prisma {
      * The data used to create many Customers.
      */
     data: CustomerCreateManyInput | CustomerCreateManyInput[]
+    skipDuplicates?: boolean
   }
 
   /**
@@ -19754,6 +19744,7 @@ export namespace Prisma {
      * The data used to create many CustomerNotes.
      */
     data: CustomerNoteCreateManyInput | CustomerNoteCreateManyInput[]
+    skipDuplicates?: boolean
   }
 
   /**
@@ -19772,6 +19763,7 @@ export namespace Prisma {
      * The data used to create many CustomerNotes.
      */
     data: CustomerNoteCreateManyInput | CustomerNoteCreateManyInput[]
+    skipDuplicates?: boolean
   }
 
   /**
@@ -20812,6 +20804,7 @@ export namespace Prisma {
      * The data used to create many CustomerMessages.
      */
     data: CustomerMessageCreateManyInput | CustomerMessageCreateManyInput[]
+    skipDuplicates?: boolean
   }
 
   /**
@@ -20830,6 +20823,7 @@ export namespace Prisma {
      * The data used to create many CustomerMessages.
      */
     data: CustomerMessageCreateManyInput | CustomerMessageCreateManyInput[]
+    skipDuplicates?: boolean
   }
 
   /**
@@ -20976,6 +20970,9 @@ export namespace Prisma {
    */
 
   export const TransactionIsolationLevel: {
+    ReadUncommitted: 'ReadUncommitted',
+    ReadCommitted: 'ReadCommitted',
+    RepeatableRead: 'RepeatableRead',
     Serializable: 'Serializable'
   };
 
@@ -21291,12 +21288,44 @@ export namespace Prisma {
   export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
 
 
+  export const JsonNullValueInput: {
+    JsonNull: typeof JsonNull
+  };
+
+  export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
+
+
+  export const NullableJsonNullValueInput: {
+    DbNull: typeof DbNull,
+    JsonNull: typeof JsonNull
+  };
+
+  export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
+
+
+  export const QueryMode: {
+    default: 'default',
+    insensitive: 'insensitive'
+  };
+
+  export type QueryMode = (typeof QueryMode)[keyof typeof QueryMode]
+
+
   export const NullsOrder: {
     first: 'first',
     last: 'last'
   };
 
   export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
+
+
+  export const JsonNullValueFilter: {
+    DbNull: typeof DbNull,
+    JsonNull: typeof JsonNull,
+    AnyNull: typeof AnyNull
+  };
+
+  export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
 
 
   /**
@@ -21312,6 +21341,13 @@ export namespace Prisma {
 
 
   /**
+   * Reference to a field of type 'String[]'
+   */
+  export type ListStringFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'String[]'>
+    
+
+
+  /**
    * Reference to a field of type 'DateTime'
    */
   export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime'>
@@ -21319,9 +21355,37 @@ export namespace Prisma {
 
 
   /**
+   * Reference to a field of type 'DateTime[]'
+   */
+  export type ListDateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'Json'
+   */
+  export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
+    
+
+
+  /**
+   * Reference to a field of type 'QueryMode'
+   */
+  export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
+    
+
+
+  /**
    * Reference to a field of type 'Int'
    */
   export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int'>
+    
+
+
+  /**
+   * Reference to a field of type 'Int[]'
+   */
+  export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int[]'>
     
 
 
@@ -21336,6 +21400,13 @@ export namespace Prisma {
    * Reference to a field of type 'Float'
    */
   export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
+    
+
+
+  /**
+   * Reference to a field of type 'Float[]'
+   */
+  export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float[]'>
     
   /**
    * Deep Input Types
@@ -21443,7 +21514,7 @@ export namespace Prisma {
     customerName?: StringFilter<"DraftProposal"> | string
     customerEmail?: StringFilter<"DraftProposal"> | string
     service?: StringFilter<"DraftProposal"> | string
-    draftJson?: StringFilter<"DraftProposal"> | string
+    draftJson?: JsonFilter<"DraftProposal">
     leadScore?: IntNullableFilter<"DraftProposal"> | number | null
     inquiryId?: StringNullableFilter<"DraftProposal"> | string | null
     receivedEmailId?: StringNullableFilter<"DraftProposal"> | string | null
@@ -21477,7 +21548,7 @@ export namespace Prisma {
     customerName?: StringFilter<"DraftProposal"> | string
     customerEmail?: StringFilter<"DraftProposal"> | string
     service?: StringFilter<"DraftProposal"> | string
-    draftJson?: StringFilter<"DraftProposal"> | string
+    draftJson?: JsonFilter<"DraftProposal">
     leadScore?: IntNullableFilter<"DraftProposal"> | number | null
     receivedEmailId?: StringNullableFilter<"DraftProposal"> | string | null
     status?: StringFilter<"DraftProposal"> | string
@@ -21514,7 +21585,7 @@ export namespace Prisma {
     customerName?: StringWithAggregatesFilter<"DraftProposal"> | string
     customerEmail?: StringWithAggregatesFilter<"DraftProposal"> | string
     service?: StringWithAggregatesFilter<"DraftProposal"> | string
-    draftJson?: StringWithAggregatesFilter<"DraftProposal"> | string
+    draftJson?: JsonWithAggregatesFilter<"DraftProposal">
     leadScore?: IntNullableWithAggregatesFilter<"DraftProposal"> | number | null
     inquiryId?: StringNullableWithAggregatesFilter<"DraftProposal"> | string | null
     receivedEmailId?: StringNullableWithAggregatesFilter<"DraftProposal"> | string | null
@@ -21539,8 +21610,8 @@ export namespace Prisma {
     signatureValid?: BoolFilter<"WebhookLog"> | boolean
     source?: StringFilter<"WebhookLog"> | string
     status?: StringFilter<"WebhookLog"> | string
-    result?: StringFilter<"WebhookLog"> | string
-    payload?: StringFilter<"WebhookLog"> | string
+    result?: JsonFilter<"WebhookLog">
+    payload?: JsonFilter<"WebhookLog">
     error?: StringNullableFilter<"WebhookLog"> | string | null
     receivedAt?: DateTimeFilter<"WebhookLog"> | Date | string
     processedAt?: DateTimeNullableFilter<"WebhookLog"> | Date | string | null
@@ -21583,8 +21654,8 @@ export namespace Prisma {
     signatureValid?: BoolFilter<"WebhookLog"> | boolean
     source?: StringFilter<"WebhookLog"> | string
     status?: StringFilter<"WebhookLog"> | string
-    result?: StringFilter<"WebhookLog"> | string
-    payload?: StringFilter<"WebhookLog"> | string
+    result?: JsonFilter<"WebhookLog">
+    payload?: JsonFilter<"WebhookLog">
     error?: StringNullableFilter<"WebhookLog"> | string | null
     receivedAt?: DateTimeFilter<"WebhookLog"> | Date | string
     processedAt?: DateTimeNullableFilter<"WebhookLog"> | Date | string | null
@@ -21631,8 +21702,8 @@ export namespace Prisma {
     signatureValid?: BoolWithAggregatesFilter<"WebhookLog"> | boolean
     source?: StringWithAggregatesFilter<"WebhookLog"> | string
     status?: StringWithAggregatesFilter<"WebhookLog"> | string
-    result?: StringWithAggregatesFilter<"WebhookLog"> | string
-    payload?: StringWithAggregatesFilter<"WebhookLog"> | string
+    result?: JsonWithAggregatesFilter<"WebhookLog">
+    payload?: JsonWithAggregatesFilter<"WebhookLog">
     error?: StringNullableWithAggregatesFilter<"WebhookLog"> | string | null
     receivedAt?: DateTimeWithAggregatesFilter<"WebhookLog"> | Date | string
     processedAt?: DateTimeNullableWithAggregatesFilter<"WebhookLog"> | Date | string | null
@@ -21762,7 +21833,7 @@ export namespace Prisma {
     excerpt?: StringFilter<"Post"> | string
     content?: StringFilter<"Post"> | string
     category?: StringFilter<"Post"> | string
-    tags?: StringFilter<"Post"> | string
+    tags?: JsonFilter<"Post">
     author?: StringFilter<"Post"> | string
     status?: StringFilter<"Post"> | string
     publishedAt?: DateTimeNullableFilter<"Post"> | Date | string | null
@@ -21797,7 +21868,7 @@ export namespace Prisma {
     excerpt?: StringFilter<"Post"> | string
     content?: StringFilter<"Post"> | string
     category?: StringFilter<"Post"> | string
-    tags?: StringFilter<"Post"> | string
+    tags?: JsonFilter<"Post">
     author?: StringFilter<"Post"> | string
     status?: StringFilter<"Post"> | string
     publishedAt?: DateTimeNullableFilter<"Post"> | Date | string | null
@@ -21835,7 +21906,7 @@ export namespace Prisma {
     excerpt?: StringWithAggregatesFilter<"Post"> | string
     content?: StringWithAggregatesFilter<"Post"> | string
     category?: StringWithAggregatesFilter<"Post"> | string
-    tags?: StringWithAggregatesFilter<"Post"> | string
+    tags?: JsonWithAggregatesFilter<"Post">
     author?: StringWithAggregatesFilter<"Post"> | string
     status?: StringWithAggregatesFilter<"Post"> | string
     publishedAt?: DateTimeNullableWithAggregatesFilter<"Post"> | Date | string | null
@@ -21943,7 +22014,7 @@ export namespace Prisma {
     sentAt?: DateTimeFilter<"EmailLog"> | Date | string
     bodyText?: StringNullableFilter<"EmailLog"> | string | null
     bodyHtml?: StringNullableFilter<"EmailLog"> | string | null
-    attachments?: StringFilter<"EmailLog"> | string
+    attachments?: JsonFilter<"EmailLog">
     invoiceId?: StringNullableFilter<"EmailLog"> | string | null
   }
 
@@ -21978,7 +22049,7 @@ export namespace Prisma {
     sentAt?: DateTimeFilter<"EmailLog"> | Date | string
     bodyText?: StringNullableFilter<"EmailLog"> | string | null
     bodyHtml?: StringNullableFilter<"EmailLog"> | string | null
-    attachments?: StringFilter<"EmailLog"> | string
+    attachments?: JsonFilter<"EmailLog">
     invoiceId?: StringNullableFilter<"EmailLog"> | string | null
   }, "id">
 
@@ -22016,7 +22087,7 @@ export namespace Prisma {
     sentAt?: DateTimeWithAggregatesFilter<"EmailLog"> | Date | string
     bodyText?: StringNullableWithAggregatesFilter<"EmailLog"> | string | null
     bodyHtml?: StringNullableWithAggregatesFilter<"EmailLog"> | string | null
-    attachments?: StringWithAggregatesFilter<"EmailLog"> | string
+    attachments?: JsonWithAggregatesFilter<"EmailLog">
     invoiceId?: StringNullableWithAggregatesFilter<"EmailLog"> | string | null
   }
 
@@ -22032,7 +22103,7 @@ export namespace Prisma {
     subject?: StringNullableFilter<"ReceivedEmail"> | string | null
     message?: StringFilter<"ReceivedEmail"> | string
     leadScore?: IntNullableFilter<"ReceivedEmail"> | number | null
-    meta?: StringFilter<"ReceivedEmail"> | string
+    meta?: JsonFilter<"ReceivedEmail">
     inquiryId?: StringNullableFilter<"ReceivedEmail"> | string | null
     createdAt?: DateTimeFilter<"ReceivedEmail"> | Date | string
   }
@@ -22063,7 +22134,7 @@ export namespace Prisma {
     subject?: StringNullableFilter<"ReceivedEmail"> | string | null
     message?: StringFilter<"ReceivedEmail"> | string
     leadScore?: IntNullableFilter<"ReceivedEmail"> | number | null
-    meta?: StringFilter<"ReceivedEmail"> | string
+    meta?: JsonFilter<"ReceivedEmail">
     inquiryId?: StringNullableFilter<"ReceivedEmail"> | string | null
     createdAt?: DateTimeFilter<"ReceivedEmail"> | Date | string
   }, "id">
@@ -22099,7 +22170,7 @@ export namespace Prisma {
     subject?: StringNullableWithAggregatesFilter<"ReceivedEmail"> | string | null
     message?: StringWithAggregatesFilter<"ReceivedEmail"> | string
     leadScore?: IntNullableWithAggregatesFilter<"ReceivedEmail"> | number | null
-    meta?: StringWithAggregatesFilter<"ReceivedEmail"> | string
+    meta?: JsonWithAggregatesFilter<"ReceivedEmail">
     inquiryId?: StringNullableWithAggregatesFilter<"ReceivedEmail"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"ReceivedEmail"> | Date | string
   }
@@ -22116,7 +22187,7 @@ export namespace Prisma {
     customerPhone?: StringNullableFilter<"Invoice"> | string | null
     service?: StringFilter<"Invoice"> | string
     description?: StringNullableFilter<"Invoice"> | string | null
-    proposalJson?: StringNullableFilter<"Invoice"> | string | null
+    proposalJson?: JsonNullableFilter<"Invoice">
     amountKobo?: IntFilter<"Invoice"> | number
     currency?: StringFilter<"Invoice"> | string
     durationLabel?: StringNullableFilter<"Invoice"> | string | null
@@ -22185,7 +22256,7 @@ export namespace Prisma {
     customerPhone?: StringNullableFilter<"Invoice"> | string | null
     service?: StringFilter<"Invoice"> | string
     description?: StringNullableFilter<"Invoice"> | string | null
-    proposalJson?: StringNullableFilter<"Invoice"> | string | null
+    proposalJson?: JsonNullableFilter<"Invoice">
     amountKobo?: IntFilter<"Invoice"> | number
     currency?: StringFilter<"Invoice"> | string
     durationLabel?: StringNullableFilter<"Invoice"> | string | null
@@ -22255,7 +22326,7 @@ export namespace Prisma {
     customerPhone?: StringNullableWithAggregatesFilter<"Invoice"> | string | null
     service?: StringWithAggregatesFilter<"Invoice"> | string
     description?: StringNullableWithAggregatesFilter<"Invoice"> | string | null
-    proposalJson?: StringNullableWithAggregatesFilter<"Invoice"> | string | null
+    proposalJson?: JsonNullableWithAggregatesFilter<"Invoice">
     amountKobo?: IntWithAggregatesFilter<"Invoice"> | number
     currency?: StringWithAggregatesFilter<"Invoice"> | string
     durationLabel?: StringNullableWithAggregatesFilter<"Invoice"> | string | null
@@ -22288,7 +22359,7 @@ export namespace Prisma {
     customerPhone?: StringNullableFilter<"EventRecord"> | string | null
     eventDate?: DateTimeFilter<"EventRecord"> | Date | string
     relatedInvoiceId?: StringNullableFilter<"EventRecord"> | string | null
-    payload?: StringFilter<"EventRecord"> | string
+    payload?: JsonFilter<"EventRecord">
     status?: StringFilter<"EventRecord"> | string
     processedAt?: DateTimeNullableFilter<"EventRecord"> | Date | string | null
     lastSentAt?: DateTimeNullableFilter<"EventRecord"> | Date | string | null
@@ -22319,7 +22390,7 @@ export namespace Prisma {
     customerPhone?: StringNullableFilter<"EventRecord"> | string | null
     eventDate?: DateTimeFilter<"EventRecord"> | Date | string
     relatedInvoiceId?: StringNullableFilter<"EventRecord"> | string | null
-    payload?: StringFilter<"EventRecord"> | string
+    payload?: JsonFilter<"EventRecord">
     status?: StringFilter<"EventRecord"> | string
     processedAt?: DateTimeNullableFilter<"EventRecord"> | Date | string | null
     lastSentAt?: DateTimeNullableFilter<"EventRecord"> | Date | string | null
@@ -22353,7 +22424,7 @@ export namespace Prisma {
     customerPhone?: StringNullableWithAggregatesFilter<"EventRecord"> | string | null
     eventDate?: DateTimeWithAggregatesFilter<"EventRecord"> | Date | string
     relatedInvoiceId?: StringNullableWithAggregatesFilter<"EventRecord"> | string | null
-    payload?: StringWithAggregatesFilter<"EventRecord"> | string
+    payload?: JsonWithAggregatesFilter<"EventRecord">
     status?: StringWithAggregatesFilter<"EventRecord"> | string
     processedAt?: DateTimeNullableWithAggregatesFilter<"EventRecord"> | Date | string | null
     lastSentAt?: DateTimeNullableWithAggregatesFilter<"EventRecord"> | Date | string | null
@@ -22446,7 +22517,7 @@ export namespace Prisma {
     invoiceId?: StringNullableFilter<"AnalyticsEvent"> | string | null
     secureToken?: StringNullableFilter<"AnalyticsEvent"> | string | null
     sessionId?: StringNullableFilter<"AnalyticsEvent"> | string | null
-    meta?: StringFilter<"AnalyticsEvent"> | string
+    meta?: JsonFilter<"AnalyticsEvent">
     createdAt?: DateTimeFilter<"AnalyticsEvent"> | Date | string
   }
 
@@ -22469,7 +22540,7 @@ export namespace Prisma {
     invoiceId?: StringNullableFilter<"AnalyticsEvent"> | string | null
     secureToken?: StringNullableFilter<"AnalyticsEvent"> | string | null
     sessionId?: StringNullableFilter<"AnalyticsEvent"> | string | null
-    meta?: StringFilter<"AnalyticsEvent"> | string
+    meta?: JsonFilter<"AnalyticsEvent">
     createdAt?: DateTimeFilter<"AnalyticsEvent"> | Date | string
   }, "id">
 
@@ -22495,7 +22566,7 @@ export namespace Prisma {
     invoiceId?: StringNullableWithAggregatesFilter<"AnalyticsEvent"> | string | null
     secureToken?: StringNullableWithAggregatesFilter<"AnalyticsEvent"> | string | null
     sessionId?: StringNullableWithAggregatesFilter<"AnalyticsEvent"> | string | null
-    meta?: StringWithAggregatesFilter<"AnalyticsEvent"> | string
+    meta?: JsonWithAggregatesFilter<"AnalyticsEvent">
     createdAt?: DateTimeWithAggregatesFilter<"AnalyticsEvent"> | Date | string
   }
 
@@ -22585,7 +22656,7 @@ export namespace Prisma {
     company?: StringNullableFilter<"Customer"> | string | null
     role?: StringNullableFilter<"Customer"> | string | null
     status?: StringFilter<"Customer"> | string
-    tags?: StringFilter<"Customer"> | string
+    tags?: JsonFilter<"Customer">
     notes?: StringNullableFilter<"Customer"> | string | null
     source?: StringFilter<"Customer"> | string
     leadScore?: IntNullableFilter<"Customer"> | number | null
@@ -22624,7 +22695,7 @@ export namespace Prisma {
     company?: StringNullableFilter<"Customer"> | string | null
     role?: StringNullableFilter<"Customer"> | string | null
     status?: StringFilter<"Customer"> | string
-    tags?: StringFilter<"Customer"> | string
+    tags?: JsonFilter<"Customer">
     notes?: StringNullableFilter<"Customer"> | string | null
     source?: StringFilter<"Customer"> | string
     leadScore?: IntNullableFilter<"Customer"> | number | null
@@ -22668,7 +22739,7 @@ export namespace Prisma {
     company?: StringNullableWithAggregatesFilter<"Customer"> | string | null
     role?: StringNullableWithAggregatesFilter<"Customer"> | string | null
     status?: StringWithAggregatesFilter<"Customer"> | string
-    tags?: StringWithAggregatesFilter<"Customer"> | string
+    tags?: JsonWithAggregatesFilter<"Customer">
     notes?: StringNullableWithAggregatesFilter<"Customer"> | string | null
     source?: StringWithAggregatesFilter<"Customer"> | string
     leadScore?: IntNullableWithAggregatesFilter<"Customer"> | number | null
@@ -22929,7 +23000,7 @@ export namespace Prisma {
     customerName: string
     customerEmail: string
     service: string
-    draftJson: string
+    draftJson: JsonNullValueInput | InputJsonValue
     leadScore?: number | null
     inquiryId?: string | null
     receivedEmailId?: string | null
@@ -22944,7 +23015,7 @@ export namespace Prisma {
     customerName: string
     customerEmail: string
     service: string
-    draftJson: string
+    draftJson: JsonNullValueInput | InputJsonValue
     leadScore?: number | null
     inquiryId?: string | null
     receivedEmailId?: string | null
@@ -22959,7 +23030,7 @@ export namespace Prisma {
     customerName?: StringFieldUpdateOperationsInput | string
     customerEmail?: StringFieldUpdateOperationsInput | string
     service?: StringFieldUpdateOperationsInput | string
-    draftJson?: StringFieldUpdateOperationsInput | string
+    draftJson?: JsonNullValueInput | InputJsonValue
     leadScore?: NullableIntFieldUpdateOperationsInput | number | null
     inquiryId?: NullableStringFieldUpdateOperationsInput | string | null
     receivedEmailId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -22974,7 +23045,7 @@ export namespace Prisma {
     customerName?: StringFieldUpdateOperationsInput | string
     customerEmail?: StringFieldUpdateOperationsInput | string
     service?: StringFieldUpdateOperationsInput | string
-    draftJson?: StringFieldUpdateOperationsInput | string
+    draftJson?: JsonNullValueInput | InputJsonValue
     leadScore?: NullableIntFieldUpdateOperationsInput | number | null
     inquiryId?: NullableStringFieldUpdateOperationsInput | string | null
     receivedEmailId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -22989,7 +23060,7 @@ export namespace Prisma {
     customerName: string
     customerEmail: string
     service: string
-    draftJson: string
+    draftJson: JsonNullValueInput | InputJsonValue
     leadScore?: number | null
     inquiryId?: string | null
     receivedEmailId?: string | null
@@ -23004,7 +23075,7 @@ export namespace Prisma {
     customerName?: StringFieldUpdateOperationsInput | string
     customerEmail?: StringFieldUpdateOperationsInput | string
     service?: StringFieldUpdateOperationsInput | string
-    draftJson?: StringFieldUpdateOperationsInput | string
+    draftJson?: JsonNullValueInput | InputJsonValue
     leadScore?: NullableIntFieldUpdateOperationsInput | number | null
     inquiryId?: NullableStringFieldUpdateOperationsInput | string | null
     receivedEmailId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -23019,7 +23090,7 @@ export namespace Prisma {
     customerName?: StringFieldUpdateOperationsInput | string
     customerEmail?: StringFieldUpdateOperationsInput | string
     service?: StringFieldUpdateOperationsInput | string
-    draftJson?: StringFieldUpdateOperationsInput | string
+    draftJson?: JsonNullValueInput | InputJsonValue
     leadScore?: NullableIntFieldUpdateOperationsInput | number | null
     inquiryId?: NullableStringFieldUpdateOperationsInput | string | null
     receivedEmailId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -23041,8 +23112,8 @@ export namespace Prisma {
     signatureValid?: boolean
     source?: string
     status?: string
-    result?: string
-    payload?: string
+    result?: JsonNullValueInput | InputJsonValue
+    payload?: JsonNullValueInput | InputJsonValue
     error?: string | null
     receivedAt?: Date | string
     processedAt?: Date | string | null
@@ -23061,8 +23132,8 @@ export namespace Prisma {
     signatureValid?: boolean
     source?: string
     status?: string
-    result?: string
-    payload?: string
+    result?: JsonNullValueInput | InputJsonValue
+    payload?: JsonNullValueInput | InputJsonValue
     error?: string | null
     receivedAt?: Date | string
     processedAt?: Date | string | null
@@ -23081,8 +23152,8 @@ export namespace Prisma {
     signatureValid?: BoolFieldUpdateOperationsInput | boolean
     source?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
-    result?: StringFieldUpdateOperationsInput | string
-    payload?: StringFieldUpdateOperationsInput | string
+    result?: JsonNullValueInput | InputJsonValue
+    payload?: JsonNullValueInput | InputJsonValue
     error?: NullableStringFieldUpdateOperationsInput | string | null
     receivedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     processedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -23101,8 +23172,8 @@ export namespace Prisma {
     signatureValid?: BoolFieldUpdateOperationsInput | boolean
     source?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
-    result?: StringFieldUpdateOperationsInput | string
-    payload?: StringFieldUpdateOperationsInput | string
+    result?: JsonNullValueInput | InputJsonValue
+    payload?: JsonNullValueInput | InputJsonValue
     error?: NullableStringFieldUpdateOperationsInput | string | null
     receivedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     processedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -23121,8 +23192,8 @@ export namespace Prisma {
     signatureValid?: boolean
     source?: string
     status?: string
-    result?: string
-    payload?: string
+    result?: JsonNullValueInput | InputJsonValue
+    payload?: JsonNullValueInput | InputJsonValue
     error?: string | null
     receivedAt?: Date | string
     processedAt?: Date | string | null
@@ -23141,8 +23212,8 @@ export namespace Prisma {
     signatureValid?: BoolFieldUpdateOperationsInput | boolean
     source?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
-    result?: StringFieldUpdateOperationsInput | string
-    payload?: StringFieldUpdateOperationsInput | string
+    result?: JsonNullValueInput | InputJsonValue
+    payload?: JsonNullValueInput | InputJsonValue
     error?: NullableStringFieldUpdateOperationsInput | string | null
     receivedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     processedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -23161,8 +23232,8 @@ export namespace Prisma {
     signatureValid?: BoolFieldUpdateOperationsInput | boolean
     source?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
-    result?: StringFieldUpdateOperationsInput | string
-    payload?: StringFieldUpdateOperationsInput | string
+    result?: JsonNullValueInput | InputJsonValue
+    payload?: JsonNullValueInput | InputJsonValue
     error?: NullableStringFieldUpdateOperationsInput | string | null
     receivedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     processedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -23301,7 +23372,7 @@ export namespace Prisma {
     excerpt: string
     content: string
     category: string
-    tags?: string
+    tags?: JsonNullValueInput | InputJsonValue
     author?: string
     status?: string
     publishedAt?: Date | string | null
@@ -23317,7 +23388,7 @@ export namespace Prisma {
     excerpt: string
     content: string
     category: string
-    tags?: string
+    tags?: JsonNullValueInput | InputJsonValue
     author?: string
     status?: string
     publishedAt?: Date | string | null
@@ -23333,7 +23404,7 @@ export namespace Prisma {
     excerpt?: StringFieldUpdateOperationsInput | string
     content?: StringFieldUpdateOperationsInput | string
     category?: StringFieldUpdateOperationsInput | string
-    tags?: StringFieldUpdateOperationsInput | string
+    tags?: JsonNullValueInput | InputJsonValue
     author?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     publishedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -23349,7 +23420,7 @@ export namespace Prisma {
     excerpt?: StringFieldUpdateOperationsInput | string
     content?: StringFieldUpdateOperationsInput | string
     category?: StringFieldUpdateOperationsInput | string
-    tags?: StringFieldUpdateOperationsInput | string
+    tags?: JsonNullValueInput | InputJsonValue
     author?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     publishedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -23365,7 +23436,7 @@ export namespace Prisma {
     excerpt: string
     content: string
     category: string
-    tags?: string
+    tags?: JsonNullValueInput | InputJsonValue
     author?: string
     status?: string
     publishedAt?: Date | string | null
@@ -23381,7 +23452,7 @@ export namespace Prisma {
     excerpt?: StringFieldUpdateOperationsInput | string
     content?: StringFieldUpdateOperationsInput | string
     category?: StringFieldUpdateOperationsInput | string
-    tags?: StringFieldUpdateOperationsInput | string
+    tags?: JsonNullValueInput | InputJsonValue
     author?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     publishedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -23397,7 +23468,7 @@ export namespace Prisma {
     excerpt?: StringFieldUpdateOperationsInput | string
     content?: StringFieldUpdateOperationsInput | string
     category?: StringFieldUpdateOperationsInput | string
-    tags?: StringFieldUpdateOperationsInput | string
+    tags?: JsonNullValueInput | InputJsonValue
     author?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
     publishedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -23516,7 +23587,7 @@ export namespace Prisma {
     sentAt?: Date | string
     bodyText?: string | null
     bodyHtml?: string | null
-    attachments?: string
+    attachments?: JsonNullValueInput | InputJsonValue
     invoiceId?: string | null
   }
 
@@ -23532,7 +23603,7 @@ export namespace Prisma {
     sentAt?: Date | string
     bodyText?: string | null
     bodyHtml?: string | null
-    attachments?: string
+    attachments?: JsonNullValueInput | InputJsonValue
     invoiceId?: string | null
   }
 
@@ -23548,7 +23619,7 @@ export namespace Prisma {
     sentAt?: DateTimeFieldUpdateOperationsInput | Date | string
     bodyText?: NullableStringFieldUpdateOperationsInput | string | null
     bodyHtml?: NullableStringFieldUpdateOperationsInput | string | null
-    attachments?: StringFieldUpdateOperationsInput | string
+    attachments?: JsonNullValueInput | InputJsonValue
     invoiceId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
@@ -23564,7 +23635,7 @@ export namespace Prisma {
     sentAt?: DateTimeFieldUpdateOperationsInput | Date | string
     bodyText?: NullableStringFieldUpdateOperationsInput | string | null
     bodyHtml?: NullableStringFieldUpdateOperationsInput | string | null
-    attachments?: StringFieldUpdateOperationsInput | string
+    attachments?: JsonNullValueInput | InputJsonValue
     invoiceId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
@@ -23580,7 +23651,7 @@ export namespace Prisma {
     sentAt?: Date | string
     bodyText?: string | null
     bodyHtml?: string | null
-    attachments?: string
+    attachments?: JsonNullValueInput | InputJsonValue
     invoiceId?: string | null
   }
 
@@ -23596,7 +23667,7 @@ export namespace Prisma {
     sentAt?: DateTimeFieldUpdateOperationsInput | Date | string
     bodyText?: NullableStringFieldUpdateOperationsInput | string | null
     bodyHtml?: NullableStringFieldUpdateOperationsInput | string | null
-    attachments?: StringFieldUpdateOperationsInput | string
+    attachments?: JsonNullValueInput | InputJsonValue
     invoiceId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
@@ -23612,7 +23683,7 @@ export namespace Prisma {
     sentAt?: DateTimeFieldUpdateOperationsInput | Date | string
     bodyText?: NullableStringFieldUpdateOperationsInput | string | null
     bodyHtml?: NullableStringFieldUpdateOperationsInput | string | null
-    attachments?: StringFieldUpdateOperationsInput | string
+    attachments?: JsonNullValueInput | InputJsonValue
     invoiceId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
@@ -23625,7 +23696,7 @@ export namespace Prisma {
     subject?: string | null
     message: string
     leadScore?: number | null
-    meta?: string
+    meta?: JsonNullValueInput | InputJsonValue
     inquiryId?: string | null
     createdAt?: Date | string
   }
@@ -23639,7 +23710,7 @@ export namespace Prisma {
     subject?: string | null
     message: string
     leadScore?: number | null
-    meta?: string
+    meta?: JsonNullValueInput | InputJsonValue
     inquiryId?: string | null
     createdAt?: Date | string
   }
@@ -23653,7 +23724,7 @@ export namespace Prisma {
     subject?: NullableStringFieldUpdateOperationsInput | string | null
     message?: StringFieldUpdateOperationsInput | string
     leadScore?: NullableIntFieldUpdateOperationsInput | number | null
-    meta?: StringFieldUpdateOperationsInput | string
+    meta?: JsonNullValueInput | InputJsonValue
     inquiryId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -23667,7 +23738,7 @@ export namespace Prisma {
     subject?: NullableStringFieldUpdateOperationsInput | string | null
     message?: StringFieldUpdateOperationsInput | string
     leadScore?: NullableIntFieldUpdateOperationsInput | number | null
-    meta?: StringFieldUpdateOperationsInput | string
+    meta?: JsonNullValueInput | InputJsonValue
     inquiryId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -23681,7 +23752,7 @@ export namespace Prisma {
     subject?: string | null
     message: string
     leadScore?: number | null
-    meta?: string
+    meta?: JsonNullValueInput | InputJsonValue
     inquiryId?: string | null
     createdAt?: Date | string
   }
@@ -23695,7 +23766,7 @@ export namespace Prisma {
     subject?: NullableStringFieldUpdateOperationsInput | string | null
     message?: StringFieldUpdateOperationsInput | string
     leadScore?: NullableIntFieldUpdateOperationsInput | number | null
-    meta?: StringFieldUpdateOperationsInput | string
+    meta?: JsonNullValueInput | InputJsonValue
     inquiryId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -23709,7 +23780,7 @@ export namespace Prisma {
     subject?: NullableStringFieldUpdateOperationsInput | string | null
     message?: StringFieldUpdateOperationsInput | string
     leadScore?: NullableIntFieldUpdateOperationsInput | number | null
-    meta?: StringFieldUpdateOperationsInput | string
+    meta?: JsonNullValueInput | InputJsonValue
     inquiryId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -23723,7 +23794,7 @@ export namespace Prisma {
     customerPhone?: string | null
     service: string
     description?: string | null
-    proposalJson?: string | null
+    proposalJson?: NullableJsonNullValueInput | InputJsonValue
     amountKobo: number
     currency?: string
     durationLabel?: string | null
@@ -23755,7 +23826,7 @@ export namespace Prisma {
     customerPhone?: string | null
     service: string
     description?: string | null
-    proposalJson?: string | null
+    proposalJson?: NullableJsonNullValueInput | InputJsonValue
     amountKobo: number
     currency?: string
     durationLabel?: string | null
@@ -23787,7 +23858,7 @@ export namespace Prisma {
     customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
     service?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    proposalJson?: NullableStringFieldUpdateOperationsInput | string | null
+    proposalJson?: NullableJsonNullValueInput | InputJsonValue
     amountKobo?: IntFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     durationLabel?: NullableStringFieldUpdateOperationsInput | string | null
@@ -23819,7 +23890,7 @@ export namespace Prisma {
     customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
     service?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    proposalJson?: NullableStringFieldUpdateOperationsInput | string | null
+    proposalJson?: NullableJsonNullValueInput | InputJsonValue
     amountKobo?: IntFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     durationLabel?: NullableStringFieldUpdateOperationsInput | string | null
@@ -23851,7 +23922,7 @@ export namespace Prisma {
     customerPhone?: string | null
     service: string
     description?: string | null
-    proposalJson?: string | null
+    proposalJson?: NullableJsonNullValueInput | InputJsonValue
     amountKobo: number
     currency?: string
     durationLabel?: string | null
@@ -23883,7 +23954,7 @@ export namespace Prisma {
     customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
     service?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    proposalJson?: NullableStringFieldUpdateOperationsInput | string | null
+    proposalJson?: NullableJsonNullValueInput | InputJsonValue
     amountKobo?: IntFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     durationLabel?: NullableStringFieldUpdateOperationsInput | string | null
@@ -23915,7 +23986,7 @@ export namespace Prisma {
     customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
     service?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    proposalJson?: NullableStringFieldUpdateOperationsInput | string | null
+    proposalJson?: NullableJsonNullValueInput | InputJsonValue
     amountKobo?: IntFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
     durationLabel?: NullableStringFieldUpdateOperationsInput | string | null
@@ -23945,7 +24016,7 @@ export namespace Prisma {
     customerPhone?: string | null
     eventDate: Date | string
     relatedInvoiceId?: string | null
-    payload?: string
+    payload?: JsonNullValueInput | InputJsonValue
     status?: string
     processedAt?: Date | string | null
     lastSentAt?: Date | string | null
@@ -23959,7 +24030,7 @@ export namespace Prisma {
     customerPhone?: string | null
     eventDate: Date | string
     relatedInvoiceId?: string | null
-    payload?: string
+    payload?: JsonNullValueInput | InputJsonValue
     status?: string
     processedAt?: Date | string | null
     lastSentAt?: Date | string | null
@@ -23973,7 +24044,7 @@ export namespace Prisma {
     customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
     eventDate?: DateTimeFieldUpdateOperationsInput | Date | string
     relatedInvoiceId?: NullableStringFieldUpdateOperationsInput | string | null
-    payload?: StringFieldUpdateOperationsInput | string
+    payload?: JsonNullValueInput | InputJsonValue
     status?: StringFieldUpdateOperationsInput | string
     processedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     lastSentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -23987,7 +24058,7 @@ export namespace Prisma {
     customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
     eventDate?: DateTimeFieldUpdateOperationsInput | Date | string
     relatedInvoiceId?: NullableStringFieldUpdateOperationsInput | string | null
-    payload?: StringFieldUpdateOperationsInput | string
+    payload?: JsonNullValueInput | InputJsonValue
     status?: StringFieldUpdateOperationsInput | string
     processedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     lastSentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -24001,7 +24072,7 @@ export namespace Prisma {
     customerPhone?: string | null
     eventDate: Date | string
     relatedInvoiceId?: string | null
-    payload?: string
+    payload?: JsonNullValueInput | InputJsonValue
     status?: string
     processedAt?: Date | string | null
     lastSentAt?: Date | string | null
@@ -24015,7 +24086,7 @@ export namespace Prisma {
     customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
     eventDate?: DateTimeFieldUpdateOperationsInput | Date | string
     relatedInvoiceId?: NullableStringFieldUpdateOperationsInput | string | null
-    payload?: StringFieldUpdateOperationsInput | string
+    payload?: JsonNullValueInput | InputJsonValue
     status?: StringFieldUpdateOperationsInput | string
     processedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     lastSentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -24029,7 +24100,7 @@ export namespace Prisma {
     customerPhone?: NullableStringFieldUpdateOperationsInput | string | null
     eventDate?: DateTimeFieldUpdateOperationsInput | Date | string
     relatedInvoiceId?: NullableStringFieldUpdateOperationsInput | string | null
-    payload?: StringFieldUpdateOperationsInput | string
+    payload?: JsonNullValueInput | InputJsonValue
     status?: StringFieldUpdateOperationsInput | string
     processedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     lastSentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -24133,7 +24204,7 @@ export namespace Prisma {
     invoiceId?: string | null
     secureToken?: string | null
     sessionId?: string | null
-    meta?: string
+    meta?: JsonNullValueInput | InputJsonValue
     createdAt?: Date | string
   }
 
@@ -24143,7 +24214,7 @@ export namespace Prisma {
     invoiceId?: string | null
     secureToken?: string | null
     sessionId?: string | null
-    meta?: string
+    meta?: JsonNullValueInput | InputJsonValue
     createdAt?: Date | string
   }
 
@@ -24153,7 +24224,7 @@ export namespace Prisma {
     invoiceId?: NullableStringFieldUpdateOperationsInput | string | null
     secureToken?: NullableStringFieldUpdateOperationsInput | string | null
     sessionId?: NullableStringFieldUpdateOperationsInput | string | null
-    meta?: StringFieldUpdateOperationsInput | string
+    meta?: JsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -24163,7 +24234,7 @@ export namespace Prisma {
     invoiceId?: NullableStringFieldUpdateOperationsInput | string | null
     secureToken?: NullableStringFieldUpdateOperationsInput | string | null
     sessionId?: NullableStringFieldUpdateOperationsInput | string | null
-    meta?: StringFieldUpdateOperationsInput | string
+    meta?: JsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -24173,7 +24244,7 @@ export namespace Prisma {
     invoiceId?: string | null
     secureToken?: string | null
     sessionId?: string | null
-    meta?: string
+    meta?: JsonNullValueInput | InputJsonValue
     createdAt?: Date | string
   }
 
@@ -24183,7 +24254,7 @@ export namespace Prisma {
     invoiceId?: NullableStringFieldUpdateOperationsInput | string | null
     secureToken?: NullableStringFieldUpdateOperationsInput | string | null
     sessionId?: NullableStringFieldUpdateOperationsInput | string | null
-    meta?: StringFieldUpdateOperationsInput | string
+    meta?: JsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -24193,7 +24264,7 @@ export namespace Prisma {
     invoiceId?: NullableStringFieldUpdateOperationsInput | string | null
     secureToken?: NullableStringFieldUpdateOperationsInput | string | null
     sessionId?: NullableStringFieldUpdateOperationsInput | string | null
-    meta?: StringFieldUpdateOperationsInput | string
+    meta?: JsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -24290,7 +24361,7 @@ export namespace Prisma {
     company?: string | null
     role?: string | null
     status?: string
-    tags?: string
+    tags?: JsonNullValueInput | InputJsonValue
     notes?: string | null
     source?: string
     leadScore?: number | null
@@ -24308,7 +24379,7 @@ export namespace Prisma {
     company?: string | null
     role?: string | null
     status?: string
-    tags?: string
+    tags?: JsonNullValueInput | InputJsonValue
     notes?: string | null
     source?: string
     leadScore?: number | null
@@ -24326,7 +24397,7 @@ export namespace Prisma {
     company?: NullableStringFieldUpdateOperationsInput | string | null
     role?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
-    tags?: StringFieldUpdateOperationsInput | string
+    tags?: JsonNullValueInput | InputJsonValue
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     source?: StringFieldUpdateOperationsInput | string
     leadScore?: NullableIntFieldUpdateOperationsInput | number | null
@@ -24344,7 +24415,7 @@ export namespace Prisma {
     company?: NullableStringFieldUpdateOperationsInput | string | null
     role?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
-    tags?: StringFieldUpdateOperationsInput | string
+    tags?: JsonNullValueInput | InputJsonValue
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     source?: StringFieldUpdateOperationsInput | string
     leadScore?: NullableIntFieldUpdateOperationsInput | number | null
@@ -24362,7 +24433,7 @@ export namespace Prisma {
     company?: string | null
     role?: string | null
     status?: string
-    tags?: string
+    tags?: JsonNullValueInput | InputJsonValue
     notes?: string | null
     source?: string
     leadScore?: number | null
@@ -24380,7 +24451,7 @@ export namespace Prisma {
     company?: NullableStringFieldUpdateOperationsInput | string | null
     role?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
-    tags?: StringFieldUpdateOperationsInput | string
+    tags?: JsonNullValueInput | InputJsonValue
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     source?: StringFieldUpdateOperationsInput | string
     leadScore?: NullableIntFieldUpdateOperationsInput | number | null
@@ -24398,7 +24469,7 @@ export namespace Prisma {
     company?: NullableStringFieldUpdateOperationsInput | string | null
     role?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
-    tags?: StringFieldUpdateOperationsInput | string
+    tags?: JsonNullValueInput | InputJsonValue
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     source?: StringFieldUpdateOperationsInput | string
     leadScore?: NullableIntFieldUpdateOperationsInput | number | null
@@ -24563,8 +24634,8 @@ export namespace Prisma {
 
   export type StringFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel>
-    in?: string[]
-    notIn?: string[]
+    in?: string[] | ListStringFieldRefInput<$PrismaModel>
+    notIn?: string[] | ListStringFieldRefInput<$PrismaModel>
     lt?: string | StringFieldRefInput<$PrismaModel>
     lte?: string | StringFieldRefInput<$PrismaModel>
     gt?: string | StringFieldRefInput<$PrismaModel>
@@ -24572,13 +24643,14 @@ export namespace Prisma {
     contains?: string | StringFieldRefInput<$PrismaModel>
     startsWith?: string | StringFieldRefInput<$PrismaModel>
     endsWith?: string | StringFieldRefInput<$PrismaModel>
+    mode?: QueryMode
     not?: NestedStringFilter<$PrismaModel> | string
   }
 
   export type StringNullableFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel> | null
-    in?: string[] | null
-    notIn?: string[] | null
+    in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    notIn?: string[] | ListStringFieldRefInput<$PrismaModel> | null
     lt?: string | StringFieldRefInput<$PrismaModel>
     lte?: string | StringFieldRefInput<$PrismaModel>
     gt?: string | StringFieldRefInput<$PrismaModel>
@@ -24586,13 +24658,14 @@ export namespace Prisma {
     contains?: string | StringFieldRefInput<$PrismaModel>
     startsWith?: string | StringFieldRefInput<$PrismaModel>
     endsWith?: string | StringFieldRefInput<$PrismaModel>
+    mode?: QueryMode
     not?: NestedStringNullableFilter<$PrismaModel> | string | null
   }
 
   export type DateTimeFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    in?: Date[] | string[]
-    notIn?: Date[] | string[]
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
     lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
@@ -24655,8 +24728,8 @@ export namespace Prisma {
 
   export type StringWithAggregatesFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel>
-    in?: string[]
-    notIn?: string[]
+    in?: string[] | ListStringFieldRefInput<$PrismaModel>
+    notIn?: string[] | ListStringFieldRefInput<$PrismaModel>
     lt?: string | StringFieldRefInput<$PrismaModel>
     lte?: string | StringFieldRefInput<$PrismaModel>
     gt?: string | StringFieldRefInput<$PrismaModel>
@@ -24664,6 +24737,7 @@ export namespace Prisma {
     contains?: string | StringFieldRefInput<$PrismaModel>
     startsWith?: string | StringFieldRefInput<$PrismaModel>
     endsWith?: string | StringFieldRefInput<$PrismaModel>
+    mode?: QueryMode
     not?: NestedStringWithAggregatesFilter<$PrismaModel> | string
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedStringFilter<$PrismaModel>
@@ -24672,8 +24746,8 @@ export namespace Prisma {
 
   export type StringNullableWithAggregatesFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel> | null
-    in?: string[] | null
-    notIn?: string[] | null
+    in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    notIn?: string[] | ListStringFieldRefInput<$PrismaModel> | null
     lt?: string | StringFieldRefInput<$PrismaModel>
     lte?: string | StringFieldRefInput<$PrismaModel>
     gt?: string | StringFieldRefInput<$PrismaModel>
@@ -24681,6 +24755,7 @@ export namespace Prisma {
     contains?: string | StringFieldRefInput<$PrismaModel>
     startsWith?: string | StringFieldRefInput<$PrismaModel>
     endsWith?: string | StringFieldRefInput<$PrismaModel>
+    mode?: QueryMode
     not?: NestedStringNullableWithAggregatesFilter<$PrismaModel> | string | null
     _count?: NestedIntNullableFilter<$PrismaModel>
     _min?: NestedStringNullableFilter<$PrismaModel>
@@ -24689,8 +24764,8 @@ export namespace Prisma {
 
   export type DateTimeWithAggregatesFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    in?: Date[] | string[]
-    notIn?: Date[] | string[]
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
     lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
@@ -24700,11 +24775,34 @@ export namespace Prisma {
     _min?: NestedDateTimeFilter<$PrismaModel>
     _max?: NestedDateTimeFilter<$PrismaModel>
   }
+  export type JsonFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<JsonFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonFilterBase<$PrismaModel>>, 'path'>>,
+        Required<JsonFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<JsonFilterBase<$PrismaModel>>, 'path'>>
+
+  export type JsonFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+  }
 
   export type IntNullableFilter<$PrismaModel = never> = {
     equals?: number | IntFieldRefInput<$PrismaModel> | null
-    in?: number[] | null
-    notIn?: number[] | null
+    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
     lt?: number | IntFieldRefInput<$PrismaModel>
     lte?: number | IntFieldRefInput<$PrismaModel>
     gt?: number | IntFieldRefInput<$PrismaModel>
@@ -24737,7 +24835,6 @@ export namespace Prisma {
     customerName?: SortOrder
     customerEmail?: SortOrder
     service?: SortOrder
-    draftJson?: SortOrder
     leadScore?: SortOrder
     inquiryId?: SortOrder
     receivedEmailId?: SortOrder
@@ -24752,7 +24849,6 @@ export namespace Prisma {
     customerName?: SortOrder
     customerEmail?: SortOrder
     service?: SortOrder
-    draftJson?: SortOrder
     leadScore?: SortOrder
     inquiryId?: SortOrder
     receivedEmailId?: SortOrder
@@ -24764,11 +24860,37 @@ export namespace Prisma {
   export type DraftProposalSumOrderByAggregateInput = {
     leadScore?: SortOrder
   }
+  export type JsonWithAggregatesFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<JsonWithAggregatesFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonWithAggregatesFilterBase<$PrismaModel>>, 'path'>>,
+        Required<JsonWithAggregatesFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<JsonWithAggregatesFilterBase<$PrismaModel>>, 'path'>>
+
+  export type JsonWithAggregatesFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedJsonFilter<$PrismaModel>
+    _max?: NestedJsonFilter<$PrismaModel>
+  }
 
   export type IntNullableWithAggregatesFilter<$PrismaModel = never> = {
     equals?: number | IntFieldRefInput<$PrismaModel> | null
-    in?: number[] | null
-    notIn?: number[] | null
+    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
     lt?: number | IntFieldRefInput<$PrismaModel>
     lte?: number | IntFieldRefInput<$PrismaModel>
     gt?: number | IntFieldRefInput<$PrismaModel>
@@ -24788,8 +24910,8 @@ export namespace Prisma {
 
   export type DateTimeNullableFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
-    in?: Date[] | string[] | null
-    notIn?: Date[] | string[] | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
     lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
@@ -24840,8 +24962,6 @@ export namespace Prisma {
     signatureValid?: SortOrder
     source?: SortOrder
     status?: SortOrder
-    result?: SortOrder
-    payload?: SortOrder
     error?: SortOrder
     receivedAt?: SortOrder
     processedAt?: SortOrder
@@ -24860,8 +24980,6 @@ export namespace Prisma {
     signatureValid?: SortOrder
     source?: SortOrder
     status?: SortOrder
-    result?: SortOrder
-    payload?: SortOrder
     error?: SortOrder
     receivedAt?: SortOrder
     processedAt?: SortOrder
@@ -24881,8 +24999,8 @@ export namespace Prisma {
 
   export type DateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
-    in?: Date[] | string[] | null
-    notIn?: Date[] | string[] | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
     lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
@@ -24970,7 +25088,6 @@ export namespace Prisma {
     excerpt?: SortOrder
     content?: SortOrder
     category?: SortOrder
-    tags?: SortOrder
     author?: SortOrder
     status?: SortOrder
     publishedAt?: SortOrder
@@ -24986,7 +25103,6 @@ export namespace Prisma {
     excerpt?: SortOrder
     content?: SortOrder
     category?: SortOrder
-    tags?: SortOrder
     author?: SortOrder
     status?: SortOrder
     publishedAt?: SortOrder
@@ -24997,8 +25113,8 @@ export namespace Prisma {
 
   export type IntFilter<$PrismaModel = never> = {
     equals?: number | IntFieldRefInput<$PrismaModel>
-    in?: number[]
-    notIn?: number[]
+    in?: number[] | ListIntFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
     lt?: number | IntFieldRefInput<$PrismaModel>
     lte?: number | IntFieldRefInput<$PrismaModel>
     gt?: number | IntFieldRefInput<$PrismaModel>
@@ -25060,8 +25176,8 @@ export namespace Prisma {
 
   export type IntWithAggregatesFilter<$PrismaModel = never> = {
     equals?: number | IntFieldRefInput<$PrismaModel>
-    in?: number[]
-    notIn?: number[]
+    in?: number[] | ListIntFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
     lt?: number | IntFieldRefInput<$PrismaModel>
     lte?: number | IntFieldRefInput<$PrismaModel>
     gt?: number | IntFieldRefInput<$PrismaModel>
@@ -25102,7 +25218,6 @@ export namespace Prisma {
     sentAt?: SortOrder
     bodyText?: SortOrder
     bodyHtml?: SortOrder
-    attachments?: SortOrder
     invoiceId?: SortOrder
   }
 
@@ -25118,7 +25233,6 @@ export namespace Prisma {
     sentAt?: SortOrder
     bodyText?: SortOrder
     bodyHtml?: SortOrder
-    attachments?: SortOrder
     invoiceId?: SortOrder
   }
 
@@ -25149,7 +25263,6 @@ export namespace Prisma {
     subject?: SortOrder
     message?: SortOrder
     leadScore?: SortOrder
-    meta?: SortOrder
     inquiryId?: SortOrder
     createdAt?: SortOrder
   }
@@ -25163,13 +25276,35 @@ export namespace Prisma {
     subject?: SortOrder
     message?: SortOrder
     leadScore?: SortOrder
-    meta?: SortOrder
     inquiryId?: SortOrder
     createdAt?: SortOrder
   }
 
   export type ReceivedEmailSumOrderByAggregateInput = {
     leadScore?: SortOrder
+  }
+  export type JsonNullableFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<JsonNullableFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonNullableFilterBase<$PrismaModel>>, 'path'>>,
+        Required<JsonNullableFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<JsonNullableFilterBase<$PrismaModel>>, 'path'>>
+
+  export type JsonNullableFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
   }
 
   export type InvoiceCountOrderByAggregateInput = {
@@ -25217,7 +25352,6 @@ export namespace Prisma {
     customerPhone?: SortOrder
     service?: SortOrder
     description?: SortOrder
-    proposalJson?: SortOrder
     amountKobo?: SortOrder
     currency?: SortOrder
     durationLabel?: SortOrder
@@ -25249,7 +25383,6 @@ export namespace Prisma {
     customerPhone?: SortOrder
     service?: SortOrder
     description?: SortOrder
-    proposalJson?: SortOrder
     amountKobo?: SortOrder
     currency?: SortOrder
     durationLabel?: SortOrder
@@ -25275,6 +25408,32 @@ export namespace Prisma {
   export type InvoiceSumOrderByAggregateInput = {
     amountKobo?: SortOrder
   }
+  export type JsonNullableWithAggregatesFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, 'path'>>,
+        Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, 'path'>>
+
+  export type JsonNullableWithAggregatesFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedJsonNullableFilter<$PrismaModel>
+    _max?: NestedJsonNullableFilter<$PrismaModel>
+  }
 
   export type EventRecordCountOrderByAggregateInput = {
     id?: SortOrder
@@ -25297,7 +25456,6 @@ export namespace Prisma {
     customerPhone?: SortOrder
     eventDate?: SortOrder
     relatedInvoiceId?: SortOrder
-    payload?: SortOrder
     status?: SortOrder
     processedAt?: SortOrder
     lastSentAt?: SortOrder
@@ -25311,7 +25469,6 @@ export namespace Prisma {
     customerPhone?: SortOrder
     eventDate?: SortOrder
     relatedInvoiceId?: SortOrder
-    payload?: SortOrder
     status?: SortOrder
     processedAt?: SortOrder
     lastSentAt?: SortOrder
@@ -25373,7 +25530,6 @@ export namespace Prisma {
     invoiceId?: SortOrder
     secureToken?: SortOrder
     sessionId?: SortOrder
-    meta?: SortOrder
     createdAt?: SortOrder
   }
 
@@ -25383,7 +25539,6 @@ export namespace Prisma {
     invoiceId?: SortOrder
     secureToken?: SortOrder
     sessionId?: SortOrder
-    meta?: SortOrder
     createdAt?: SortOrder
   }
 
@@ -25464,7 +25619,6 @@ export namespace Prisma {
     company?: SortOrder
     role?: SortOrder
     status?: SortOrder
-    tags?: SortOrder
     notes?: SortOrder
     source?: SortOrder
     leadScore?: SortOrder
@@ -25482,7 +25636,6 @@ export namespace Prisma {
     company?: SortOrder
     role?: SortOrder
     status?: SortOrder
-    tags?: SortOrder
     notes?: SortOrder
     source?: SortOrder
     leadScore?: SortOrder
@@ -25599,8 +25752,8 @@ export namespace Prisma {
 
   export type NestedStringFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel>
-    in?: string[]
-    notIn?: string[]
+    in?: string[] | ListStringFieldRefInput<$PrismaModel>
+    notIn?: string[] | ListStringFieldRefInput<$PrismaModel>
     lt?: string | StringFieldRefInput<$PrismaModel>
     lte?: string | StringFieldRefInput<$PrismaModel>
     gt?: string | StringFieldRefInput<$PrismaModel>
@@ -25613,8 +25766,8 @@ export namespace Prisma {
 
   export type NestedStringNullableFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel> | null
-    in?: string[] | null
-    notIn?: string[] | null
+    in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    notIn?: string[] | ListStringFieldRefInput<$PrismaModel> | null
     lt?: string | StringFieldRefInput<$PrismaModel>
     lte?: string | StringFieldRefInput<$PrismaModel>
     gt?: string | StringFieldRefInput<$PrismaModel>
@@ -25627,8 +25780,8 @@ export namespace Prisma {
 
   export type NestedDateTimeFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    in?: Date[] | string[]
-    notIn?: Date[] | string[]
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
     lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
@@ -25638,8 +25791,8 @@ export namespace Prisma {
 
   export type NestedStringWithAggregatesFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel>
-    in?: string[]
-    notIn?: string[]
+    in?: string[] | ListStringFieldRefInput<$PrismaModel>
+    notIn?: string[] | ListStringFieldRefInput<$PrismaModel>
     lt?: string | StringFieldRefInput<$PrismaModel>
     lte?: string | StringFieldRefInput<$PrismaModel>
     gt?: string | StringFieldRefInput<$PrismaModel>
@@ -25655,8 +25808,8 @@ export namespace Prisma {
 
   export type NestedIntFilter<$PrismaModel = never> = {
     equals?: number | IntFieldRefInput<$PrismaModel>
-    in?: number[]
-    notIn?: number[]
+    in?: number[] | ListIntFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
     lt?: number | IntFieldRefInput<$PrismaModel>
     lte?: number | IntFieldRefInput<$PrismaModel>
     gt?: number | IntFieldRefInput<$PrismaModel>
@@ -25666,8 +25819,8 @@ export namespace Prisma {
 
   export type NestedStringNullableWithAggregatesFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel> | null
-    in?: string[] | null
-    notIn?: string[] | null
+    in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    notIn?: string[] | ListStringFieldRefInput<$PrismaModel> | null
     lt?: string | StringFieldRefInput<$PrismaModel>
     lte?: string | StringFieldRefInput<$PrismaModel>
     gt?: string | StringFieldRefInput<$PrismaModel>
@@ -25683,8 +25836,8 @@ export namespace Prisma {
 
   export type NestedIntNullableFilter<$PrismaModel = never> = {
     equals?: number | IntFieldRefInput<$PrismaModel> | null
-    in?: number[] | null
-    notIn?: number[] | null
+    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
     lt?: number | IntFieldRefInput<$PrismaModel>
     lte?: number | IntFieldRefInput<$PrismaModel>
     gt?: number | IntFieldRefInput<$PrismaModel>
@@ -25694,8 +25847,8 @@ export namespace Prisma {
 
   export type NestedDateTimeWithAggregatesFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    in?: Date[] | string[]
-    notIn?: Date[] | string[]
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
     lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
@@ -25705,11 +25858,34 @@ export namespace Prisma {
     _min?: NestedDateTimeFilter<$PrismaModel>
     _max?: NestedDateTimeFilter<$PrismaModel>
   }
+  export type NestedJsonFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<NestedJsonFilterBase<$PrismaModel>>, Exclude<keyof Required<NestedJsonFilterBase<$PrismaModel>>, 'path'>>,
+        Required<NestedJsonFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<NestedJsonFilterBase<$PrismaModel>>, 'path'>>
+
+  export type NestedJsonFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+  }
 
   export type NestedIntNullableWithAggregatesFilter<$PrismaModel = never> = {
     equals?: number | IntFieldRefInput<$PrismaModel> | null
-    in?: number[] | null
-    notIn?: number[] | null
+    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
     lt?: number | IntFieldRefInput<$PrismaModel>
     lte?: number | IntFieldRefInput<$PrismaModel>
     gt?: number | IntFieldRefInput<$PrismaModel>
@@ -25724,8 +25900,8 @@ export namespace Prisma {
 
   export type NestedFloatNullableFilter<$PrismaModel = never> = {
     equals?: number | FloatFieldRefInput<$PrismaModel> | null
-    in?: number[] | null
-    notIn?: number[] | null
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
     lt?: number | FloatFieldRefInput<$PrismaModel>
     lte?: number | FloatFieldRefInput<$PrismaModel>
     gt?: number | FloatFieldRefInput<$PrismaModel>
@@ -25740,8 +25916,8 @@ export namespace Prisma {
 
   export type NestedDateTimeNullableFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
-    in?: Date[] | string[] | null
-    notIn?: Date[] | string[] | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
     lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
@@ -25759,8 +25935,8 @@ export namespace Prisma {
 
   export type NestedDateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
-    in?: Date[] | string[] | null
-    notIn?: Date[] | string[] | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
     lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
@@ -25773,8 +25949,8 @@ export namespace Prisma {
 
   export type NestedIntWithAggregatesFilter<$PrismaModel = never> = {
     equals?: number | IntFieldRefInput<$PrismaModel>
-    in?: number[]
-    notIn?: number[]
+    in?: number[] | ListIntFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
     lt?: number | IntFieldRefInput<$PrismaModel>
     lte?: number | IntFieldRefInput<$PrismaModel>
     gt?: number | IntFieldRefInput<$PrismaModel>
@@ -25789,13 +25965,36 @@ export namespace Prisma {
 
   export type NestedFloatFilter<$PrismaModel = never> = {
     equals?: number | FloatFieldRefInput<$PrismaModel>
-    in?: number[]
-    notIn?: number[]
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel>
     lt?: number | FloatFieldRefInput<$PrismaModel>
     lte?: number | FloatFieldRefInput<$PrismaModel>
     gt?: number | FloatFieldRefInput<$PrismaModel>
     gte?: number | FloatFieldRefInput<$PrismaModel>
     not?: NestedFloatFilter<$PrismaModel> | number
+  }
+  export type NestedJsonNullableFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<NestedJsonNullableFilterBase<$PrismaModel>>, Exclude<keyof Required<NestedJsonNullableFilterBase<$PrismaModel>>, 'path'>>,
+        Required<NestedJsonNullableFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<NestedJsonNullableFilterBase<$PrismaModel>>, 'path'>>
+
+  export type NestedJsonNullableFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
   }
 
 

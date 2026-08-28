@@ -254,10 +254,8 @@ export function PaymentsTab({
             {data.logs.map((l) => {
               const isOpen = expanded === l.id;
               let detail: Record<string, unknown> = {};
-              try {
-                detail = JSON.parse(l.result || "{}") as Record<string, unknown>;
-              } catch {
-                /* ignore */
+              if (l.result && typeof l.result === "object" && !Array.isArray(l.result)) {
+                detail = l.result as Record<string, unknown>;
               }
               const isCharge = l.event === "charge.success";
               const Icon = isCharge ? CreditCard : l.event === "transfer.success" ? Webhook : l.event === "signature.rejected" ? ShieldX : Ban;
@@ -395,9 +393,9 @@ export function PaymentsTab({
             <ul className="max-h-72 divide-y divide-white/[0.04] overflow-y-auto [scrollbar-width:thin]">
               {data.kickoffEvents.map((k) => {
                 let p: { invoiceNumber?: string; customerName?: string; service?: string } = {};
-                try {
-                  p = JSON.parse(k.payload || "{}") as typeof p;
-                } catch { /* ignore */ }
+                if (k.payload && typeof k.payload === "object" && !Array.isArray(k.payload)) {
+                  p = k.payload as typeof p;
+                }
                 return (
                   <li key={k.id} className="flex items-center justify-between gap-3 px-6 py-3.5">
                     <div className="min-w-0">

@@ -28,14 +28,23 @@ services:
     # Prisma's runtime lookup of `prisma_schema_build_bg.wasm` succeeds. (With
     # `npx prisma`, Docker's COPY dereferenced the .bin/prisma symlink into a
     # regular file and the wasm lookup failed with ENOENT.)
-    startCommand: node ./node_modules/prisma/build/index.js db push --skip-generate --accept-data-loss && (node scripts/seed-testimonials.mjs || true) && exec node .next/standalone/server.js
+    startCommand: node ./node_modules/prisma/build/index.js db push --skip-generate && (node scripts/seed-testimonials.mjs || true) && exec node .next/standalone/server.js
     healthCheckPath: /api/health
     autoDeploy: true
     envVars:
       - key: NODE_ENV
         value: production
+      # ── Phase 28: Neon PostgreSQL (was SQLite on /data disk) ──
+      # Set BOTH env vars in the Render dashboard after first deploy:
+      #   DATABASE_URL  = pooled Neon URL (…-pooler…?…&pgbouncer=true&connection_limit=1)
+      #   DIRECT_URL    = direct Neon URL (no -pooler, no pgbouncer) — for migrations
+      # The persistent /data disk below is kept for snapshot-style backups
+      # (the admin Backups tab still writes a local SQLite dump there as a
+      # fallback when Drive isn't configured). The main DB is now external.
       - key: DATABASE_URL
-        value: file:/data/dev.db
+        sync: false
+      - key: DIRECT_URL
+        sync: false
       - key: HOSTNAME
         value: 0.0.0.0
       - key: NEXT_TELEMETRY_DISABLED
@@ -94,7 +103,7 @@ services:
       - key: GOOGLE_SCRIPT_URL
         sync: false
     disk:
-      name: okomba-sqlite
+      name: okomba-local-cache
       mountPath: /data
       sizeGB: 1
 

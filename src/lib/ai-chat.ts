@@ -26,6 +26,7 @@
 
 import ZAI from "z-ai-web-dev-sdk";
 import { db } from "@/lib/db";
+import type { InputJsonValue } from "@prisma/client/runtime/library";
 import { SERVICES, PROJECTS } from "@/lib/content";
 import { generateProposalDraft } from "@/lib/proposal";
 
@@ -228,11 +229,11 @@ async function captureLead(input: {
       subject: "AI chat lead — service finder",
       message: transcriptText,
       leadScore: input.leadScore,
-      meta: JSON.stringify({
+      meta: {
         sessionId: input.sessionId,
         recommendedServices: input.recommendedServices,
         capturedAt: new Date().toISOString(),
-      }),
+      } as InputJsonValue,
     },
   });
 
@@ -269,7 +270,7 @@ async function captureLead(input: {
           customerName: inquiry.name,
           customerEmail: inquiry.email,
           service,
-          draftJson: JSON.stringify(draft),
+          draftJson: draft as InputJsonValue,
           leadScore: input.leadScore,
           inquiryId: inquiry.id,
           receivedEmailId: received.id,
@@ -326,13 +327,9 @@ export async function runAiChatTurn(input: {
       where: { source: "ai_chat", email },
       orderBy: { createdAt: "desc" },
     });
-    if (existing) {
-      try {
-        const meta = JSON.parse(existing.meta || "{}") as { sessionId?: string };
-        alreadyCaptured = meta.sessionId === input.sessionId;
-      } catch {
-        alreadyCaptured = false;
-      }
+    if (existing && existing.meta && typeof existing.meta === "object" && !Array.isArray(existing.meta)) {
+      const meta = existing.meta as { sessionId?: string };
+      alreadyCaptured = meta.sessionId === input.sessionId;
     }
   }
 

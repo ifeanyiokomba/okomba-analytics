@@ -4,9 +4,20 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
+
+// ── SQLite → PostgreSQL migration (Phase 28) ─────────────────
+// Provider switched from `sqlite` to `postgresql`. JSON-as-String
+// fields (tags, attachments, lessons, customFields, meta, payload,
+// result, draftJson, proposalJson) were converted to native Prisma
+// `Json` type. Defaults remain JSON literals so empty rows still
+// serialize to `[]` / `{}` in the new column. App code that calls
+// `JSON.parse(...)` on these fields must be updated to consume the
+// already-parsed object/Array; the migration script handles the
+// conversion from SQLite TEXT → PostgreSQL jsonb.
 
 model Inquiry {
   id          String   @id @default(cuid())
@@ -34,7 +45,7 @@ model DraftProposal {
   customerName    String
   customerEmail   String
   service         String   // primary recommended service (title)
-  draftJson       String   // ProposalDraft JSON snapshot (price-scrubbed)
+  draftJson       Json     // ProposalDraft JSON snapshot (price-scrubbed)
   leadScore       Int?     // 1–10, rated by the AI from chat signals
   inquiryId       String?  @unique // link into the Inquiries workflow
   receivedEmailId String?  // link to the received_emails lead row
@@ -63,8 +74,8 @@ model WebhookLog {
   signatureValid Boolean   @default(false)
   source         String    @default("webhook") // webhook | admin-test
   status         String    @default("received") // received | processed | failed | ignored | duplicate
-  result         String    @default("{}") // JSON outcome detail
-  payload        String    @default("{}") // JSON snapshot (trimmed)
+  result         Json      @default("{}") // JSON outcome detail
+  payload        Json      @default("{}") // JSON snapshot (trimmed)
   error          String?
   receivedAt     DateTime  @default(now())
   processedAt    DateTime?
@@ -102,7 +113,7 @@ model Post {
   excerpt     String
   content     String
   category    String
-  tags        String    @default("[]") // JSON-serialized string array
+  tags        Json      @default("[]") // JSON-serialized string array
   author      String    @default("OKOMBA ANALYTICS")
   status      String    @default("draft") // draft | published
   publishedAt DateTime?
@@ -143,7 +154,7 @@ model EmailLog {
   // ── Phase-1 audit extensions (sent_emails contract) ──
   bodyText     String?  // plain-text version
   bodyHtml     String?  // branded HTML version
-  attachments  String   @default("[]") // JSON [{filename, size, storageUrl?}]
+  attachments  Json     @default("[]") // JSON [{filename, size, storageUrl?}]
   invoiceId    String?  // related invoice when type=invoice.sent
 
   @@index([postId])
@@ -174,7 +185,7 @@ model ReceivedEmail {
   subject    String?
   message    String
   leadScore  Int?     // 0–100, set by ai_chat qualification (Phase 3)
-  meta       String   @default("{}") // JSON: { service, budget, extra }
+  meta       Json     @default("{}") // JSON: { service, budget, extra }
   inquiryId  String?  // link to the Inquiry workflow row
   createdAt  DateTime @default(now())
 
@@ -191,7 +202,7 @@ model Invoice {
   customerPhone    String?
   service          String
   description      String?
-  proposalJson     String?   // full (admin-edited) proposal snapshot — powers PDF regeneration & reminders
+  proposalJson     Json?     // full (admin-edited) proposal snapshot — powers PDF regeneration & reminders
   amountKobo       Int       // NGN minor units — integer math, no float drift
   currency         String    @default("NGN")
   durationLabel    String?   // e.g. "3 weeks"
@@ -233,7 +244,7 @@ model EventRecord {
   customerPhone    String?
   eventDate        DateTime
   relatedInvoiceId String?
-  payload          String    @default("{}") // JSON snapshot for the handler
+  payload          Json      @default("{}") // JSON snapshot for the handler
   status           String    @default("scheduled") // scheduled | processed | skipped | failed
   processedAt      DateTime?
   lastSentAt       DateTime? // last time a reminder for this event actually went out
@@ -272,7 +283,7 @@ model AnalyticsEvent {
   invoiceId   String?
   secureToken String?
   sessionId   String? // AI chat session grouping
-  meta        String   @default("{}") // JSON: { service, source, … }
+  meta        Json     @default("{}") // JSON: { service, source, … }
   createdAt   DateTime @default(now())
 
   @@index([type])
@@ -326,7 +337,7 @@ model Customer {
   company     String?
   role        String?  // e.g. "Founder, TechStartNG"
   status      String   @default("lead") // lead | qualified | proposal_sent | paying | churned | blocked
-  tags        String   @default("[]") // JSON string array — flexible taxonomy
+  tags        Json     @default("[]") // JSON string array — flexible taxonomy
   notes       String?  // free-text internal notes (latest snapshot)
   source      String   @default("manual") // manual | csv | excel | inquiry | ai_chat | invoice | broadcast
   // Lead-scoring (0-100) — set by AI on CSV import or by admin manually.

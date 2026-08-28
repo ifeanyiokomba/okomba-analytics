@@ -8,6 +8,7 @@
  */
 
 import { db } from "@/lib/db";
+import type { InputJsonValue } from "@prisma/client/runtime/library";
 import { createInvoiceDva } from "@/lib/paystack";
 import { generateProposalPdf } from "@/lib/pdf/proposal-pdf";
 import { sendProposalEmail } from "@/lib/notify";
@@ -117,7 +118,7 @@ export async function sendProposal(input: SendProposalInput): Promise<SendPropos
       customerPhone: inquiry.phone ?? inquiry.whatsapp ?? null,
       service: inquiry.service,
       description: input.description ?? null,
-      proposalJson: JSON.stringify(input.proposal),
+      proposalJson: input.proposal as InputJsonValue,
       amountKobo: amountNaira * 100,
       currency: "NGN",
       durationLabel: input.durationLabel ?? null,
@@ -185,12 +186,12 @@ export async function sendProposal(input: SendProposalInput): Promise<SendPropos
           customerPhone: inquiry.phone ?? inquiry.whatsapp ?? null,
           eventDate: e.date,
           relatedInvoiceId: invoice.id,
-          payload: JSON.stringify({
+          payload: {
             invoiceNumber,
             customerName: inquiry.name,
             amountNaira,
             service: inquiry.service,
-          }),
+          } as InputJsonValue,
           status: "scheduled",
         })),
       });

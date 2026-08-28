@@ -11,17 +11,15 @@ import type { ProposalDraft } from "@/lib/proposal";
 import { DVA_ACCOUNT_NAME } from "@/lib/brand";
 
 export function parseProposalSnapshot(invoice: Invoice): ProposalDraft {
-  try {
-    const parsed = JSON.parse(invoice.proposalJson ?? "{}") as ProposalDraft;
+  const raw = invoice.proposalJson;
+  if (raw && typeof raw === "object" && !Array.isArray(raw)) {
+    const parsed = raw as ProposalDraft;
     if (
-      parsed &&
       typeof parsed.executiveSummary === "string" &&
       Array.isArray(parsed.objectives)
     ) {
       return parsed;
     }
-  } catch {
-    /* fall through */
   }
   return {
     executiveSummary: `${invoice.service} engagement proposal.`,
