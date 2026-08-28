@@ -84,8 +84,31 @@ const FROM_EMAIL = "insights@okomba.com";
 const BASE_URL =
   process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") || "https://okomba.com";
 
+/* ── Shared formatters (extracted for testability, B1-C) ──
+   These were previously inlined inside sendReminderEmail,
+   sendProposalEmail, sendPaymentThankYouEmail, and
+   notifyPaymentProofUploaded. They are now module-level so the
+   exported `compose*Body` / `*Subject` helpers (used by
+   tests/email-plaintext.test.ts) share the EXACT same formatting
+   logic as the production code paths. Behaviour is unchanged. */
+const fmtNaira = (n: number): string =>
+  `\u20A6${n.toLocaleString("en-NG", { maximumFractionDigits: 0 })}`;
+
+/** Format an ISO due date as "14 February 2026" (or null when missing). */
+function proposalDueLabel(inv: {
+  dueDate?: string | null;
+}): string | null {
+  return inv.dueDate
+    ? new Date(inv.dueDate).toLocaleDateString("en-NG", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      })
+    : null;
+}
+
 /* ── Subject line generators ──────────────────────────────── */
-function subjectFor(payload: NotificationPayload): string {
+export function subjectFor(payload: NotificationPayload): string {
   switch (payload.type) {
     case "inquiry.created":
       return `New inquiry from ${payload.inquiry.name} — ${payload.inquiry.service}`;
@@ -99,7 +122,7 @@ function subjectFor(payload: NotificationPayload): string {
 }
 
 /* ── Body composer for each notification type ────────────── */
-function composeBody(payload: NotificationPayload): string {
+export function composeBody(payload: NotificationPayload): string {
   switch (payload.type) {
     case "inquiry.created":
       return [
@@ -485,18 +508,18 @@ const REMINDER_TYPE: Record<ReminderEmailPayload["kind"], string> = {
   overdue: "invoice.reminder_overdue",
 };
 
-export async function sendReminderEmail(
-  rem: ReminderEmailPayload
-): Promise<{ ok: boolean; error?: string }> {
-  if (!enabled) return { ok: false, error: "notifications disabled" };
+/* ── Plain-text body + subject composers (exported for tests, B1-C) ──
+   These are extracted verbatim from the inline body/subject construction
+   that used to live inside sendReminderEmail. They are the EXACT strings
+   the production email path sends — sendReminderEmail now calls these
+   helpers instead of constructing the body inline, so
+   tests/email-plaintext.test.ts verifies the real production output. */
+export function reminderSubject(rem: ReminderEmailPayload): string {
+  return `Reminder: Invoice #${rem.invoiceNumber} Due ${rem.dueLabel}`;
+}
 
-  const fmtNaira = (n: number) =>
-    `\u20A6${n.toLocaleString("en-NG", { maximumFractionDigits: 0 })}`;
-
-  // Exact subject per spec
-  const subject = `Reminder: Invoice #${rem.invoiceNumber} Due ${rem.dueLabel}`;
-
-  const body = [
+export function composeReminderBody(rem: ReminderEmailPayload): string {
+  return [
     rem.bodyText,
     ``,
     `Invoice:  ${rem.invoiceNumber}`,
@@ -516,6 +539,15 @@ export async function sendReminderEmail(
     `The PDF attached to this email contains the full proposal, invoice and`,
     `payment details for your records.`,
   ].join("\n");
+}
+
+export async function sendReminderEmail(
+  rem: ReminderEmailPayload
+): Promise<{ ok: boolean; error?: string }> {
+  if (!enabled) return { ok: false, error: "notifications disabled" };
+
+  const subject = reminderSubject(rem);
+  const body = composeReminderBody(rem);
 
   const html = brandedEmailHtml({
     title: `Reminder — ${rem.invoiceNumber}`,
@@ -647,25 +679,16 @@ export type InvoiceEmailPayload = {
   portalUrl?: string | null; // Module 8A — /portal/{secureToken} link
 };
 
-export async function sendProposalEmail(
-  inv: InvoiceEmailPayload
-): Promise<{ ok: boolean; error?: string }> {
-  if (!enabled) return { ok: false, error: "notifications disabled" };
+/* ── Plain-text body + subject composers (exported for tests, B1-C) ──
+   Extracted verbatim from sendProposalEmail. Tests verify the real
+   production output by calling these same helpers. */
+export function proposalSubject(inv: InvoiceEmailPayload): string {
+  return `Your Proposal from Okomba Analytics - Invoice #${inv.invoiceNumber}`;
+}
 
-  const fmtNaira = (n: number) =>
-    `\u20A6${n.toLocaleString("en-NG", { maximumFractionDigits: 0 })}`;
-  const due = inv.dueDate
-    ? new Date(inv.dueDate).toLocaleDateString("en-NG", {
-        day: "numeric",
-        month: "long",
-        year: "numeric",
-      })
-    : null;
-
-  // Exact subject per spec
-  const subject = `Your Proposal from Okomba Analytics - Invoice #${inv.invoiceNumber}`;
-
-  const body = [
+export function composeProposalBody(inv: InvoiceEmailPayload): string {
+  const due = proposalDueLabel(inv);
+  return [
     `Dear ${inv.customerName},`,
     ``,
     `Thank you for choosing Okomba Analytics. Your proposal and invoice`,
@@ -689,6 +712,16 @@ export async function sendProposalEmail(
     ``,
     `The PDF attached to this email is your official proposal and invoice.`,
   ].join("\n");
+}
+
+export async function sendProposalEmail(
+  inv: InvoiceEmailPayload
+): Promise<{ ok: boolean; error?: string }> {
+  if (!enabled) return { ok: false, error: "notifications disabled" };
+
+  const due = proposalDueLabel(inv);
+  const subject = proposalSubject(inv);
+  const body = composeProposalBody(inv);
 
   const html = brandedEmailHtml({
     title: `Your Proposal — ${inv.invoiceNumber}`,
@@ -905,7 +938,7 @@ export async function sendAdminAlertEmail(p: AdminAlertPayload): Promise<{ ok: b
 /* ─────────────────────────────────────────────────────────────
    Payment proof uploaded alert (Module 8A "I've Paid" button).
    ───────────────────────────────────────────────────────────── */
-export async function notifyPaymentProofUploaded(a: {
+export type PaymentProofAlertPayload = {
   invoiceNumber: string;
   customerName: string;
   customerEmail: string;
@@ -913,23 +946,32 @@ export async function notifyPaymentProofUploaded(a: {
   fileName: string;
   sizeBytes: number;
   portalUrl: string;
-}): Promise<void> {
-  const fmtNaira = (n: number) =>
-    `\u20A6${n.toLocaleString("en-NG", { maximumFractionDigits: 0 })}`;
+};
+
+/* ── Plain-text body + subject composers (exported for tests, B1-C) ── */
+export function paymentProofAlertSubject(a: PaymentProofAlertPayload): string {
+  return `Payment proof uploaded — ${a.invoiceNumber} (${a.customerName})`;
+}
+
+export function composePaymentProofAlertBody(a: PaymentProofAlertPayload): string {
+  return [
+    `${a.customerName} just uploaded a payment proof via the client portal.`,
+    ``,
+    `Invoice:  ${a.invoiceNumber}`,
+    `Amount:   ${fmtNaira(a.amountNaira)}`,
+    `Email:    ${a.customerEmail}`,
+    `Proof:    ${a.fileName} (${Math.max(1, Math.round(a.sizeBytes / 1024))} KB)`,
+    ``,
+    `Open the Payments tab to verify, then confirm the invoice when the`,
+    `bank/Paystack record lands. Portal: ${a.portalUrl}`,
+  ].join("\n");
+}
+
+export async function notifyPaymentProofUploaded(a: PaymentProofAlertPayload): Promise<void> {
   await sendAdminAlertEmail({
     key: `payment.proof.${a.invoiceNumber}`,
-    subject: `Payment proof uploaded — ${a.invoiceNumber} (${a.customerName})`,
-    bodyText: [
-      `${a.customerName} just uploaded a payment proof via the client portal.`,
-      ``,
-      `Invoice:  ${a.invoiceNumber}`,
-      `Amount:   ${fmtNaira(a.amountNaira)}`,
-      `Email:    ${a.customerEmail}`,
-      `Proof:    ${a.fileName} (${Math.max(1, Math.round(a.sizeBytes / 1024))} KB)`,
-      ``,
-      `Open the Payments tab to verify, then confirm the invoice when the`,
-      `bank/Paystack record lands. Portal: ${a.portalUrl}`,
-    ].join("\n"),
+    subject: paymentProofAlertSubject(a),
+    bodyText: composePaymentProofAlertBody(a),
     blocks: [
       { kind: "text", text: `${a.customerName} just uploaded a payment proof via the client portal.` },
       {
@@ -967,17 +1009,13 @@ export type PaymentEmailPayload = {
   pdfFilename: string;
 };
 
-export async function sendPaymentThankYouEmail(
-  p: PaymentEmailPayload
-): Promise<{ ok: boolean; error?: string }> {
-  if (!enabled) return { ok: false, error: "notifications disabled" };
+/* ── Plain-text body + subject composers (exported for tests, B1-C) ── */
+export function paymentThankYouSubject(p: PaymentEmailPayload): string {
+  return `Thank You — Payment Received for Invoice #${p.invoiceNumber}`;
+}
 
-  const fmtNaira = (n: number) =>
-    `\u20A6${n.toLocaleString("en-NG", { maximumFractionDigits: 0 })}`;
-
-  const subject = `Thank You — Payment Received for Invoice #${p.invoiceNumber}`;
-
-  const body = [
+export function composePaymentThankYouBody(p: PaymentEmailPayload): string {
+  return [
     p.bodyText,
     ``,
     `Receipt:      ${p.receiptNumber}`,
@@ -989,6 +1027,15 @@ export async function sendPaymentThankYouEmail(
     `The PDF attached to this email is your official receipt. Your`,
     `project kickoff is scheduled within 24 hours.`,
   ].join("\n");
+}
+
+export async function sendPaymentThankYouEmail(
+  p: PaymentEmailPayload
+): Promise<{ ok: boolean; error?: string }> {
+  if (!enabled) return { ok: false, error: "notifications disabled" };
+
+  const subject = paymentThankYouSubject(p);
+  const body = composePaymentThankYouBody(p);
 
   const html = brandedEmailHtml({
     title: `Payment Received — ${p.receiptNumber}`,

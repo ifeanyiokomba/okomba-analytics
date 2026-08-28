@@ -144,6 +144,33 @@ Rules:
 
 Return ONLY a compact JSON array, no markdown, no commentary. Each element is an object with the keys above.`;
 
+/* PII GOVERNANCE opt-out flag (R68 / B1-B fix):
+   When CRM_IMPORT_NO_LLM is set to "true" / "1" (case-insensitive),
+   the import route SKIPS the z-ai-web-dev-sdk LLM call entirely and
+   uses ONLY the deterministic header-name heuristic fallback mapper
+   (defined further below in this file). No customer spreadsheet data
+   (name, email, phone, WhatsApp, company, role, notes) is sent to
+   any third-party LLM provider.
+
+   Why this flag exists: the default flow sends uploaded spreadsheet
+   contents to the z-ai-web-dev-sdk LLM for smart column mapping. The
+   LLM produces better tagging + lead-scoring, but it also exfiltrates
+   customer PII to a third-party inference endpoint. When the
+   founder's internal policy (or a customer's DPA, or a regulator's
+   guidance) prohibits that exfiltration, set CRM_IMPORT_NO_LLM=true
+   and the import flow degrades gracefully to deterministic-only
+   mapping — no LLM call, no network egress, no PII leak. The admin
+   still gets a usable preview; they lose auto-tagging + lead
+   scoring, which they can add manually in the review step.
+
+   Default behavior (env var unset or "false"): LLM is used for
+   smart mapping, with the deterministic fallback if the LLM call
+   fails (the original Phase 2 behavior — preserved). */
+function isNoLlmOptOut(): boolean {
+  const raw = (process.env.CRM_IMPORT_NO_LLM ?? "").trim().toLowerCase();
+  return raw === "true" || raw === "1";
+}
+
 export async function POST(req: Request) {
   try {
     if (!(await isAdminAuthorized())) {
@@ -186,39 +213,52 @@ export async function POST(req: Request) {
     // AI extraction — try the real LLM first. If the SDK is missing or
     // the call fails, fall back to a deterministic header-name mapper so
     // the admin still gets a usable preview.
+    //
+    // PII GOVERNANCE: when CRM_IMPORT_NO_LLM=true, the LLM call is
+    // skipped entirely (no network egress, no PII leak). The
+    // deterministic fallback mapper is the ONLY mapping path used.
+    // See the isNoLlmOptOut() helper comment above for the full rationale.
     let parsed: Array<Record<string, unknown> | null> | null = null;
     let usedFallback = false;
-    try {
-      const ZAI = (await import("z-ai-web-dev-sdk")).default;
-      const zai = await ZAI.create();
-      const completion = await zai.chat.completions.create({
-        messages: [
-          { role: "assistant", content: EXTRACTION_PROMPT },
-          {
-            role: "user",
-            content: `Here are ${cappedRows.length} customer rows from the file "${file.name}". Map each to the canonical shape.\n\nROWS:\n${JSON.stringify(cappedRows)}`,
-          },
-        ],
-        thinking: { type: "disabled" },
-      });
-      const text = completion.choices[0]?.message?.content ?? "";
-      // Strip any markdown fences if the model added them
-      const clean = text.replace(/```json\s*/g, "").replace(/```/g, "").trim();
-      const start = clean.indexOf("[");
-      const end = clean.lastIndexOf("]");
-      if (start >= 0 && end > start) {
-        const arr = JSON.parse(clean.slice(start, end + 1));
-        if (Array.isArray(arr)) {
-          parsed = arr;
+    const NO_LLM = isNoLlmOptOut();
+    if (NO_LLM) {
+      console.info(
+        "[customers/import] CRM_IMPORT_NO_LLM is set — skipping LLM extraction; using deterministic header-name mapper only (PII governance opt-out). No spreadsheet data is sent to any third-party LLM provider."
+      );
+      usedFallback = true;
+    } else {
+      try {
+        const ZAI = (await import("z-ai-web-dev-sdk")).default;
+        const zai = await ZAI.create();
+        const completion = await zai.chat.completions.create({
+          messages: [
+            { role: "assistant", content: EXTRACTION_PROMPT },
+            {
+              role: "user",
+              content: `Here are ${cappedRows.length} customer rows from the file "${file.name}". Map each to the canonical shape.\n\nROWS:\n${JSON.stringify(cappedRows)}`,
+            },
+          ],
+          thinking: { type: "disabled" },
+        });
+        const text = completion.choices[0]?.message?.content ?? "";
+        // Strip any markdown fences if the model added them
+        const clean = text.replace(/```json\s*/g, "").replace(/```/g, "").trim();
+        const start = clean.indexOf("[");
+        const end = clean.lastIndexOf("]");
+        if (start >= 0 && end > start) {
+          const arr = JSON.parse(clean.slice(start, end + 1));
+          if (Array.isArray(arr)) {
+            parsed = arr;
+          }
         }
-      }
-      if (!parsed) {
-        console.warn("[customers/import] model did not return a JSON array — using fallback");
+        if (!parsed) {
+          console.warn("[customers/import] model did not return a JSON array — using fallback");
+          usedFallback = true;
+        }
+      } catch (err) {
+        console.error("[customers/import] AI extraction failed:", err);
         usedFallback = true;
       }
-    } catch (err) {
-      console.error("[customers/import] AI extraction failed:", err);
-      usedFallback = true;
     }
 
     if (!parsed || usedFallback) {

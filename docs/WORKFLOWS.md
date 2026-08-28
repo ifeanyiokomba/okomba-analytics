@@ -4,6 +4,7 @@ Preservation-first documentation of every user-facing workflow in the applicatio
 The presentation layer (UI) may evolve; these contracts must keep working.
 
 Last audited: after Phase-2 Modules 5+6 (reminder engine + WhatsApp widget).
+B1-B update: added W17 — CRM Customer Import (CSV/XLSX → preview → upsert) incl. `CRM_IMPORT_NO_LLM` PII-governance opt-out.
 
 ---
 
@@ -280,6 +281,20 @@ The four procedures the founder runs every working day. Each is end-to-end again
 | 8 | Resume the web service (Settings → Resume). Verify with `curl https://okomba.com/api/health` → `{"ok":true,…}`. |
 | 9 | The 14-day local rotation under `data/backups/` is the fast-restore option when Drive is unreachable. Use the same Shell-copy flow with a local file name. |
 | 10 | Backups run automatically every day at 02:00 WAT (`BACKUP_CRON_EXPR=0 2 * * *`). Verify the last run is <24h old in the Analytics strip; if it's older, check `BACKUP_CRON_ENABLED` and the WhatsApp service status (cron runs in the Next.js process). |
+
+## W17 — CRM Customer Import (CSV/XLSX → preview → upsert)
+
+| Aspect | Detail |
+|---|---|
+| **Entry** | Admin → Customers tab → **Import** button (file picker accepts `.csv` + `.xlsx`) |
+| **Endpoint** | `POST /api/admin/customers/import` (admin-cookie-gated, multipart/form-data with field `file`) |
+| **Hardening** | max file size 5 MB · max 500 rows · max 25 cols · single sheet · `exceljs` (no `xlsx` ReDoS surface per Phase 27 audit) |
+| **Column mapping (default)** | spreadsheet contents (name, email, phone, WhatsApp, company, role, notes) sent to the z-ai-web-dev-sdk LLM with the `EXTRACTION_PROMPT` system prompt; LLM returns canonical JSON with auto-tags + lead-scoring |
+| **Column mapping (fallback)** | if LLM call fails or returns non-JSON, deterministic header-name heuristic mapper (`pick("email","e_mail","mail",…)`, etc.) — always works, no AI tags |
+| **PII GOVERNANCE OPT-OUT** | set `CRM_IMPORT_NO_LLM=true` (or `"1"`, case-insensitive) → the LLM call is SKIPPED entirely; the deterministic mapper is the only path used. No spreadsheet PII is exfiltrated to any third-party LLM provider. A `console.info` is logged server-side on every import while the flag is active. The admin loses auto-tagging + lead-scoring (they can add those manually in the review step). Use this when the founder's internal policy, a customer's DPA, or a regulator's guidance prohibits sending customer PII to a third-party inference endpoint. Default (unset / `"false"`): LLM is used. |
+| **Response** | `{ ok, rows, totalRows, detectedColumns, usedFallback, fileName }` |
+| **Review step** | admin reviews the parsed preview rows + edits tags/status/leadScore before clicking "Import" — which calls `POST /api/admin/customers` per row (upsert-safe by email) |
+| **Persistence** | Prisma `Customer` table (one row per unique email; duplicate emails in the upload are deduped in the preview) |
 
 ## Non-negotiables (Stage 9 additions)
 
