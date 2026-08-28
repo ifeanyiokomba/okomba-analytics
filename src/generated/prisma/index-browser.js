@@ -265,6 +265,7 @@ exports.Prisma.InvoiceScalarFieldEnum = {
   dvaAccountNumber: 'dvaAccountNumber',
   dvaBankName: 'dvaBankName',
   dvaBankCode: 'dvaBankCode',
+  paystackReference: 'paystackReference',
   pdfUrl: 'pdfUrl',
   pdfStorage: 'pdfStorage',
   secureToken: 'secureToken',

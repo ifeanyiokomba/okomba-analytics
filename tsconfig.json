@@ -37,6 +37,13 @@
     ".next/dev/types/**/*.ts"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "examples",
+    "skills",
+    "tests",
+    "research-assets",
+    "e2e-shots",
+    "download",
+    "okomba-handover-v2.zip"
   ]
 }

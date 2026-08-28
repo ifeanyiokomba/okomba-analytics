@@ -22,7 +22,7 @@ const DEV_CONFIRM_SIMULATION = process.env.NEXT_PUBLIC_DEV_CONFIRM_SIMULATION !=
  */
 export function NewsletterSection() {
   const [email, setEmail] = useState("");
-  const [state, setState] = useState<"idle" | "busy" | "sent-flash" | "done" | "error">("idle");
+  const [state, setState] = useState<"idle" | "busy" | "sent" | "sent-flash" | "done" | "error">("idle");
   const [message, setMessage] = useState("");
   const [confirmPath, setConfirmPath] = useState<string | null>(null);
 

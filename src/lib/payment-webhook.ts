@@ -229,39 +229,56 @@ export async function processPaystackEvent(
 /* ── charge.success handler (the money path) ───────────────── */
 
 async function handleChargeSuccess(data: PaystackChargeData): Promise<WebhookOutcome> {
-  // a. Find invoice by DVA account_number
+  // Audit fix (Phase 27): invoice matching uses an IMMUTABLE binding
+  // chain — never email+amount (which can collide across multiple open
+  // invoices for the same customer). The lookup order is:
+  //   1. paystackReference (data.reference) — strongest, set at DVA /
+  //      checkout creation time, unique per invoice.
+  //   2. dvaAccountNumber — also uniquely bound to one invoice at
+  //      creation time (Paystack issues a fresh DVA per invoice).
+  //   3. NO FALLBACK. If neither matches, the payment lands in a
+  //      "needs manual reconciliation" queue + alerts the admin. We
+  //      do NOT auto-mark any invoice paid by email+amount heuristic.
+  const reference =
+    typeof data.reference === "string" && data.reference.trim()
+      ? data.reference.trim()
+      : null;
   const dva = data.dedicated_account ?? {};
   const accountNumber =
     typeof dva.account_number === "string" ? dva.account_number : null;
 
-  let invoice = accountNumber
-    ? await db.invoice.findFirst({
-        where: { dvaAccountNumber: accountNumber },
-        orderBy: { createdAt: "desc" },
-      })
-    : null;
+  let invoice: Awaited<ReturnType<typeof db.invoice.findFirst>> = null;
 
-  // Robustness fallback: match unpaid invoice by customer email + amount
-  if (!invoice && data.customer?.email && data.amount) {
+  // 1. Primary — paystackReference (unique per invoice, set at DVA creation)
+  if (reference) {
+    invoice = await db.invoice.findUnique({
+      where: { paystackReference: reference },
+    });
+  }
+
+  // 2. Secondary — DVA account_number (also unique per invoice at creation)
+  if (!invoice && accountNumber) {
     invoice = await db.invoice.findFirst({
-      where: {
-        customerEmail: data.customer.email,
-        amountKobo: data.amount,
-        status: { in: ["sent", "pending", "overdue", "draft"] },
-      },
+      where: { dvaAccountNumber: accountNumber },
       orderBy: { createdAt: "desc" },
     });
   }
 
+  // 3. No match — manual reconciliation queue (NEVER auto-pick by email+amount)
   if (!invoice) {
     return {
       status: "failed",
       detail: {
-        note: "no invoice matched this payment",
+        note: "no invoice matched this payment by reference or DVA — queued for manual reconciliation",
+        lookedUpReference: reference,
         lookedUpAccount: accountNumber,
         customerEmail: data.customer?.email ?? null,
+        amountKobo: typeof data.amount === "number" ? data.amount : null,
+        // The admin opens the failed webhook in the dashboard, verifies
+        // the payment in Paystack, then manually marks the correct
+        // invoice paid. Zero risk of marking the wrong invoice.
       },
-      error: "invoice_not_found",
+      error: "invoice_not_found_needs_manual_reconciliation",
     };
   }
 

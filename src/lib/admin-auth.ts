@@ -1,7 +1,18 @@
 import { cookies } from "next/headers";
+import { createHash } from "node:crypto";
 import { db } from "@/lib/db";
 
 export const ADMIN_COOKIE_NAME = "okomba_admin";
+
+/**
+ * Audit fix (Phase 27): never persist the raw session token in the DB.
+ * If SQLite is ever exfiltrated, raw tokens would grant admin access
+ * until they expire. We store the SHA-256 hash; the cookie carries the
+ * raw token (128-bit random UUID) so a DB compromise can't be replayed.
+ */
+export function hashSessionToken(token: string): string {
+  return createHash("sha256").update(token, "utf8").digest("hex");
+}
 
 /**
  * Reads the admin session token from the request.
@@ -43,6 +54,9 @@ export async function getAdminSessionToken(req?: Request): Promise<string | null
 /**
  * Validates that the current request carries a valid, unexpired admin
  * session token. Expired sessions are deleted opportunistically.
+ *
+ * Audit fix (Phase 27): the cookie carries the RAW token, but the DB
+ * stores only the SHA-256 hash. Lookups hash the submitted token first.
  */
 export async function isAdminAuthorized(): Promise<boolean> {
   try {
@@ -54,7 +68,8 @@ export async function isAdminAuthorized(): Promise<boolean> {
       where: { expiresAt: { lt: new Date() } },
     });
 
-    const session = await db.adminSession.findUnique({ where: { token } });
+    const tokenHash = hashSessionToken(token);
+    const session = await db.adminSession.findUnique({ where: { token: tokenHash } });
     if (!session) return false;
 
     return session.expiresAt.getTime() > Date.now();

@@ -1,23 +1,41 @@
+# ─────────────────────────────────────────────────────────────────────
+# SANDBOX GATEWAY ONLY — NOT FOR PRODUCTION DEPLOYMENT.
+#
+# This Caddyfile is the sandbox gateway that lets the dev preview
+# route API/WS requests to mini-services running on different ports
+# (whatsapp-service on 3004, etc.) via the ?XTransformPort=<port>
+# query parameter. The production deployment on Render does NOT use
+# this file — Render's own routing handles port isolation per service.
+#
+# Audit fix (Phase 27): the XTransformPort handler is restricted to
+# private-network traffic only (trusted_proxies + internal IP ranges).
+# Public requests from the internet cannot reach internal services
+# through this gateway on Render — only the sandbox preview allows it
+# because the sandbox gateway is bound to a private internal interface.
+# ─────────────────────────────────────────────────────────────────────
 :81 {
-	@transform_port_query {
-		query XTransformPort=*
-	}
+        @transform_port_query {
+                query XTransformPort=*
+                # Only honor XTransformPort from internal sandbox traffic —
+                # blocks public-internet abuse of the port-proxy feature.
+                remote_ip 127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16 ::1/128 fc00::/7
+        }
 
-	handle @transform_port_query {
-		reverse_proxy localhost:{query.XTransformPort} {
-			header_up Host {host}
-			header_up X-Forwarded-For {remote_host}
-			header_up X-Forwarded-Proto {scheme}
-			header_up X-Real-IP {remote_host}
-		}
-	}
+        handle @transform_port_query {
+                reverse_proxy localhost:{query.XTransformPort} {
+                        header_up Host {host}
+                        header_up X-Forwarded-For {remote_host}
+                        header_up X-Forwarded-Proto {scheme}
+                        header_up X-Real-IP {remote_host}
+                }
+        }
 
-	handle {
-		reverse_proxy localhost:3000 {
-			header_up Host {host}
-			header_up X-Forwarded-For {remote_host}
-			header_up X-Forwarded-Proto {scheme}
-			header_up X-Real-IP {remote_host}
-		}
-	}
+        handle {
+                reverse_proxy localhost:3000 {
+                        header_up Host {host}
+                        header_up X-Forwarded-For {remote_host}
+                        header_up X-Forwarded-Proto {scheme}
+                        header_up X-Real-IP {remote_host}
+                }
+        }
 }

@@ -201,6 +201,12 @@ model Invoice {
   dvaAccountNumber String?
   dvaBankName      String?
   dvaBankCode      String?
+  // ── Audit fix (Phase 27): unique Paystack transaction reference ──
+  // Bound at DVA creation / checkout-session time so the webhook can
+  // match a payment to its invoice by an immutable reference (NOT by
+  // email + amount, which can collide across multiple open invoices).
+  // NULL until the DVA / checkout session is provisioned.
+  paystackReference String? @unique
   pdfUrl           String?   // Cloudinary URL (Module 8B) or local fallback label
   pdfStorage       String?   // cloudinary | local
   // ── Module 8A: Client Portal (/portal/{secureToken}) ──

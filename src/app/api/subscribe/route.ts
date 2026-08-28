@@ -119,11 +119,20 @@ export async function POST(req: Request) {
       unsubscribeUrl: `${siteUrl}/api/subscribe/unsubscribe?token=${unsubToken}`,
     }).catch(() => undefined);
 
-    // In dev (no email provider) the client shows the confirm link directly.
-    return NextResponse.json(
-      { ok: true, confirmPath: `/api/subscribe/confirm?token=${token}` },
-      { status: 201 }
-    );
+    // Audit fix (Phase 27): the original response returned confirmPath
+    // with the raw confirmation token — defeating the double-opt-in
+    // ownership check (anyone who calls /api/subscribe with an email
+    // could immediately confirm the subscription without checking
+    // email inbox). In production we return only a generic message;
+    // in dev (NEXT_PUBLIC_DEV_CONFIRM_SIMULATION !== "false") we still
+    // surface the link so the sandbox preview can complete the flow.
+    const devSim = process.env.NEXT_PUBLIC_DEV_CONFIRM_SIMULATION !== "false";
+    const isProduction = process.env.NODE_ENV === "production";
+    const body: { ok: boolean; confirmPath?: string } = { ok: true };
+    if (!isProduction && devSim) {
+      body.confirmPath = `/api/subscribe/confirm?token=${token}`;
+    }
+    return NextResponse.json(body, { status: 201 });
   } catch (err) {
     console.error("[subscribe] error:", err);
     return NextResponse.json(
