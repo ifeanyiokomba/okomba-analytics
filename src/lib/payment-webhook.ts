@@ -239,16 +239,28 @@ export async function processPaystackEvent(
 /* ── charge.success handler (the money path) ───────────────── */
 
 async function handleChargeSuccess(data: PaystackChargeData): Promise<WebhookOutcome> {
-  // Audit fix (Phase 27): invoice matching uses an IMMUTABLE binding
-  // chain — never email+amount (which can collide across multiple open
-  // invoices for the same customer). The lookup order is:
-  //   1. paystackReference (data.reference) — strongest, set at DVA /
-  //      checkout creation time, unique per invoice.
-  //   2. dvaAccountNumber — also uniquely bound to one invoice at
-  //      creation time (Paystack issues a fresh DVA per invoice).
-  //   3. NO FALLBACK. If neither matches, the payment lands in a
-  //      "needs manual reconciliation" queue + alerts the admin. We
-  //      do NOT auto-mark any invoice paid by email+amount heuristic.
+  // Audit fix (Phase 27 + B2 deep-trace): invoice matching uses an
+  // IMMUTABLE binding chain — never email+amount (which can collide
+  // across multiple open invoices for the same customer). The lookup
+  // order is:
+  //   1. paystackReference (data.reference) — strongest, intended to
+  //      be set at DVA / checkout creation time, unique per invoice.
+  //      NOTE (B2 deep-trace): in the current production DVA-only
+  //      flow this field is NOT actually written at invoice creation
+  //      (src/lib/invoice-service.ts omits it from the create call),
+  //      so for bank-transfer payments the primary lookup is dead
+  //      code — only the secondary below actually matches. Switching
+  //      to Paystack transaction.initialize / payment_request would
+  //      let us mint our own reference at creation time and have it
+  //      echoed in the webhook. Tracked as a recommended future fix
+  //      in docs/paystack-flow-trace.md §E.
+  //   2. dvaAccountNumber — per-customer (NOT per-invoice) on real
+  //      Paystack; see the inline note in the secondary block below
+  //      for how the multi-invoice case is handled (ambiguous →
+  //      manual reconciliation, never "guess most recent").
+  //   3. NO FALLBACK. If neither uniquely resolves, the payment lands
+  //      in a "needs manual reconciliation" queue + alerts the admin.
+  //      We do NOT auto-mark any invoice paid by email+amount heuristic.
   const reference =
     typeof data.reference === "string" && data.reference.trim()
       ? data.reference.trim()
@@ -259,19 +271,63 @@ async function handleChargeSuccess(data: PaystackChargeData): Promise<WebhookOut
 
   let invoice: Awaited<ReturnType<typeof db.invoice.findFirst>> = null;
 
-  // 1. Primary — paystackReference (unique per invoice, set at DVA creation)
+  // 1. Primary — paystackReference (intended unique-per-invoice; see
+  //    the header note above for the B2 deep-trace caveat that the
+  //    production DVA-only flow currently leaves this NULL at invoice
+  //    creation, so this branch only fires for test-webhook admin
+  //    smoke tests + future checkout-session flows).
   if (reference) {
     invoice = await db.invoice.findUnique({
       where: { paystackReference: reference },
     });
   }
 
-  // 2. Secondary — DVA account_number (also unique per invoice at creation)
+  // 2. Secondary — DVA account_number.
+  //
+  // B2 deep-trace finding (Master Directive §5 / §13): the original
+  // Phase 27 audit fix comment claimed "Paystack issues a fresh DVA
+  // per invoice", but the production createInvoiceDva() path (see
+  // src/lib/paystack.ts) actually REUSES the customer's existing DVA
+  // on a second invoice — Paystack's DVA model is per-customer, not
+  // per-invoice. The previous `findFirst({ orderBy: createdAt desc })`
+  // would silently pick the most-recent invoice sharing that DVA,
+  // re-introducing the original "wrong invoice marked paid" class of
+  // bug for repeat customers with multiple outstanding invoices.
+  //
+  // The B1-A regression test (tests/paystack-account-isolation.test.ts)
+  // does not catch this because every test invoice has a UNIQUE
+  // dvaAccountNumber. In production, a single customer with two open
+  // invoices shares the SAME dvaAccountNumber.
+  //
+  // Minimal fix: enumerate ALL invoices sharing this DVA. Only auto-
+  // pay when exactly one match exists. When 2+ matches exist, route
+  // to manual reconciliation so the admin picks the right invoice
+  // (matches §13's "use stable database identifiers + explicit
+  // relationships" rule — never guess by recency).
   if (!invoice && accountNumber) {
-    invoice = await db.invoice.findFirst({
+    const matches = await db.invoice.findMany({
       where: { dvaAccountNumber: accountNumber },
       orderBy: { createdAt: "desc" },
     });
+    if (matches.length === 1) {
+      invoice = matches[0] ?? null;
+    } else if (matches.length > 1) {
+      // Ambiguous: multiple invoices share this DVA. DO NOT guess.
+      return {
+        status: "failed",
+        detail: {
+          note:
+            "multiple invoices share this DVA account_number — admin must manually reconcile to avoid marking the wrong invoice paid",
+          lookedUpReference: reference,
+          lookedUpAccount: accountNumber,
+          customerEmail: data.customer?.email ?? null,
+          amountKobo: typeof data.amount === "number" ? data.amount : null,
+          ambiguousInvoiceIds: matches.map((m) => m.id),
+          ambiguousInvoiceNumbers: matches.map((m) => m.invoiceNumber),
+        },
+        error: "ambiguous_dva_match_needs_manual_reconciliation",
+      };
+    }
   }
 
   // 3. No match — manual reconciliation queue (NEVER auto-pick by email+amount)
