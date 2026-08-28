@@ -36,6 +36,7 @@ export type SendProposalResult = {
     accountNumber: string;
     bankName: string;
     accountName: string;
+    reference: string; // OKM-{invoiceNumber} (sandbox) | OKM-{invoiceNumber}-{ts} (real)
     sandbox: boolean;
   };
   emailSent?: boolean;
@@ -109,6 +110,16 @@ export async function sendProposal(input: SendProposalInput): Promise<SendPropos
   const cloudUpload = await uploadProposalPdf(invoiceNumber, pdfBuffer);
 
   // 3. Persist the invoice row (status: sent)
+  //    B3 GAP-A fix: persist `paystackReference` (minted by
+  //    createInvoiceDva) so the webhook handler's primary lookup
+  //    (findUnique by reference) has something to match against
+  //    future checkout-session flows (transaction.initialize /
+  //    payment_request echo back the reference in charge.success).
+  //    For the current DVA-bank-transfer flow, Paystack's webhook
+  //    does NOT carry this reference, so the webhook falls through
+  //    to the secondary lookup (dvaAccountNumber, now ambiguity-
+  //    safe per B2's fix). The reference is also surfaced in the
+  //    admin CRM timeline for audit.
   const invoice = await db.invoice.create({
     data: {
       invoiceNumber,
@@ -126,6 +137,7 @@ export async function sendProposal(input: SendProposalInput): Promise<SendPropos
       status: "sent",
       dvaAccountNumber: dva.accountNumber,
       dvaBankName: dva.bankName,
+      paystackReference: dva.reference,
       secureToken,
       pdfUrl: cloudUpload.url,
       pdfStorage: cloudUpload.storage,

@@ -19,6 +19,24 @@ export type DvaResult = {
   bankName: string;
   bankCode?: string;
   accountName: string;
+  /**
+   * Minted per-invoice Paystack reference. The Paystack Dedicated
+   * Virtual Account API does NOT return a per-invoice reference
+   * (DVAs are per-customer, not per-invoice) — so we mint our own
+   * deterministic OKM-{invoiceNumber} token at creation time.
+   *
+   * This reference is persisted to `Invoice.paystackReference` so
+   * the webhook handler's primary lookup (findUnique by reference)
+   * has something to match against future checkout-session flows
+   * (transaction.initialize / payment_request) — which DO echo
+   * back the reference — and so the @unique DB constraint at
+   * `prisma/schema.prisma` is exercised at the production data
+   * level. For the current DVA-bank-transfer flow, Paystack's
+   * charge.success webhook does NOT carry this reference, so the
+   * webhook handler falls through to the secondary lookup
+   * (dvaAccountNumber) — which is now ambiguity-safe per B2's fix.
+   */
+  reference: string;
   sandbox: boolean;
 };
 
@@ -59,7 +77,7 @@ type DvaData = {
   currency?: string;
 };
 
-function sandboxDva(seed: string): DvaResult {
+function sandboxDva(seed: string, invoiceNumber: string): DvaResult {
   // Deterministic 10-digit NUBAN-style number derived from the seed so
   // retries produce the same account for the same client.
   const digest = createHash("sha256").update(seed).digest("hex");
@@ -70,6 +88,13 @@ function sandboxDva(seed: string): DvaResult {
     accountNumber,
     bankName: "Paystack Test Bank (Sandbox)",
     accountName: DVA_ACCOUNT_NAME,
+    // Deterministic per-invoice reference — idempotent across retries
+    // of `createInvoiceDva` for the same invoiceNumber. Matches the
+    // B3 GAP-A fix contract: OKM-{invoiceNumber} (no timestamp in
+    // sandbox mode so re-runs of the pipeline against the same
+    // invoiceNumber produce the same persisted paystackReference,
+    // avoiding @unique-constraint violations on retry).
+    reference: `OKM-${invoiceNumber}`,
     sandbox: true,
   };
 }
@@ -91,7 +116,7 @@ export async function createInvoiceDva(client: {
     console.info(
       `[paystack] PAYSTACK_SECRET_KEY not set — issuing sandbox DVA for ${client.invoiceNumber}`
     );
-    return sandboxDva(`${client.email}|${client.invoiceNumber}`);
+    return sandboxDva(`${client.email}|${client.invoiceNumber}`, client.invoiceNumber);
   }
 
   // 1. Create the customer (email is unique on Paystack — a duplicate
@@ -126,7 +151,7 @@ export async function createInvoiceDva(client: {
 
   if (!customerId) {
     console.error("[paystack] could not create/resolve customer — sandbox fallback");
-    return sandboxDva(`${client.email}|${client.invoiceNumber}`);
+    return sandboxDva(`${client.email}|${client.invoiceNumber}`, client.invoiceNumber);
   }
 
   // 2. Create the dedicated virtual account.
@@ -139,6 +164,14 @@ export async function createInvoiceDva(client: {
       accountNumber: dva.data.account_number,
       bankName: dva.data.bank?.name ?? "Paystack",
       accountName: dva.data.account_name || DVA_ACCOUNT_NAME,
+      // Mint our own per-invoice reference (Paystack's DVA API does
+      // not return one — DVAs are per-customer, not per-invoice).
+      // Unique per creation attempt via Date.now() so two distinct
+      // createInvoiceDva calls for DIFFERENT invoices can never
+      // collide on the @unique constraint. (For the SAME invoice
+      // this branch is only reached once per proposal send; on
+      // retries the existing-DVA fallback below is taken instead.)
+      reference: `OKM-${client.invoiceNumber}-${Date.now()}`,
       sandbox: false,
     };
   }
@@ -162,6 +195,12 @@ export async function createInvoiceDva(client: {
         accountNumber: first.account_number,
         bankName: first.bank?.name ?? "Paystack",
         accountName: first.account_name || DVA_ACCOUNT_NAME,
+        // DVA already exists for this customer — mint a fresh
+        // per-invoice reference. (Paystack's DVA is per-customer
+        // so the SAME account_number may be reused across multiple
+        // invoices for repeat customers — that's the GAP-B reality
+        // B2's webhook secondary-lookup ambiguity-safe fix handles.)
+        reference: `OKM-${client.invoiceNumber}-${Date.now()}`,
         sandbox: false,
       };
     }
@@ -171,5 +210,5 @@ export async function createInvoiceDva(client: {
 
   const dvaError = dva.ok ? "no account number in Paystack response" : dva.error;
   console.error("[paystack] DVA creation failed — sandbox fallback:", dvaError);
-  return sandboxDva(`${client.email}|${client.invoiceNumber}`);
+  return sandboxDva(`${client.email}|${client.invoiceNumber}`, client.invoiceNumber);
 }

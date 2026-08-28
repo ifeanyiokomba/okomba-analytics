@@ -173,7 +173,16 @@ export function composeBody(payload: NotificationPayload): string {
 }
 
 /* ── HTML body composer (branded template) ────────────── */
-function composeBlocks(payload: NotificationPayload): EmailBlock[] {
+/**
+ * Compose the `EmailBlock[]` for the four generic notification types
+ * (inquiry.created / subscriber.welcome / post.published / broadcast).
+ *
+ * Exported in B3 so `tests/email-render.test.ts` can build the EXACT
+ * HTML the production `deliverOne()` builds — verifying the rendered
+ * output rather than a re-implementation. The production path is
+ * unchanged: `deliverOne` still calls this same function.
+ */
+export function composeBlocks(payload: NotificationPayload): EmailBlock[] {
   switch (payload.type) {
     case "inquiry.created":
       return [
