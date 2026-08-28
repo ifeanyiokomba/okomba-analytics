@@ -320,6 +320,17 @@ async function deliverOne(
       attachments,
       type: channel,
       legacyAction: "sendEmail",
+      // B5-FIX Bug 2: forward the full inquiry object when the
+      // type is inquiry.created so Code.gs's handleInquiryNotification
+      // can compose the admin alert + submitter confirmation bodies
+      // (reading inq.name, inq.email, inq.phone, inq.whatsapp,
+      // inq.service, inq.addlService, inq.message). Before this fix,
+      // the inquiry was dropped at the FailoverOptions boundary →
+      // handleInquiryNotification received `inq = {}` → admin got
+      // an empty-body email + blank sheet row + submitter copy
+      // NEVER sent.
+      inquiry:
+        payload.type === "inquiry.created" ? payload.inquiry : undefined,
     });
     if (!result.ok) {
       console.error(

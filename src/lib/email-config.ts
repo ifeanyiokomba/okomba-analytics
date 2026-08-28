@@ -387,27 +387,53 @@ export async function testProvider(
   return result;
 }
 
-/* ── Apps Script payload shape (B5 — extracted for contract test) ── */
+/* ── Apps Script payload shape (B5 — extracted for contract test;
+ *    B5-FIX — Bug 2 + Bug 5 root-cause fixes) ────────────────── */
 //
 // Phase 29 hardcoded this JSON body inline inside callProviderApi's
 // fetch() call. Batch 5 (Code.gs reconciliation) extracted it into a
 // pure function so tests/codegs-payload-shape.test.ts can assert the
 // EXACT field shape without making a real HTTP call.
 //
+// B5-FIX (this batch — Bug 2 + Bug 5 root-cause fixes per Master
+// Directive §8 "fix the root cause"):
+//
+//   • Bug 5 fix — `legacyAction` is now an OPTIONAL parameter. When
+//     notify.ts passes `legacyAction: "sendInvoiceEmail"` for invoice
+//     emails (proposal, reminder, payment-received — see notify.ts
+//     lines 625, 813, 1109), the modern apps_script provider now
+//     honors it (sets `action: "sendInvoiceEmail"`) instead of
+//     hardcoding `action: "sendEmail"`. This preserves the invoice
+//     PDF attachment flow: Code.gs routes action=sendInvoiceEmail →
+//     sendInvoiceEmail(data) → reads `data.to` + `data.base64Pdf` +
+//     `data.filename` + `data.invoiceSummary` and sends the email
+//     with the PDF attached via MailApp. Before this fix, invoice
+//     emails sent through the modern apps_script provider went
+//     through handleNotification → no matching case → silent no-op
+//     (Bug 3).
+//
+//   • Bug 2 fix — `inquiry` is now an OPTIONAL parameter. When
+//     notify.ts passes the full inquiry object for type=inquiry.created,
+//     the provider now includes it in the payload so Code.gs's
+//     handleInquiryNotification can compose the admin alert + submitter
+//     confirmation bodies (reading inq.name, inq.email, inq.phone,
+//     inq.whatsapp, inq.service, inq.addlService, inq.message). Before
+//     this fix, the inquiry object was dropped at the FailoverOptions
+//     boundary → handleInquiryNotification received `inq = {}` →
+//     admin got an empty-body email + blank sheet row + submitter copy
+//     NEVER sent.
+//
+// Backward-compat: existing callers that don't pass `legacyAction`
+// (e.g. testProvider — type="test") default to action="sendEmail",
+// exactly the same as Phase 29's hardcoded behavior. Existing callers
+// that don't pass `inquiry` (every type except inquiry.created) get a
+// payload without the inquiry field — byte-identical to Phase 29.
+//
 // IMPORTANT — this helper is the single source of truth for what the
 // modern apps_script provider POSTs to the Apps Script Web App /exec
-// URL. Code.gs v5's doPost(e) reads a DIFFERENT field set (it reads
-// `recipient`, NOT `to`, for the handleNotification path). This
-// mismatch is documented in docs/codegs-reconciliation.md §C as a
-// CRITICAL integration bug — the founder must either:
-//   (a) update this helper to ALSO send `recipient: opts.to` (and
-//       `inquiry: opts.inquiry` for inquiry.created type), OR
-//   (b) update Code.gs v5's handleNotification to read `data.to`
-//       instead of `data.recipient`.
-// Until then, only the legacy NOTIFY_WEBHOOK_URL fallback path
-// delivers invoice emails correctly (because that path sends
-// `action: "sendInvoiceEmail"` which Code.gs routes through
-// sendInvoiceEmail(data) → reads `data.to` directly).
+// URL. Code.gs v6's doPost(e) is the contract this payload must
+// satisfy; v6 now accepts BOTH `to` and `recipient` (Bug 1 fix), so
+// the provider sending only `to` is no longer a mismatch.
 export type AppsScriptPayloadOptions = {
   to: string;
   subject: string;
@@ -415,11 +441,18 @@ export type AppsScriptPayloadOptions = {
   bodyText: string;
   attachments: Array<{ filename: string; contentType: string; base64: string }>;
   type: string;
+  // B5-FIX Bug 5: when notify.ts passes legacyAction="sendInvoiceEmail"
+  // for invoice emails, respect it instead of hardcoding "sendEmail".
+  legacyAction?: string;
+  // B5-FIX Bug 2: forward the full inquiry object for type=inquiry.created
+  // so Code.gs's handleInquiryNotification can compose the dual emails.
+  inquiry?: Record<string, unknown>;
 };
 
 export function buildAppsScriptPayload(opts: AppsScriptPayloadOptions): Record<string, unknown> {
-  return {
-    action: "sendEmail",
+  const payload: Record<string, unknown> = {
+    // B5-FIX Bug 5: respect legacyAction if set; else default to sendEmail.
+    action: opts.legacyAction ?? "sendEmail",
     to: opts.to,
     subject: opts.subject,
     body: opts.bodyText,
@@ -429,6 +462,13 @@ export function buildAppsScriptPayload(opts: AppsScriptPayloadOptions): Record<s
     attachments: opts.attachments,
     type: opts.type,
   };
+  // B5-FIX Bug 2: forward the inquiry object when set (only for
+  // type=inquiry.created in practice, but the field is optional and
+  // harmless to include for any other type).
+  if (opts.inquiry) {
+    payload.inquiry = opts.inquiry;
+  }
+  return payload;
 }
 
 /* ── Per-provider HTTP call ─────────────────────────────────── */

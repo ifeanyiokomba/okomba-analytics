@@ -48,6 +48,11 @@ export type FailoverOptions = {
   // ignore these.
   invoiceSummary?: Record<string, unknown>;
   legacyAction?: string; // "sendEmail" | "sendInvoiceEmail"
+  // B5-FIX Bug 2: the inquiry object for type=inquiry.created. Forwarded
+  // to both the modern apps_script provider (buildAppsScriptPayload) and
+  // the legacy fallback (buildLegacyAppsScriptPayload) so Code.gs's
+  // handleInquiryNotification can compose the dual emails.
+  inquiry?: Record<string, unknown>;
 };
 
 export type FailoverAttempt = {
@@ -66,29 +71,48 @@ export type FailoverResult = {
 
 const LEGACY_TIMEOUT_MS = 30_000;
 
-/* ── Legacy Apps Script payload shape (B5 — extracted for contract test) ──
+/* ── Legacy Apps Script payload shape (B5 — extracted for contract
+ *    test; B5-FIX — Bug 4 root-cause fix) ──────────────────────
  *
  * Phase 29 hardcoded this JSON body inline inside the legacy fallback
  * fetch() call. Batch 5 (Code.gs reconciliation) extracted it into a
  * pure function so tests/codegs-payload-shape.test.ts can assert the
  * EXACT field shape without making a real HTTP call.
  *
- * The legacy path (NOTIFY_WEBHOOK_URL) is the ONLY delivery path
- * today where invoice emails actually reach the recipient — because
- * notify.ts passes `legacyAction: "sendInvoiceEmail"` for invoice.sent
- * / invoice.reminder_* / payment.received, and Code.gs v5's doPost
- * routes action="sendInvoiceEmail" → sendInvoiceEmail(data) which
- * reads `data.to` directly (and `data.base64Pdf` + `data.filename`
- * + `data.invoiceSummary` for the PDF attachment + Sheets backup).
+ * B5-FIX (this batch — Bug 4 root-cause fix per Master Directive §8):
  *
- * For action="sendEmail" + a `type` field (inquiry.created,
- * subscriber.welcome, post.published, broadcast, system.alert),
- * Code.gs routes through handleNotification(data) which reads
- * `data.recipient` — a field THIS PAYLOAD DOES NOT SEND. Result:
- * the email is silently dropped (MailApp.sendEmail is called with
- * `to: undefined` → its `if (!opts.to) return` early-exit fires).
- * This is the CRITICAL integration bug documented in
- * docs/codegs-reconciliation.md §C.
+ *   • Bug 4 fix — the legacy payload now INCLUDES the `type` field.
+ *     Phase 29's buildLegacyAppsScriptPayload returned 11 fields and
+ *     SILENTLY DROPPED `type` from the payload. Code.gs's doPost
+ *     received no `type`, no `name`/`email`, no `recipient` → fell
+ *     to `throw new Error("Unrecognized payload")`. Apps Script
+ *     caught the throw and returned `{success:false, error:"Unrecog-
+ *     nized payload"}` with HTTP 200 (Apps Script's ContentService
+ *     always returns 200 from doPost). The failover chain's `res.ok`
+ *     check saw HTTP 200 → thought delivery SUCCEEDED → marked the
+ *     email as sent → TRUE SILENT FAILURE. With the `type` field
+ *     now in the payload, Code.gs's `if (data.type)` branch routes
+ *     to handleNotification(data) which has the new default case
+ *     (Bug 3 fix) → the email actually goes out.
+ *
+ *   • Bug 2 fix (legacy side) — the legacy payload also forwards the
+ *     `inquiry` object when set (only for type=inquiry.created). Same
+ *     shape as the modern provider's Bug 2 fix in email-config.ts.
+ *
+ *   • Bug 1 fix (legacy side) — the legacy payload keeps sending `to`
+ *     (NOT `recipient`) but Code.gs v6 now accepts both fields, so
+ *     `to` is picked up. No payload change needed on this side beyond
+ *     what was already there.
+ *
+ * The legacy path (NOTIFY_WEBHOOK_URL) was the ONLY delivery path
+ * today where invoice emails actually reached the recipient — because
+ * notify.ts passes `legacyAction: "sendInvoiceEmail"` for invoice.sent
+ * / invoice.reminder_* / payment.received, and Code.gs routes
+ * action="sendInvoiceEmail" → sendInvoiceEmail(data) which reads
+ * `data.to` directly. With the Bug 4 fix, the legacy path now ALSO
+ * delivers non-invoice emails (inquiry.created, subscriber.welcome,
+ * post.published, broadcast, system.alert) — those reach customers
+ * via handleNotification → switch case + default case.
  */
 export type LegacyAppsScriptPayloadOptions = {
   to: string;
@@ -99,13 +123,16 @@ export type LegacyAppsScriptPayloadOptions = {
   type: string;
   invoiceSummary?: Record<string, unknown>;
   legacyAction?: string;
+  // B5-FIX Bug 2 (legacy side): forward the inquiry object for
+  // type=inquiry.created so Code.gs can compose the dual emails.
+  inquiry?: Record<string, unknown>;
 };
 
 export function buildLegacyAppsScriptPayload(
   opts: LegacyAppsScriptPayloadOptions,
   ctx: { bodyText: string; attachments: FailoverAttachment[] }
 ): Record<string, unknown> {
-  return {
+  const payload: Record<string, unknown> = {
     action: opts.legacyAction ?? "sendEmail",
     to: opts.to,
     subject: opts.subject,
@@ -119,7 +146,18 @@ export function buildLegacyAppsScriptPayload(
     filename:
       ctx.attachments.length > 0 ? ctx.attachments[0].filename : undefined,
     invoiceSummary: opts.invoiceSummary,
+    // B5-FIX Bug 4: include the `type` field in the legacy payload
+    // so Code.gs's `if (data.type)` branch routes to handleNotification
+    // (and its new default case) instead of throwing "Unrecognized
+    // payload" → silent HTTP 200 failure.
+    type: opts.type,
   };
+  // B5-FIX Bug 2 (legacy side): forward the inquiry object when set
+  // (only for type=inquiry.created in practice).
+  if (opts.inquiry) {
+    payload.inquiry = opts.inquiry;
+  }
+  return payload;
 }
 
 export async function getEnabledProviderCount(): Promise<number> {
@@ -175,6 +213,13 @@ export async function deliverWithFailover(
         bodyText,
         attachments,
         type: opts.type,
+        // B5-FIX Bug 5: forward legacyAction so the modern apps_script
+        // provider can set action="sendInvoiceEmail" for invoice emails
+        // (preserves the PDF attachment flow). Other providers (resend /
+        // mailtrap / maileroo) ignore these fields — see callProviderApi.
+        legacyAction: opts.legacyAction,
+        // B5-FIX Bug 2: forward the inquiry object for type=inquiry.created.
+        inquiry: opts.inquiry,
       });
     } catch (err) {
       result = {

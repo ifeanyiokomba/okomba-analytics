@@ -1,6 +1,33 @@
 /**
- * OKOMBA ANALYTICS — Google Apps Script Engine (v5)
+ * OKOMBA ANALYTICS — Google Apps Script Engine (v6)
  *
+ * v6 change (B5-FIX — 6 integration bug fixes):
+ *   • Bug 1 fix: handleNotification + handleInquiryNotification +
+ *     bare sendEmail branch now accept EITHER `data.recipient`
+ *     (legacy field) OR `data.to` (modern provider field) — read
+ *     via `const to = data.recipient || data.to;`. This is
+ *     backward-compatible: existing v5 callers that send
+ *     `recipient` keep working; the Phase 29 apps_script provider
+ *     that sends `to` now also works.
+ *   • Bug 3 fix: handleNotification switch has a NEW `default:`
+ *     case that sends a generic email using whatever fields are
+ *     present (to/recipient + subject + body + html). Unknown
+ *     email types (invoice.sent, invoice.reminder_*, payment.
+ *     received, system.alert, etc.) NO LONGER silently no-op —
+ *     they now send the composed email body the provider passes.
+ *   • Bug 4 fix (Code.gs side): the legacy `else` branch that
+ *     previously threw "Unrecognized payload" now routes through
+ *     handleNotification(data) so the new default case picks it
+ *     up. (Combined with the provider-side Bug 4 fix in
+ *     email-failover.ts that now INCLUDES the `type` field in
+ *     the legacy payload, non-invoice emails reach the customer.)
+ *   • Bug 6 fix: handleNotification switch has a NEW explicit
+ *     `crm.message` case (first-class handling, same shape as
+ *     subscriber.welcome / post.published / broadcast).
+ *   • All v5 functionality PRESERVED (sendEmail, sendInvoiceEmail,
+ *     backupToSheet, smart saveToSheet, syncSheetColumns,
+ *     ensureInquiryHeaders_, verifySetup, listSheetTabs).
+ *   • No v5 payload is broken — v6 is fully backward-compatible.
  * v5 change: saveToSheet() + backupToSheet() now AUTO-ADD any
  * missing standard columns to the RIGHT of your existing sheet
  * headers. Your existing rows + data are NEVER touched — the
@@ -156,17 +183,28 @@ function doPost(e) {
           handleNotification(data);
         } else if (data.name || data.email) {
           handleLegacyInquiry(data);
-        } else if (data.subject && data.recipient) {
-          // bare sendEmail without a type
+        } else if (data.subject && (data.recipient || data.to)) {
+          // v6 Bug 1 fix: bare sendEmail accepts EITHER `recipient`
+          // (legacy field) OR `to` (modern provider field).
           sendSimpleEmail({
-            to: data.recipient,
+            to: data.recipient || data.to,
             subject: data.subject,
             body: (data.body || "") + "\n\n" + footerBlock(),
             html: data.html,
             attachments: data.attachments,
           });
         } else {
-          throw new Error("Unrecognized payload");
+          // v6 Bug 4 fix (Code.gs side): previously threw
+          // "Unrecognized payload" — silently dropped the email
+          // (Apps Script returned HTTP 200 + {success:false} → the
+          // failover chain saw res.ok=true and marked it as sent,
+          // a TRUE SILENT FAILURE). Now route through handleNoti-
+          // fication(data) so the new `default:` case (Bug 3 fix)
+          // picks it up and sends a generic email using whatever
+          // fields are present (or no-ops gracefully if no
+          // recipient is set — sendSimpleEmail's `if (!opts.to)
+          // return` early-exit fires safely).
+          handleNotification(data);
         }
         break;
       case "improveWithAI":
@@ -194,6 +232,10 @@ function ok() {
 
 // ─── v2 NOTIFICATION ROUTER ──────────────────────────────────
 function handleNotification(data) {
+  // v6 Bug 1 fix: accept EITHER `recipient` (legacy field used by
+  // the CRM message route + v5 callers) OR `to` (modern apps_script
+  // provider field). Backward-compatible with all v5 payloads.
+  const to = data.recipient || data.to;
   switch (data.type) {
     case "inquiry.created":
       handleInquiryNotification(data);
@@ -202,11 +244,45 @@ function handleNotification(data) {
     case "post.published":
     case "broadcast":
       sendSimpleEmail({
-        to: data.recipient,
+        to: to,
         subject: data.subject,
-        body: data.body + "\n\n" + footerBlock(),
+        body: (data.body || "") + "\n\n" + footerBlock(),
         html: data.html, // branded HTML from the Next.js template
         attachments: data.attachments, // [{filename, contentType, base64}]
+      });
+      break;
+    case "crm.message":
+      // v6 Bug 6 fix: explicit first-class handling for CRM messages
+      // composed in src/app/api/admin/customers/[id]/message/route.ts.
+      // Same shape as subscriber.welcome etc. — sends the composed
+      // subject/body/html that the CRM route already constructs.
+      sendSimpleEmail({
+        to: to,
+        subject: data.subject,
+        body: (data.body || "") + "\n\n" + footerBlock(),
+        html: data.html,
+        attachments: data.attachments,
+      });
+      break;
+    default:
+      // v6 Bug 3 fix: previously, this switch had NO default case —
+      // unknown types (invoice.sent, invoice.reminder_3d/_due/_overdue,
+      // payment.received, system.alert, plus any future type the
+      // Next.js app adds) SILENTLY no-op'd. Now we send a generic
+      // email using the to/subject/body/html fields the provider
+      // already passes for every email type. If neither `to` nor
+      // `recipient` is set, sendSimpleEmail's `if (!opts.to) return`
+      // early-exit fires safely (no silent Gmail send).
+      Logger.log(
+        "handleNotification: unmatched type '" + data.type +
+        "' — sending generic email via default case"
+      );
+      sendSimpleEmail({
+        to: to,
+        subject: data.subject,
+        body: (data.body || "") + "\n\n" + footerBlock(),
+        html: data.html,
+        attachments: data.attachments,
       });
       break;
   }
@@ -216,9 +292,14 @@ function handleNotification(data) {
 // The app sends this twice: once to the admin, once to the submitter
 // (the recipient field distinguishes them).
 function handleInquiryNotification(data) {
+  // v6 Bug 1 fix: accept EITHER `recipient` (legacy) OR `to`
+  // (modern apps_script provider field). Backward-compatible with
+  // all v5 callers — `to` is the field the Phase 29 failover chain
+  // actually sends.
+  const to = data.recipient || data.to;
   const inq = data.inquiry || {};
-  const isForSubmitter = data.recipient && inq.email &&
-    String(data.recipient).toLowerCase() === String(inq.email).toLowerCase();
+  const isForSubmitter = to && inq.email &&
+    String(to).toLowerCase() === String(inq.email).toLowerCase();
 
   if (isForSubmitter) {
     sendSimpleEmail({
