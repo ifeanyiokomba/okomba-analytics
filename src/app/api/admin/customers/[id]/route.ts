@@ -20,11 +20,11 @@ export const dynamic = "force-dynamic";
 /* ------------------------------------------------------------------ */
 
 export async function GET(
-  _req: Request,
+  req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    if (!(await isAdminAuthorized())) {
+    if (!(await isAdminAuthorized(req))) {
       return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
     }
     const { id } = await params;
@@ -217,7 +217,7 @@ export async function GET(
 
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    if (!(await isAdminAuthorized())) {
+    if (!(await isAdminAuthorized(req))) {
       return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
     }
     const { id } = await params;
@@ -268,9 +268,9 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
 /*   fields (phone, whatsapp) per privacy best practice.                */
 /* ------------------------------------------------------------------ */
 
-export async function DELETE(_req: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    if (!(await isAdminAuthorized())) {
+    if (!(await isAdminAuthorized(req))) {
       return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
     }
     const { id } = await params;

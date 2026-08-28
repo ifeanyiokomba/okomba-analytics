@@ -21,7 +21,7 @@ export const dynamic = "force-dynamic";
 
 export async function GET(req: Request) {
   try {
-    if (!(await isAdminAuthorized())) {
+    if (!(await isAdminAuthorized(req))) {
       return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
     }
     const url = new URL(req.url);
@@ -148,7 +148,7 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
   try {
-    if (!(await isAdminAuthorized())) {
+    if (!(await isAdminAuthorized(req))) {
       return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
     }
     const body = (await req.json()) as {

@@ -57,10 +57,19 @@ export async function getAdminSessionToken(req?: Request): Promise<string | null
  *
  * Audit fix (Phase 27): the cookie carries the RAW token, but the DB
  * stores only the SHA-256 hash. Lookups hash the submitted token first.
+ *
+ * Batch 8 E2E fix: an optional `req` parameter is threaded through to
+ * `getAdminSessionToken(req)` so the fallback manual-Cookie-header
+ * parse branch (which was already implemented but unreachable from
+ * this caller) becomes active when `next/headers`'s `cookies()` store
+ * is unavailable — i.e. when the route handler is invoked outside a
+ * real Next.js request scope (such as the bun:test integration harness).
+ * In production the parameter is simply not passed and the existing
+ * `cookies()` path is used, byte-identical to the pre-B8 behaviour.
  */
-export async function isAdminAuthorized(): Promise<boolean> {
+export async function isAdminAuthorized(req?: Request): Promise<boolean> {
   try {
-    const token = await getAdminSessionToken();
+    const token = await getAdminSessionToken(req);
     if (!token) return false;
 
     // Opportunistically purge expired sessions.

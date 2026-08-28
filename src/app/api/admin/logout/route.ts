@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { ADMIN_COOKIE_NAME, getAdminSessionToken } from "@/lib/admin-auth";
+import { ADMIN_COOKIE_NAME, getAdminSessionToken, hashSessionToken } from "@/lib/admin-auth";
 
 export const runtime = "nodejs";
 
@@ -9,8 +9,13 @@ export async function POST(req: Request) {
     const token = await getAdminSessionToken(req);
 
     if (token) {
-      // Delete the session row (no-op if it was already removed/expired).
-      await db.adminSession.deleteMany({ where: { token } });
+      // Batch 8 E2E fix: the cookie carries the RAW token, but the
+      // AdminSession table stores the SHA-256 hash (Phase 27 audit fix).
+      // Hash before deleting — otherwise the lookup silently no-ops and
+      // the session row lingers for 24h (a stolen cookie could be replayed
+      // within that window even after the user "logged out").
+      const tokenHash = hashSessionToken(token);
+      await db.adminSession.deleteMany({ where: { token: tokenHash } });
     }
 
     const res = NextResponse.json({ ok: true });

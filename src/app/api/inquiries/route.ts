@@ -192,7 +192,7 @@ export async function POST(req: Request) {
 /* ------------------------------------------------------------------ */
 export async function GET(req: Request) {
   try {
-    if (!(await isAdminAuthorized())) {
+    if (!(await isAdminAuthorized(req))) {
       return NextResponse.json({ ok: false }, { status: 401 });
     }
 
@@ -292,7 +292,7 @@ export async function GET(req: Request) {
 /* ------------------------------------------------------------------ */
 export async function PATCH(req: Request) {
   try {
-    if (!(await isAdminAuthorized())) {
+    if (!(await isAdminAuthorized(req))) {
       return NextResponse.json({ ok: false }, { status: 401 });
     }
 

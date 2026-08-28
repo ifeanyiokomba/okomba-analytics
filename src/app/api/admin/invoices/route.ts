@@ -8,9 +8,9 @@ export const runtime = "nodejs";
 /* GET /api/admin/invoices — list invoices for the Proposals tab       */
 /* ------------------------------------------------------------------ */
 
-export async function GET() {
+export async function GET(req: Request) {
   try {
-    if (!(await isAdminAuthorized())) {
+    if (!(await isAdminAuthorized(req))) {
       return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
     }
 

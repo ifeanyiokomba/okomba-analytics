@@ -12,7 +12,7 @@ export const runtime = "nodejs";
 
 export async function GET(req: Request) {
   try {
-    if (!(await isAdminAuthorized())) {
+    if (!(await isAdminAuthorized(req))) {
       return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
     }
     const url = new URL(req.url);
