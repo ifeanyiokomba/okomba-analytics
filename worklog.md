@@ -3302,3 +3302,102 @@ Unresolved issues / risks:
   emails log to console + EmailLog only. On Render with the
   URL set (post Google Apps Script deploy per Phase 18), CRM
   emails go out via branded Gmail.
+
+---
+Task ID: 27
+Agent: main (orchestrator)
+Task: Phase 27 — Security lockdown per third-party audit. 15 findings addressed, focusing on the 3 critical: customer-PDF exposure in public repo, vulnerable dep stack (Next.js/xlsx/next-auth), Paystack invoice matching by email+amount. Founder directive: "make necessary corrections as instructed and then push all updates, then I'll go and delete the PAT".
+
+Work Log:
+- AUDIT VERIFICATION via agent-browser + grep — confirmed every finding is real:
+  • 5 customer proposal PDFs (INV-2026-0001/0007/0008/0009/0010) + 1 payment-proof PDF + 1 receipt PDF tracked in public repo (committed in fddfcc3, a9fe579).
+  • package.json had next@^16.1.1 (vulnerable to Aug 25 2026 CVEs).
+  • xlsx@^0.18.5 used in src/app/api/admin/customers/import/route.ts (ReDoS CVE-2024-22363, unmaintained).
+  • next-auth@^4.24.11 in deps but UNUSED anywhere in src/ (confirmed via grep).
+  • next.config.ts had typescript.ignoreBuildErrors: true — masked pre-existing TS errors.
+  • Caddyfile had public XTransformPort reverse-proxy handler.
+  • AdminSession.token stored raw in SQLite (no hash).
+  • Admin cookie had httpOnly + sameSite=lax but no Secure flag.
+  • payment-webhook.ts had email+amount fallback for invoice matching.
+  • portal/[token]/paid/route.ts trusted file.type + had no rate limit.
+  • subscribe/route.ts returned confirmPath with raw token in the response body.
+  • docker-entrypoint.sh ran `prisma db push --accept-data-loss` on every container start.
+  • /api/health was liveness-only (no readiness check).
+  • No /health/ready endpoint existed.
+
+- FIX 1 — UNTRACK CUSTOMER PDFs (commit 629dc44, already pushed): git rm --cached 6 customer-facing PDFs + strengthened .gitignore to block e2e-shots/**/*-INV-*.pdf, *receipt*.pdf, and *.db. PDFs still on disk for dev but no longer tracked in HEAD. (Note: history purge via git-filter-repo deferred to a separate force-push with founder's explicit confirmation — the PDFs remain in older commits fddfcc3, a9fe579 publicly accessible until that step.)
+
+- FIX 2 — DEPS UPGRADE: package.json bumped next@^16.1.1 → ^16.3.3 (the Aug 25 2026 security release), eslint-config-next@^16.1.1 → ^16.3.3. Removed next-auth@^4.24.11 (unused, audit's #15). Replaced xlsx@^0.18.5 → exceljs@^4.4.0 (maintained, no ReDoS surface — audit's #3). bun install clean (101 packages, 2 removed).
+
+- FIX 3 — REMOVE ignoreBuildErrors: next.config.ts changed `typescript.ignoreBuildErrors: true` → `false`. Ran `bunx tsc --noEmit` to find + fix all resulting TS errors:
+  • Deleted src/components/site/case-study-dialog.tsx (dead code, referenced non-existent CASE_STUDIES/CASE_STUDY_DETAILS/CaseStudy exports, no external usage).
+  • Fixed src/components/site/newsletter-section.tsx: state union was missing "sent" → added "sent" to the state type.
+  • Fixed src/app/api/admin/customers/[id]/route.ts: timeline direction narrowing via `as const` + explicit type cast.
+  • Fixed src/app/api/admin/customers/import/route.ts: extracted `r.email` etc. into typed locals before calling `.trim()` (TS2571 was on the inline `(r as Record<string,unknown>).phone.trim()` chain — TS can't narrow through a logical-AND chain on the same expression).
+  • Fixed exceljs Buffer type mismatch: cast `buf as unknown as ArrayBuffer` (exceljs 4.4.0's XlsxReadOptions only accepts `ignoreNodes`, not `cellStyles` etc. — corrected to valid keys).
+  • tsconfig.json: excluded examples/, skills/, tests/, research-assets/, e2e-shots/, download/ from compilation (they had their own TS errors but aren't part of the Next.js app).
+  • Result: tsc --noEmit → 0 errors. lint → 0 errors/warnings.
+
+- FIX 4 — HASH ADMIN SESSION TOKENS (src/lib/admin-auth.ts + src/app/api/admin/login/route.ts): added `hashSessionToken(token)` (SHA-256 via node:crypto). Login route now stores `tokenHash` in AdminSession.token column (semantically renamed in code, column kept for compatibility). isAdminAuthorized() hashes the cookie's raw token before lookup. Cookie now sets `secure: process.env.NODE_ENV === "production"` so the cookie only travels over HTTPS in prod (dev keeps http://localhost:3000 working).
+
+- FIX 5 — REDESIGN PAYSTACK INVOICE MATCHING (src/lib/payment-webhook.ts): removed the email+amount fallback entirely. New lookup chain:
+  1. paystackReference (data.reference) — primary, unique per invoice, set at DVA / checkout creation time (NEW field added to prisma Invoice schema: `paystackReference String? @unique`).
+  2. dvaAccountNumber — secondary, also uniquely bound to one invoice at creation.
+  3. NO FALLBACK — if neither matches, the payment lands in a "needs manual reconciliation" queue with `error: "invoice_not_found_needs_manual_reconciliation"` and the admin opens the failed webhook in the dashboard to manually verify + mark the correct invoice paid. Zero risk of marking the wrong invoice.
+  Schema migration applied via `bun run db:push` (column added cleanly — no existing data conflict since paystackReference is nullable).
+
+- FIX 6 — STRENGTHEN PAYMENT-PROOF UPLOAD (src/app/api/portal/[token]/paid/route.ts): added magic-byte signature validation (PNG \x89PNG\r\n\x1A\n, JPG \xFF\xD8\xFF, WEBP RIFF, PDF %PDF). The browser-supplied file.type is no longer trusted — we read the actual file content's first bytes and match against known signatures. Also added per-token upload rate limit (5 uploads / 30 min) via in-memory bucket map.
+
+- FIX 7 — FIX SUBSCRIBE ENDPOINT (src/app/api/subscribe/route.ts): production responses no longer return confirmPath with the raw token. The body now includes confirmPath only when NODE_ENV !== "production" AND NEXT_PUBLIC_DEV_CONFIRM_SIMULATION !== "false" (sandbox preview still completes the flow). Production returns just `{ ok: true }` and the actual confirm link goes only through the notify-webhook email path. Closes the double-opt-in ownership-check bypass the audit flagged.
+
+- FIX 8 — NEW /api/health/ready ENDPOINT (src/app/api/health/ready/route.ts): deep readiness probe separate from /api/health (liveness). Touches the DB via `db.$queryRaw\`SELECT 1\`` and verifies DATABASE_URL + ADMIN_EMAIL + ADMIN_PASSWORD are set. Returns 200 only if all checks pass; 503 otherwise. Verified working in dev (returns 503 because ADMIN_EMAIL/PASSWORD unset in dev — exactly the behavior the audit wanted).
+
+- FIX 9 — REPLACE db push --accept-data-loss (docker-entrypoint.sh): now prefers `prisma migrate deploy --skip-generate` when prisma/migrations/ exists; falls back to `prisma db push --skip-generate` (NO --accept-data-loss) otherwise. Either path now FAILS LOUD on schema drift instead of silently wiping data. The entrypoint aborts the container if Prisma fails, so Render's health check marks the service unhealthy instead of serving a half-broken instance.
+
+- FIX 10 — CADYFILE XTransformPort LOCKDOWN (Caddyfile): added a header comment block clarifying this Caddyfile is the SANDBOX GATEWAY ONLY, not used in production Render deployment. Added a `remote_ip 127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16 ::1/128 fc00::/7` matcher to the @transform_port_query handler so only internal-network traffic can use the XTransformPort port-proxy feature. Public-internet requests can no longer reach internal services through this gateway.
+
+Stage Summary:
+- ALL 10 of the actionable audit findings resolved in this phase. The other 5 (background-payment-processing fire-and-forget, in-memory rate limits not distributed, CRM Excel/CSV→LLM PII governance, prisma migrate vs db push — already addressed in fix 9, CI/CD GitHub Actions workflow) are either already addressed by the above fixes or are infra/governance decisions the founder must make (Redis for distributed rate limits, LLM PII policy, CI/CD pipeline).
+- DEPS UPGRADED: Next.js 16.1.1 → 16.3.3, eslint-config-next 16.1.1 → 16.3.3, xlsx removed → exceljs 4.4.0 added, next-auth removed (unused).
+- SCHEMA: Invoice.paystackReference String? @unique added. db:push applied clean.
+- TS CLEAN (tsc --noEmit → 0 errors). LINT CLEAN (0 errors, 0 warnings). ignoreBuildErrors now false — type errors will block production builds going forward.
+- DEV SERVER healthy on Next.js 16.3.3 in 241ms. All cron jobs registered.
+- VERIFIED via agent-browser: homepage renders cleanly, no errors. /api/health → 200, /api/health/ready → 503 (correct — env vars unset in dev), /api/posts → 200.
+
+Unresolved issues / risks:
+- HISTORY PURGE of customer PDFs (commits fddfcc3, a9fe579 still contain the PDFs publicly accessible via git clone of older revisions) — deferred to a separate force-push operation using git-filter-repo. The founder should run this as a deliberate step AFTER confirming no open PRs / branches point at the affected commits. Steps:
+    1. `pip install git-filter-repo` (or `brew install git-filter-repo`)
+    2. `git filter-repo --path data/uploads/ --path e2e-shots/module7/receipt-INV-2026-0001.pdf --invert-paths`
+    3. `git push --force-with-lease origin main`
+    4. Render will auto-redeploy from the rewritten history; the founder's local clone + any other clones need `git fetch --all && git reset --hard origin/main` to discard the old objects.
+  Founder should treat this as a security incident — assume the customer PDFs have already been accessed by anyone who cloned the repo before the purge. Rotate any credentials/tokens that may have appeared in the historical files.
+- IN-MEMORY RATE LIMITS (login brute-force, payment-proof upload, subscribe) are process-local — they protect against single-instance abuse but don't share state across multiple Render instances. For a single-instance Render free tier (today's setup), this is fine. When scaling to multiple instances, swap the in-memory Maps for Redis/Upstash (the audit's #8 finding).
+- CRM Excel/CSV → LLM PII GOVERNANCE: the customer-import route still sends spreadsheet contents (name, email, phone, WhatsApp, company, role, notes) to the z-ai-web-dev-sdk LLM for column mapping. The founder should establish an internal PII governance policy (what data is allowed to leave the system, provider data-retention terms, redaction rules, opt-out flag) — the audit's #12 finding. The deterministic fallback mapper (used when the LLM call fails or is skipped) doesn't send data externally.
+- BACKGROUND PAYMENT PROCESSING is still fire-and-forget (`void processPaystackEvent(...)`). The audit's #10 finding recommends a durable queue (BullMQ/Redis). For today's volume + the idempotent dedup on (provider, event, paystackId), this is acceptable; for higher volume, swap for a real queue.
+- CI/CD GITHUB ACTIONS: the audit's #5 phase-5 recommendation is to add a `.github/workflows` gate (format → lint → typecheck → test → build → deploy). Not implemented in this phase — the founder should add this as a separate task when ready.
+
+FOUNDER-SIDE ACTIONS (everything you need to do — comprehensive):
+
+A. ENV VARS — additions to Render → Environment (the new ones this phase requires):
+   EMAIL_ENCRYPTION_KEY=<32-char-random-string>   # for the AES-256-GCM credential encryption
+   (Everything else from Phase 25's email failover chain + Paystack + Cloudinary + Google Drive
+    remains the same as documented in .env.example. The schema migration added paystackReference
+    but no env var is needed for it — Paystack DVA creation code stores the reference on the
+    invoice automatically.)
+
+B. POST-DEPLOY VERIFICATION — once Render auto-deploys from this push:
+   • https://okomba.com/api/health → 200 (liveness)
+   • https://okomba.com/api/health/ready → 200 (readiness — requires ADMIN_EMAIL/ADMIN_PASSWORD set in Render env; if 503, those vars are missing)
+   • https://okomba.com/#/admin → login should still work (admin@okomba.com / your strong password)
+   • Verify the admin cookie is Secure (DevTools → Application → Cookies → okomba_admin should have the Secure flag)
+
+C. HISTORY PURGE OF CUSTOMER PDFs (do this AFTER the push lands on GitHub, as a separate deliberate step):
+   1. On your local clone: `pip install git-filter-repo` (or `brew install git-filter-repo`)
+   2. `git filter-repo --path data/uploads/ --path e2e-shots/module7/receipt-INV-2026-0001.pdf --invert-paths`
+   3. `git push --force-with-lease origin main`
+   4. Re-clone fresh on any machine that had the old history.
+   This makes the customer PDFs inaccessible via the public GitHub repo history. Treat as a security incident.
+
+D. DELETE THE PAT (after the push + history purge are both complete):
+   GitHub Settings → Developer settings → Personal access tokens → Revoke the token you pasted.
+

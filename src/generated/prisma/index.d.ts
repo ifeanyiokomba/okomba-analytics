@@ -12218,6 +12218,7 @@ export namespace Prisma {
     dvaAccountNumber: string | null
     dvaBankName: string | null
     dvaBankCode: string | null
+    paystackReference: string | null
     pdfUrl: string | null
     pdfStorage: string | null
     secureToken: string | null
@@ -12249,6 +12250,7 @@ export namespace Prisma {
     dvaAccountNumber: string | null
     dvaBankName: string | null
     dvaBankCode: string | null
+    paystackReference: string | null
     pdfUrl: string | null
     pdfStorage: string | null
     secureToken: string | null
@@ -12280,6 +12282,7 @@ export namespace Prisma {
     dvaAccountNumber: number
     dvaBankName: number
     dvaBankCode: number
+    paystackReference: number
     pdfUrl: number
     pdfStorage: number
     secureToken: number
@@ -12321,6 +12324,7 @@ export namespace Prisma {
     dvaAccountNumber?: true
     dvaBankName?: true
     dvaBankCode?: true
+    paystackReference?: true
     pdfUrl?: true
     pdfStorage?: true
     secureToken?: true
@@ -12352,6 +12356,7 @@ export namespace Prisma {
     dvaAccountNumber?: true
     dvaBankName?: true
     dvaBankCode?: true
+    paystackReference?: true
     pdfUrl?: true
     pdfStorage?: true
     secureToken?: true
@@ -12383,6 +12388,7 @@ export namespace Prisma {
     dvaAccountNumber?: true
     dvaBankName?: true
     dvaBankCode?: true
+    paystackReference?: true
     pdfUrl?: true
     pdfStorage?: true
     secureToken?: true
@@ -12501,6 +12507,7 @@ export namespace Prisma {
     dvaAccountNumber: string | null
     dvaBankName: string | null
     dvaBankCode: string | null
+    paystackReference: string | null
     pdfUrl: string | null
     pdfStorage: string | null
     secureToken: string | null
@@ -12551,6 +12558,7 @@ export namespace Prisma {
     dvaAccountNumber?: boolean
     dvaBankName?: boolean
     dvaBankCode?: boolean
+    paystackReference?: boolean
     pdfUrl?: boolean
     pdfStorage?: boolean
     secureToken?: boolean
@@ -12582,6 +12590,7 @@ export namespace Prisma {
     dvaAccountNumber?: boolean
     dvaBankName?: boolean
     dvaBankCode?: boolean
+    paystackReference?: boolean
     pdfUrl?: boolean
     pdfStorage?: boolean
     secureToken?: boolean
@@ -12613,6 +12622,7 @@ export namespace Prisma {
     dvaAccountNumber?: boolean
     dvaBankName?: boolean
     dvaBankCode?: boolean
+    paystackReference?: boolean
     pdfUrl?: boolean
     pdfStorage?: boolean
     secureToken?: boolean
@@ -12644,6 +12654,7 @@ export namespace Prisma {
     dvaAccountNumber?: boolean
     dvaBankName?: boolean
     dvaBankCode?: boolean
+    paystackReference?: boolean
     pdfUrl?: boolean
     pdfStorage?: boolean
     secureToken?: boolean
@@ -12657,7 +12668,7 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type InvoiceOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "invoiceNumber" | "inquiryId" | "customerName" | "customerEmail" | "customerPhone" | "service" | "description" | "proposalJson" | "amountKobo" | "currency" | "durationLabel" | "dueDate" | "status" | "dvaAccountNumber" | "dvaBankName" | "dvaBankCode" | "pdfUrl" | "pdfStorage" | "secureToken" | "portalViewedAt" | "paymentProofUrl" | "paymentProofName" | "paymentProofUploadedAt" | "paidAt" | "sentAt" | "createdAt" | "updatedAt", ExtArgs["result"]["invoice"]>
+  export type InvoiceOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "invoiceNumber" | "inquiryId" | "customerName" | "customerEmail" | "customerPhone" | "service" | "description" | "proposalJson" | "amountKobo" | "currency" | "durationLabel" | "dueDate" | "status" | "dvaAccountNumber" | "dvaBankName" | "dvaBankCode" | "paystackReference" | "pdfUrl" | "pdfStorage" | "secureToken" | "portalViewedAt" | "paymentProofUrl" | "paymentProofName" | "paymentProofUploadedAt" | "paidAt" | "sentAt" | "createdAt" | "updatedAt", ExtArgs["result"]["invoice"]>
 
   export type $InvoicePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Invoice"
@@ -12680,6 +12691,7 @@ export namespace Prisma {
       dvaAccountNumber: string | null
       dvaBankName: string | null
       dvaBankCode: string | null
+      paystackReference: string | null
       pdfUrl: string | null
       pdfStorage: string | null
       secureToken: string | null
@@ -13131,6 +13143,7 @@ export namespace Prisma {
     readonly dvaAccountNumber: FieldRef<"Invoice", 'String'>
     readonly dvaBankName: FieldRef<"Invoice", 'String'>
     readonly dvaBankCode: FieldRef<"Invoice", 'String'>
+    readonly paystackReference: FieldRef<"Invoice", 'String'>
     readonly pdfUrl: FieldRef<"Invoice", 'String'>
     readonly pdfStorage: FieldRef<"Invoice", 'String'>
     readonly secureToken: FieldRef<"Invoice", 'String'>
@@ -21143,6 +21156,7 @@ export namespace Prisma {
     dvaAccountNumber: 'dvaAccountNumber',
     dvaBankName: 'dvaBankName',
     dvaBankCode: 'dvaBankCode',
+    paystackReference: 'paystackReference',
     pdfUrl: 'pdfUrl',
     pdfStorage: 'pdfStorage',
     secureToken: 'secureToken',
@@ -22111,6 +22125,7 @@ export namespace Prisma {
     dvaAccountNumber?: StringNullableFilter<"Invoice"> | string | null
     dvaBankName?: StringNullableFilter<"Invoice"> | string | null
     dvaBankCode?: StringNullableFilter<"Invoice"> | string | null
+    paystackReference?: StringNullableFilter<"Invoice"> | string | null
     pdfUrl?: StringNullableFilter<"Invoice"> | string | null
     pdfStorage?: StringNullableFilter<"Invoice"> | string | null
     secureToken?: StringNullableFilter<"Invoice"> | string | null
@@ -22142,6 +22157,7 @@ export namespace Prisma {
     dvaAccountNumber?: SortOrderInput | SortOrder
     dvaBankName?: SortOrderInput | SortOrder
     dvaBankCode?: SortOrderInput | SortOrder
+    paystackReference?: SortOrderInput | SortOrder
     pdfUrl?: SortOrderInput | SortOrder
     pdfStorage?: SortOrderInput | SortOrder
     secureToken?: SortOrderInput | SortOrder
@@ -22158,6 +22174,7 @@ export namespace Prisma {
   export type InvoiceWhereUniqueInput = Prisma.AtLeast<{
     id?: string
     invoiceNumber?: string
+    paystackReference?: string
     secureToken?: string
     AND?: InvoiceWhereInput | InvoiceWhereInput[]
     OR?: InvoiceWhereInput[]
@@ -22187,7 +22204,7 @@ export namespace Prisma {
     sentAt?: DateTimeNullableFilter<"Invoice"> | Date | string | null
     createdAt?: DateTimeFilter<"Invoice"> | Date | string
     updatedAt?: DateTimeFilter<"Invoice"> | Date | string
-  }, "id" | "invoiceNumber" | "secureToken">
+  }, "id" | "invoiceNumber" | "paystackReference" | "secureToken">
 
   export type InvoiceOrderByWithAggregationInput = {
     id?: SortOrder
@@ -22207,6 +22224,7 @@ export namespace Prisma {
     dvaAccountNumber?: SortOrderInput | SortOrder
     dvaBankName?: SortOrderInput | SortOrder
     dvaBankCode?: SortOrderInput | SortOrder
+    paystackReference?: SortOrderInput | SortOrder
     pdfUrl?: SortOrderInput | SortOrder
     pdfStorage?: SortOrderInput | SortOrder
     secureToken?: SortOrderInput | SortOrder
@@ -22246,6 +22264,7 @@ export namespace Prisma {
     dvaAccountNumber?: StringNullableWithAggregatesFilter<"Invoice"> | string | null
     dvaBankName?: StringNullableWithAggregatesFilter<"Invoice"> | string | null
     dvaBankCode?: StringNullableWithAggregatesFilter<"Invoice"> | string | null
+    paystackReference?: StringNullableWithAggregatesFilter<"Invoice"> | string | null
     pdfUrl?: StringNullableWithAggregatesFilter<"Invoice"> | string | null
     pdfStorage?: StringNullableWithAggregatesFilter<"Invoice"> | string | null
     secureToken?: StringNullableWithAggregatesFilter<"Invoice"> | string | null
@@ -23713,6 +23732,7 @@ export namespace Prisma {
     dvaAccountNumber?: string | null
     dvaBankName?: string | null
     dvaBankCode?: string | null
+    paystackReference?: string | null
     pdfUrl?: string | null
     pdfStorage?: string | null
     secureToken?: string | null
@@ -23744,6 +23764,7 @@ export namespace Prisma {
     dvaAccountNumber?: string | null
     dvaBankName?: string | null
     dvaBankCode?: string | null
+    paystackReference?: string | null
     pdfUrl?: string | null
     pdfStorage?: string | null
     secureToken?: string | null
@@ -23775,6 +23796,7 @@ export namespace Prisma {
     dvaAccountNumber?: NullableStringFieldUpdateOperationsInput | string | null
     dvaBankName?: NullableStringFieldUpdateOperationsInput | string | null
     dvaBankCode?: NullableStringFieldUpdateOperationsInput | string | null
+    paystackReference?: NullableStringFieldUpdateOperationsInput | string | null
     pdfUrl?: NullableStringFieldUpdateOperationsInput | string | null
     pdfStorage?: NullableStringFieldUpdateOperationsInput | string | null
     secureToken?: NullableStringFieldUpdateOperationsInput | string | null
@@ -23806,6 +23828,7 @@ export namespace Prisma {
     dvaAccountNumber?: NullableStringFieldUpdateOperationsInput | string | null
     dvaBankName?: NullableStringFieldUpdateOperationsInput | string | null
     dvaBankCode?: NullableStringFieldUpdateOperationsInput | string | null
+    paystackReference?: NullableStringFieldUpdateOperationsInput | string | null
     pdfUrl?: NullableStringFieldUpdateOperationsInput | string | null
     pdfStorage?: NullableStringFieldUpdateOperationsInput | string | null
     secureToken?: NullableStringFieldUpdateOperationsInput | string | null
@@ -23837,6 +23860,7 @@ export namespace Prisma {
     dvaAccountNumber?: string | null
     dvaBankName?: string | null
     dvaBankCode?: string | null
+    paystackReference?: string | null
     pdfUrl?: string | null
     pdfStorage?: string | null
     secureToken?: string | null
@@ -23868,6 +23892,7 @@ export namespace Prisma {
     dvaAccountNumber?: NullableStringFieldUpdateOperationsInput | string | null
     dvaBankName?: NullableStringFieldUpdateOperationsInput | string | null
     dvaBankCode?: NullableStringFieldUpdateOperationsInput | string | null
+    paystackReference?: NullableStringFieldUpdateOperationsInput | string | null
     pdfUrl?: NullableStringFieldUpdateOperationsInput | string | null
     pdfStorage?: NullableStringFieldUpdateOperationsInput | string | null
     secureToken?: NullableStringFieldUpdateOperationsInput | string | null
@@ -23899,6 +23924,7 @@ export namespace Prisma {
     dvaAccountNumber?: NullableStringFieldUpdateOperationsInput | string | null
     dvaBankName?: NullableStringFieldUpdateOperationsInput | string | null
     dvaBankCode?: NullableStringFieldUpdateOperationsInput | string | null
+    paystackReference?: NullableStringFieldUpdateOperationsInput | string | null
     pdfUrl?: NullableStringFieldUpdateOperationsInput | string | null
     pdfStorage?: NullableStringFieldUpdateOperationsInput | string | null
     secureToken?: NullableStringFieldUpdateOperationsInput | string | null
@@ -25164,6 +25190,7 @@ export namespace Prisma {
     dvaAccountNumber?: SortOrder
     dvaBankName?: SortOrder
     dvaBankCode?: SortOrder
+    paystackReference?: SortOrder
     pdfUrl?: SortOrder
     pdfStorage?: SortOrder
     secureToken?: SortOrder
@@ -25199,6 +25226,7 @@ export namespace Prisma {
     dvaAccountNumber?: SortOrder
     dvaBankName?: SortOrder
     dvaBankCode?: SortOrder
+    paystackReference?: SortOrder
     pdfUrl?: SortOrder
     pdfStorage?: SortOrder
     secureToken?: SortOrder
@@ -25230,6 +25258,7 @@ export namespace Prisma {
     dvaAccountNumber?: SortOrder
     dvaBankName?: SortOrder
     dvaBankCode?: SortOrder
+    paystackReference?: SortOrder
     pdfUrl?: SortOrder
     pdfStorage?: SortOrder
     secureToken?: SortOrder

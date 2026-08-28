@@ -140,8 +140,8 @@ export async function GET(
       })),
       ...waMessages.map<TimelineItem>((m) => ({
         id: m.id,
-        kind: "whatsapp",
-        direction: m.direction === "inbound" ? "inbound" : "outbound",
+        kind: "whatsapp" as const,
+        direction: (m.direction === "inbound" ? "inbound" : "outbound") as "inbound" | "outbound",
         title: m.direction === "inbound" ? "WhatsApp reply" : "WhatsApp sent",
         body: m.messageText ?? undefined,
         meta: {

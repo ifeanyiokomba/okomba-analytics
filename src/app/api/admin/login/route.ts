@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { db } from "@/lib/db";
-import { ADMIN_COOKIE_NAME } from "@/lib/admin-auth";
+import { ADMIN_COOKIE_NAME, hashSessionToken } from "@/lib/admin-auth";
 
 export const runtime = "nodejs";
 
@@ -133,13 +133,22 @@ export async function POST(req: Request) {
 
     resetAttempts(ip);
 
+    // Audit fix (Phase 27): store only the SHA-256 hash in the DB so a
+    // SQLite exfiltration cannot be replayed. The raw token lives in
+    // the httpOnly cookie, which is the source of truth for the next
+    // request's lookup (which hashes the cookie value + matches).
+    const tokenHash = hashSessionToken(token);
     await db.adminSession.create({
-      data: { token, expiresAt },
+      data: { token: tokenHash, expiresAt },
     });
 
     const res = NextResponse.json({ ok: true });
     res.cookies.set(ADMIN_COOKIE_NAME, token, {
       httpOnly: true,
+      // Audit fix (Phase 27): add the Secure flag in production so the
+      // cookie only travels over HTTPS. Dev (http://localhost:3000)
+      // must NOT set Secure or the browser drops the cookie.
+      secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       path: "/",
       maxAge: COOKIE_MAX_AGE,

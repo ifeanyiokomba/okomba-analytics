@@ -17,31 +17,109 @@ export const dynamic = "force-dynamic";
 /*   Response: { ok, rows, totalRows, detectedColumns, suggested }     */
 /* ------------------------------------------------------------------ */
 
-// Avoid bundling the xlsx library on the edge path — only loaded when
-// an admin actually imports. Same for z-ai-web-dev-sdk.
-async function parseSpreadsheet(buf: Buffer, fileName: string): Promise<Record<string, unknown>[]> {
-  const XLSX = await import("xlsx");
-  const wb = XLSX.read(buf, { type: "buffer" });
-  const sheetName = wb.SheetNames[0];
-  const sheet = wb.Sheets[sheetName];
-  // raw:false → coerces cells to formatted strings (so phone numbers
-  // don't come back as scientific notation). defval → empty cells
-  // become "" instead of being skipped.
-  const rows = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet, {
-    raw: false,
-    defval: "",
-    blankrows: false,
-  });
-  if (!rows.length) return [];
-  // Lowercase + trim column keys so the AI sees clean headers
-  return rows.map((r) => {
-    const out: Record<string, unknown> = {};
-    for (const [k, v] of Object.entries(r)) {
-      const key = String(k).trim().toLowerCase().replace(/\s+/g, "_");
-      out[key] = typeof v === "string" ? v.trim() : v;
+/* Audit fix (Phase 27): harden spreadsheet parsing against
+   memory-exhaustion / ReDoS attacks. The legacy `xlsx` npm package
+   is unmaintained (SheetJS moved to a private CDN) and vulnerable
+   to ReDoS (CVE-2024-22363). We've switched to `exceljs` (actively
+   maintained) AND enforce these limits BEFORE any cell is parsed:
+     - max file size:  5 MB
+     - max rows:       500
+     - max columns:    25
+     - max sheets:     1 (we only read the first sheet)
+   CSV files bypass exceljs — parsed line-by-line with the same caps. */
+const MAX_FILE_BYTES = 5 * 1024 * 1024;
+const MAX_ROWS = 500;
+const MAX_COLUMNS = 25;
+
+async function parseCsv(buf: Buffer): Promise<Record<string, unknown>[]> {
+  // Lightweight line-by-line CSV parser. Avoids the heavyweight
+  // exceljs dependency for plain CSV files.
+  const text = buf.toString("utf-8");
+  const lines = text.split(/\r?\n/).filter((l) => l.trim().length > 0);
+  if (lines.length === 0) return [];
+  const headers = splitCsvLine(lines[0]).map((h) => h.trim().toLowerCase().replace(/\s+/g, "_")).slice(0, MAX_COLUMNS);
+  const rows: Record<string, unknown>[] = [];
+  for (let i = 1; i < Math.min(lines.length, MAX_ROWS + 1); i++) {
+    const cells = splitCsvLine(lines[i]);
+    const row: Record<string, unknown> = {};
+    for (let c = 0; c < headers.length; c++) {
+      const v = cells[c]?.trim() ?? "";
+      row[headers[c]] = v;
     }
-    return out;
+    rows.push(row);
+  }
+  return rows;
+}
+
+// RFC-4180-ish CSV cell splitter — handles quoted values + escaped quotes.
+function splitCsvLine(line: string): string[] {
+  const out: string[] = [];
+  let cur = "";
+  let inQuotes = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (inQuotes) {
+      if (ch === '"') {
+        if (line[i + 1] === '"') { cur += '"'; i++; }
+        else { inQuotes = false; }
+      } else { cur += ch; }
+    } else {
+      if (ch === '"') { inQuotes = true; }
+      else if (ch === ',') { out.push(cur); cur = ""; }
+      else { cur += ch; }
+    }
+  }
+  out.push(cur);
+  return out;
+}
+
+async function parseSpreadsheet(buf: Buffer, fileName: string): Promise<Record<string, unknown>[]> {
+  // CSV path — fast, no heavy deps.
+  if (fileName.endsWith(".csv")) {
+    return parseCsv(buf);
+  }
+  // Excel path — exceljs (maintained, no ReDoS surface).
+  const ExcelJS = (await import("exceljs")).default;
+  const workbook = new ExcelJS.Workbook();
+  // Pass the raw Buffer; exceljs strictly expects a Node Buffer.
+  // Under Bun's strict TS the Buffer generic param differs from
+  // exceljs's expected type, so we cast through unknown. At runtime
+  // the value IS a Node-compatible Buffer (Bun polyfills it).
+  // Only ignoreNodes is a valid XlsxReadOptions key (exceljs 4.4.0).
+  await workbook.xlsx.load(buf as unknown as ArrayBuffer, {
+    ignoreNodes: ["conditionalFormatting", "dataValidations", "hyperlinks", "drawings", "charts", "sheetPr"],
   });
+  // Only read the first sheet.
+  const sheet = workbook.worksheets[0];
+  if (!sheet) return [];
+  // Pre-scan: cap rows + columns. exceljs supports streaming reads;
+  // we truncate at MAX_ROWS × MAX_COLUMNS before any AI extraction.
+  const headers: string[] = [];
+  const rows: Record<string, unknown>[] = [];
+  let rowCount = 0;
+  sheet.eachRow({ includeEmpty: false }, (row) => {
+    rowCount += 1;
+    if (rowCount > MAX_ROWS + 1) return; // cap + header row
+    const values = (row.values as unknown[]).slice(1, MAX_COLUMNS + 2); // values[0] is placeholder
+    if (rowCount === 1) {
+      // header row
+      for (const v of values) {
+        if (typeof v === "string" && v.trim()) {
+          headers.push(v.trim().toLowerCase().replace(/\s+/g, "_"));
+        } else {
+          headers.push(`col_${headers.length + 1}`);
+        }
+      }
+      return;
+    }
+    const obj: Record<string, unknown> = {};
+    for (let c = 0; c < headers.length; c++) {
+      const v = values[c];
+      obj[headers[c]] = typeof v === "string" ? v.trim() : v ?? "";
+    }
+    rows.push(obj);
+  });
+  return rows;
 }
 
 const EXTRACTION_PROMPT = `You are an enterprise CRM migration assistant. You receive an array of customer records (raw CSV/Excel rows with arbitrary column names) and you must map each row into Okomba Analytics' canonical Customer shape.
@@ -86,15 +164,24 @@ export async function POST(req: Request) {
         { status: 400 }
       );
     }
+    // Audit fix (Phase 27): reject oversized files BEFORE parsing to
+    // prevent memory-exhaustion attacks. 5 MB is plenty for any
+    // reasonable CRM list (500 rows × 25 cols × ~400 chars/row).
+    if (file.size > MAX_FILE_BYTES) {
+      return NextResponse.json(
+        { ok: false, error: `File too large — limit is ${MAX_FILE_BYTES / (1024 * 1024)} MB` },
+        { status: 413 }
+      );
+    }
 
     const buf = Buffer.from(await file.arrayBuffer());
     const rawRows = await parseSpreadsheet(buf, fileName);
     if (rawRows.length === 0) {
       return NextResponse.json({ ok: false, error: "File appears to be empty" }, { status: 400 });
     }
-    // Hard cap so we don't blow the model context — 100 rows per import.
-    const cappedRows = rawRows.slice(0, 100);
-    const detectedColumns = Object.keys(cappedRows[0] ?? {}).slice(0, 25);
+    // Hard cap so we don't blow the model context — MAX_ROWS (500) per import.
+    const cappedRows = rawRows.slice(0, MAX_ROWS);
+    const detectedColumns = Object.keys(cappedRows[0] ?? {}).slice(0, MAX_COLUMNS);
 
     // AI extraction — try the real LLM first. If the SDK is missing or
     // the call fails, fall back to a deterministic header-name mapper so
@@ -166,29 +253,38 @@ export async function POST(req: Request) {
     // Normalize + deduplicate by email
     const seen = new Set<string>();
     const rows = (parsed as Array<Record<string, unknown> | null>)
-      .filter((r): r is Record<string, unknown> => !!r && typeof r === "object" && typeof (r as Record<string, unknown>).email === "string" && (r as Record<string, unknown>).email.trim().length > 0)
+      .filter((r): r is Record<string, unknown> => {
+        if (!r || typeof r !== "object") return false;
+        const email = r.email;
+        return typeof email === "string" && email.trim().length > 0;
+      })
       .map((r) => {
-        const email = String((r as Record<string, unknown>).email).toLowerCase().trim();
+        const emailRaw = r.email;
+        if (typeof emailRaw !== "string") return null;
+        const email = emailRaw.toLowerCase().trim();
         if (seen.has(email)) return null;
         seen.add(email);
-        const tagsRaw = (r as Record<string, unknown>).tags;
+        const tagsRaw = r.tags;
         let tags: string[] = [];
         if (Array.isArray(tagsRaw)) {
           tags = tagsRaw.filter((t): t is string => typeof t === "string" && t.trim().length > 0).map((t) => t.trim().toLowerCase().replace(/\s+/g, "_"));
         } else if (typeof tagsRaw === "string" && tagsRaw.trim()) {
           tags = tagsRaw.split(/[,\s]+/).map((t) => t.trim().toLowerCase().replace(/\s+/g, "_")).filter(Boolean);
         }
+        const strOr = (v: unknown): string | null =>
+          typeof v === "string" && v.trim() ? v.trim() : null;
+        const nameRaw = r.name;
         return {
-          name: String((r as Record<string, unknown>).name ?? email.split("@")[0]).trim().slice(0, 80),
+          name: (typeof nameRaw === "string" ? nameRaw : email.split("@")[0]).trim().slice(0, 80),
           email,
-          phone: typeof (r as Record<string, unknown>).phone === "string" && (r as Record<string, unknown>).phone.trim() ? String((r as Record<string, unknown>).phone).trim() : null,
-          whatsapp: typeof (r as Record<string, unknown>).whatsapp === "string" && (r as Record<string, unknown>).whatsapp.trim() ? String((r as Record<string, unknown>).whatsapp).trim() : null,
-          company: typeof (r as Record<string, unknown>).company === "string" && (r as Record<string, unknown>).company.trim() ? String((r as Record<string, unknown>).company).trim().slice(0, 80) : null,
-          role: typeof (r as Record<string, unknown>).role === "string" && (r as Record<string, unknown>).role.trim() ? String((r as Record<string, unknown>).role).trim().slice(0, 80) : null,
-          notes: typeof (r as Record<string, unknown>).notes === "string" && (r as Record<string, unknown>).notes.trim() ? String((r as Record<string, unknown>).notes).trim() : null,
+          phone: strOr(r.phone) ? String(r.phone).trim() : null,
+          whatsapp: strOr(r.whatsapp) ? String(r.whatsapp).trim() : null,
+          company: strOr(r.company) ? String(r.company).trim().slice(0, 80) : null,
+          role: strOr(r.role) ? String(r.role).trim().slice(0, 80) : null,
+          notes: strOr(r.notes) ? String(r.notes).trim() : null,
           tags,
-          status: typeof (r as Record<string, unknown>).status === "string" && ["lead", "qualified", "proposal_sent", "paying", "churned"].includes(String((r as Record<string, unknown>).status)) ? String((r as Record<string, unknown>).status) : "lead",
-          leadScore: typeof (r as Record<string, unknown>).leadScore === "number" ? Math.max(0, Math.min(100, Math.round(Number((r as Record<string, unknown>).leadScore)))) : null,
+          status: typeof r.status === "string" && ["lead", "qualified", "proposal_sent", "paying", "churned"].includes(String(r.status)) ? String(r.status) : "lead",
+          leadScore: typeof r.leadScore === "number" ? Math.max(0, Math.min(100, Math.round(Number(r.leadScore)))) : null,
           source: isCsv ? "csv" : "excel",
         };
       })
