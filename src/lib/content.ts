@@ -268,6 +268,19 @@ export const CATEGORIES = [
 ] as const;
 
 /* ── Products / Solutions (real Okomba platforms) ──────────── */
+/* Research sources (Phase 19, 2026-08-28):
+ *   Turbopay    — https://turbopay.okomba.com (LIVE, dark emerald wallet)
+ *   Votewise    — https://votewise.com.ng     (LIVE, royal blue institutional)
+ *   Bill Swift  — https://www.billswift.com.ng (LIVE, navy+mint glass-morphism)
+ *   TrustScore  — no live site (subdomain 404s, all candidates NXDOMAIN)
+ *   Omniscore   — no live site (all candidates NXDOMAIN)
+ *   Sanctum     — no live site (all candidates NXDOMAIN)
+ * Verbatim hero copy + feature lists lifted from the live sites for the
+ * 3 LIVE products; the 3 roadmap products keep honest Okomba-card copy
+ * with a "Coming soon" pill so visitors aren't misled.
+ */
+export type ProductStatus = "live" | "coming-soon";
+
 export type Product = {
   id: string;
   name: string;
@@ -276,72 +289,177 @@ export type Product = {
   desc: string;
   points: string[];
   icon: string;
-  accent: "gold" | "teal" | "blue";
-  link?: string;
+  accent: "gold" | "teal" | "blue" | "emerald" | "royal" | "mint";
+  link?: string;              // external product site (only on LIVE)
+  status: ProductStatus;
+  image: string;              // preview image (real screenshot for LIVE, brand banner for roadmap)
+  logo?: string;             // brand logo SVG/PNG
+  stats?: { label: string; value: string }[];   // social proof band (e.g. 500K+ users)
+  ctaLabel: string;           // primary CTA label
+  pricingNote?: string;       // e.g. "Free wallet · ₦5M KYC tier" / "₦25k /election"
 };
 
 export const PRODUCTS: Product[] = [
+  /* ── TURBOPAY (live, https://turbopay.okomba.com) ────────── */
   {
     id: "turbopay",
     name: "Turbopay",
-    tagline: "Payments, at turbo speed",
+    tagline: "Your money, faster than ever.",
     category: "Payments Platform",
-    desc: "A fast, reliable payment platform for modern businesses — collections, transfers and payment processing built for Nigeria's digital economy.",
-    points: ["Fast collections & transfers", "Business payment processing", "Built for Nigerian rails"],
+    desc: "Nigeria's modern digital wallet. Fund instantly, transfer for free, buy airtime & data, and pay bills — all from one app.",
+    points: [
+      "Wallet & dedicated Monnify virtual account",
+      "Free transfers — no fees, no delays, no hidden charges",
+      "Airtime & data for MTN, Glo, Airtel, 9mobile",
+      "Bills: 8 DISCOs, DStv, GOtv, water, Remita",
+      "Multi-layer security + real-time fraud detection",
+      "KYC tiers up to ₦5M per transaction (NIN/BVN)",
+    ],
     icon: "wallet",
-    accent: "gold",
+    accent: "emerald",
     link: "https://turbopay.okomba.com",
+    status: "live",
+    image: "/images/projects/turbopay-preview.png",
+    logo: "/images/projects/turbopay-logo.svg",
+    stats: [
+      { label: "Wallet speed", value: "Instant funding" },
+      { label: "Transfer fee", value: "₦0" },
+      { label: "KYC ceiling", value: "₦5M / txn" },
+    ],
+    ctaLabel: "Create free account",
+    pricingNote: "Free wallet · Free transfers · Free airtime",
   },
+  /* ── VOTEWISE (live, https://votewise.com.ng) ───────────── */
+  {
+    id: "votewise",
+    name: "Votewise",
+    tagline: "Election Management Built for Organizations",
+    category: "Voting & Elections Platform",
+    desc: "Run secure, auditable elections for universities, unions, associations and institutions. Voter verification, real-time monitoring and tamper-proof results — all in one platform.",
+    points: [
+      "Tamper-proof ballots with verifiable hashes",
+      "OTP voter verification (email + SMS)",
+      "Live results, turnout & verification analytics",
+      "Scales from 40-voter club to 50,000-voter faculty",
+      "Ballot secrecy by design — votes dissociated from identity",
+      "Sub-3-second voting on any device, even slow networks",
+    ],
+    icon: "clipboard",
+    accent: "royal",
+    link: "https://votewise.com.ng",
+    status: "live",
+    image: "/images/projects/votewise-preview.png",
+    logo: "/images/projects/votewise-logo.svg",
+    stats: [
+      { label: "Voting time", value: "< 3 seconds" },
+      { label: "Ballot integrity", value: "Hash-sealed" },
+      { label: "Election cap", value: "50K voters" },
+    ],
+    ctaLabel: "Start Free Election",
+    pricingNote: "Starter ₦25k · Pro ₦150k · Enterprise: custom",
+  },
+  /* ── BILL SWIFT (live, https://www.billswift.com.ng) ─────── */
   {
     id: "billswift",
-    name: "BillSwift",
-    tagline: "Bills paid in seconds",
-    category: "Bill Payments Platform",
-    desc: "Swift bill payments — airtime, data, utilities and more — with instant confirmation and clean transaction records.",
-    points: ["Airtime, data & utilities", "Instant confirmation", "Clean transaction records"],
+    name: "Bill Swift",
+    tagline: "Instant Airtime & Data Top-Up",
+    category: "Bill Payments & VTU Platform",
+    desc: "Nigeria's most reliable VTU platform. Recharge airtime, buy data bundles, pay bills and more — all in seconds with our automated system.",
+    points: [
+      "Airtime top-up: MTN, Glo, Airtel, 9Mobile — 24/7",
+      "Data bundles at the best rates in Nigeria",
+      "Cable TV: DStv, GOtv, Startimes, ShowMax",
+      "Electricity: all DISCOs + instant token delivery",
+      "Education: WAEC, NECO, JAMB exam pins",
+      "Developer API + CAC business registration",
+    ],
     icon: "zap",
-    accent: "teal",
+    accent: "mint",
+    link: "https://www.billswift.com.ng",
+    status: "live",
+    image: "/images/projects/billswift-preview.png",
+    logo: "/images/projects/billswift-logo.png",
+    stats: [
+      { label: "Happy customers", value: "500K+" },
+      { label: "Transactions", value: "10M+" },
+      { label: "Success rate", value: "99.9%" },
+      { label: "Support", value: "24/7" },
+    ],
+    ctaLabel: "Start Recharging",
+    pricingNote: "Free wallet · Wholesale API rates for resellers",
   },
+  /* ── TRUSTSCORE (roadmap — no live site yet) ─────────────── */
   {
     id: "trustscore",
     name: "TrustScore",
     tagline: "Know who you're dealing with",
     category: "Identity Verification",
-    desc: "Identity verification and trust scoring for businesses that need to validate customers quickly and confidently.",
-    points: ["Identity verification", "Trust scoring", "Fraud-aware checks"],
+    desc: "Identity verification engine with trust scoring and fraud-aware checks — for businesses that need to validate customers quickly and confidently.",
+    points: [
+      "Identity verification engine",
+      "Trust scoring system",
+      "Fraud-aware validation checks",
+      "KYC, identity & trust signals",
+      "Fast confident customer validation",
+    ],
     icon: "shield",
     accent: "blue",
+    status: "coming-soon",
+    image: "/images/projects/trustscore-preview.png",
+    stats: [
+      { label: "Status", value: "In development" },
+      { label: "Vertical", value: "Fintech / KYC" },
+    ],
+    ctaLabel: "Join the waitlist",
+    pricingNote: "Enterprise quote · Per-check pricing on launch",
   },
+  /* ── OMNISCORE CPaaS (roadmap — no live site yet) ────────── */
   {
     id: "omniscore",
     name: "Omniscore CPaaS",
     tagline: "Every channel. One platform.",
     category: "Communications Platform",
-    desc: "A communications platform-as-a-service for bulk SMS, messaging, voice, WhatsApp, Telegram and OTP verification — every channel behind one platform.",
-    points: ["Bulk SMS & messaging", "Voice, WhatsApp & Telegram", "OTP verification"],
+    desc: "Okomba's in-house communications platform-as-a-service — bulk SMS, voice, WhatsApp, Telegram and OTP verification behind one unified API. In active internal use across Okomba engagements; public launch pending.",
+    points: [
+      "Bulk SMS & messaging",
+      "Voice, WhatsApp & Telegram",
+      "OTP & 2FA verification",
+      "One unified API for every channel",
+    ],
     icon: "workflow",
     accent: "gold",
+    status: "coming-soon",
+    image: "/images/projects/omniscore-placeholder.png",
+    stats: [
+      { label: "Status", value: "In development" },
+      { label: "Vertical", value: "CPaaS / OTP" },
+    ],
+    ctaLabel: "Join the waitlist",
+    pricingNote: "Per-SMS unit pricing on launch",
   },
-  {
-    id: "votewise",
-    name: "Votewise",
-    tagline: "Elections people trust",
-    category: "Voting Platform",
-    desc: "A digital voting and election management platform delivering secure polls and real-time results.",
-    points: ["Secure digital voting", "Real-time results", "Election management"],
-    icon: "clipboard",
-    accent: "teal",
-    link: "https://votewise.com.ng",
-  },
+  /* ── SANCTUM MULTIPURPOSE (roadmap — no live site yet) ───── */
   {
     id: "sanctum",
     name: "Sanctum Multipurpose",
-    tagline: "One platform, many purposes",
+    tagline: "One platform, many purposes.",
     category: "Multipurpose Platform",
-    desc: "A versatile multipurpose platform built to serve the varied operational needs of modern organizations.",
-    points: ["Multipurpose operations", "Modular capabilities", "Organization-ready"],
+    desc: "Okomba's modular multipurpose platform — adaptable operational tooling designed to fit the varied ways modern organizations actually work. In active internal use; public launch pending.",
+    points: [
+      "Modular capability architecture",
+      "Configurable to organization workflows",
+      "Operations-ready out of the box",
+      "Multi-purpose toolset",
+    ],
     icon: "layers",
-    accent: "blue",
+    accent: "teal",
+    status: "coming-soon",
+    image: "/images/projects/sanctum-placeholder.png",
+    stats: [
+      { label: "Status", value: "In development" },
+      { label: "Vertical", value: "Org operations" },
+    ],
+    ctaLabel: "Join the waitlist",
+    pricingNote: "Modular pricing on launch",
   },
 ];
 
