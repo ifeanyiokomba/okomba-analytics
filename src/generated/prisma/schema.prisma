@@ -302,3 +302,89 @@ model BackupLog {
   @@index([createdAt])
   @@index([status])
 }
+
+/**
+ * ── Stage 11 CRM: canonical Customer record ─────────────────────
+ * The CRM unifies Inquiries + Invoices + EmailLog + WhatsAppMessage
+ * + Subscribers by customerEmail. A Customer row is the canonical
+ * contact: name, email, phone, whatsapp, company, status, tags,
+ * notes (free-text), source (manual | csv | inquiry | ai_chat |
+ * invoice), and an internal notes trail.
+ * Why a separate Customer table vs. just virtualizing off Inquiries:
+ * - Lets the admin add prospects that haven't submitted an inquiry
+ * yet (e.g. from a CSV upload, a networking event, a referral).
+ * - Gives the admin a stable ID to attach notes / tags / status to,
+ * independent of which channel the contact came in through.
+ * - Makes the CRM searchable + filterable in one query (no N-table
+ * union needed at render time).
+ * The detail view still aggregates interactions from the existing
+ * tables by customerEmail so historical rows created BEFORE the CRM
+ * feature ship are visible too — zero migration needed.
+ */
+model Customer {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  phone     String?
+  whatsapp  String?
+  company   String?
+  role      String? // e.g. "Founder, TechStartNG"
+  status    String   @default("lead") // lead | qualified | proposal_sent | paying | churned | blocked
+  tags      String   @default("[]") // JSON string array — flexible taxonomy
+  notes     String? // free-text internal notes (latest snapshot)
+  source    String   @default("manual") // manual | csv | excel | inquiry | ai_chat | invoice | broadcast
+  // Lead-scoring (0-100) — set by AI on CSV import or by admin manually.
+  leadScore Int?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Convenience flags surfaced on the list view (denormalized for perf)
+  lastContactAt DateTime? // most recent of: inquiry createdAt / invoice sentAt / email sentAt
+
+  @@index([status])
+  @@index([source])
+  @@index([lastContactAt])
+  @@index([leadScore])
+}
+
+/**
+ * ── Stage 11 CRM: internal note trail per customer ─────────────
+ */
+model CustomerNote {
+  id         String   @id @default(cuid())
+  customerId String
+  author     String   @default("admin")
+  body       String
+  // Optional context — what triggered the note?
+  context    String? // call | email | whatsapp | meeting | referral | misc
+  createdAt  DateTime @default(now())
+
+  @@index([customerId])
+  @@index([createdAt])
+}
+
+/**
+ * ── Stage 11 CRM: admin-to-customer message log ────────────────
+ * Records every outbound message sent FROM the admin CRM. The
+ * actual delivery is via the existing email pipeline (notify.ts →
+ * Apps Script for branded Gmail) and the WhatsApp mini-service.
+ * Replies come back via the inbound WhatsApp + email-poll routes
+ * and land in WhatsAppMessage / ReceivedEmail — the CRM detail
+ * view aggregates both sides into one timeline.
+ */
+model CustomerMessage {
+  id         String   @id @default(cuid())
+  customerId String?
+  toEmail    String
+  toPhone    String?
+  channel    String // email | whatsapp
+  subject    String?
+  body       String
+  status     String   @default("queued") // queued | sent | failed
+  error      String?
+  sentAt     DateTime @default(now())
+
+  @@index([customerId])
+  @@index([channel])
+  @@index([sentAt])
+}

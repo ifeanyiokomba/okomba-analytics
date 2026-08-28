@@ -1,11 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowLeft, Loader2, Lock, Mail, User } from "lucide-react";
+import { ArrowLeft, Eye, EyeOff, Loader2, Lock, Mail, User } from "lucide-react";
 import { OkombaNavLogo } from "../logo";
 
 /* Admin login — env-credential flow with session cookie.
-   Preserved exactly from the original implementation, just polished. */
+   Preserved exactly from the original implementation, just polished.
+   Stage 11 (founder directive): show/hide password eye toggle so the
+   admin doesn't mistype credentials on mobile. */
 export function AdminLogin({
   onLogin,
   onExit,
@@ -17,6 +19,7 @@ export function AdminLogin({
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -91,14 +94,31 @@ export function AdminLogin({
                 <User size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground/60" aria-hidden="true" />
                 <input
                   id="admin-pass"
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   required
                   autoComplete="current-password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••••••"
-                  className="w-full rounded-xl border border-white/[0.09] bg-white/[0.03] py-3 pl-10 pr-4 text-[14px] text-foreground outline-none transition-colors placeholder:text-muted-foreground/60 focus:border-gold/60 focus:bg-white/[0.05]"
+                  className="w-full rounded-xl border border-white/[0.09] bg-white/[0.03] py-3 pl-10 pr-11 text-[14px] text-foreground outline-none transition-colors placeholder:text-muted-foreground/60 focus:border-gold/60 focus:bg-white/[0.05]"
                 />
+                {/* Show / hide password toggle — eye icon on the right
+                    inside the input so the admin can verify what they
+                    typed on mobile. Hitting it does NOT submit. */}
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((v) => !v)}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  aria-pressed={showPassword}
+                  title={showPassword ? "Hide password" : "Show password"}
+                  className="absolute right-2 top-1/2 inline-flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-lg text-muted-foreground/60 transition-colors hover:bg-white/[0.05] hover:text-gold focus-visible:outline-2 focus-visible:outline-gold"
+                >
+                  {showPassword ? (
+                    <EyeOff size={15} aria-hidden="true" />
+                  ) : (
+                    <Eye size={15} aria-hidden="true" />
+                  )}
+                </button>
               </div>
             </div>
 

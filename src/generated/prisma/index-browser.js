@@ -327,6 +327,46 @@ exports.Prisma.BackupLogScalarFieldEnum = {
   createdAt: 'createdAt'
 };
 
+exports.Prisma.CustomerScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  email: 'email',
+  phone: 'phone',
+  whatsapp: 'whatsapp',
+  company: 'company',
+  role: 'role',
+  status: 'status',
+  tags: 'tags',
+  notes: 'notes',
+  source: 'source',
+  leadScore: 'leadScore',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  lastContactAt: 'lastContactAt'
+};
+
+exports.Prisma.CustomerNoteScalarFieldEnum = {
+  id: 'id',
+  customerId: 'customerId',
+  author: 'author',
+  body: 'body',
+  context: 'context',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.CustomerMessageScalarFieldEnum = {
+  id: 'id',
+  customerId: 'customerId',
+  toEmail: 'toEmail',
+  toPhone: 'toPhone',
+  channel: 'channel',
+  subject: 'subject',
+  body: 'body',
+  status: 'status',
+  error: 'error',
+  sentAt: 'sentAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -352,7 +392,10 @@ exports.Prisma.ModelName = {
   EventRecord: 'EventRecord',
   WhatsAppMessage: 'WhatsAppMessage',
   AnalyticsEvent: 'AnalyticsEvent',
-  BackupLog: 'BackupLog'
+  BackupLog: 'BackupLog',
+  Customer: 'Customer',
+  CustomerNote: 'CustomerNote',
+  CustomerMessage: 'CustomerMessage'
 };
 
 /**

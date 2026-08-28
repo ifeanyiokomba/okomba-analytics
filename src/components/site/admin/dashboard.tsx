@@ -36,6 +36,7 @@ import { PostsTab } from "./posts-tab";
 import { TestimonialsTab } from "./testimonials-tab";
 import { EmailLogTab } from "./email-log-tab";
 import { InvoicesTab } from "./invoices-tab";
+import { CustomersTab } from "./customers-tab";
 import { WhatsAppTab } from "./whatsapp-tab";
 import { PaymentsTab } from "./payments-tab";
 import { AnalyticsTab } from "./analytics-tab";
@@ -53,6 +54,7 @@ import type {
 type Tab =
   | "overview"
   | "inquiries"
+  | "customers"
   | "proposals"
   | "payments"
   | "analytics"
@@ -65,6 +67,7 @@ type Tab =
 const TABS: { id: Tab; label: string; icon: typeof Inbox }[] = [
   { id: "overview", label: "Overview", icon: LayoutDashboard },
   { id: "inquiries", label: "Inquiries", icon: Inbox },
+  { id: "customers", label: "CRM", icon: Users },
   { id: "proposals", label: "Proposals", icon: FileSignature },
   { id: "payments", label: "Payments", icon: CreditCard },
   { id: "analytics", label: "Analytics", icon: BarChart3 },
@@ -673,6 +676,7 @@ export function AdminDashboard({
                 }}
               />
             )}
+            {tab === "customers" && <CustomersTab />}
             {tab === "proposals" && (
               <InvoicesTab
                 invoices={invoices}

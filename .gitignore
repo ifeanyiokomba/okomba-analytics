@@ -60,6 +60,13 @@ server.log
 db/custom.db
 db/*.db
 screenshots/
+# Local DB snapshots — produced by the Module 8B backup engine.
+# Don't version them: each .db is a binary snapshot of the live DB
+# at a point in time; committing them bloats git history + leaks
+# whatever test data was in the DB. The download endpoint serves
+# them on-demand to authenticated admins.
+data/backups/*.db
+data/uploads/
 
 # Runtime PID / state files (auto-updated by dev.sh + cron job)
 .zscripts/dev.pid

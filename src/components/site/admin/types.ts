@@ -157,6 +157,87 @@ export type WhatsAppServiceStatus = {
   serviceUp: boolean;
 };
 
+/* ── CRM (Stage 11) ────────────────────────────────────────── */
+export type CustomerStatus = "lead" | "qualified" | "proposal_sent" | "paying" | "churned" | "blocked";
+
+export type Customer = {
+  id: string;
+  name: string;
+  email: string;
+  phone: string | null;
+  whatsapp: string | null;
+  company: string | null;
+  role: string | null;
+  status: string;
+  source: string;
+  leadScore: number | null;
+  tags: string[];
+  notes: string | null;
+  lastContactAt: string | null;
+  createdAt: string;
+  stats: {
+    inquiries: number;
+    invoices: number;
+    emails: number;
+    whatsapp: number;
+    notes: number;
+  };
+};
+
+export type CustomerDetail = {
+  ok: boolean;
+  customer: Omit<Customer, "stats"> & { updatedAt: string; lastContactAt: string | null };
+  timeline: TimelineItem[];
+  stats: {
+    inquiries: number;
+    invoices: number;
+    paidInvoices: number;
+    emails: number;
+    whatsapp: number;
+    notes: number;
+    myMessages: number;
+    totalPipelineNaira: number;
+    totalPaidNaira: number;
+    totalOutstandingNaira: number;
+  };
+};
+
+export type TimelineItem = {
+  id: string;
+  kind: "inquiry" | "invoice" | "email" | "whatsapp" | "note" | "message";
+  direction?: "inbound" | "outbound";
+  title: string;
+  subtitle?: string;
+  body?: string;
+  meta?: Record<string, string | number | null | undefined>;
+  at: string;
+};
+
+export type CustomerImportRow = {
+  name: string;
+  email: string;
+  phone: string | null;
+  whatsapp: string | null;
+  company: string | null;
+  role: string | null;
+  notes: string | null;
+  tags: string[];
+  status: string;
+  leadScore: number | null;
+  source: string;
+};
+
+export const CUSTOMER_STATUSES = ["lead", "qualified", "proposal_sent", "paying", "churned", "blocked"] as const;
+
+export const CUSTOMER_STATUS_STYLES: Record<string, string> = {
+  lead: "border-gold/35 bg-gold-dim text-gold",
+  qualified: "border-[#5b9eff]/35 bg-[#5b9eff]/10 text-[#5b9eff]",
+  proposal_sent: "border-purple-400/35 bg-purple-400/10 text-purple-300",
+  paying: "border-teal/35 bg-teal-dim text-teal",
+  churned: "border-red-500/30 bg-red-500/10 text-red-300",
+  blocked: "border-white/15 bg-white/[0.04] text-muted-foreground",
+};
+
 export function formatPhoneDisplay(msisdn: string): string {
   const n = msisdn.replace(/\D/g, "");
   if (n.startsWith("234") && n.length === 13) {

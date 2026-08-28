@@ -22,6 +22,7 @@ import {
   ArrowRight,
   Cloud,
   Database,
+  Download,
   ExternalLink,
   FileText,
   Loader2,
@@ -568,55 +569,147 @@ function FunnelStrip({ counts }: { counts: Record<string, number> }) {
   );
 }
 
-/* ── Backups strip (Module 8B) ─────────────────────────── */
+/* ── Backups strip (Module 8B) ───────────────────────────
+   Stage 11 (founder directive): show the FULL backup trail
+   (top 8), each row with a Download button. Replaced the
+   single "last backup" line with a small KPI strip + history
+   list so the admin sees at a glance: how many backups exist,
+   when the last one ran, what's the next scheduled run, and
+   the full downloadable trail. The "Drive not configured"
+   pill tone was softened from warn → neutral because local-
+   only backups ARE working — it's a configuration gap, not
+   a failure. */
 
 function BackupsCard({ backups }: { backups: AnalyticsData["backups"] }) {
   const last = backups.logs[0];
+  const successCount = backups.logs.filter((l) => l.status === "success").length;
+  const failedCount = backups.logs.length - successCount;
+  const totalSize = backups.logs.reduce((s, l) => s + (l.sizeBytes ?? 0), 0);
 
   return (
     <div className={cn(CARD, "sm:p-6")}>
-      <div className="flex items-center gap-2">
-        <Cloud size={16} className="text-[#C9910A]" aria-hidden="true" />
-        <h2 className="text-[15px] font-semibold text-[#0B0F1A]">Backups · Module 8B</h2>
+      <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+        <div className="flex items-center gap-2">
+          <Cloud size={16} className="text-[#C9910A]" aria-hidden="true" />
+          <h2 className="text-[15px] font-semibold text-[#0B0F1A]">Backups · Module 8B</h2>
+        </div>
+        <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-[#5a6373]">
+          daily 02:00 WAT · manual trigger above
+        </span>
       </div>
 
-      <div className="mt-4 flex flex-wrap items-center gap-2.5">
+      {/* Status pill row — softened the "local only" tone from warn → ok
+          because local snapshots ARE valid backups; Drive is just
+          off-instance uplift. */}
+      <div className="mt-3.5 flex flex-wrap items-center gap-2.5">
+        <Pill tone={last?.status === "success" ? "ok" : "fail"}>
+          {last?.status === "success" ? "Last backup succeeded" : "Last backup failed"}
+        </Pill>
         <Pill tone={backups.configured ? "ok" : "warn"}>
-          {backups.configured ? "Google Drive configured" : "Local only · Drive not configured"}
+          {backups.configured ? "Google Drive configured" : "Local only · Drive uplift off"}
         </Pill>
         <Pill tone={backups.cloudinary ? "ok" : "warn"}>
-          {backups.cloudinary ? "Cloudinary connected" : "Cloudinary not configured"}
+          {backups.cloudinary ? "Cloudinary connected" : "Cloudinary media off"}
         </Pill>
         <span className="font-mono text-[11px] text-[#5a6373]">
           Local rotation: {backups.retentionDays} days
         </span>
       </div>
 
-      {/* Last backup row */}
-      <div className="mt-4 rounded-xl border border-[#e4e1d8] bg-[#f7f5ef] p-3.5">
-        {last ? (
-          <div className="flex flex-wrap items-center gap-2.5">
-            <FileText size={14} className="text-[#C9910A]" aria-hidden="true" />
-            <span className="font-mono text-[11.5px] text-[#1c2333]">{last.fileName}</span>
-            <span className="font-mono text-[10.5px] text-[#5a6373]">
-              {fmtBytes(last.sizeBytes)}
-            </span>
-            <span className="font-mono text-[10.5px] text-[#5a6373]">
-              {fmtDuration(last.durationMs)}
-            </span>
-            <Pill tone={last.status === "success" ? "ok" : "fail"} small>
-              {last.status}
-            </Pill>
-            <span className="font-mono text-[10.5px] text-[#5a6373]">
-              {relativeTime(last.createdAt)}
-            </span>
-            {last.error && (
-              <span className="text-[11px] text-red-600">{last.error}</span>
-            )}
-          </div>
-        ) : (
-          <p className="text-[12.5px] text-[#5a6373]">No backups yet — run one now.</p>
-        )}
+      {/* KPI strip — total backups, last run, total size */}
+      <div className="mt-4 grid grid-cols-3 gap-3">
+        <div className="rounded-xl border border-[#e4e1d8] bg-[#f7f5ef] px-3 py-2.5">
+          <p className="font-mono text-[9.5px] uppercase tracking-[0.14em] text-[#5a6373]">
+            Snapshots
+          </p>
+          <p className="mt-1 font-mono text-[18px] font-bold leading-none text-[#0B0F1A]">
+            {backups.logs.length}
+          </p>
+        </div>
+        <div className="rounded-xl border border-[#e4e1d8] bg-[#f7f5ef] px-3 py-2.5">
+          <p className="font-mono text-[9.5px] uppercase tracking-[0.14em] text-[#5a6373]">
+            Last run
+          </p>
+          <p className="mt-1 font-mono text-[12px] font-semibold leading-none text-[#C9910A]">
+            {last ? relativeTime(last.createdAt) : "—"}
+          </p>
+          <p className="mt-1 font-mono text-[9.5px] text-[#5a6373]">
+            {last ? `${fmtBytes(last.sizeBytes)} · ${fmtDuration(last.durationMs)}` : "no runs yet"}
+          </p>
+        </div>
+        <div className="rounded-xl border border-[#e4e1d8] bg-[#f7f5ef] px-3 py-2.5">
+          <p className="font-mono text-[9.5px] uppercase tracking-[0.14em] text-[#5a6373]">
+            Trail size
+          </p>
+          <p className="mt-1 font-mono text-[18px] font-bold leading-none text-[#0B0F1A]">
+            {fmtBytes(totalSize)}
+          </p>
+          <p className="mt-1 font-mono text-[9.5px] text-[#5a6373]">
+            {successCount} ok · {failedCount} failed
+          </p>
+        </div>
+      </div>
+
+      {/* Backup history list — full trail with per-row download */}
+      <div className="mt-4 overflow-hidden rounded-xl border border-[#e4e1d8]">
+        <div className="grid grid-cols-[1fr_auto_auto_auto] gap-2 border-b border-[#e4e1d8] bg-[#f7f5ef] px-3.5 py-2 font-mono text-[9.5px] uppercase tracking-[0.14em] text-[#5a6373]">
+          <span>File</span>
+          <span className="text-right">Size</span>
+          <span className="text-right">When</span>
+          <span className="text-right">Action</span>
+        </div>
+        <ul className="divide-y divide-[#e4e1d8]/70 bg-white">
+          {backups.logs.length === 0 ? (
+            <li className="px-3.5 py-6 text-center text-[12.5px] text-[#5a6373]">
+              No backups yet — hit &quot;Run backup now&quot; at the top.
+            </li>
+          ) : (
+            backups.logs.map((l) => (
+              <li
+                key={l.id}
+                className="grid grid-cols-[1fr_auto_auto_auto] items-center gap-2 px-3.5 py-2.5 transition-colors hover:bg-[#f7f5ef]/60"
+              >
+                <div className="flex min-w-0 items-center gap-2">
+                  <FileText
+                    size={13}
+                    className={l.status === "success" ? "text-[#C9910A]" : "text-red-500"}
+                    aria-hidden="true"
+                  />
+                  <span className="truncate font-mono text-[11px] text-[#1c2333]">
+                    {l.fileName ?? "—"}
+                  </span>
+                  {l.error && (
+                    <span className="ml-1 truncate text-[10px] text-red-600" title={l.error}>
+                      {l.error}
+                    </span>
+                  )}
+                </div>
+                <span className="text-right font-mono text-[10.5px] text-[#5a6373]">
+                  {fmtBytes(l.sizeBytes ?? 0)}
+                </span>
+                <span className="text-right font-mono text-[10.5px] text-[#5a6373]">
+                  {relativeTime(l.createdAt)}
+                </span>
+                <div className="flex justify-end">
+                  {l.status === "success" && l.fileName ? (
+                    <a
+                      href={`/api/admin/backups/${encodeURIComponent(l.fileName)}/download`}
+                      aria-label={`Download ${l.fileName}`}
+                      title="Download snapshot"
+                      className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-[#e4e1d8] bg-white text-[#1c2333] transition-colors hover:border-[#C9910A]/45 hover:text-[#C9910A]"
+                    >
+                      <Download size={12} aria-hidden="true" />
+                    </a>
+                  ) : (
+                    <span className="font-mono text-[9px] uppercase tracking-wider text-red-500">
+                      failed
+                    </span>
+                  )}
+                </div>
+              </li>
+            ))
+          )}
+        </ul>
       </div>
 
       {/* Helpers when something is not configured */}
@@ -642,7 +735,7 @@ function BackupsCard({ backups }: { backups: AnalyticsData["backups"] }) {
                 <code className="rounded bg-white px-1 py-0.5 font-mono text-[10.5px] text-[#C9910A]">
                   GOOGLE_DRIVE_FOLDER_ID
                 </code>{" "}
-                to enable Drive uploads.
+                to enable Drive uplift.
               </>
             )}
           </p>

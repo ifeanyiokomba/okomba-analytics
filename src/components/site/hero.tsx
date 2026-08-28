@@ -71,30 +71,65 @@ export function Hero({ onGetStarted, onViewServices }: HeroProps) {
               </p>
             </Reveal>
 
-            {/* CTAs — Termii-style: primary full-width + larger on mobile,
-                secondary shorter & contrasting; primary wider on desktop. */}
+            {/* CTAs — Stage 11 redesign (founder directive):
+                NO translate-on-hover movement (felt jittery/jittery on
+                mobile). Instead the buttons stay anchored in place and
+                "illuminate": the primary swaps to a brighter gold gradient
+                with a stronger gold halo; the secondary lights up with a
+                gold ring + gold icon + arrow nudge. Both feel pressable
+                without any layout shift. Mobile-first: full-width stack. */}
             <Reveal delay={120}>
               <div className="mt-9 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center lg:justify-start">
-                {/* Primary — most important, gold gradient, wider */}
+                {/* Primary — anchored, illuminative gold gradient with
+                    always-on halo + hover intensifies the glow. */}
                 <button
                   onClick={onGetStarted}
-                  className="btn-shine group inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-gold-light to-gold px-8 py-4 text-[15.5px] font-bold text-ink shadow-gold-lg transition-all hover:-translate-y-0.5 hover:shadow-gold active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold sm:w-auto sm:px-9 sm:py-4"
+                  className="group relative inline-flex w-full items-center justify-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-r from-gold-light via-gold to-gold-dark px-8 py-4 text-[15.5px] font-bold text-ink shadow-gold-lg transition-[box-shadow,filter] duration-300 hover:shadow-[0_22px_60px_-12px_rgba(201,145,10,0.65)] hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold active:brightness-95 sm:w-auto sm:px-9 sm:py-4"
                 >
-                  Start a Project
-                  <ArrowRight
-                    size={17}
-                    strokeWidth={2.6}
-                    className="transition-transform group-hover:translate-x-1"
+                  {/* Always-on breathing halo behind the button — invites
+                      the click even before the user hovers. */}
+                  <span
                     aria-hidden="true"
+                    className="pointer-events-none absolute -inset-0.5 -z-10 rounded-2xl bg-gradient-to-r from-gold-light to-gold opacity-50 blur-md [animation:btn-glow_3s_ease-in-out_infinite]"
                   />
+                  {/* Shine sweep on hover — no transform on the button itself */}
+                  <span
+                    aria-hidden="true"
+                    className="pointer-events-none absolute inset-0 -z-0 translate-x-[-120%] bg-gradient-to-r from-transparent via-white/40 to-transparent transition-transform duration-700 ease-out group-hover:translate-x-[120%]"
+                  />
+                  <span className="relative z-10 flex items-center gap-2">
+                    Start a Project
+                    <ArrowRight
+                      size={17}
+                      strokeWidth={2.6}
+                      className="transition-transform duration-300 group-hover:translate-x-1"
+                      aria-hidden="true"
+                    />
+                  </span>
                 </button>
-                {/* Secondary — contrasting dark ink outlined, shorter */}
+                {/* Secondary — anchored dark-ink pill that lights up:
+                    gold ring + gold text + gold icon glow on hover. */}
                 <button
                   onClick={onViewServices}
-                  className="group inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-ink/15 bg-ink px-6 py-3.5 text-[14.5px] font-semibold text-white shadow-[0_12px_32px_-14px_rgba(20,25,38,0.5)] transition-all hover:-translate-y-0.5 hover:border-gold/50 hover:text-gold-light focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold sm:w-auto sm:px-7"
+                  className="group relative inline-flex w-full items-center justify-center gap-2 overflow-hidden rounded-2xl border border-ink/15 bg-ink px-6 py-3.5 text-[14.5px] font-semibold text-white transition-[border-color,color,box-shadow] duration-300 hover:border-gold/55 hover:text-gold-light focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold sm:w-auto sm:px-7"
                 >
-                  <LayoutGrid size={16} aria-hidden="true" />
-                  Explore our services
+                  {/* Hover-only radial gold glow that bleeds out from
+                      behind the pill — gives the "lit-up" feel without
+                      any translate. */}
+                  <span
+                    aria-hidden="true"
+                    className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                    style={{
+                      background:
+                        "radial-gradient(80% 120% at 50% 0%, rgba(201,145,10,0.22), transparent 65%)",
+                    }}
+                  />
+                  <LayoutGrid
+                    size={16}
+                    aria-hidden="true"
+                    className="relative z-10 text-white/85 transition-colors duration-300 group-hover:text-gold-light"
+                  />
+                  <span className="relative z-10">Explore our services</span>
                 </button>
               </div>
             </Reveal>

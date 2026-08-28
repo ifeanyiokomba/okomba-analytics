@@ -90,6 +90,7 @@
   --gold: #C9910A;         /* Vivid honey amber */
   --gold-light: #FFC94D;   /* Warm honey light */
   --gold-bright: #FFDF8E;  /* Golden hour highlight */
+  --gold-dark: #8E6A00;    /* Deep honey — gradient anchor for buttons */
   --gold-dim: rgba(201, 145, 10, 0.13);
   --teal: #0a9d84;
   --teal-dim: rgba(10, 157, 132, 0.1);
@@ -361,6 +362,23 @@
 @keyframes glow-breathe {
   0%, 100% { opacity: 0.55; }
   50% { opacity: 0.9; }
+}
+/* Always-on button glow ring — gentle breathing halo behind lit CTAs
+   so users feel invited to click even before typing anything. */
+@keyframes btn-glow {
+  0%, 100% { opacity: 0.5; transform: scale(0.985); }
+  50% { opacity: 0.85; transform: scale(1.02); }
+}
+/* One-shot celebratory flash when an email send is confirmed. */
+@keyframes sent-flash {
+  0% { opacity: 0.9; transform: scale(0.96); }
+  35% { opacity: 1; transform: scale(1.04); }
+  100% { opacity: 0; transform: scale(1.22); }
+}
+/* Micro-confetti sparkles — fly outward in a 5-point burst. */
+@keyframes confetti {
+  0% { opacity: 1; transform: translate(0, 0) scale(1) rotate(0deg); }
+  100% { opacity: 0; transform: translate(var(--cx, 40px), var(--cy, -40px)) scale(0.4) rotate(180deg); }
 }
 @keyframes spin-slow {
   to { transform: rotate(360deg); }

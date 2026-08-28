@@ -2,8 +2,10 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AlertCircle, ArrowRight, CheckCircle2, Loader2, X } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { SERVICES, type Service } from "@/lib/content";
+import { ServiceIcon } from "./service-icon";
 
 type InquiryModalProps = {
   service: Service | null; // preselected service
@@ -94,6 +96,12 @@ export function InquiryModal({ service, onClose, onSuccess }: InquiryModalProps)
   const selectedService = useMemo(
     () => SERVICES.find((s) => s.title === form.service) ?? null,
     [form.service]
+  );
+
+  // Lookup for the additional service so we can render its icon too
+  const additionalService = useMemo(
+    () => SERVICES.find((s) => s.title === form.addlService) ?? null,
+    [form.addlService]
   );
 
   const set = (key: keyof FormState) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -319,15 +327,67 @@ export function InquiryModal({ service, onClose, onSuccess }: InquiryModalProps)
               </select>
             </div>
 
-            {/* Selected service context hint */}
-            {selectedService && (
-              <div className="flex items-start gap-3 rounded-xl border border-gold/15 bg-gold/[0.06] px-4 py-3">
-                <CheckCircle2 size={16} className="mt-0.5 shrink-0 text-gold" aria-hidden="true" />
-                <p className="text-[12.5px] leading-relaxed text-muted-foreground">
-                  <span className="font-semibold text-foreground">{selectedService.title}</span> — {selectedService.desc}
-                </p>
-              </div>
-            )}
+            {/* Selected service context hint — Stage 11 redesign
+                (founder directive). Each service carries an "object"
+                (its own icon: </> for web/mobile, wallet for fintech,
+                zap for payment integration, etc.) so users can see at
+                a glance which service the form is being submitted for.
+                The badge animates in when a service is picked, and a
+                second chip appears for the additional service. */}
+            <AnimatePresence>
+              {(selectedService || additionalService) && (
+                <motion.div
+                  initial={{ opacity: 0, y: 6, height: 0 }}
+                  animate={{ opacity: 1, y: 0, height: "auto" }}
+                  exit={{ opacity: 0, y: -6, height: 0 }}
+                  transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+                  className="overflow-hidden"
+                >
+                  <div className="rounded-xl border border-gold/20 bg-gradient-to-br from-gold/[0.10] to-gold/[0.04] px-4 py-3.5">
+                    <p className="mb-2 font-mono text-[9px] uppercase tracking-[0.14em] text-gold/80">
+                      Building for
+                    </p>
+                    <div className="flex flex-wrap items-center gap-2.5">
+                      {selectedService ? (
+                        <span className="inline-flex items-center gap-2 rounded-lg border border-gold/35 bg-[#0b101c] px-3 py-1.5">
+                          <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-gold-dim text-gold">
+                            <ServiceIcon name={selectedService.icon} size={13} className="text-gold" />
+                          </span>
+                          <span className="text-[12px] font-semibold text-foreground">{selectedService.title}</span>
+                          <span className="rounded-full border border-gold/20 px-1.5 py-0.5 font-mono text-[8.5px] uppercase tracking-wider text-gold/80">
+                            {selectedService.category}
+                          </span>
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-2 rounded-lg border border-white/[0.08] bg-white/[0.02] px-3 py-1.5 text-[11.5px] text-muted-foreground">
+                          <span className="font-mono text-[9.5px]">?</span>
+                          Pick a service below
+                        </span>
+                      )}
+                      {additionalService && (
+                        <>
+                          <span className="font-mono text-[12px] text-gold/60">+</span>
+                          <span className="inline-flex items-center gap-2 rounded-lg border border-teal/30 bg-teal-dim px-3 py-1.5">
+                            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-teal/15 text-teal">
+                              <ServiceIcon name={additionalService.icon} size={13} className="text-teal" />
+                            </span>
+                            <span className="text-[12px] font-semibold text-foreground">{additionalService.title}</span>
+                          </span>
+                        </>
+                      )}
+                    </div>
+                    {selectedService && (
+                      <p className="mt-2.5 flex items-start gap-2 text-[12px] leading-relaxed text-muted-foreground">
+                        <CheckCircle2 size={13} className="mt-0.5 shrink-0 text-gold" aria-hidden="true" />
+                        <span>
+                          <span className="font-semibold text-foreground">{selectedService.title}</span> — {selectedService.desc}
+                        </span>
+                      </p>
+                    )}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             {apiError && (
               <div role="alert" className="flex items-start gap-3 rounded-xl border border-red-500/25 bg-red-500/[0.08] px-4 py-3">
