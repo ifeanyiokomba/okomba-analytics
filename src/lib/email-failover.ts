@@ -66,6 +66,62 @@ export type FailoverResult = {
 
 const LEGACY_TIMEOUT_MS = 30_000;
 
+/* ── Legacy Apps Script payload shape (B5 — extracted for contract test) ──
+ *
+ * Phase 29 hardcoded this JSON body inline inside the legacy fallback
+ * fetch() call. Batch 5 (Code.gs reconciliation) extracted it into a
+ * pure function so tests/codegs-payload-shape.test.ts can assert the
+ * EXACT field shape without making a real HTTP call.
+ *
+ * The legacy path (NOTIFY_WEBHOOK_URL) is the ONLY delivery path
+ * today where invoice emails actually reach the recipient — because
+ * notify.ts passes `legacyAction: "sendInvoiceEmail"` for invoice.sent
+ * / invoice.reminder_* / payment.received, and Code.gs v5's doPost
+ * routes action="sendInvoiceEmail" → sendInvoiceEmail(data) which
+ * reads `data.to` directly (and `data.base64Pdf` + `data.filename`
+ * + `data.invoiceSummary` for the PDF attachment + Sheets backup).
+ *
+ * For action="sendEmail" + a `type` field (inquiry.created,
+ * subscriber.welcome, post.published, broadcast, system.alert),
+ * Code.gs routes through handleNotification(data) which reads
+ * `data.recipient` — a field THIS PAYLOAD DOES NOT SEND. Result:
+ * the email is silently dropped (MailApp.sendEmail is called with
+ * `to: undefined` → its `if (!opts.to) return` early-exit fires).
+ * This is the CRITICAL integration bug documented in
+ * docs/codegs-reconciliation.md §C.
+ */
+export type LegacyAppsScriptPayloadOptions = {
+  to: string;
+  subject: string;
+  bodyHtml: string;
+  bodyText?: string;
+  attachments?: FailoverAttachment[];
+  type: string;
+  invoiceSummary?: Record<string, unknown>;
+  legacyAction?: string;
+};
+
+export function buildLegacyAppsScriptPayload(
+  opts: LegacyAppsScriptPayloadOptions,
+  ctx: { bodyText: string; attachments: FailoverAttachment[] }
+): Record<string, unknown> {
+  return {
+    action: opts.legacyAction ?? "sendEmail",
+    to: opts.to,
+    subject: opts.subject,
+    body: ctx.bodyText,
+    html: opts.bodyHtml,
+    bodyText: ctx.bodyText,
+    bodyHtml: opts.bodyHtml,
+    attachments: ctx.attachments,
+    base64Pdf:
+      ctx.attachments.length > 0 ? ctx.attachments[0].base64 : undefined,
+    filename:
+      ctx.attachments.length > 0 ? ctx.attachments[0].filename : undefined,
+    invoiceSummary: opts.invoiceSummary,
+  };
+}
+
 export async function getEnabledProviderCount(): Promise<number> {
   try {
     return await db.emailProviderConfig.count({
@@ -156,20 +212,7 @@ export async function deliverWithFailover(
       const res = await fetch(webhookUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          action: opts.legacyAction ?? "sendEmail",
-          to: opts.to,
-          subject: opts.subject,
-          body: bodyText,
-          html: opts.bodyHtml,
-          bodyText,
-          bodyHtml: opts.bodyHtml,
-          attachments,
-          base64Pdf:
-            attachments.length > 0 ? attachments[0].base64 : undefined,
-          filename: attachments.length > 0 ? attachments[0].filename : undefined,
-          invoiceSummary: opts.invoiceSummary,
-        }),
+        body: JSON.stringify(buildLegacyAppsScriptPayload(opts, { bodyText, attachments })),
         signal: AbortSignal.timeout(LEGACY_TIMEOUT_MS),
       });
       const latencyMs = Date.now() - start;

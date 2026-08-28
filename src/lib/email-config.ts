@@ -387,6 +387,50 @@ export async function testProvider(
   return result;
 }
 
+/* ── Apps Script payload shape (B5 — extracted for contract test) ── */
+//
+// Phase 29 hardcoded this JSON body inline inside callProviderApi's
+// fetch() call. Batch 5 (Code.gs reconciliation) extracted it into a
+// pure function so tests/codegs-payload-shape.test.ts can assert the
+// EXACT field shape without making a real HTTP call.
+//
+// IMPORTANT — this helper is the single source of truth for what the
+// modern apps_script provider POSTs to the Apps Script Web App /exec
+// URL. Code.gs v5's doPost(e) reads a DIFFERENT field set (it reads
+// `recipient`, NOT `to`, for the handleNotification path). This
+// mismatch is documented in docs/codegs-reconciliation.md §C as a
+// CRITICAL integration bug — the founder must either:
+//   (a) update this helper to ALSO send `recipient: opts.to` (and
+//       `inquiry: opts.inquiry` for inquiry.created type), OR
+//   (b) update Code.gs v5's handleNotification to read `data.to`
+//       instead of `data.recipient`.
+// Until then, only the legacy NOTIFY_WEBHOOK_URL fallback path
+// delivers invoice emails correctly (because that path sends
+// `action: "sendInvoiceEmail"` which Code.gs routes through
+// sendInvoiceEmail(data) → reads `data.to` directly).
+export type AppsScriptPayloadOptions = {
+  to: string;
+  subject: string;
+  bodyHtml: string;
+  bodyText: string;
+  attachments: Array<{ filename: string; contentType: string; base64: string }>;
+  type: string;
+};
+
+export function buildAppsScriptPayload(opts: AppsScriptPayloadOptions): Record<string, unknown> {
+  return {
+    action: "sendEmail",
+    to: opts.to,
+    subject: opts.subject,
+    body: opts.bodyText,
+    html: opts.bodyHtml,
+    bodyText: opts.bodyText,
+    bodyHtml: opts.bodyHtml,
+    attachments: opts.attachments,
+    type: opts.type,
+  };
+}
+
 /* ── Per-provider HTTP call ─────────────────────────────────── */
 //
 // Exported because email-failover.ts reuses it for the live delivery
@@ -394,14 +438,7 @@ export async function testProvider(
 export async function callProviderApi(
   provider: EmailProviderName,
   creds: EmailProviderCredentials,
-  opts: {
-    to: string;
-    subject: string;
-    bodyHtml: string;
-    bodyText: string;
-    attachments: Array<{ filename: string; contentType: string; base64: string }>;
-    type: string;
-  }
+  opts: AppsScriptPayloadOptions
 ): Promise<{ ok: boolean; error?: string; detail?: string }> {
   if (provider === "apps_script") {
     const url = creds.webhookUrl;
@@ -409,17 +446,7 @@ export async function callProviderApi(
     const res = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        action: "sendEmail",
-        to: opts.to,
-        subject: opts.subject,
-        body: opts.bodyText,
-        html: opts.bodyHtml,
-        bodyText: opts.bodyText,
-        bodyHtml: opts.bodyHtml,
-        attachments: opts.attachments,
-        type: opts.type,
-      }),
+      body: JSON.stringify(buildAppsScriptPayload(opts)),
       signal: AbortSignal.timeout(15000),
     });
     if (!res.ok) {
