@@ -246,7 +246,7 @@ the webhook only adds physical delivery.
 1. Open [script.google.com](https://script.google.com) → New project → name it **Okomba Webhook**
 2. Paste the contents of **`Google-apps-script/Code.gs`** (in this repo) into the editor
 3. Fill the `CONFIG` block: your Google Sheet ID, admin email, site URL
-4. Run the `testWebhook` function once → authorize Gmail/Sheets access when prompted
+4. Run the `verifySetup()` function once (also run `listSheetTabs()` + `syncSheetColumns()` first if upgrading from v5) → authorize Gmail/Sheets access when prompted
 5. **Deploy → New deployment → Web app** — "Execute as: Me", "Who has access: Anyone"
 6. Copy the Web App URL
 7. On Render (or any host) set the environment variable:

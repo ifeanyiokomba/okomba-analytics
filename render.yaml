@@ -43,8 +43,12 @@ services:
       # fallback when Drive isn't configured). The main DB is now external.
       - key: DATABASE_URL
         sync: false
-      - key: DIRECT_URL
-        sync: false
+      # ── Phase 29: DIRECT_URL removed from prisma/schema.prisma (P1012
+      # fix — Render doesn't have DIRECT_URL set, causing every deploy to
+      # abort). The schema now uses DATABASE_URL for everything. Modern
+      # Neon pooler supports db push fine. If we ever hit "prepared
+      # statement does not exist", re-add directUrl to schema + set
+      # DIRECT_URL here to the non-pooler Neon hostname.
       - key: HOSTNAME
         value: 0.0.0.0
       - key: NEXT_TELEMETRY_DISABLED
@@ -70,6 +74,17 @@ services:
       - key: ADMIN_EMAIL
         sync: false
       - key: ADMIN_PASSWORD
+        sync: false
+      # ── Phase 29: email failover chain AES-256-GCM encryption key ──
+      # 32-byte hex string (openssl rand -hex 32). Used by
+      # src/lib/email-config.ts to encrypt provider credentials before
+      # storing in EmailProviderConfig table. CRITICAL: once set, never
+      # change — rotating requires re-entering all provider credentials
+      # via the admin Settings tab.
+      - key: EMAIL_CONFIG_ENCRYPTION_KEY
+        sync: false
+      # ── Phase 29: optional test recipient for email provider Test button ──
+      - key: EMAIL_TEST_TO
         sync: false
       - key: WHATSAPP_INTERNAL_TOKEN
         sync: false
