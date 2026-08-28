@@ -205,7 +205,7 @@ export function CustomersTab() {
               Retry
             </button>
           </div>
-        ) : !data || data.customers.length === 0 ? (
+        ) : !data || (!debouncedSearch && data.customers.length === 0) ? (
           <div className="flex flex-col items-center gap-3 py-16 text-center">
             <Users size={30} className="text-muted-foreground/40" aria-hidden="true" />
             <p className="max-w-md text-[13.5px] leading-relaxed text-muted-foreground">

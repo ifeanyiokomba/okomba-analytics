@@ -217,9 +217,9 @@ export function CookieConsent() {
           <button
             onClick={dismiss}
             aria-label="Close cookie notice"
-            className="shrink-0 rounded-lg p-1 text-muted-foreground/60 transition-colors hover:text-foreground focus-visible:outline-2 focus-visible:outline-gold"
+            className="shrink-0 rounded-lg p-2 min-h-[44px] min-w-[44px] flex items-center justify-center text-muted-foreground/60 transition-colors hover:text-foreground focus-visible:outline-2 focus-visible:outline-gold"
           >
-            <X size={14} aria-hidden="true" />
+            <X size={16} aria-hidden="true" />
           </button>
         </div>
       </div>
