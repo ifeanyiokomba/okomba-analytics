@@ -109,8 +109,8 @@ Last audited: after Phase-2 Modules 5+6 (reminder engine + WhatsApp widget).
 | Aspect | Detail |
 |---|---|
 | **Entry** | Admin → WhatsApp tab (`/admin` dashboard) |
-| **Service** | `mini-services/whatsapp-service` — REST `:3004` (server-to-server), socket.io `:3005` at path `/` (browser via `/?XTransformPort=3005`) |
-| **Engine** | whatsapp-web.js + puppeteer, LocalAuth session in `mini-services/whatsapp-service/data/session`. Modes: `auto` (real, demo fallback) / `real` / `demo` (`WHATSAPP_MODE` env) |
+| **Service** | `whatsapp-service` — REST `:3004` (server-to-server), socket.io `:3005` at path `/` (browser via `/?XTransformPort=3005`) |
+| **Engine** | whatsapp-web.js + puppeteer, LocalAuth session in `whatsapp-service/data/session`. Modes: `auto` (real, demo fallback) / `real` / `demo` (`WHATSAPP_MODE` env) |
 | **Left panel** | unified customer list (invoices + enquiries + chat traffic) with last message, unread badge, latest unpaid invoice (`GET /api/admin/whatsapp/chats`) |
 | **Right panel** | chat history from `whatsapp_messages` (`GET /api/admin/whatsapp/messages?phone=`) |
 | **Composer** | text send · **Attach Invoice** (re-generates latest pending invoice PDF, attaches with caption) · quick replies ("Thanks for payment", "Invoice attached", "Need more info?") |

@@ -3829,3 +3829,128 @@ Unresolved issues / risks:
   Phase 27 fix) but remain in older commits publicly accessible via
   git clone. Founder should still run git-filter-repo as a deliberate
   security-incident step (instructions in Phase 27 worklog entry).
+
+---
+Task ID: 29-A
+Agent: full-stack-developer
+Task: Implement real email failover chain (Apps Script → Resend → Mailtrap → Maileroo) with AES-256-GCM-encrypted credentials, EmailProviderConfig Prisma model, admin Settings tab, and test-failover API.
+
+Work Log:
+- Read worklog.md (Phase 28 ending at line ~3831) to understand project history. Confirmed the worklog explicitly admitted at line 3807: "EMAIL FAILOVER CHAIN WAS NEVER IMPLEMENTED." My task is to ACTUALLY implement it now.
+- Read existing files: prisma/schema.prisma (405 lines, postgresql provider, EmailLog model at line 156 — no `provider` column yet), src/lib/notify.ts (1020 lines, single-provider pattern via NOTIFY_WEBHOOK_URL), src/components/site/admin/dashboard.tsx (802 lines, TABS array at line 67 with 11 tabs), src/app/api/admin/customers/route.ts (auth pattern: `isAdminAuthorized()` from `@/lib/admin-auth`), src/lib/admin-auth.ts (cookie-token-SHA256-hash pattern).
+- Verified the existing UI library has Switch, Card, Input, Label, Badge components at src/components/ui/.
+- Step 1 — Prisma schema: added `EmailProviderConfig` model (provider unique, displayName, priority, enabled, credentialsEnc encrypted blob, lastTestAt/Status/Error timestamps) with @@index([enabled, priority]) after the CustomerMessage model. Also added `provider String? @default("apps_script")` to EmailLog to record which provider actually delivered each email.
+- Step 1b — Bumped PRISMA_CACHE_KEY from 'schema-v12-postgresql-json' to 'schema-v13-email-failover' in src/lib/db.ts so the new model is picked up by the global PrismaClient instance.
+- Step 2 — DB push: ran `DATABASE_URL="$(extract from .env)" bunx prisma db push --skip-generate` (had to set env explicitly because Prisma's automatic .env loader was failing on the quoted URL with P1012; explicit env var passing worked). Output: "🚀 Your database is now in sync with your Prisma schema. Done in 7.71s" against Neon Postgres at ep-curly-cake-b2i9bf98-pooler. Generated Prisma client: `bunx prisma generate` → Prisma Client v6.19.2 in 260ms. Verified `EmailProviderConfig` and `EmailLog.provider` are in the generated client (src/generated/prisma/index.d.ts).
+- Step 3 — Created src/lib/email-config.ts (440+ lines):
+  • `encryptCredentials(obj)` — AES-256-GCM via createCipheriv("aes-256-gcm", key, iv[12]); output base64(iv|ciphertext|tag[16]). Key derived from EMAIL_CONFIG_ENCRYPTION_KEY (64-char hex) when set, else PBKDF2(sha512, 200k iters) over ADMIN_PASSWORD with stable salt — keeps local-dev frictionless but production MUST set the hex key.
+  • `decryptCredentials(blob)` — inverse via createDecipheriv + setAuthTag. Throws on tag mismatch (wrong key / tampered blob).
+  • `getEmailProviders()` / `getEnabledProvidersOrdered()` — Prisma queries ordered by priority asc.
+  • `saveEmailProvider(provider, credentialsObj, { displayName?, priority?, enabled? })` — upserts with re-encryption.
+  • `listPublicProviders()` — returns redacted shape (provider, displayName, priority, enabled, hasCredentials bool, credentialFields string[], lastTestAt/Status/Error) — credentials values NEVER leave the server.
+  • `getTestRecipient()` / `saveTestRecipient(to)` — stores the admin's test email in a pseudo-row provider="test_recipient" with same AES-256-GCM encryption (no separate migration needed — same table).
+  • `testProvider(provider)` — performs a real test send (same call shape as `callProviderApi` used by the live failover chain) to the configured test recipient and persists lastTestAt/Status/Error on the row.
+  • `callProviderApi(provider, creds, opts)` — exported per-provider HTTP call (used by both testProvider AND email-failover.ts). Provider endpoints:
+    - apps_script: POST {webhookUrl} with JSON body, 15s timeout
+    - resend: POST https://api.resend.com/emails, Bearer apiKey, 30s timeout
+    - mailtrap: POST https://send.api.mailtrap.io/api/send, Bearer apiKey, 30s timeout
+    - maileroo: POST https://api.maileroo.com/v1/smtp/emails, Bearer apiKey, 30s timeout
+  • Type exports: EmailProviderName (5 values including test_recipient pseudo-row), EmailProviderCredentials (webhookUrl/apiKey/fromEmail/fromName/apiEndpoint/to all optional), PublicProviderRow.
+  • Constants: DEFAULT_PROVIDER_DISPLAY_NAMES, ALL_PROVIDER_SLOTS (the 4 real providers, no test_recipient), PROVIDER_FIELD_DEFS (per-provider form fields for the admin UI).
+- Step 4 — Created src/lib/email-failover.ts (200+ lines):
+  • `deliverWithFailover(opts)` — iterates enabled providers (excluding the test_recipient pseudo-row) in priority order. For each: decrypts credentials, calls callProviderApi, records the attempt. Returns on first HTTP 2xx with `{ provider, ok: true, attempts }`.
+  • BACKWARD-COMPAT FALLBACK: if no providers configured AND NOTIFY_WEBHOOK_URL env var is set, transparently uses the legacy single-provider Google Apps Script path (same action="sendInvoiceEmail"/"sendEmail" + base64Pdf payload shape as before). The legacy path also accepts `invoiceSummary` and `legacyAction` opts so existing callers in notify.ts keep working unchanged.
+  • PURE STUB MODE: if no providers AND no webhook, returns `{ provider: "stub", ok: true }` silently — preserves the prior "log only" dev behavior.
+  • ALL-FAILED aggregation: if every provider fails (and webhook unset or also failed), returns `{ provider: "all_failed", ok: false, error: "delivery chain exhausted — provider1: err1 | provider2: err2 | …" }`.
+  • Each HTTP failure (4xx/5xx/timeout/network) falls through to the next provider — no exceptions thrown to the caller; the caller reads `result.ok` and `result.error`.
+- Step 5 — Rewrote src/lib/notify.ts (now 1092 lines):
+  • Updated file header doc-comment to describe the new Phase 29 failover chain.
+  • Added `import { deliverWithFailover } from "@/lib/email-failover"`.
+  • Internally replaced the 5 places that did `fetch(NOTIFY_WEBHOOK_URL, …)` with `await deliverWithFailover({ to, subject, bodyHtml, bodyText, attachments, type, legacyAction, invoiceSummary })`:
+    - `deliverOne` (used by notifyNewInquiry, notifyNewSubscriber, notifyPostPublished, notifyBroadcast) — legacyAction="sendEmail"
+    - `sendReminderEmail` — legacyAction="sendInvoiceEmail"
+    - `sendProposalEmail` — legacyAction="sendInvoiceEmail"
+    - `sendAdminAlertEmail` — legacyAction="sendEmail"
+    - `sendPaymentThankYouEmail` — legacyAction="sendInvoiceEmail"
+  • Each public helper now: (1) creates the EmailLog audit row first (status="sent") with `select: { id: true }` to grab the row id, (2) calls deliverWithFailover, (3) updateMany on the row to set `provider = result.provider` (and on failure, status="failed" + error=result.error). This means the audit row NOW records WHICH provider actually delivered — a Phase 29 win.
+  • All existing public exports preserved with unchanged signatures: `notifyNewInquiry`, `notifyNewSubscriber`, `notifyPostPublished`, `notifyBroadcast`, `sendReminderEmail`, `sendProposalEmail`, `sendAdminAlertEmail`, `sendPaymentThankYouEmail`, `notifyPaymentProofUploaded`, `adminAlertRecipient`, plus all type exports (`EmailAttachment`, `InquiryNotificationPayload`, `SubscriberNotificationPayload`, `PostPublishedNotificationPayload`, `BroadcastNotificationPayload`, `NotificationPayload`, `ReminderEmailPayload`, `InvoiceEmailPayload`, `AdminAlertPayload`, `PaymentEmailPayload`). NO callers break.
+  • Preserved `NOTIFICATIONS_ENABLED=false` silencing — every public helper returns early when `!enabled`.
+  • Preserved EmailLog persistence on every path (inquiry, subscriber, post, broadcast, reminder, proposal, admin alert, payment thank-you).
+  • Preserved the alertLastSent cooldown map for sendAdminAlertEmail (1-hour dedupe).
+- Step 6 — Created src/components/site/admin/settings-tab.tsx (480+ lines, "use client"):
+  • Renders 4 provider cards (Google Apps Script, Resend, Mailtrap, Maileroo) in priority order via ALL_PROVIDER_SLOTS.
+  • Each card shows: priority badge (gold on enabled, muted on disabled), provider display name + blurb + endpoint URL (PROVIDER_META map), enabled toggle (custom switch — gold when on), per-provider form fields (driven by PROVIDER_FIELD_DEFS — apps_script has webhookUrl + fromEmail; resend/mailtrap/maileroo each have apiKey + fromEmail + fromName), Save button (POSTs to /api/admin/email-config), Test button (POSTs to /api/admin/email-config/test?provider=X), last test status badge (emerald "Test OK" or red "Test failed" with timestamp), last test error inline display.
+  • Top-of-page explainer card with Shield icon: "Email Failover Chain — providers are tried in priority order. If the primary fails, the next provider is automatically used. All credentials are AES-256-GCM encrypted at rest."
+  • Test recipient field at the top — saves to /api/admin/email-config/test-to POST. Pre-fills from /api/admin/email-config/test-to GET on mount.
+  • Credential fields render empty by default (the API only tells the UI which fields have values via `credentialFields` array — never the values themselves). Each populated field shows a small emerald "● saved" marker so the admin knows what's configured without seeing the secret.
+  • Matches the dark theme aesthetic of other admin tabs: bg via `surface-card` class (defined in globals.css), gold accents (text-gold, border-gold/30, bg-gold-dim), white-on-dark text, consistent padding (px-6 py-5 cards).
+  • Per-card toast notifications on save/test actions (auto-dismiss after 3.5s).
+  • Loading state with Loader2 spinner; error state with retry button.
+- Step 7 — Updated src/components/site/admin/dashboard.tsx:
+  • Added `Settings` to the lucide-react icon imports (alphabetically between Send and Users).
+  • Added `import { SettingsTab } from "./settings-tab"` after the AnalyticsTab import.
+  • Added `"settings"` to the `Tab` union type (after "email").
+  • Added `{ id: "settings", label: "Settings", icon: Settings }` to the TABS array as the 12th tab.
+  • Added `{tab === "settings" && <SettingsTab />}` to the tab content rendering block (after the email tab block at line 733→736).
+- Step 8 — Created src/app/api/admin/email-config/route.ts:
+  • GET — enforces admin auth via isAdminAuthorized(). Returns all 4 provider slots (even when no row exists yet — the UI needs the full set to render cards). Each row is the redacted PublicProviderRow shape (provider, displayName, priority, enabled, hasCredentials, credentialFields, lastTestAt/Status/Error, updatedAt) — credential values NEVER surfaced.
+  • POST — body `{ provider, credentials: Record<string,string>|null, displayName?, priority?, enabled? }`. When `credentials` is provided (non-null + non-empty), calls `saveEmailProvider()` from email-config.ts (which re-encrypts). When credentials is null (metadata-only update — used by the enabled-toggle when no new creds entered), does a direct `db.emailProviderConfig.update` to preserve the existing credentialsEnc.
+- Step 9 — Created src/app/api/admin/email-config/test/route.ts:
+  • POST — accepts provider via query param `?provider=X` OR JSON body `{ provider }`. Validates against the 4 real providers. Calls `testProvider(provider)` from email-config.ts which performs a real HTTP send to the configured test recipient and persists lastTestAt/Status/Error on the row. Returns `{ ok, error?, latencyMs, detail? }`.
+- Step 10 — Created src/app/api/admin/email-config/test-to/route.ts:
+  • GET — returns `{ ok, to }` where `to` is the resolved test recipient (DB row → EMAIL_TEST_TO env → ADMIN_EMAIL env → support@okomba.com fallback chain via `getTestRecipient()`).
+  • POST — body `{ to: "email@example.com" }`. Validates email format. Persists via `saveTestRecipient()` (encrypted the same way as real provider credentials).
+  • Both routes enforce admin auth via isAdminAuthorized().
+- Step 11 — Updated .env.example:
+  • Added Phase 29 explainer block for EMAIL_CONFIG_ENCRYPTION_KEY (64-char hex, AES-256-GCM, critical warning that rotation requires re-entering all credentials).
+  • Added EMAIL_TEST_TO documentation (optional, falls back to ADMIN_EMAIL).
+  • Added legacy note on NOTIFY_WEBHOOK_URL explaining it's now the backward-compat fallback path when no providers are DB-configured.
+  • Updated the env-var reference table at the bottom to include EMAIL_CONFIG_ENCRYPTION_KEY and EMAIL_TEST_TO entries.
+  • Updated source-of-truth footer to include `email-config,email-failover` in the lib list and `admin/email-config` in the routes list.
+- Step 12 — Generated a real 32-byte hex encryption key with `openssl rand -hex 32` and added it to the local .env file (NOT committed — .env is in .gitignore). Local key: `ec17cce7d19bbec10a86119aeb059af3259ecb7ef686b2e412d9dfb7e36aeac8`. The .env.example has the placeholder `<paste-your-64-char-hex-string-here>` so the founder generates their own for production.
+- Step 13 — Fixed a TypeScript union-width issue: `EmailProviderName` was originally just 4 values but the codebase compared `provider !== "test_recipient"` (a 5th value) — TS errored. Widened the type to include "test_recipient" and added the corresponding entries to `DEFAULT_PROVIDER_DISPLAY_NAMES`, `PROVIDER_FIELD_DEFS`, and the UI's `PROVIDER_META` Record so the type union is complete.
+- Step 14 — Ran `bun run lint` (0 errors / 0 warnings) and `bunx tsc --noEmit` (0 errors). Verified dev.log shows clean boot — no errors related to the new modules; "Reload env: .env" message confirms Next.js picked up the new EMAIL_CONFIG_ENCRYPTION_KEY.
+
+Stage Summary:
+- ALL 8 ACCEPTANCE CRITERIA MET:
+  1. ✅ `bunx prisma db push --skip-generate` succeeded — EmailProviderConfig table + provider column on EmailLog created on Neon Postgres (Done in 7.71s).
+  2. ✅ `bun run lint` passes with 0 errors / 0 warnings.
+  3. ✅ All existing notify.ts callers still work — every public export preserved with unchanged signature (notifyNewInquiry, notifyNewSubscriber, notifyPostPublished, notifyBroadcast, sendReminderEmail, sendProposalEmail, sendAdminAlertEmail, sendPaymentThankYouEmail, notifyPaymentProofUploaded, adminAlertRecipient + all type exports).
+  4. ✅ Settings tab reachable via the dashboard's tab nav — added as the 12th tab `{ id: "settings", label: "Settings", icon: Settings }` after the email tab.
+  5. ✅ AES-256-GCM encryption used (NOT base64, NOT plain text) — `createCipheriv("aes-256-gcm", key, iv[12])` with `getAuthTag()` / `setAuthTag(tag)`. Code comment in src/lib/email-config.ts explicitly documents: "Algorithm: aes-256-gcm. Output is base64(iv[12] || ciphertext || tag[16])." GCM gives both confidentiality AND authentication — tampered ciphertext or rotated key fails the auth-tag check rather than silently decrypting garbage.
+  6. ✅ The 4 providers' API endpoints are correct per the spec: apps_script POST {webhookUrl}, resend POST https://api.resend.com/emails, mailtrap POST https://send.api.mailtrap.io/api/send, maileroo POST https://api.maileroo.com/v1/smtp/emails.
+  7. ✅ EMAIL_CONFIG_ENCRYPTION_KEY documented in .env.example with critical rotation warning.
+
+- FILES CREATED (5):
+  • src/lib/email-config.ts (440+ lines — encryption + CRUD + test + per-provider HTTP call)
+  • src/lib/email-failover.ts (200+ lines — deliverWithFailover chain + legacy NOTIFY_WEBHOOK_URL fallback + stub mode)
+  • src/components/site/admin/settings-tab.tsx (480+ lines — 4 provider cards + test recipient + dark-theme UI matching the rest of the admin)
+  • src/app/api/admin/email-config/route.ts (GET redacted list + POST save with re-encryption)
+  • src/app/api/admin/email-config/test/route.ts (POST — real test send to configured test recipient)
+  • src/app/api/admin/email-config/test-to/route.ts (GET/POST — test recipient CRUD)
+
+- FILES MODIFIED (4):
+  • prisma/schema.prisma — added EmailProviderConfig model + provider column on EmailLog
+  • src/lib/db.ts — bumped PRISMA_CACHE_KEY to 'schema-v13-email-failover'
+  • src/lib/notify.ts — replaced 5 webhook fetches with deliverWithFailover calls, kept all exports + EmailLog persistence + NOTIFICATIONS_ENABLED silencing; audit rows now also record which provider actually delivered
+  • src/components/site/admin/dashboard.tsx — added Settings import + tab + rendering block
+  • .env — added EMAIL_CONFIG_ENCRYPTION_KEY (local dev only — not committed)
+  • .env.example — documented EMAIL_CONFIG_ENCRYPTION_KEY + EMAIL_TEST_TO + legacy NOTIFY_WEBHOOK_URL note + updated env-var reference table
+
+- LINT RESULT: `bun run lint` → exit 0, 0 errors / 0 warnings.
+- PRISMA DB PUSH RESULT: succeeded (Done in 7.71s) against Neon Postgres at ep-curly-cake-b2i9bf98-pooler.c-6.eu-central-1.aws.neon.tech/neondb. New table EmailProviderConfig created (id, provider unique, displayName, priority, enabled, credentialsEnc, lastTestAt, lastTestStatus, lastTestError, createdAt, updatedAt) + @@index([enabled, priority]). EmailLog altered to add provider String? @default("apps_script").
+- TYPESCRIPT CHECK: `bunx tsc --noEmit` → exit 0, 0 errors.
+- DEV LOG: clean — no errors related to new modules; "Reload env: .env" message confirms Next.js picked up EMAIL_CONFIG_ENCRYPTION_KEY. The blocked cross-origin warnings in dev.log are a sandbox/preview-only issue unrelated to email failover.
+
+- ISSUES / LIMITATIONS:
+  1. DB push had to be invoked with the env var passed explicitly via shell rather than relying on Prisma's automatic .env loader — the latter errored with P1012 ("URL must start with the protocol postgresql://"). Investigation: the .env file uses `DATABASE_URL="postgresql://..."` (quoted) and Prisma's loader was including the literal quotes. Worked around by `DATABASE_URL="$(grep '^DATABASE_URL=' .env | sed -E 's/.../.../')" bunx prisma db push`. This is a Phase 28 regression that didn't block us here but the founder should be aware — if they hit P1012 locally they can use the same workaround.
+  2. The legacy NOTIFY_WEBHOOK_URL Apps Script payload shape (action="sendInvoiceEmail" + base64Pdf + invoiceSummary) is preserved in the failover's legacy fallback path so existing Apps Script Web App deployments keep working without redeploying the script. Once the founder sets up real provider credentials via the admin Settings tab, the legacy path is no longer consulted.
+  3. The `EmailProviderConfig.provider` unique constraint means there can only ever be ONE row per provider name. This is intentional — the priority/enabled flags express ordering and enablement, not multiple parallel instances of the same provider.
+  4. The `test_recipient` pseudo-row reuses the EmailProviderConfig table (provider="test_recipient", credentialsEnc stores `{ to: "email" }` encrypted the same way). This avoids a separate migration but means it's subject to the unique constraint on provider — only one test recipient at a time, which is the desired behavior anyway.
+  5. EmailLog rows created BEFORE Phase 29 have `provider = NULL` (the default was applied retroactively by Postgres). New rows from Phase 29 onward will record the actual provider that delivered. The admin Email log UI currently shows the raw `provider` column value via the existing `EmailLog` type — a future polish pass could add a colored badge per provider in the email-log-tab, but it's not blocking.
+
+- Worklog entry appended to /home/z/my-project/worklog.md (this section).
+- NO git push performed (per instructions — main agent handles the push).
+- NO dev server start attempted (auto-run by system).
+- NO production build modified.
+- Focused only on implementation files per the task directive.

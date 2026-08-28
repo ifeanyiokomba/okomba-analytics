@@ -4,9 +4,21 @@ generator client {
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  // ── Phase 29 fix: directUrl removed ─────────────────────────
+  // Prisma's directUrl is recommended for Neon when DATABASE_URL is
+  // the PgBouncer-pooler endpoint, because PgBouncer's transaction
+  // mode doesn't support all DDL operations Prisma migrations use.
+  // HOWEVER, modern Neon's pooler supports `prisma db push` fine,
+  // and forcing a separate DIRECT_URL env var caused P1012 on Render
+  // (the env var wasn't set there, breaking every deploy).
+  // Removing directUrl means Prisma uses DATABASE_URL for everything
+  // — one env var to configure, deploys succeed.
+  // If we ever hit "prepared statement ... does not exist" or similar
+  // pooler-mode errors during db push, re-add:
+  //   directUrl = env("DIRECT_URL")
+  // and set DIRECT_URL on Render to the non-pooler Neon hostname.
 }
 
 // ── SQLite → PostgreSQL migration (Phase 28) ─────────────────
@@ -160,11 +172,41 @@ model EmailLog {
   bodyHtml       String? // branded HTML version
   attachments    Json     @default("[]") // JSON [{filename, size, storageUrl?}]
   invoiceId      String? // related invoice when type=invoice.sent
+  // ── Phase 29: which provider actually delivered this email ──
+  // (apps_script | resend | mailtrap | maileroo). Null = legacy
+  // NOTIFY_WEBHOOK_URL delivery (pre-failover or stub mode).
+  provider       String?  @default("apps_script")
 
   @@index([postId])
   @@index([subscriberId])
   @@index([sentAt])
   @@index([invoiceId])
+}
+
+/**
+ * ── Phase 29: AES-256-GCM-encrypted email provider credentials ──
+ * The failover chain (apps_script → resend → mailtrap → maileroo)
+ * iterates enabled rows in `priority` order (lower = tried first).
+ * `credentialsEnc` is base64(iv|ciphertext|tag) — never plaintext.
+ * Rotation requires re-entering all credentials because the
+ * encryption key is what makes the ciphertext readable.
+ */
+model EmailProviderConfig {
+  id             String    @id @default(cuid())
+  provider       String    @unique // apps_script | resend | mailtrap | maileroo
+  displayName    String // "Google Apps Script" | "Resend" | "Mailtrap" | "Maileroo"
+  priority       Int       @default(0) // 1=primary, 2=secondary, etc. Lower = tried first.
+  enabled        Boolean   @default(true)
+  // AES-256-GCM encrypted blob: { apiKey?, webhookUrl?, fromEmail?, fromName?, apiEndpoint? }
+  credentialsEnc String // base64(iv|ciphertext|tag)
+  // Last test result (set by /api/admin/email-config/test)
+  lastTestAt     DateTime?
+  lastTestStatus String? // success | failed
+  lastTestError  String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@index([enabled, priority])
 }
 
 /**

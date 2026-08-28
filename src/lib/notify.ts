@@ -1,18 +1,25 @@
 /**
  * Notification service — integration point for outbound notifications.
  *
- * Currently implements a console-based "email stub" that logs structured
- * notification payloads and records each delivery in the EmailLog table so
- * the admin dashboard can show what was sent, when, and to whom.
+ * Phase 29: this module is now backed by the multi-provider failover
+ * chain (apps_script → resend → mailtrap → maileroo) implemented in
+ * `src/lib/email-failover.ts`. Every public helper here composes a
+ * branded HTML + plain-text body and hands it to `deliverWithFailover`,
+ * which tries each enabled provider in priority order until one returns
+ * HTTP 2xx. The provider that actually delivered the email is
+ * persisted on the EmailLog row (new `provider` column, Phase 29).
  *
- * When a real email provider (Resend, SendGrid, AWS SES, etc.) is wired,
- * swap the body of `deliver()` — no other code needs to change.
+ * BACKWARD-COMPAT: if no EmailProviderConfig rows exist, the failover
+ * chain transparently falls back to the legacy `NOTIFY_WEBHOOK_URL`
+ * env var (Google Apps Script). This keeps the existing deployed env
+ * working without forcing a reconfiguration before the next deploy.
  *
  * Set `NOTIFICATIONS_ENABLED=false` to silence entirely.
  */
 
 import { db } from "@/lib/db";
 import { brandedEmailHtml, type EmailBlock } from "@/lib/email-template";
+import { deliverWithFailover } from "@/lib/email-failover";
 
 /* Attachment contract shared with the Google Apps Script engine.
    `base64` is only transported over the webhook (never stored in the
@@ -244,8 +251,10 @@ async function deliverOne(
   );
 
   // ── Record in EmailLog (sent_emails audit) ──────────
+  // Phase 29: also persist the provider that actually delivered.
+  let logId: string | null = null;
   try {
-    await db.emailLog.create({
+    const created = await db.emailLog.create({
       data: {
         type: channel,
         recipientEmail: recipient.email,
@@ -259,32 +268,51 @@ async function deliverOne(
         attachments: attachments.map((a) => ({ filename: a.filename, size: a.base64.length })),
         invoiceId: opts?.invoiceId ?? null,
       },
+      select: { id: true },
     });
+    logId = created.id;
   } catch (err) {
     console.error("[notify:email-log] persist failed:", err);
   }
 
-  // ── Google Apps Script forward (real delivery) ───────
-  const webhookUrl = process.env.NOTIFY_WEBHOOK_URL;
-  if (webhookUrl) {
-    try {
-      await fetch(webhookUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          action: "sendEmail",
-          ...payload,
-          recipient: recipient.email,
-          subject,
-          body,
-          html,
-          attachments,
-        }),
-        signal: AbortSignal.timeout(15000),
-      });
-    } catch (err) {
-      console.error("[notify:webhook] delivery failed:", err);
+  // ── Real delivery via the failover chain (apps_script →
+  //    resend → mailtrap → maileroo). Falls back to the legacy
+  //    NOTIFY_WEBHOOK_URL env var when no providers are
+  //    configured, so the existing deployed env keeps working. ──
+  try {
+    const result = await deliverWithFailover({
+      to: recipient.email,
+      subject,
+      bodyHtml: html,
+      bodyText: body,
+      attachments,
+      type: channel,
+      legacyAction: "sendEmail",
+    });
+    if (!result.ok) {
+      console.error(
+        `[notify:failover] all providers failed for ${recipient.email}:`,
+        result.error
+      );
     }
+    // Persist which provider actually delivered (or "all_failed" /
+    // "legacy_apps_script" / "stub"). The EmailLog row already exists
+    // from the audit-write above; we just augment it with the provider.
+    if (logId) {
+      try {
+        await db.emailLog.updateMany({
+          where: { id: logId },
+          data: {
+            provider: result.provider,
+            ...(result.ok ? {} : { status: "failed", error: result.error ?? "delivery failed" }),
+          },
+        });
+      } catch (err) {
+        console.error("[notify:failover] provider persist failed:", err);
+      }
+    }
+  } catch (err) {
+    console.error("[notify:failover] delivery threw:", err);
   }
 }
 
@@ -516,9 +544,12 @@ export async function sendReminderEmail(
     footerNote: "Already paid? Reply to this email and we will confirm right away.",
   });
 
-  // Audit row (sent_emails contract)
+  // Audit row (sent_emails contract). Phase 29: also persist the
+  // provider that actually delivered (set after the failover call
+  // returns, so we know which provider succeeded).
+  let logId: string | null = null;
   try {
-    await db.emailLog.create({
+    const created = await db.emailLog.create({
       data: {
         type: REMINDER_TYPE[rem.kind],
         recipientEmail: rem.customerEmail,
@@ -529,53 +560,63 @@ export async function sendReminderEmail(
         attachments: [{ filename: rem.pdfFilename, size: rem.pdfBase64.length }],
         invoiceId: rem.invoiceId,
       },
+      select: { id: true },
     });
+    logId = created.id;
   } catch (err) {
     console.error("[notify:reminder] log persist failed:", err);
   }
 
-  // Real delivery via Google Apps Script (same action as proposals —
-  // attaches the base64 PDF, never a link)
-  const webhookUrl = process.env.NOTIFY_WEBHOOK_URL;
-  if (!webhookUrl) {
-    console.info(
-      `[notify:reminder] stub — ${rem.invoiceNumber} (${rem.kind}) to ${rem.customerEmail} (${rem.pdfFilename})`
-    );
-    return { ok: true };
-  }
+  // Real delivery via the failover chain (apps_script → resend →
+  // mailtrap → maileroo). Falls back to NOTIFY_WEBHOOK_URL when no
+  // providers are configured (the legacy Apps Script path expects
+  // action="sendInvoiceEmail" + base64Pdf, so we pass that hint).
   try {
-    const res = await fetch(webhookUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        action: "sendInvoiceEmail",
-        to: rem.customerEmail,
-        subject,
-        body,
-        html,
-        base64Pdf: rem.pdfBase64,
-        filename: rem.pdfFilename,
-        invoiceSummary: {
-          invoiceNumber: rem.invoiceNumber,
-          customerName: rem.customerName,
-          service: rem.service,
-          amount: fmtNaira(rem.amountNaira),
-          dueDate: rem.dueLabel,
-        },
-      }),
-      signal: AbortSignal.timeout(30000),
+    const result = await deliverWithFailover({
+      to: rem.customerEmail,
+      subject,
+      bodyHtml: html,
+      bodyText: body,
+      attachments: [
+        { filename: rem.pdfFilename, contentType: "application/pdf", base64: rem.pdfBase64 },
+      ],
+      type: REMINDER_TYPE[rem.kind],
+      legacyAction: "sendInvoiceEmail",
+      invoiceSummary: {
+        invoiceNumber: rem.invoiceNumber,
+        customerName: rem.customerName,
+        service: rem.service,
+        amount: fmtNaira(rem.amountNaira),
+        dueDate: rem.dueLabel,
+      },
     });
-    if (!res.ok) throw new Error(`webhook responded ${res.status}`);
+    if (logId) {
+      try {
+        await db.emailLog.updateMany({
+          where: { id: logId },
+          data: {
+            provider: result.provider,
+            ...(result.ok ? {} : { status: "failed", error: result.error ?? "delivery failed" }),
+          },
+        });
+      } catch {}
+    }
+    if (!result.ok) {
+      console.error("[notify:reminder] delivery failed:", result.error);
+      return { ok: false, error: result.error };
+    }
     return { ok: true };
   } catch (err) {
-    const msg = err instanceof Error ? err.message : "webhook delivery failed";
-    console.error("[notify:reminder] delivery failed:", msg);
-    try {
-      await db.emailLog.updateMany({
-        where: { invoiceId: rem.invoiceId, type: REMINDER_TYPE[rem.kind], status: "sent" },
-        data: { status: "failed", error: msg },
-      });
-    } catch {}
+    const msg = err instanceof Error ? err.message : "delivery failed";
+    console.error("[notify:reminder] delivery threw:", msg);
+    if (logId) {
+      try {
+        await db.emailLog.updateMany({
+          where: { id: logId },
+          data: { status: "failed", error: msg },
+        });
+      } catch {}
+    }
     return { ok: false, error: msg };
   }
 }
@@ -692,9 +733,11 @@ export async function sendProposalEmail(
     base64: inv.pdfBase64,
   };
 
-  // Audit row (sent_emails contract)
+  // Audit row (sent_emails contract). Phase 29: also persist the
+  // provider that actually delivered (set after the failover call).
+  let logId: string | null = null;
   try {
-    await db.emailLog.create({
+    const created = await db.emailLog.create({
       data: {
         type: "invoice.sent",
         recipientEmail: inv.customerEmail,
@@ -707,53 +750,60 @@ export async function sendProposalEmail(
         ],
         invoiceId: inv.invoiceId,
       },
+      select: { id: true },
     });
+    logId = created.id;
   } catch (err) {
     console.error("[notify:invoice] log persist failed:", err);
   }
 
-  // Real delivery via Google Apps Script — action: sendInvoiceEmail
-  // attaches the base64 PDF via MailApp (no links, per spec).
-  const webhookUrl = process.env.NOTIFY_WEBHOOK_URL;
-  if (!webhookUrl) {
-    console.info(
-      `[notify:invoice] stub — ${inv.invoiceNumber} to ${inv.customerEmail} (${inv.pdfFilename}, ${inv.pdfBase64.length} b64 chars)`
-    );
-    return { ok: true };
-  }
+  // Real delivery via the failover chain (apps_script → resend →
+  // mailtrap → maileroo). Falls back to NOTIFY_WEBHOOK_URL when no
+  // providers are configured.
   try {
-    const res = await fetch(webhookUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        action: "sendInvoiceEmail",
-        to: inv.customerEmail,
-        subject,
-        body,
-        html,
-        base64Pdf: inv.pdfBase64,
-        filename: inv.pdfFilename,
-        invoiceSummary: {
-          invoiceNumber: inv.invoiceNumber,
-          customerName: inv.customerName,
-          service: inv.service,
-          amount: fmtNaira(inv.amountNaira),
-          dueDate: due,
-        },
-      }),
-      signal: AbortSignal.timeout(30000),
+    const result = await deliverWithFailover({
+      to: inv.customerEmail,
+      subject,
+      bodyHtml: html,
+      bodyText: body,
+      attachments: [attachment],
+      type: "invoice.sent",
+      legacyAction: "sendInvoiceEmail",
+      invoiceSummary: {
+        invoiceNumber: inv.invoiceNumber,
+        customerName: inv.customerName,
+        service: inv.service,
+        amount: fmtNaira(inv.amountNaira),
+        dueDate: due,
+      },
     });
-    if (!res.ok) throw new Error(`webhook responded ${res.status}`);
+    if (logId) {
+      try {
+        await db.emailLog.updateMany({
+          where: { id: logId },
+          data: {
+            provider: result.provider,
+            ...(result.ok ? {} : { status: "failed", error: result.error ?? "delivery failed" }),
+          },
+        });
+      } catch {}
+    }
+    if (!result.ok) {
+      console.error("[notify:invoice] delivery failed:", result.error);
+      return { ok: false, error: result.error };
+    }
     return { ok: true };
   } catch (err) {
-    const msg = err instanceof Error ? err.message : "webhook delivery failed";
-    console.error("[notify:invoice] delivery failed:", msg);
-    try {
-      await db.emailLog.updateMany({
-        where: { invoiceId: inv.invoiceId, type: "invoice.sent", status: "sent" },
-        data: { status: "failed", error: msg },
-      });
-    } catch {}
+    const msg = err instanceof Error ? err.message : "delivery failed";
+    console.error("[notify:invoice] delivery threw:", msg);
+    if (logId) {
+      try {
+        await db.emailLog.updateMany({
+          where: { id: logId },
+          data: { status: "failed", error: msg },
+        });
+      } catch {}
+    }
     return { ok: false, error: msg };
   }
 }
@@ -800,9 +850,10 @@ export async function sendAdminAlertEmail(p: AdminAlertPayload): Promise<{ ok: b
 
   const to = adminAlertRecipient();
 
-  // Audit row
+  // Audit row. Phase 29: also persist the provider that delivered.
+  let logId: string | null = null;
   try {
-    await db.emailLog.create({
+    const created = await db.emailLog.create({
       data: {
         type: "system.alert",
         recipientEmail: to,
@@ -811,34 +862,42 @@ export async function sendAdminAlertEmail(p: AdminAlertPayload): Promise<{ ok: b
         bodyText: p.bodyText,
         bodyHtml: html,
       },
+      select: { id: true },
     });
+    logId = created.id;
   } catch (err) {
     console.error("[notify:admin-alert] log persist failed:", err);
   }
 
-  const webhookUrl = process.env.NOTIFY_WEBHOOK_URL;
-  if (!webhookUrl) {
-    console.info(`[notify:admin-alert] stub — ${p.subject} → ${to}`);
-    return { ok: true };
-  }
+  // Real delivery via the failover chain.
   try {
-    const res = await fetch(webhookUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        action: "sendEmail",
-        to,
-        subject: p.subject,
-        body: p.bodyText,
-        html,
-        attachments: [],
-      }),
-      signal: AbortSignal.timeout(15000),
+    const result = await deliverWithFailover({
+      to,
+      subject: p.subject,
+      bodyHtml: html,
+      bodyText: p.bodyText,
+      attachments: [],
+      type: "system.alert",
+      legacyAction: "sendEmail",
     });
-    if (!res.ok) throw new Error(`webhook responded ${res.status}`);
+    if (logId) {
+      try {
+        await db.emailLog.updateMany({
+          where: { id: logId },
+          data: {
+            provider: result.provider,
+            ...(result.ok ? {} : { status: "failed", error: result.error ?? "delivery failed" }),
+          },
+        });
+      } catch {}
+    }
+    if (!result.ok) {
+      console.error("[notify:admin-alert] delivery failed:", result.error);
+      return { ok: false };
+    }
     return { ok: true };
   } catch (err) {
-    console.error("[notify:admin-alert] delivery failed:", err instanceof Error ? err.message : err);
+    console.error("[notify:admin-alert] delivery threw:", err instanceof Error ? err.message : err);
     return { ok: false };
   }
 }
@@ -956,9 +1015,11 @@ export async function sendPaymentThankYouEmail(
     footerNote: "Questions about this payment? Reply to this email or reach us on WhatsApp.",
   });
 
-  // Audit row (sent_emails contract)
+  // Audit row (sent_emails contract). Phase 29: also persist the
+  // provider that actually delivered (set after the failover call).
+  let logId: string | null = null;
   try {
-    await db.emailLog.create({
+    const created = await db.emailLog.create({
       data: {
         type: "payment.received",
         recipientEmail: p.customerEmail,
@@ -969,52 +1030,62 @@ export async function sendPaymentThankYouEmail(
         attachments: [{ filename: p.pdfFilename, size: p.pdfBase64.length }],
         invoiceId: p.invoiceId,
       },
+      select: { id: true },
     });
+    logId = created.id;
   } catch (err) {
     console.error("[notify:payment] log persist failed:", err);
   }
 
-  // Delivery via Google Apps Script — same attachment engine
-  const webhookUrl = process.env.NOTIFY_WEBHOOK_URL;
-  if (!webhookUrl) {
-    console.info(
-      `[notify:payment] stub — receipt ${p.receiptNumber} to ${p.customerEmail} (${p.pdfFilename})`
-    );
-    return { ok: true };
-  }
+  // Real delivery via the failover chain (apps_script → resend →
+  // mailtrap → maileroo). Falls back to NOTIFY_WEBHOOK_URL when no
+  // providers are configured.
   try {
-    const res = await fetch(webhookUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        action: "sendInvoiceEmail",
-        to: p.customerEmail,
-        subject,
-        body,
-        html,
-        base64Pdf: p.pdfBase64,
-        filename: p.pdfFilename,
-        invoiceSummary: {
-          invoiceNumber: p.invoiceNumber,
-          customerName: p.customerName,
-          service: p.service,
-          amount: fmtNaira(p.amountNaira),
-          dueDate: `PAID ${p.paidLabel}`,
-        },
-      }),
-      signal: AbortSignal.timeout(30000),
+    const result = await deliverWithFailover({
+      to: p.customerEmail,
+      subject,
+      bodyHtml: html,
+      bodyText: body,
+      attachments: [
+        { filename: p.pdfFilename, contentType: "application/pdf", base64: p.pdfBase64 },
+      ],
+      type: "payment.received",
+      legacyAction: "sendInvoiceEmail",
+      invoiceSummary: {
+        invoiceNumber: p.invoiceNumber,
+        customerName: p.customerName,
+        service: p.service,
+        amount: fmtNaira(p.amountNaira),
+        dueDate: `PAID ${p.paidLabel}`,
+      },
     });
-    if (!res.ok) throw new Error(`webhook responded ${res.status}`);
+    if (logId) {
+      try {
+        await db.emailLog.updateMany({
+          where: { id: logId },
+          data: {
+            provider: result.provider,
+            ...(result.ok ? {} : { status: "failed", error: result.error ?? "delivery failed" }),
+          },
+        });
+      } catch {}
+    }
+    if (!result.ok) {
+      console.error("[notify:payment] delivery failed:", result.error);
+      return { ok: false, error: result.error };
+    }
     return { ok: true };
   } catch (err) {
-    const msg = err instanceof Error ? err.message : "webhook delivery failed";
-    console.error("[notify:payment] delivery failed:", msg);
-    try {
-      await db.emailLog.updateMany({
-        where: { invoiceId: p.invoiceId, type: "payment.received", status: "sent" },
-        data: { status: "failed", error: msg },
-      });
-    } catch {}
+    const msg = err instanceof Error ? err.message : "delivery failed";
+    console.error("[notify:payment] delivery threw:", msg);
+    if (logId) {
+      try {
+        await db.emailLog.updateMany({
+          where: { id: logId },
+          data: { status: "failed", error: msg },
+        });
+      } catch {}
+    }
     return { ok: false, error: msg };
   }
 }

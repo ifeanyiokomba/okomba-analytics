@@ -233,7 +233,22 @@ exports.Prisma.EmailLogScalarFieldEnum = {
   bodyText: 'bodyText',
   bodyHtml: 'bodyHtml',
   attachments: 'attachments',
-  invoiceId: 'invoiceId'
+  invoiceId: 'invoiceId',
+  provider: 'provider'
+};
+
+exports.Prisma.EmailProviderConfigScalarFieldEnum = {
+  id: 'id',
+  provider: 'provider',
+  displayName: 'displayName',
+  priority: 'priority',
+  enabled: 'enabled',
+  credentialsEnc: 'credentialsEnc',
+  lastTestAt: 'lastTestAt',
+  lastTestStatus: 'lastTestStatus',
+  lastTestError: 'lastTestError',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 };
 
 exports.Prisma.ReceivedEmailScalarFieldEnum = {
@@ -411,6 +426,7 @@ exports.Prisma.ModelName = {
   Post: 'Post',
   Testimonial: 'Testimonial',
   EmailLog: 'EmailLog',
+  EmailProviderConfig: 'EmailProviderConfig',
   ReceivedEmail: 'ReceivedEmail',
   Invoice: 'Invoice',
   EventRecord: 'EventRecord',

@@ -59,6 +59,16 @@ export type Testimonial = $Result.DefaultSelection<Prisma.$TestimonialPayload>
  */
 export type EmailLog = $Result.DefaultSelection<Prisma.$EmailLogPayload>
 /**
+ * Model EmailProviderConfig
+ * ── Phase 29: AES-256-GCM-encrypted email provider credentials ──
+ *    The failover chain (apps_script → resend → mailtrap → maileroo)
+ *    iterates enabled rows in `priority` order (lower = tried first).
+ *    `credentialsEnc` is base64(iv|ciphertext|tag) — never plaintext.
+ *    Rotation requires re-entering all credentials because the
+ *    encryption key is what makes the ciphertext readable.
+ */
+export type EmailProviderConfig = $Result.DefaultSelection<Prisma.$EmailProviderConfigPayload>
+/**
  * Model ReceivedEmail
  * ── Phase-1 Module 2: audit-trail models ────────────────────
  *    Directive asked for Mongoose models; this stack is Prisma +
@@ -341,6 +351,16 @@ export class PrismaClient<
     * ```
     */
   get emailLog(): Prisma.EmailLogDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.emailProviderConfig`: Exposes CRUD operations for the **EmailProviderConfig** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more EmailProviderConfigs
+    * const emailProviderConfigs = await prisma.emailProviderConfig.findMany()
+    * ```
+    */
+  get emailProviderConfig(): Prisma.EmailProviderConfigDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.receivedEmail`: Exposes CRUD operations for the **ReceivedEmail** model.
@@ -880,6 +900,7 @@ export namespace Prisma {
     Post: 'Post',
     Testimonial: 'Testimonial',
     EmailLog: 'EmailLog',
+    EmailProviderConfig: 'EmailProviderConfig',
     ReceivedEmail: 'ReceivedEmail',
     Invoice: 'Invoice',
     EventRecord: 'EventRecord',
@@ -907,7 +928,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "inquiry" | "draftProposal" | "webhookLog" | "adminSession" | "subscriber" | "post" | "testimonial" | "emailLog" | "receivedEmail" | "invoice" | "eventRecord" | "whatsAppMessage" | "analyticsEvent" | "backupLog" | "customer" | "customerNote" | "customerMessage"
+      modelProps: "inquiry" | "draftProposal" | "webhookLog" | "adminSession" | "subscriber" | "post" | "testimonial" | "emailLog" | "emailProviderConfig" | "receivedEmail" | "invoice" | "eventRecord" | "whatsAppMessage" | "analyticsEvent" | "backupLog" | "customer" | "customerNote" | "customerMessage"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1500,6 +1521,80 @@ export namespace Prisma {
           count: {
             args: Prisma.EmailLogCountArgs<ExtArgs>
             result: $Utils.Optional<EmailLogCountAggregateOutputType> | number
+          }
+        }
+      }
+      EmailProviderConfig: {
+        payload: Prisma.$EmailProviderConfigPayload<ExtArgs>
+        fields: Prisma.EmailProviderConfigFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.EmailProviderConfigFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EmailProviderConfigPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.EmailProviderConfigFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EmailProviderConfigPayload>
+          }
+          findFirst: {
+            args: Prisma.EmailProviderConfigFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EmailProviderConfigPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.EmailProviderConfigFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EmailProviderConfigPayload>
+          }
+          findMany: {
+            args: Prisma.EmailProviderConfigFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EmailProviderConfigPayload>[]
+          }
+          create: {
+            args: Prisma.EmailProviderConfigCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EmailProviderConfigPayload>
+          }
+          createMany: {
+            args: Prisma.EmailProviderConfigCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.EmailProviderConfigCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EmailProviderConfigPayload>[]
+          }
+          delete: {
+            args: Prisma.EmailProviderConfigDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EmailProviderConfigPayload>
+          }
+          update: {
+            args: Prisma.EmailProviderConfigUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EmailProviderConfigPayload>
+          }
+          deleteMany: {
+            args: Prisma.EmailProviderConfigDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.EmailProviderConfigUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.EmailProviderConfigUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EmailProviderConfigPayload>[]
+          }
+          upsert: {
+            args: Prisma.EmailProviderConfigUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$EmailProviderConfigPayload>
+          }
+          aggregate: {
+            args: Prisma.EmailProviderConfigAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateEmailProviderConfig>
+          }
+          groupBy: {
+            args: Prisma.EmailProviderConfigGroupByArgs<ExtArgs>
+            result: $Utils.Optional<EmailProviderConfigGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.EmailProviderConfigCountArgs<ExtArgs>
+            result: $Utils.Optional<EmailProviderConfigCountAggregateOutputType> | number
           }
         }
       }
@@ -2273,6 +2368,7 @@ export namespace Prisma {
     post?: PostOmit
     testimonial?: TestimonialOmit
     emailLog?: EmailLogOmit
+    emailProviderConfig?: EmailProviderConfigOmit
     receivedEmail?: ReceivedEmailOmit
     invoice?: InvoiceOmit
     eventRecord?: EventRecordOmit
@@ -9999,6 +10095,7 @@ export namespace Prisma {
     bodyText: string | null
     bodyHtml: string | null
     invoiceId: string | null
+    provider: string | null
   }
 
   export type EmailLogMaxAggregateOutputType = {
@@ -10014,6 +10111,7 @@ export namespace Prisma {
     bodyText: string | null
     bodyHtml: string | null
     invoiceId: string | null
+    provider: string | null
   }
 
   export type EmailLogCountAggregateOutputType = {
@@ -10030,6 +10128,7 @@ export namespace Prisma {
     bodyHtml: number
     attachments: number
     invoiceId: number
+    provider: number
     _all: number
   }
 
@@ -10047,6 +10146,7 @@ export namespace Prisma {
     bodyText?: true
     bodyHtml?: true
     invoiceId?: true
+    provider?: true
   }
 
   export type EmailLogMaxAggregateInputType = {
@@ -10062,6 +10162,7 @@ export namespace Prisma {
     bodyText?: true
     bodyHtml?: true
     invoiceId?: true
+    provider?: true
   }
 
   export type EmailLogCountAggregateInputType = {
@@ -10078,6 +10179,7 @@ export namespace Prisma {
     bodyHtml?: true
     attachments?: true
     invoiceId?: true
+    provider?: true
     _all?: true
   }
 
@@ -10167,6 +10269,7 @@ export namespace Prisma {
     bodyHtml: string | null
     attachments: JsonValue
     invoiceId: string | null
+    provider: string | null
     _count: EmailLogCountAggregateOutputType | null
     _min: EmailLogMinAggregateOutputType | null
     _max: EmailLogMaxAggregateOutputType | null
@@ -10200,6 +10303,7 @@ export namespace Prisma {
     bodyHtml?: boolean
     attachments?: boolean
     invoiceId?: boolean
+    provider?: boolean
   }, ExtArgs["result"]["emailLog"]>
 
   export type EmailLogSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -10216,6 +10320,7 @@ export namespace Prisma {
     bodyHtml?: boolean
     attachments?: boolean
     invoiceId?: boolean
+    provider?: boolean
   }, ExtArgs["result"]["emailLog"]>
 
   export type EmailLogSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -10232,6 +10337,7 @@ export namespace Prisma {
     bodyHtml?: boolean
     attachments?: boolean
     invoiceId?: boolean
+    provider?: boolean
   }, ExtArgs["result"]["emailLog"]>
 
   export type EmailLogSelectScalar = {
@@ -10248,9 +10354,10 @@ export namespace Prisma {
     bodyHtml?: boolean
     attachments?: boolean
     invoiceId?: boolean
+    provider?: boolean
   }
 
-  export type EmailLogOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "type" | "recipientEmail" | "subject" | "postId" | "subscriberId" | "status" | "error" | "sentAt" | "bodyText" | "bodyHtml" | "attachments" | "invoiceId", ExtArgs["result"]["emailLog"]>
+  export type EmailLogOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "type" | "recipientEmail" | "subject" | "postId" | "subscriberId" | "status" | "error" | "sentAt" | "bodyText" | "bodyHtml" | "attachments" | "invoiceId" | "provider", ExtArgs["result"]["emailLog"]>
 
   export type $EmailLogPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "EmailLog"
@@ -10269,6 +10376,7 @@ export namespace Prisma {
       bodyHtml: string | null
       attachments: Prisma.JsonValue
       invoiceId: string | null
+      provider: string | null
     }, ExtArgs["result"]["emailLog"]>
     composites: {}
   }
@@ -10705,6 +10813,7 @@ export namespace Prisma {
     readonly bodyHtml: FieldRef<"EmailLog", 'String'>
     readonly attachments: FieldRef<"EmailLog", 'Json'>
     readonly invoiceId: FieldRef<"EmailLog", 'String'>
+    readonly provider: FieldRef<"EmailLog", 'String'>
   }
     
 
@@ -11068,6 +11177,1113 @@ export namespace Prisma {
      * Omit specific fields from the EmailLog
      */
     omit?: EmailLogOmit<ExtArgs> | null
+  }
+
+
+  /**
+   * Model EmailProviderConfig
+   */
+
+  export type AggregateEmailProviderConfig = {
+    _count: EmailProviderConfigCountAggregateOutputType | null
+    _avg: EmailProviderConfigAvgAggregateOutputType | null
+    _sum: EmailProviderConfigSumAggregateOutputType | null
+    _min: EmailProviderConfigMinAggregateOutputType | null
+    _max: EmailProviderConfigMaxAggregateOutputType | null
+  }
+
+  export type EmailProviderConfigAvgAggregateOutputType = {
+    priority: number | null
+  }
+
+  export type EmailProviderConfigSumAggregateOutputType = {
+    priority: number | null
+  }
+
+  export type EmailProviderConfigMinAggregateOutputType = {
+    id: string | null
+    provider: string | null
+    displayName: string | null
+    priority: number | null
+    enabled: boolean | null
+    credentialsEnc: string | null
+    lastTestAt: Date | null
+    lastTestStatus: string | null
+    lastTestError: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type EmailProviderConfigMaxAggregateOutputType = {
+    id: string | null
+    provider: string | null
+    displayName: string | null
+    priority: number | null
+    enabled: boolean | null
+    credentialsEnc: string | null
+    lastTestAt: Date | null
+    lastTestStatus: string | null
+    lastTestError: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type EmailProviderConfigCountAggregateOutputType = {
+    id: number
+    provider: number
+    displayName: number
+    priority: number
+    enabled: number
+    credentialsEnc: number
+    lastTestAt: number
+    lastTestStatus: number
+    lastTestError: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type EmailProviderConfigAvgAggregateInputType = {
+    priority?: true
+  }
+
+  export type EmailProviderConfigSumAggregateInputType = {
+    priority?: true
+  }
+
+  export type EmailProviderConfigMinAggregateInputType = {
+    id?: true
+    provider?: true
+    displayName?: true
+    priority?: true
+    enabled?: true
+    credentialsEnc?: true
+    lastTestAt?: true
+    lastTestStatus?: true
+    lastTestError?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type EmailProviderConfigMaxAggregateInputType = {
+    id?: true
+    provider?: true
+    displayName?: true
+    priority?: true
+    enabled?: true
+    credentialsEnc?: true
+    lastTestAt?: true
+    lastTestStatus?: true
+    lastTestError?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type EmailProviderConfigCountAggregateInputType = {
+    id?: true
+    provider?: true
+    displayName?: true
+    priority?: true
+    enabled?: true
+    credentialsEnc?: true
+    lastTestAt?: true
+    lastTestStatus?: true
+    lastTestError?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type EmailProviderConfigAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which EmailProviderConfig to aggregate.
+     */
+    where?: EmailProviderConfigWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of EmailProviderConfigs to fetch.
+     */
+    orderBy?: EmailProviderConfigOrderByWithRelationInput | EmailProviderConfigOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: EmailProviderConfigWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` EmailProviderConfigs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` EmailProviderConfigs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned EmailProviderConfigs
+    **/
+    _count?: true | EmailProviderConfigCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: EmailProviderConfigAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: EmailProviderConfigSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: EmailProviderConfigMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: EmailProviderConfigMaxAggregateInputType
+  }
+
+  export type GetEmailProviderConfigAggregateType<T extends EmailProviderConfigAggregateArgs> = {
+        [P in keyof T & keyof AggregateEmailProviderConfig]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateEmailProviderConfig[P]>
+      : GetScalarType<T[P], AggregateEmailProviderConfig[P]>
+  }
+
+
+
+
+  export type EmailProviderConfigGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: EmailProviderConfigWhereInput
+    orderBy?: EmailProviderConfigOrderByWithAggregationInput | EmailProviderConfigOrderByWithAggregationInput[]
+    by: EmailProviderConfigScalarFieldEnum[] | EmailProviderConfigScalarFieldEnum
+    having?: EmailProviderConfigScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: EmailProviderConfigCountAggregateInputType | true
+    _avg?: EmailProviderConfigAvgAggregateInputType
+    _sum?: EmailProviderConfigSumAggregateInputType
+    _min?: EmailProviderConfigMinAggregateInputType
+    _max?: EmailProviderConfigMaxAggregateInputType
+  }
+
+  export type EmailProviderConfigGroupByOutputType = {
+    id: string
+    provider: string
+    displayName: string
+    priority: number
+    enabled: boolean
+    credentialsEnc: string
+    lastTestAt: Date | null
+    lastTestStatus: string | null
+    lastTestError: string | null
+    createdAt: Date
+    updatedAt: Date
+    _count: EmailProviderConfigCountAggregateOutputType | null
+    _avg: EmailProviderConfigAvgAggregateOutputType | null
+    _sum: EmailProviderConfigSumAggregateOutputType | null
+    _min: EmailProviderConfigMinAggregateOutputType | null
+    _max: EmailProviderConfigMaxAggregateOutputType | null
+  }
+
+  type GetEmailProviderConfigGroupByPayload<T extends EmailProviderConfigGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<EmailProviderConfigGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof EmailProviderConfigGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], EmailProviderConfigGroupByOutputType[P]>
+            : GetScalarType<T[P], EmailProviderConfigGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type EmailProviderConfigSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    provider?: boolean
+    displayName?: boolean
+    priority?: boolean
+    enabled?: boolean
+    credentialsEnc?: boolean
+    lastTestAt?: boolean
+    lastTestStatus?: boolean
+    lastTestError?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["emailProviderConfig"]>
+
+  export type EmailProviderConfigSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    provider?: boolean
+    displayName?: boolean
+    priority?: boolean
+    enabled?: boolean
+    credentialsEnc?: boolean
+    lastTestAt?: boolean
+    lastTestStatus?: boolean
+    lastTestError?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["emailProviderConfig"]>
+
+  export type EmailProviderConfigSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    provider?: boolean
+    displayName?: boolean
+    priority?: boolean
+    enabled?: boolean
+    credentialsEnc?: boolean
+    lastTestAt?: boolean
+    lastTestStatus?: boolean
+    lastTestError?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["emailProviderConfig"]>
+
+  export type EmailProviderConfigSelectScalar = {
+    id?: boolean
+    provider?: boolean
+    displayName?: boolean
+    priority?: boolean
+    enabled?: boolean
+    credentialsEnc?: boolean
+    lastTestAt?: boolean
+    lastTestStatus?: boolean
+    lastTestError?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type EmailProviderConfigOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "provider" | "displayName" | "priority" | "enabled" | "credentialsEnc" | "lastTestAt" | "lastTestStatus" | "lastTestError" | "createdAt" | "updatedAt", ExtArgs["result"]["emailProviderConfig"]>
+
+  export type $EmailProviderConfigPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "EmailProviderConfig"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      provider: string
+      displayName: string
+      priority: number
+      enabled: boolean
+      credentialsEnc: string
+      lastTestAt: Date | null
+      lastTestStatus: string | null
+      lastTestError: string | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["emailProviderConfig"]>
+    composites: {}
+  }
+
+  type EmailProviderConfigGetPayload<S extends boolean | null | undefined | EmailProviderConfigDefaultArgs> = $Result.GetResult<Prisma.$EmailProviderConfigPayload, S>
+
+  type EmailProviderConfigCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<EmailProviderConfigFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: EmailProviderConfigCountAggregateInputType | true
+    }
+
+  export interface EmailProviderConfigDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['EmailProviderConfig'], meta: { name: 'EmailProviderConfig' } }
+    /**
+     * Find zero or one EmailProviderConfig that matches the filter.
+     * @param {EmailProviderConfigFindUniqueArgs} args - Arguments to find a EmailProviderConfig
+     * @example
+     * // Get one EmailProviderConfig
+     * const emailProviderConfig = await prisma.emailProviderConfig.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends EmailProviderConfigFindUniqueArgs>(args: SelectSubset<T, EmailProviderConfigFindUniqueArgs<ExtArgs>>): Prisma__EmailProviderConfigClient<$Result.GetResult<Prisma.$EmailProviderConfigPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one EmailProviderConfig that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {EmailProviderConfigFindUniqueOrThrowArgs} args - Arguments to find a EmailProviderConfig
+     * @example
+     * // Get one EmailProviderConfig
+     * const emailProviderConfig = await prisma.emailProviderConfig.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends EmailProviderConfigFindUniqueOrThrowArgs>(args: SelectSubset<T, EmailProviderConfigFindUniqueOrThrowArgs<ExtArgs>>): Prisma__EmailProviderConfigClient<$Result.GetResult<Prisma.$EmailProviderConfigPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first EmailProviderConfig that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {EmailProviderConfigFindFirstArgs} args - Arguments to find a EmailProviderConfig
+     * @example
+     * // Get one EmailProviderConfig
+     * const emailProviderConfig = await prisma.emailProviderConfig.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends EmailProviderConfigFindFirstArgs>(args?: SelectSubset<T, EmailProviderConfigFindFirstArgs<ExtArgs>>): Prisma__EmailProviderConfigClient<$Result.GetResult<Prisma.$EmailProviderConfigPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first EmailProviderConfig that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {EmailProviderConfigFindFirstOrThrowArgs} args - Arguments to find a EmailProviderConfig
+     * @example
+     * // Get one EmailProviderConfig
+     * const emailProviderConfig = await prisma.emailProviderConfig.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends EmailProviderConfigFindFirstOrThrowArgs>(args?: SelectSubset<T, EmailProviderConfigFindFirstOrThrowArgs<ExtArgs>>): Prisma__EmailProviderConfigClient<$Result.GetResult<Prisma.$EmailProviderConfigPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more EmailProviderConfigs that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {EmailProviderConfigFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all EmailProviderConfigs
+     * const emailProviderConfigs = await prisma.emailProviderConfig.findMany()
+     * 
+     * // Get first 10 EmailProviderConfigs
+     * const emailProviderConfigs = await prisma.emailProviderConfig.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const emailProviderConfigWithIdOnly = await prisma.emailProviderConfig.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends EmailProviderConfigFindManyArgs>(args?: SelectSubset<T, EmailProviderConfigFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$EmailProviderConfigPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a EmailProviderConfig.
+     * @param {EmailProviderConfigCreateArgs} args - Arguments to create a EmailProviderConfig.
+     * @example
+     * // Create one EmailProviderConfig
+     * const EmailProviderConfig = await prisma.emailProviderConfig.create({
+     *   data: {
+     *     // ... data to create a EmailProviderConfig
+     *   }
+     * })
+     * 
+     */
+    create<T extends EmailProviderConfigCreateArgs>(args: SelectSubset<T, EmailProviderConfigCreateArgs<ExtArgs>>): Prisma__EmailProviderConfigClient<$Result.GetResult<Prisma.$EmailProviderConfigPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many EmailProviderConfigs.
+     * @param {EmailProviderConfigCreateManyArgs} args - Arguments to create many EmailProviderConfigs.
+     * @example
+     * // Create many EmailProviderConfigs
+     * const emailProviderConfig = await prisma.emailProviderConfig.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends EmailProviderConfigCreateManyArgs>(args?: SelectSubset<T, EmailProviderConfigCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many EmailProviderConfigs and returns the data saved in the database.
+     * @param {EmailProviderConfigCreateManyAndReturnArgs} args - Arguments to create many EmailProviderConfigs.
+     * @example
+     * // Create many EmailProviderConfigs
+     * const emailProviderConfig = await prisma.emailProviderConfig.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many EmailProviderConfigs and only return the `id`
+     * const emailProviderConfigWithIdOnly = await prisma.emailProviderConfig.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends EmailProviderConfigCreateManyAndReturnArgs>(args?: SelectSubset<T, EmailProviderConfigCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$EmailProviderConfigPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a EmailProviderConfig.
+     * @param {EmailProviderConfigDeleteArgs} args - Arguments to delete one EmailProviderConfig.
+     * @example
+     * // Delete one EmailProviderConfig
+     * const EmailProviderConfig = await prisma.emailProviderConfig.delete({
+     *   where: {
+     *     // ... filter to delete one EmailProviderConfig
+     *   }
+     * })
+     * 
+     */
+    delete<T extends EmailProviderConfigDeleteArgs>(args: SelectSubset<T, EmailProviderConfigDeleteArgs<ExtArgs>>): Prisma__EmailProviderConfigClient<$Result.GetResult<Prisma.$EmailProviderConfigPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one EmailProviderConfig.
+     * @param {EmailProviderConfigUpdateArgs} args - Arguments to update one EmailProviderConfig.
+     * @example
+     * // Update one EmailProviderConfig
+     * const emailProviderConfig = await prisma.emailProviderConfig.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends EmailProviderConfigUpdateArgs>(args: SelectSubset<T, EmailProviderConfigUpdateArgs<ExtArgs>>): Prisma__EmailProviderConfigClient<$Result.GetResult<Prisma.$EmailProviderConfigPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more EmailProviderConfigs.
+     * @param {EmailProviderConfigDeleteManyArgs} args - Arguments to filter EmailProviderConfigs to delete.
+     * @example
+     * // Delete a few EmailProviderConfigs
+     * const { count } = await prisma.emailProviderConfig.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends EmailProviderConfigDeleteManyArgs>(args?: SelectSubset<T, EmailProviderConfigDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more EmailProviderConfigs.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {EmailProviderConfigUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many EmailProviderConfigs
+     * const emailProviderConfig = await prisma.emailProviderConfig.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends EmailProviderConfigUpdateManyArgs>(args: SelectSubset<T, EmailProviderConfigUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more EmailProviderConfigs and returns the data updated in the database.
+     * @param {EmailProviderConfigUpdateManyAndReturnArgs} args - Arguments to update many EmailProviderConfigs.
+     * @example
+     * // Update many EmailProviderConfigs
+     * const emailProviderConfig = await prisma.emailProviderConfig.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more EmailProviderConfigs and only return the `id`
+     * const emailProviderConfigWithIdOnly = await prisma.emailProviderConfig.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends EmailProviderConfigUpdateManyAndReturnArgs>(args: SelectSubset<T, EmailProviderConfigUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$EmailProviderConfigPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one EmailProviderConfig.
+     * @param {EmailProviderConfigUpsertArgs} args - Arguments to update or create a EmailProviderConfig.
+     * @example
+     * // Update or create a EmailProviderConfig
+     * const emailProviderConfig = await prisma.emailProviderConfig.upsert({
+     *   create: {
+     *     // ... data to create a EmailProviderConfig
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the EmailProviderConfig we want to update
+     *   }
+     * })
+     */
+    upsert<T extends EmailProviderConfigUpsertArgs>(args: SelectSubset<T, EmailProviderConfigUpsertArgs<ExtArgs>>): Prisma__EmailProviderConfigClient<$Result.GetResult<Prisma.$EmailProviderConfigPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of EmailProviderConfigs.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {EmailProviderConfigCountArgs} args - Arguments to filter EmailProviderConfigs to count.
+     * @example
+     * // Count the number of EmailProviderConfigs
+     * const count = await prisma.emailProviderConfig.count({
+     *   where: {
+     *     // ... the filter for the EmailProviderConfigs we want to count
+     *   }
+     * })
+    **/
+    count<T extends EmailProviderConfigCountArgs>(
+      args?: Subset<T, EmailProviderConfigCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], EmailProviderConfigCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a EmailProviderConfig.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {EmailProviderConfigAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends EmailProviderConfigAggregateArgs>(args: Subset<T, EmailProviderConfigAggregateArgs>): Prisma.PrismaPromise<GetEmailProviderConfigAggregateType<T>>
+
+    /**
+     * Group by EmailProviderConfig.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {EmailProviderConfigGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends EmailProviderConfigGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: EmailProviderConfigGroupByArgs['orderBy'] }
+        : { orderBy?: EmailProviderConfigGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, EmailProviderConfigGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetEmailProviderConfigGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the EmailProviderConfig model
+   */
+  readonly fields: EmailProviderConfigFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for EmailProviderConfig.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__EmailProviderConfigClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the EmailProviderConfig model
+   */
+  interface EmailProviderConfigFieldRefs {
+    readonly id: FieldRef<"EmailProviderConfig", 'String'>
+    readonly provider: FieldRef<"EmailProviderConfig", 'String'>
+    readonly displayName: FieldRef<"EmailProviderConfig", 'String'>
+    readonly priority: FieldRef<"EmailProviderConfig", 'Int'>
+    readonly enabled: FieldRef<"EmailProviderConfig", 'Boolean'>
+    readonly credentialsEnc: FieldRef<"EmailProviderConfig", 'String'>
+    readonly lastTestAt: FieldRef<"EmailProviderConfig", 'DateTime'>
+    readonly lastTestStatus: FieldRef<"EmailProviderConfig", 'String'>
+    readonly lastTestError: FieldRef<"EmailProviderConfig", 'String'>
+    readonly createdAt: FieldRef<"EmailProviderConfig", 'DateTime'>
+    readonly updatedAt: FieldRef<"EmailProviderConfig", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * EmailProviderConfig findUnique
+   */
+  export type EmailProviderConfigFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EmailProviderConfig
+     */
+    select?: EmailProviderConfigSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the EmailProviderConfig
+     */
+    omit?: EmailProviderConfigOmit<ExtArgs> | null
+    /**
+     * Filter, which EmailProviderConfig to fetch.
+     */
+    where: EmailProviderConfigWhereUniqueInput
+  }
+
+  /**
+   * EmailProviderConfig findUniqueOrThrow
+   */
+  export type EmailProviderConfigFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EmailProviderConfig
+     */
+    select?: EmailProviderConfigSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the EmailProviderConfig
+     */
+    omit?: EmailProviderConfigOmit<ExtArgs> | null
+    /**
+     * Filter, which EmailProviderConfig to fetch.
+     */
+    where: EmailProviderConfigWhereUniqueInput
+  }
+
+  /**
+   * EmailProviderConfig findFirst
+   */
+  export type EmailProviderConfigFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EmailProviderConfig
+     */
+    select?: EmailProviderConfigSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the EmailProviderConfig
+     */
+    omit?: EmailProviderConfigOmit<ExtArgs> | null
+    /**
+     * Filter, which EmailProviderConfig to fetch.
+     */
+    where?: EmailProviderConfigWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of EmailProviderConfigs to fetch.
+     */
+    orderBy?: EmailProviderConfigOrderByWithRelationInput | EmailProviderConfigOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for EmailProviderConfigs.
+     */
+    cursor?: EmailProviderConfigWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` EmailProviderConfigs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` EmailProviderConfigs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of EmailProviderConfigs.
+     */
+    distinct?: EmailProviderConfigScalarFieldEnum | EmailProviderConfigScalarFieldEnum[]
+  }
+
+  /**
+   * EmailProviderConfig findFirstOrThrow
+   */
+  export type EmailProviderConfigFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EmailProviderConfig
+     */
+    select?: EmailProviderConfigSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the EmailProviderConfig
+     */
+    omit?: EmailProviderConfigOmit<ExtArgs> | null
+    /**
+     * Filter, which EmailProviderConfig to fetch.
+     */
+    where?: EmailProviderConfigWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of EmailProviderConfigs to fetch.
+     */
+    orderBy?: EmailProviderConfigOrderByWithRelationInput | EmailProviderConfigOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for EmailProviderConfigs.
+     */
+    cursor?: EmailProviderConfigWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` EmailProviderConfigs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` EmailProviderConfigs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of EmailProviderConfigs.
+     */
+    distinct?: EmailProviderConfigScalarFieldEnum | EmailProviderConfigScalarFieldEnum[]
+  }
+
+  /**
+   * EmailProviderConfig findMany
+   */
+  export type EmailProviderConfigFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EmailProviderConfig
+     */
+    select?: EmailProviderConfigSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the EmailProviderConfig
+     */
+    omit?: EmailProviderConfigOmit<ExtArgs> | null
+    /**
+     * Filter, which EmailProviderConfigs to fetch.
+     */
+    where?: EmailProviderConfigWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of EmailProviderConfigs to fetch.
+     */
+    orderBy?: EmailProviderConfigOrderByWithRelationInput | EmailProviderConfigOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing EmailProviderConfigs.
+     */
+    cursor?: EmailProviderConfigWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` EmailProviderConfigs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` EmailProviderConfigs.
+     */
+    skip?: number
+    distinct?: EmailProviderConfigScalarFieldEnum | EmailProviderConfigScalarFieldEnum[]
+  }
+
+  /**
+   * EmailProviderConfig create
+   */
+  export type EmailProviderConfigCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EmailProviderConfig
+     */
+    select?: EmailProviderConfigSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the EmailProviderConfig
+     */
+    omit?: EmailProviderConfigOmit<ExtArgs> | null
+    /**
+     * The data needed to create a EmailProviderConfig.
+     */
+    data: XOR<EmailProviderConfigCreateInput, EmailProviderConfigUncheckedCreateInput>
+  }
+
+  /**
+   * EmailProviderConfig createMany
+   */
+  export type EmailProviderConfigCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many EmailProviderConfigs.
+     */
+    data: EmailProviderConfigCreateManyInput | EmailProviderConfigCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * EmailProviderConfig createManyAndReturn
+   */
+  export type EmailProviderConfigCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EmailProviderConfig
+     */
+    select?: EmailProviderConfigSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the EmailProviderConfig
+     */
+    omit?: EmailProviderConfigOmit<ExtArgs> | null
+    /**
+     * The data used to create many EmailProviderConfigs.
+     */
+    data: EmailProviderConfigCreateManyInput | EmailProviderConfigCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * EmailProviderConfig update
+   */
+  export type EmailProviderConfigUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EmailProviderConfig
+     */
+    select?: EmailProviderConfigSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the EmailProviderConfig
+     */
+    omit?: EmailProviderConfigOmit<ExtArgs> | null
+    /**
+     * The data needed to update a EmailProviderConfig.
+     */
+    data: XOR<EmailProviderConfigUpdateInput, EmailProviderConfigUncheckedUpdateInput>
+    /**
+     * Choose, which EmailProviderConfig to update.
+     */
+    where: EmailProviderConfigWhereUniqueInput
+  }
+
+  /**
+   * EmailProviderConfig updateMany
+   */
+  export type EmailProviderConfigUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update EmailProviderConfigs.
+     */
+    data: XOR<EmailProviderConfigUpdateManyMutationInput, EmailProviderConfigUncheckedUpdateManyInput>
+    /**
+     * Filter which EmailProviderConfigs to update
+     */
+    where?: EmailProviderConfigWhereInput
+    /**
+     * Limit how many EmailProviderConfigs to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * EmailProviderConfig updateManyAndReturn
+   */
+  export type EmailProviderConfigUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EmailProviderConfig
+     */
+    select?: EmailProviderConfigSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the EmailProviderConfig
+     */
+    omit?: EmailProviderConfigOmit<ExtArgs> | null
+    /**
+     * The data used to update EmailProviderConfigs.
+     */
+    data: XOR<EmailProviderConfigUpdateManyMutationInput, EmailProviderConfigUncheckedUpdateManyInput>
+    /**
+     * Filter which EmailProviderConfigs to update
+     */
+    where?: EmailProviderConfigWhereInput
+    /**
+     * Limit how many EmailProviderConfigs to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * EmailProviderConfig upsert
+   */
+  export type EmailProviderConfigUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EmailProviderConfig
+     */
+    select?: EmailProviderConfigSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the EmailProviderConfig
+     */
+    omit?: EmailProviderConfigOmit<ExtArgs> | null
+    /**
+     * The filter to search for the EmailProviderConfig to update in case it exists.
+     */
+    where: EmailProviderConfigWhereUniqueInput
+    /**
+     * In case the EmailProviderConfig found by the `where` argument doesn't exist, create a new EmailProviderConfig with this data.
+     */
+    create: XOR<EmailProviderConfigCreateInput, EmailProviderConfigUncheckedCreateInput>
+    /**
+     * In case the EmailProviderConfig was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<EmailProviderConfigUpdateInput, EmailProviderConfigUncheckedUpdateInput>
+  }
+
+  /**
+   * EmailProviderConfig delete
+   */
+  export type EmailProviderConfigDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EmailProviderConfig
+     */
+    select?: EmailProviderConfigSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the EmailProviderConfig
+     */
+    omit?: EmailProviderConfigOmit<ExtArgs> | null
+    /**
+     * Filter which EmailProviderConfig to delete.
+     */
+    where: EmailProviderConfigWhereUniqueInput
+  }
+
+  /**
+   * EmailProviderConfig deleteMany
+   */
+  export type EmailProviderConfigDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which EmailProviderConfigs to delete
+     */
+    where?: EmailProviderConfigWhereInput
+    /**
+     * Limit how many EmailProviderConfigs to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * EmailProviderConfig without action
+   */
+  export type EmailProviderConfigDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EmailProviderConfig
+     */
+    select?: EmailProviderConfigSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the EmailProviderConfig
+     */
+    omit?: EmailProviderConfigOmit<ExtArgs> | null
   }
 
 
@@ -21112,10 +22328,28 @@ export namespace Prisma {
     bodyText: 'bodyText',
     bodyHtml: 'bodyHtml',
     attachments: 'attachments',
-    invoiceId: 'invoiceId'
+    invoiceId: 'invoiceId',
+    provider: 'provider'
   };
 
   export type EmailLogScalarFieldEnum = (typeof EmailLogScalarFieldEnum)[keyof typeof EmailLogScalarFieldEnum]
+
+
+  export const EmailProviderConfigScalarFieldEnum: {
+    id: 'id',
+    provider: 'provider',
+    displayName: 'displayName',
+    priority: 'priority',
+    enabled: 'enabled',
+    credentialsEnc: 'credentialsEnc',
+    lastTestAt: 'lastTestAt',
+    lastTestStatus: 'lastTestStatus',
+    lastTestError: 'lastTestError',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type EmailProviderConfigScalarFieldEnum = (typeof EmailProviderConfigScalarFieldEnum)[keyof typeof EmailProviderConfigScalarFieldEnum]
 
 
   export const ReceivedEmailScalarFieldEnum: {
@@ -22016,6 +23250,7 @@ export namespace Prisma {
     bodyHtml?: StringNullableFilter<"EmailLog"> | string | null
     attachments?: JsonFilter<"EmailLog">
     invoiceId?: StringNullableFilter<"EmailLog"> | string | null
+    provider?: StringNullableFilter<"EmailLog"> | string | null
   }
 
   export type EmailLogOrderByWithRelationInput = {
@@ -22032,6 +23267,7 @@ export namespace Prisma {
     bodyHtml?: SortOrderInput | SortOrder
     attachments?: SortOrder
     invoiceId?: SortOrderInput | SortOrder
+    provider?: SortOrderInput | SortOrder
   }
 
   export type EmailLogWhereUniqueInput = Prisma.AtLeast<{
@@ -22051,6 +23287,7 @@ export namespace Prisma {
     bodyHtml?: StringNullableFilter<"EmailLog"> | string | null
     attachments?: JsonFilter<"EmailLog">
     invoiceId?: StringNullableFilter<"EmailLog"> | string | null
+    provider?: StringNullableFilter<"EmailLog"> | string | null
   }, "id">
 
   export type EmailLogOrderByWithAggregationInput = {
@@ -22067,6 +23304,7 @@ export namespace Prisma {
     bodyHtml?: SortOrderInput | SortOrder
     attachments?: SortOrder
     invoiceId?: SortOrderInput | SortOrder
+    provider?: SortOrderInput | SortOrder
     _count?: EmailLogCountOrderByAggregateInput
     _max?: EmailLogMaxOrderByAggregateInput
     _min?: EmailLogMinOrderByAggregateInput
@@ -22089,6 +23327,91 @@ export namespace Prisma {
     bodyHtml?: StringNullableWithAggregatesFilter<"EmailLog"> | string | null
     attachments?: JsonWithAggregatesFilter<"EmailLog">
     invoiceId?: StringNullableWithAggregatesFilter<"EmailLog"> | string | null
+    provider?: StringNullableWithAggregatesFilter<"EmailLog"> | string | null
+  }
+
+  export type EmailProviderConfigWhereInput = {
+    AND?: EmailProviderConfigWhereInput | EmailProviderConfigWhereInput[]
+    OR?: EmailProviderConfigWhereInput[]
+    NOT?: EmailProviderConfigWhereInput | EmailProviderConfigWhereInput[]
+    id?: StringFilter<"EmailProviderConfig"> | string
+    provider?: StringFilter<"EmailProviderConfig"> | string
+    displayName?: StringFilter<"EmailProviderConfig"> | string
+    priority?: IntFilter<"EmailProviderConfig"> | number
+    enabled?: BoolFilter<"EmailProviderConfig"> | boolean
+    credentialsEnc?: StringFilter<"EmailProviderConfig"> | string
+    lastTestAt?: DateTimeNullableFilter<"EmailProviderConfig"> | Date | string | null
+    lastTestStatus?: StringNullableFilter<"EmailProviderConfig"> | string | null
+    lastTestError?: StringNullableFilter<"EmailProviderConfig"> | string | null
+    createdAt?: DateTimeFilter<"EmailProviderConfig"> | Date | string
+    updatedAt?: DateTimeFilter<"EmailProviderConfig"> | Date | string
+  }
+
+  export type EmailProviderConfigOrderByWithRelationInput = {
+    id?: SortOrder
+    provider?: SortOrder
+    displayName?: SortOrder
+    priority?: SortOrder
+    enabled?: SortOrder
+    credentialsEnc?: SortOrder
+    lastTestAt?: SortOrderInput | SortOrder
+    lastTestStatus?: SortOrderInput | SortOrder
+    lastTestError?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type EmailProviderConfigWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    provider?: string
+    AND?: EmailProviderConfigWhereInput | EmailProviderConfigWhereInput[]
+    OR?: EmailProviderConfigWhereInput[]
+    NOT?: EmailProviderConfigWhereInput | EmailProviderConfigWhereInput[]
+    displayName?: StringFilter<"EmailProviderConfig"> | string
+    priority?: IntFilter<"EmailProviderConfig"> | number
+    enabled?: BoolFilter<"EmailProviderConfig"> | boolean
+    credentialsEnc?: StringFilter<"EmailProviderConfig"> | string
+    lastTestAt?: DateTimeNullableFilter<"EmailProviderConfig"> | Date | string | null
+    lastTestStatus?: StringNullableFilter<"EmailProviderConfig"> | string | null
+    lastTestError?: StringNullableFilter<"EmailProviderConfig"> | string | null
+    createdAt?: DateTimeFilter<"EmailProviderConfig"> | Date | string
+    updatedAt?: DateTimeFilter<"EmailProviderConfig"> | Date | string
+  }, "id" | "provider">
+
+  export type EmailProviderConfigOrderByWithAggregationInput = {
+    id?: SortOrder
+    provider?: SortOrder
+    displayName?: SortOrder
+    priority?: SortOrder
+    enabled?: SortOrder
+    credentialsEnc?: SortOrder
+    lastTestAt?: SortOrderInput | SortOrder
+    lastTestStatus?: SortOrderInput | SortOrder
+    lastTestError?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: EmailProviderConfigCountOrderByAggregateInput
+    _avg?: EmailProviderConfigAvgOrderByAggregateInput
+    _max?: EmailProviderConfigMaxOrderByAggregateInput
+    _min?: EmailProviderConfigMinOrderByAggregateInput
+    _sum?: EmailProviderConfigSumOrderByAggregateInput
+  }
+
+  export type EmailProviderConfigScalarWhereWithAggregatesInput = {
+    AND?: EmailProviderConfigScalarWhereWithAggregatesInput | EmailProviderConfigScalarWhereWithAggregatesInput[]
+    OR?: EmailProviderConfigScalarWhereWithAggregatesInput[]
+    NOT?: EmailProviderConfigScalarWhereWithAggregatesInput | EmailProviderConfigScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"EmailProviderConfig"> | string
+    provider?: StringWithAggregatesFilter<"EmailProviderConfig"> | string
+    displayName?: StringWithAggregatesFilter<"EmailProviderConfig"> | string
+    priority?: IntWithAggregatesFilter<"EmailProviderConfig"> | number
+    enabled?: BoolWithAggregatesFilter<"EmailProviderConfig"> | boolean
+    credentialsEnc?: StringWithAggregatesFilter<"EmailProviderConfig"> | string
+    lastTestAt?: DateTimeNullableWithAggregatesFilter<"EmailProviderConfig"> | Date | string | null
+    lastTestStatus?: StringNullableWithAggregatesFilter<"EmailProviderConfig"> | string | null
+    lastTestError?: StringNullableWithAggregatesFilter<"EmailProviderConfig"> | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"EmailProviderConfig"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"EmailProviderConfig"> | Date | string
   }
 
   export type ReceivedEmailWhereInput = {
@@ -23589,6 +24912,7 @@ export namespace Prisma {
     bodyHtml?: string | null
     attachments?: JsonNullValueInput | InputJsonValue
     invoiceId?: string | null
+    provider?: string | null
   }
 
   export type EmailLogUncheckedCreateInput = {
@@ -23605,6 +24929,7 @@ export namespace Prisma {
     bodyHtml?: string | null
     attachments?: JsonNullValueInput | InputJsonValue
     invoiceId?: string | null
+    provider?: string | null
   }
 
   export type EmailLogUpdateInput = {
@@ -23621,6 +24946,7 @@ export namespace Prisma {
     bodyHtml?: NullableStringFieldUpdateOperationsInput | string | null
     attachments?: JsonNullValueInput | InputJsonValue
     invoiceId?: NullableStringFieldUpdateOperationsInput | string | null
+    provider?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type EmailLogUncheckedUpdateInput = {
@@ -23637,6 +24963,7 @@ export namespace Prisma {
     bodyHtml?: NullableStringFieldUpdateOperationsInput | string | null
     attachments?: JsonNullValueInput | InputJsonValue
     invoiceId?: NullableStringFieldUpdateOperationsInput | string | null
+    provider?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type EmailLogCreateManyInput = {
@@ -23653,6 +24980,7 @@ export namespace Prisma {
     bodyHtml?: string | null
     attachments?: JsonNullValueInput | InputJsonValue
     invoiceId?: string | null
+    provider?: string | null
   }
 
   export type EmailLogUpdateManyMutationInput = {
@@ -23669,6 +24997,7 @@ export namespace Prisma {
     bodyHtml?: NullableStringFieldUpdateOperationsInput | string | null
     attachments?: JsonNullValueInput | InputJsonValue
     invoiceId?: NullableStringFieldUpdateOperationsInput | string | null
+    provider?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type EmailLogUncheckedUpdateManyInput = {
@@ -23685,6 +25014,105 @@ export namespace Prisma {
     bodyHtml?: NullableStringFieldUpdateOperationsInput | string | null
     attachments?: JsonNullValueInput | InputJsonValue
     invoiceId?: NullableStringFieldUpdateOperationsInput | string | null
+    provider?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type EmailProviderConfigCreateInput = {
+    id?: string
+    provider: string
+    displayName: string
+    priority?: number
+    enabled?: boolean
+    credentialsEnc: string
+    lastTestAt?: Date | string | null
+    lastTestStatus?: string | null
+    lastTestError?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type EmailProviderConfigUncheckedCreateInput = {
+    id?: string
+    provider: string
+    displayName: string
+    priority?: number
+    enabled?: boolean
+    credentialsEnc: string
+    lastTestAt?: Date | string | null
+    lastTestStatus?: string | null
+    lastTestError?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type EmailProviderConfigUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    provider?: StringFieldUpdateOperationsInput | string
+    displayName?: StringFieldUpdateOperationsInput | string
+    priority?: IntFieldUpdateOperationsInput | number
+    enabled?: BoolFieldUpdateOperationsInput | boolean
+    credentialsEnc?: StringFieldUpdateOperationsInput | string
+    lastTestAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastTestStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    lastTestError?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type EmailProviderConfigUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    provider?: StringFieldUpdateOperationsInput | string
+    displayName?: StringFieldUpdateOperationsInput | string
+    priority?: IntFieldUpdateOperationsInput | number
+    enabled?: BoolFieldUpdateOperationsInput | boolean
+    credentialsEnc?: StringFieldUpdateOperationsInput | string
+    lastTestAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastTestStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    lastTestError?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type EmailProviderConfigCreateManyInput = {
+    id?: string
+    provider: string
+    displayName: string
+    priority?: number
+    enabled?: boolean
+    credentialsEnc: string
+    lastTestAt?: Date | string | null
+    lastTestStatus?: string | null
+    lastTestError?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type EmailProviderConfigUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    provider?: StringFieldUpdateOperationsInput | string
+    displayName?: StringFieldUpdateOperationsInput | string
+    priority?: IntFieldUpdateOperationsInput | number
+    enabled?: BoolFieldUpdateOperationsInput | boolean
+    credentialsEnc?: StringFieldUpdateOperationsInput | string
+    lastTestAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastTestStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    lastTestError?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type EmailProviderConfigUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    provider?: StringFieldUpdateOperationsInput | string
+    displayName?: StringFieldUpdateOperationsInput | string
+    priority?: IntFieldUpdateOperationsInput | number
+    enabled?: BoolFieldUpdateOperationsInput | boolean
+    credentialsEnc?: StringFieldUpdateOperationsInput | string
+    lastTestAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastTestStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    lastTestError?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type ReceivedEmailCreateInput = {
@@ -25204,6 +26632,7 @@ export namespace Prisma {
     bodyHtml?: SortOrder
     attachments?: SortOrder
     invoiceId?: SortOrder
+    provider?: SortOrder
   }
 
   export type EmailLogMaxOrderByAggregateInput = {
@@ -25219,6 +26648,7 @@ export namespace Prisma {
     bodyText?: SortOrder
     bodyHtml?: SortOrder
     invoiceId?: SortOrder
+    provider?: SortOrder
   }
 
   export type EmailLogMinOrderByAggregateInput = {
@@ -25234,6 +26664,57 @@ export namespace Prisma {
     bodyText?: SortOrder
     bodyHtml?: SortOrder
     invoiceId?: SortOrder
+    provider?: SortOrder
+  }
+
+  export type EmailProviderConfigCountOrderByAggregateInput = {
+    id?: SortOrder
+    provider?: SortOrder
+    displayName?: SortOrder
+    priority?: SortOrder
+    enabled?: SortOrder
+    credentialsEnc?: SortOrder
+    lastTestAt?: SortOrder
+    lastTestStatus?: SortOrder
+    lastTestError?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type EmailProviderConfigAvgOrderByAggregateInput = {
+    priority?: SortOrder
+  }
+
+  export type EmailProviderConfigMaxOrderByAggregateInput = {
+    id?: SortOrder
+    provider?: SortOrder
+    displayName?: SortOrder
+    priority?: SortOrder
+    enabled?: SortOrder
+    credentialsEnc?: SortOrder
+    lastTestAt?: SortOrder
+    lastTestStatus?: SortOrder
+    lastTestError?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type EmailProviderConfigMinOrderByAggregateInput = {
+    id?: SortOrder
+    provider?: SortOrder
+    displayName?: SortOrder
+    priority?: SortOrder
+    enabled?: SortOrder
+    credentialsEnc?: SortOrder
+    lastTestAt?: SortOrder
+    lastTestStatus?: SortOrder
+    lastTestError?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type EmailProviderConfigSumOrderByAggregateInput = {
+    priority?: SortOrder
   }
 
   export type ReceivedEmailCountOrderByAggregateInput = {

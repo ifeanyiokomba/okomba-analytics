@@ -17,6 +17,7 @@ import {
   MessageSquareQuote,
   RefreshCw,
   Send,
+  Settings,
   Users,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -40,6 +41,7 @@ import { CustomersTab } from "./customers-tab";
 import { WhatsAppTab } from "./whatsapp-tab";
 import { PaymentsTab } from "./payments-tab";
 import { AnalyticsTab } from "./analytics-tab";
+import { SettingsTab } from "./settings-tab";
 import { ProposalComposerDialog } from "./proposal-composer-dialog";
 import type {
   DraftProposalRow,
@@ -62,7 +64,8 @@ type Tab =
   | "posts"
   | "testimonials"
   | "whatsapp"
-  | "email";
+  | "email"
+  | "settings";
 
 const TABS: { id: Tab; label: string; icon: typeof Inbox }[] = [
   { id: "overview", label: "Overview", icon: LayoutDashboard },
@@ -76,6 +79,7 @@ const TABS: { id: Tab; label: string; icon: typeof Inbox }[] = [
   { id: "testimonials", label: "Testimonials", icon: MessageSquareQuote },
   { id: "whatsapp", label: "WhatsApp", icon: MessageCircle },
   { id: "email", label: "Email log", icon: Mail },
+  { id: "settings", label: "Settings", icon: Settings },
 ];
 
 export function AdminDashboard({
@@ -729,6 +733,7 @@ export function AdminDashboard({
             {tab === "email" && (
               <EmailLogTab logs={emailLogs} loading={false} total={emailLogs.length} />
             )}
+            {tab === "settings" && <SettingsTab />}
           </>
         )}
       </main>

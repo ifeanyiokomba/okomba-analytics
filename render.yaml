@@ -116,7 +116,7 @@ services:
     runtime: node
     plan: starter
     region: frankfurt
-    rootDir: mini-services/whatsapp-service
+    rootDir: whatsapp-service
     buildCommand: npm install
     startCommand: npm start
     healthCheckPath: /status
