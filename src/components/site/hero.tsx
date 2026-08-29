@@ -55,7 +55,7 @@ export function Hero({ onGetStarted, onViewServices }: HeroProps) {
               </span>
             </Reveal>
 
-            <Reveal delay={40}>
+            <Reveal delay={30}>
               <h1 className="display-hero mt-6 font-display text-balance text-foreground">
                 We build the digital
                 <br className="hidden sm:block" /> systems that help
@@ -64,7 +64,7 @@ export function Hero({ onGetStarted, onViewServices }: HeroProps) {
               </h1>
             </Reveal>
 
-            <Reveal delay={80}>
+            <Reveal delay={60}>
               <p className="lead-body mx-auto mt-6 max-w-xl text-balance text-muted-foreground lg:mx-0">
                 Okomba Analytics designs, engineers and operates web applications, payment
                 systems, automation and data solutions — one team from idea to launch and beyond.
@@ -78,7 +78,7 @@ export function Hero({ onGetStarted, onViewServices }: HeroProps) {
                 with a stronger gold halo; the secondary lights up with a
                 gold ring + gold icon + arrow nudge. Both feel pressable
                 without any layout shift. Mobile-first: full-width stack. */}
-            <Reveal delay={120}>
+            <Reveal delay={90}>
               <div className="mt-9 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center lg:justify-start">
                 {/* Primary — anchored, illuminative gold gradient with
                     always-on halo + hover intensifies the glow. */}
@@ -135,14 +135,14 @@ export function Hero({ onGetStarted, onViewServices }: HeroProps) {
             </Reveal>
 
             {/* micro-trust line — Termii spec style */}
-            <Reveal delay={150}>
+            <Reveal delay={120}>
               <p className="mt-5 font-mono text-[11px] tracking-wide text-muted-foreground/80">
                 Free consultation · Proposal within 24 hours · Nigeria &amp; remote
               </p>
             </Reveal>
 
             {/* proof strip */}
-            <Reveal delay={180}>
+            <Reveal delay={150}>
               <div className="mt-8 flex flex-col items-center justify-center gap-4 border-t border-black/[0.06] pt-7 sm:flex-row sm:gap-6 lg:justify-start">
                 <div className="flex items-center gap-3">
                   <span className="flex h-8 w-8 items-center justify-center rounded-full bg-gold-dim font-mono text-[10px] font-bold text-gold">

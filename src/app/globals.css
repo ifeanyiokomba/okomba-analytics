@@ -517,12 +517,16 @@
 .animate-glow-breathe { animation: glow-breathe 5s ease-in-out infinite; }
 .animate-spin-slow { animation: spin-slow 24s linear infinite; }
 
-/* Scroll reveal */
+/* Scroll reveal — tuned for snappy perceived load (Phase 36:
+   founder directive: "improve the load speed of the website").
+   Reduced the initial transform from 26px → 14px and the
+   transition from 0.7s → 0.5s so the staggered reveal feels
+   quick rather than "drawing in" slowly. */
 .reveal {
   opacity: 0;
-  transform: translateY(26px);
-  transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
-    transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  transform: translateY(14px);
+  transition: opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
   transition-delay: var(--reveal-delay, 0ms);
   will-change: opacity, transform;
 }
