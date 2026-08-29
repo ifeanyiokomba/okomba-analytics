@@ -38,6 +38,89 @@ import {
   PaymentValidationError,
 } from "./errors";
 
+/**
+ * Checkout route — the high-level payment strategy for a country
+ * (directive §8, §27). Determines which Paystack surface a customer
+ * hits when an invoice is sent.
+ *
+ *   • "dva_ng"  — Dedicated Virtual Account (NGN). The customer pays
+ *                 by bank transfer into a Paystack-issued virtual
+ *                 account number owned by them. Driven by
+ *                 PAYSTACK_PREFERRED_BANK_NG (default: wema-bank).
+ *   • "dva_gh"  — Dedicated Virtual Account (GHS). Mobile-money-style
+ *                 virtual account for Ghana. Driven by
+ *                 PAYSTACK_PREFERRED_BANK_GH (default:
+ *                 zenithmobilemoneyprovider).
+ *   • "standard_checkout" — Every other country (KE, ZA, US, GB, …).
+ *                 No DVA is provisioned. The customer is sent to the
+ *                 Paystack Standard Checkout (POST /transaction/
+ *                 initialize) where they pay by card, mobile money,
+ *                 bank transfer or USSD depending on the currency.
+ *                 PAYSTACK_PREFERRED_BANK_* is IRRELEVANT here.
+ */
+export type CheckoutRoute = "dva_ng" | "dva_gh" | "standard_checkout";
+
+/**
+ * Resolve the high-level checkout route for a country code.
+ * This is the single source of truth that higher layers should
+ * consult to decide whether to invoke the DVA pipeline or skip it.
+ *
+ *   NG → "dva_ng"          (DVA eligible, NGN)
+ *   GH → "dva_gh"          (DVA eligible, GHS)
+ *   anything else → "standard_checkout"
+ */
+export function resolveCheckoutRoute(
+  countryCode: string | null | undefined
+): CheckoutRoute {
+  const eligibility = resolvePaymentEligibility(countryCode);
+  if (eligibility !== "eligible") return "standard_checkout";
+  if (countryCode?.toUpperCase() === "GH") return "dva_gh";
+  return "dva_ng";
+}
+
+/**
+ * Preferred DVA bank provider_slug, resolved per-country with a
+ * sensible global fallback. Resolution order (first wins):
+ *
+ *   1. PAYSTACK_PREFERRED_BANK_NG  — applies only to NG customers
+ *   2. PAYSTACK_PREFERRED_BANK_GH  — applies only to GH customers
+ *   3. PAYSTACK_PREFERRED_BANK     — global override (any DVA country)
+ *   4. Hard-coded default          — wema-bank (NG), zenithmobilemoneyprovider (GH)
+ *
+ * The slug MUST be a `provider_slug` from Paystack's
+ * /dedicated_account/available_providers endpoint (e.g. "wema-bank",
+ * "access-bank", "zenith-bank", "zenithmobilemoneyprovider",
+ * "stanbic-ghana-provider"). The listDvaProviders() call (§16) is
+ * the source of truth — this is only a PREFERENCE; if the preferred
+ * slug is not in the live provider list for that currency, pickProvider
+ * falls back to a deterministic order.
+ *
+ * NOTE: For non-DVA countries (KE, ZA, US, GB, …) this function is
+ * NEVER consulted — resolveCheckoutRoute returns "standard_checkout"
+ * and the DVA pipeline is skipped entirely. Setting
+ * PAYSTACK_PREFERRED_BANK for those countries has NO effect.
+ */
+function preferredBankForCountry(countryCode: string): string | undefined {
+  const upper = countryCode.toUpperCase();
+  // 1. per-country override
+  const perCountry =
+    upper === "NG"
+      ? process.env.PAYSTACK_PREFERRED_BANK_NG
+      : upper === "GH"
+        ? process.env.PAYSTACK_PREFERRED_BANK_GH
+        : undefined;
+  if (perCountry && perCountry.trim()) return perCountry.trim();
+  // 2. global override
+  const env = process.env.PAYSTACK_PREFERRED_BANK;
+  if (env && env.trim()) return env.trim();
+  // 3. hard-coded defaults
+  switch (upper) {
+    case "NG": return "wema-bank";
+    case "GH": return "zenithmobilemoneyprovider";
+    default: return undefined;
+  }
+}
+
 export type DvaStatus =
   | "not_eligible"
   | "eligible"
@@ -66,20 +149,6 @@ export type CustomerDvaResult = {
   /** True if we reused an existing local active DVA (zero Paystack calls). */
   reused: boolean;
 };
-
-/** Default preferred bank provider_slug per country — overridable via env. */
-function preferredBankForCountry(countryCode: string): string | undefined {
-  const env = process.env.PAYSTACK_PREFERRED_BANK;
-  if (env && env.trim()) return env.trim();
-  // Sensible defaults — directive §17 names wema-bank for NG. The
-  // listDvaProviders call (§16) is the source of truth; these defaults
-  // are only a PREFERENCE, not an absolute assumption.
-  switch (countryCode) {
-    case "NG": return "wema-bank";
-    case "GH": return "zenithmobilemoneyprovider";
-    default: return undefined;
-  }
-}
 
 /**
  * Deterministic fallback order — directive §16: "If Wema is configured
