@@ -175,6 +175,30 @@ export type Customer = {
   notes: string | null;
   lastContactAt: string | null;
   createdAt: string;
+  // ── BATCH 7 (directive §5, §44) — canonical identity + Paystack + DVA ──
+  firstName?: string | null;
+  lastName?: string | null;
+  countryCode?: string | null;
+  countryLabel?: string;
+  currency?: string;
+  dvaEligible?: boolean;
+  paystack?: {
+    customerId?: string | null;
+    customerCode?: string | null;
+  };
+  dva?: {
+    status?: string | null;
+    accountId?: string | null;
+    accountNumber?: string | null;
+    accountName?: string | null;
+    bankName?: string | null;
+    bankCode?: string | null;
+    bankSlug?: string | null;
+    provider?: string | null;
+    currency?: string | null;
+    assignedAt?: string | null;
+    updatedAt?: string | null;
+  };
   stats: {
     inquiries: number;
     invoices: number;
@@ -184,9 +208,41 @@ export type Customer = {
   };
 };
 
+// ── BATCH 7 (directive §26): Payment record (admin CRM mirror) ──
+export type PaymentRow = {
+  id: string;
+  invoiceId: string | null;
+  provider: string;
+  providerTransactionId: string | null;
+  reference: string;
+  amountMinor: number;
+  currency: string;
+  channel: string | null;
+  accountNumber: string | null;
+  status: "pending" | "successful" | "failed" | "reversed" | "ambiguous" | "unmatched";
+  paidAt: string | null;
+  reconciledAt: string | null;
+  reconciledBy: string | null;
+  webhookLogId: string | null;
+  createdAt: string;
+};
+
+// ── BATCH 7: open invoice stub for the manual reconcile dropdown ──
+export type OpenInvoiceRow = {
+  id: string;
+  invoiceNumber: string;
+  service: string;
+  amountNaira: number;
+  currency: string;
+  status: string;
+  createdAt: string;
+};
+
 export type CustomerDetail = {
   ok: boolean;
   customer: Omit<Customer, "stats"> & { updatedAt: string; lastContactAt: string | null };
+  payments?: PaymentRow[];
+  openInvoices?: OpenInvoiceRow[];
   timeline: TimelineItem[];
   stats: {
     inquiries: number;
@@ -199,6 +255,12 @@ export type CustomerDetail = {
     totalPipelineNaira: number;
     totalPaidNaira: number;
     totalOutstandingNaira: number;
+    // ── BATCH 7 (directive §44): payment history stats ──
+    payments?: number;
+    paymentsSuccessfulNaira?: number;
+    paymentsAmbiguous?: number;
+    paymentsUnmatched?: number;
+    lastPaymentAt?: string | null;
   };
 };
 

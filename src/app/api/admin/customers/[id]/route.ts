@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { isAdminAuthorized } from "@/lib/admin-auth";
+import { resolvePaymentEligibility, countryLabel, currencyForCountry } from "@/lib/countries";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -34,7 +35,8 @@ export async function GET(
     }
 
     // Pull every interaction stream keyed to this customer
-    const [inquiries, invoices, emailLogs, waMessages, notes, myMessages] = await Promise.all([
+    // ── BATCH 7 (directive §26, §44): also pull the Payment history ──
+    const [inquiries, invoices, emailLogs, waMessages, notes, myMessages, payments] = await Promise.all([
       db.inquiry.findMany({
         where: { email: c.email },
         orderBy: { createdAt: "desc" },
@@ -67,6 +69,11 @@ export async function GET(
       db.customerMessage.findMany({
         where: { customerId: c.id },
         orderBy: { sentAt: "desc" },
+        take: 50,
+      }),
+      db.payment.findMany({
+        where: { customerId: c.id },
+        orderBy: { createdAt: "desc" },
         take: 50,
       }),
     ]);
@@ -175,6 +182,13 @@ export async function GET(
       customer: {
         id: c.id,
         name: c.name,
+        // ── BATCH 7 (directive §5, §44): canonical identity fields ──
+        firstName: c.firstName,
+        lastName: c.lastName,
+        countryCode: c.countryCode,
+        countryLabel: countryLabel(c.countryCode),
+        currency: currencyForCountry(c.countryCode),
+        dvaEligible: resolvePaymentEligibility(c.countryCode) === "eligible",
         email: c.email,
         phone: c.phone,
         whatsapp: c.whatsapp,
@@ -185,10 +199,46 @@ export async function GET(
         leadScore: c.leadScore,
         tags: JSON.parse(c.tags || "[]") as string[],
         notes: c.notes,
+        // ── BATCH 7 (directive §44): Paystack identity ──
+        paystack: {
+          customerId: c.paystackCustomerId,
+          customerCode: c.paystackCustomerCode,
+        },
+        // ── BATCH 7 (directive §11, §20, §44): DVA details + status ──
+        dva: {
+          status: c.dvaStatus,
+          accountId: c.dvaAccountId,
+          accountNumber: c.dvaAccountNumber,
+          accountName: c.dvaAccountName,
+          bankName: c.dvaBankName,
+          bankCode: c.dvaBankCode,
+          bankSlug: c.dvaBankSlug,
+          provider: c.dvaProvider,
+          currency: c.dvaCurrency,
+          assignedAt: c.dvaAssignedAt?.toISOString() ?? null,
+          updatedAt: c.dvaUpdatedAt?.toISOString() ?? null,
+        },
         createdAt: c.createdAt.toISOString(),
         updatedAt: c.updatedAt.toISOString(),
         lastContactAt: c.lastContactAt?.toISOString() ?? null,
       },
+      payments: payments.map((p) => ({
+        id: p.id,
+        invoiceId: p.invoiceId,
+        provider: p.provider,
+        providerTransactionId: p.providerTransactionId,
+        reference: p.reference,
+        amountMinor: p.amountMinor,
+        currency: p.currency,
+        channel: p.channel,
+        accountNumber: p.accountNumber,
+        status: p.status,
+        paidAt: p.paidAt?.toISOString() ?? null,
+        reconciledAt: p.reconciledAt?.toISOString() ?? null,
+        reconciledBy: p.reconciledBy,
+        webhookLogId: p.webhookLogId,
+        createdAt: p.createdAt.toISOString(),
+      })),
       timeline,
       stats: {
         inquiries: inquiries.length,
@@ -201,7 +251,27 @@ export async function GET(
         totalPipelineNaira,
         totalPaidNaira,
         totalOutstandingNaira,
+        // ── BATCH 7 (directive §44): payment history stats ──
+        payments: payments.length,
+        paymentsSuccessfulNaira: payments
+          .filter((p) => p.status === "successful")
+          .reduce((s, p) => s + Math.round(p.amountMinor / 100), 0),
+        paymentsAmbiguous: payments.filter((p) => p.status === "ambiguous").length,
+        paymentsUnmatched: payments.filter((p) => p.status === "unmatched").length,
+        lastPaymentAt: payments[0]?.paidAt?.toISOString() ?? payments[0]?.createdAt.toISOString() ?? null,
       },
+      // ── BATCH 7: open invoices for the manual reconcile dropdown ──
+      openInvoices: invoices
+        .filter((i) => ["sent", "pending", "overdue"].includes(i.status))
+        .map((i) => ({
+          id: i.id,
+          invoiceNumber: i.invoiceNumber,
+          service: i.service,
+          amountNaira: Math.round(i.amountKobo / 100),
+          currency: i.currency,
+          status: i.status,
+          createdAt: i.createdAt.toISOString(),
+        })),
     });
   } catch (err) {
     console.error("[GET /api/admin/customers/[id]]", err);

@@ -4,6 +4,8 @@ import { z } from "zod";
 import { db } from "@/lib/db";
 import { isAdminAuthorized } from "@/lib/admin-auth";
 import { notifyNewInquiry } from "@/lib/notify";
+import { COUNTRY_CODES, normalizeEmail, normalizePhone } from "@/lib/countries";
+import { findOrCreateCustomer, linkInquiryToCustomer } from "@/lib/customer-service";
 
 export const runtime = "nodejs";
 
@@ -46,25 +48,47 @@ function isRateLimited(ip: string): boolean {
 const emptyToUndefined = (value: unknown): unknown =>
   typeof value === "string" && value.trim() === "" ? undefined : value;
 
+// ── BATCH 2 (directive §5,§6,§7): canonical customer identity contract ──
+//   Required: firstName, lastName, email, phone, country, service, message
+//   Optional: whatsapp, addlService, budget
+//   Country MUST be a structured ISO-2 code from the catalogue — no free text.
+//   Phone is normalized (whitespace/parens stripped) on the backend so the
+//   browser is never the final authority (directive §7, §8).
+//   The legacy `name` field is NOT accepted from the client anymore —
+//   it's derived server-side from firstName + " " + lastName for compat
+//   with the existing PDF / email / portal pipeline.
 const inquirySchema = z.object({
-  name: z
+  firstName: z
     .string()
     .trim()
-    .min(2, "Name must be at least 2 characters")
-    .max(100, "Name must be at most 100 characters"),
+    .min(1, "First name is required")
+    .max(60, "First name must be at most 60 characters"),
+  lastName: z
+    .string()
+    .trim()
+    .min(1, "Last name is required")
+    .max(60, "Last name must be at most 60 characters"),
   email: z
     .string()
     .trim()
     .min(1, "Email is required")
     .pipe(z.email("Please provide a valid email address")),
-  phone: z.preprocess(
-    emptyToUndefined,
-    z.string().trim().max(30, "Phone must be at most 30 characters").optional()
-  ),
+  phone: z
+    .string()
+    .trim()
+    .min(7, "A valid phone number is required")
+    .max(30, "Phone must be at most 30 characters"),
   whatsapp: z.preprocess(
     emptyToUndefined,
     z.string().trim().max(30, "WhatsApp must be at most 30 characters").optional()
   ),
+  country: z
+    .string()
+    .trim()
+    .toUpperCase()
+    .refine((c) => (COUNTRY_CODES as readonly string[]).includes(c), {
+      message: "Please select a valid country",
+    }),
   service: z.string().trim().min(1, "Please select a service"),
   budget: z.preprocess(
     emptyToUndefined,
@@ -126,12 +150,50 @@ export async function POST(req: Request) {
       );
     }
 
+    // ── BATCH 2: normalize + derive canonical identity ──
+    //   email/phone are normalized server-side (directive §7).
+    //   `name` is derived for legacy display/compat — we don't accept
+    //   it from the client anymore (directive §48: no name-splitting).
+    const normalizedEmail = normalizeEmail(parsed.data.email) ?? parsed.data.email.toLowerCase();
+    const normalizedPhone = normalizePhone(parsed.data.phone);
+    const normalizedWhatsapp = normalizePhone(parsed.data.whatsapp) ?? null;
+    const derivedName =
+      `${parsed.data.firstName} ${parsed.data.lastName}`.trim();
+
+    // ── directive §28: Validate → Create Inquiry → Find Customer by
+    //   normalized email → Create/Update Customer → Link Inquiry → Customer ──
+    //   Customer sync runs FIRST (so the Inquiry row can carry customerId
+    //   at creation time — saves a second write). Per directive §29, we do
+    //   NOT provision a Paystack customer or DVA here — that happens later
+    //   when a proposal is accepted and an invoice is created.
+    let customerId: string | null = null;
+    try {
+      const upsert = await findOrCreateCustomer({
+        firstName: parsed.data.firstName,
+        lastName: parsed.data.lastName,
+        email: normalizedEmail,
+        phone: normalizedPhone,
+        whatsapp: normalizedWhatsapp,
+        countryCode: parsed.data.country,
+        source: "inquiry",
+      });
+      customerId = upsert.customer.id;
+    } catch (err) {
+      // Customer sync failure must NOT block the inquiry — the lead is
+      // still valuable. The admin can re-link from the CRM view later.
+      console.error("[POST /api/inquiries] customer sync failed:", err);
+    }
+
     const inquiry = await db.inquiry.create({
       data: {
-        name: parsed.data.name,
-        email: parsed.data.email,
-        phone: parsed.data.phone ?? null,
-        whatsapp: parsed.data.whatsapp ?? null,
+        name: derivedName, // legacy display/compat field
+        firstName: parsed.data.firstName,
+        lastName: parsed.data.lastName,
+        countryCode: parsed.data.country,
+        customerId,
+        email: normalizedEmail,
+        phone: normalizedPhone,
+        whatsapp: normalizedWhatsapp,
         service: parsed.data.service,
         addlService: parsed.data.addlService ?? null,
         budget: parsed.data.budget ?? null,
@@ -140,6 +202,16 @@ export async function POST(req: Request) {
       },
     });
 
+    // If Customer was created BEFORE the Inquiry row, link back the
+    // Inquiry's customerId now (the findOrCreateCustomer call returned
+    // the Customer id, but db.inquiry.create already set it — so this
+    // is a no-op in the happy path; it's a safety net for the rare case
+    // where the Customer exists but their row was updated after the
+    // Inquiry create.
+    if (customerId && !inquiry.customerId) {
+      await linkInquiryToCustomer(inquiry.id, customerId);
+    }
+
     // received_emails audit trail (Phase-1 Module 2) — inbound record
     // mirrors the inquiry; kept separate from the workflow table so
     // ai_chat leads (Phase 3) and manual entries share one audit log.
@@ -147,7 +219,7 @@ export async function POST(req: Request) {
       await db.receivedEmail.create({
         data: {
           source: "contact",
-          name: inquiry.name,
+          name: derivedName,
           email: inquiry.email,
           phone: inquiry.phone,
           subject: `Inquiry — ${inquiry.service}`,
@@ -158,6 +230,10 @@ export async function POST(req: Request) {
             addlService: inquiry.addlService,
             budget: inquiry.budget,
             whatsapp: inquiry.whatsapp,
+            firstName: inquiry.firstName,
+            lastName: inquiry.lastName,
+            countryCode: inquiry.countryCode,
+            customerId: inquiry.customerId,
           }),
         },
       });
@@ -177,7 +253,7 @@ export async function POST(req: Request) {
       message: inquiry.message,
     }).catch(() => undefined);
 
-    return NextResponse.json({ ok: true, id: inquiry.id }, { status: 201 });
+    return NextResponse.json({ ok: true, id: inquiry.id, customerId }, { status: 201 });
   } catch (err) {
     console.error("[POST /api/inquiries]", err);
     return NextResponse.json(

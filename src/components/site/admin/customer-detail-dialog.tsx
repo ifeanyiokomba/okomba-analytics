@@ -24,6 +24,7 @@ import {
   formatTimestamp,
   timeAgo,
   type CustomerDetail,
+  type OpenInvoiceRow,
   type TimelineItem,
 } from "./types";
 
@@ -69,6 +70,9 @@ export function CustomerDetailDialog({
   const [statusDraft, setStatusDraft] = useState<string | null>(null);
   const [tagDraft, setTagDraft] = useState("");
   const [savingStatus, setSavingStatus] = useState(false);
+
+  // ── BATCH 7: manual reconciliation state for ambiguous/unmatched payments ──
+  const [reconciling, setReconciling] = useState<{ paymentId: string; invoiceId: string } | null>(null);
 
   const dialogRef = useRef<HTMLDivElement>(null);
 
@@ -184,6 +188,29 @@ export function CustomerDetailDialog({
     }
   };
 
+  // ── BATCH 7: manual reconciliation action for ambiguous/unmatched payments ──
+  const reconcilePayment = async (paymentId: string, invoiceId: string) => {
+    if (!customerId) return;
+    setReconciling({ paymentId, invoiceId });
+    try {
+      const res = await fetch(`/api/admin/payments/${paymentId}/reconcile`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ invoiceId }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        console.error("[reconcile] failed:", err);
+      }
+      // Reload the customer detail to reflect the new Payment + Invoice state.
+      const fresh = await fetch(`/api/admin/customers/${customerId}`);
+      if (fresh.ok) setData((await fresh.json()) as CustomerDetail);
+      onSaved?.();
+    } finally {
+      setReconciling(null);
+    }
+  };
+
   const addTag = async () => {
     if (!data || !tagDraft.trim()) return;
     const newTags = Array.from(new Set([...data.customer.tags, tagDraft.trim().toLowerCase()]));
@@ -285,7 +312,7 @@ export function CustomerDetailDialog({
             </div>
           ) : data ? (
             <>
-              {/* ── LEFT RAIL — contact card + status + tags + KPIs ── */}
+              {/* ── LEFT RAIL — contact card + status + tags + KPIs + identity + Paystack + DVA + Payments ── */}
               <aside className="border-b border-white/[0.06] p-5 lg:border-b-0 lg:border-r">
                 <ContactCard data={data} />
                 <StatusEditor
@@ -303,6 +330,15 @@ export function CustomerDetailDialog({
                   removeTag={removeTag}
                 />
                 <StatsStrip data={data} />
+                {/* ── BATCH 7 (directive §44): Identity, Paystack, DVA, Payments panels ── */}
+                <IdentityPanel data={data} />
+                <PaystackPanel data={data} />
+                <DvaPanel data={data} />
+                <PaymentsPanel
+                  data={data}
+                  onReconcile={reconcilePayment}
+                  reconciling={reconciling}
+                />
               </aside>
 
               {/* ── CENTER — Timeline ── */}
@@ -518,6 +554,18 @@ function StatsStrip({ data }: { data: CustomerDetail }) {
     { label: "Emails", value: s.emails },
     { label: "WhatsApp", value: s.whatsapp },
     { label: "Pipeline", value: formatNaira(s.totalPipelineNaira), tone: "text-gold" },
+    // ── BATCH 7 (directive §44): payment history stats ──
+    { label: "Payments", value: s.payments ?? 0 },
+    {
+      label: "Paid (₦)",
+      value: formatNaira(s.paymentsSuccessfulNaira ?? 0),
+      tone: "text-teal",
+    },
+    {
+      label: "Ambiguous",
+      value: s.paymentsAmbiguous ?? 0,
+      tone: (s.paymentsAmbiguous ?? 0) > 0 ? "text-amber-400" : "text-muted-foreground",
+    },
   ];
   return (
     <div className="mt-3 grid grid-cols-3 gap-2">
@@ -534,6 +582,308 @@ function StatsStrip({ data }: { data: CustomerDetail }) {
           </p>
         </div>
       ))}
+    </div>
+  );
+}
+
+/* ── BATCH 7 (directive §5, §44): Identity panel — country, currency, DVA eligibility ── */
+function IdentityPanel({ data }: { data: CustomerDetail }) {
+  const c = data.customer;
+  return (
+    <div className="mt-3 rounded-2xl border border-white/[0.07] bg-white/[0.02] p-4">
+      <p className="eyebrow mb-2 text-[9px] text-muted-foreground">Identity</p>
+      <div className="space-y-1.5 text-[12px]">
+        <div className="flex justify-between gap-3">
+          <span className="text-muted-foreground">First name</span>
+          <span className="text-foreground">{c.firstName ?? "—"}</span>
+        </div>
+        <div className="flex justify-between gap-3">
+          <span className="text-muted-foreground">Last name</span>
+          <span className="text-foreground">{c.lastName ?? "—"}</span>
+        </div>
+        <div className="flex justify-between gap-3">
+          <span className="text-muted-foreground">Country</span>
+          <span className="text-foreground">
+            {c.countryCode ?? "—"}
+            {c.countryLabel && c.countryLabel !== "—" ? ` · ${c.countryLabel}` : ""}
+          </span>
+        </div>
+        <div className="flex justify-between gap-3">
+          <span className="text-muted-foreground">Currency</span>
+          <span className="font-mono text-foreground">{c.currency ?? "—"}</span>
+        </div>
+        <div className="flex justify-between gap-3">
+          <span className="text-muted-foreground">DVA eligible</span>
+          <span
+            className={cn(
+              "rounded-md border px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-wider",
+              c.dvaEligible
+                ? "border-teal/40 bg-teal-dim text-teal"
+                : "border-white/[0.08] bg-white/[0.02] text-muted-foreground"
+            )}
+          >
+            {c.dvaEligible ? "Yes" : "No"}
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── BATCH 7 (directive §44): Paystack identity panel ── */
+function PaystackPanel({ data }: { data: CustomerDetail }) {
+  const p = data.customer.paystack;
+  if (!p || (!p.customerId && !p.customerCode)) {
+    return (
+      <div className="mt-3 rounded-2xl border border-white/[0.07] bg-white/[0.02] p-4">
+        <p className="eyebrow mb-2 text-[9px] text-muted-foreground">Paystack</p>
+        <p className="text-[11px] text-muted-foreground/70">
+          No Paystack customer linked yet — provisioning happens when an
+          invoice is sent (NG/GH customers only).
+        </p>
+      </div>
+    );
+  }
+  return (
+    <div className="mt-3 rounded-2xl border border-white/[0.07] bg-white/[0.02] p-4">
+      <p className="eyebrow mb-2 text-[9px] text-muted-foreground">Paystack</p>
+      <div className="space-y-1.5 text-[12px]">
+        {p.customerId && (
+          <div className="flex justify-between gap-3">
+            <span className="text-muted-foreground">Customer ID</span>
+            <span className="font-mono text-foreground">{p.customerId}</span>
+          </div>
+        )}
+        {p.customerCode && (
+          <div className="flex justify-between gap-3">
+            <span className="text-muted-foreground">Customer code</span>
+            <span className="font-mono text-foreground">{p.customerCode}</span>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ── BATCH 7 (directive §11, §20, §44): DVA panel — status, account, bank, provider ── */
+const DVA_STATUS_STYLES: Record<string, string> = {
+  not_eligible: "border-white/15 bg-white/[0.04] text-muted-foreground",
+  eligible: "border-gold/35 bg-gold-dim text-gold",
+  pending: "border-amber-400/40 bg-amber-400/10 text-amber-300",
+  active: "border-teal/40 bg-teal-dim text-teal",
+  failed: "border-red-500/30 bg-red-500/10 text-red-300",
+  deactivated: "border-white/15 bg-white/[0.04] text-muted-foreground",
+  requires_validation: "border-purple-400/35 bg-purple-400/10 text-purple-300",
+};
+
+function DvaPanel({ data }: { data: CustomerDetail }) {
+  const d = data.customer.dva;
+  if (!d) return null;
+  const status = d.status ?? "—";
+  return (
+    <div className="mt-3 rounded-2xl border border-white/[0.07] bg-white/[0.02] p-4">
+      <div className="mb-2 flex items-center justify-between">
+        <p className="eyebrow text-[9px] text-muted-foreground">Dedicated Virtual Account</p>
+        <span
+          className={cn(
+            "rounded-md border px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-wider",
+            DVA_STATUS_STYLES[status] ?? "border-white/15 bg-white/[0.04] text-muted-foreground"
+          )}
+        >
+          {status}
+        </span>
+      </div>
+      {!d.accountNumber && !d.accountId ? (
+        <p className="text-[11px] text-muted-foreground/70">
+          No DVA assigned yet. {data.customer.dvaEligible ? "Provisioning happens when an invoice is sent." : "Customer country is not DVA-eligible — standard Paystack checkout route applies."}
+        </p>
+      ) : (
+        <div className="space-y-1.5 text-[12px]">
+          {d.accountId && (
+            <div className="flex justify-between gap-3">
+              <span className="text-muted-foreground">Account ID</span>
+              <span className="font-mono text-foreground">{d.accountId}</span>
+            </div>
+          )}
+          {d.accountNumber && (
+            <div className="flex justify-between gap-3">
+              <span className="text-muted-foreground">Account no.</span>
+              <span className="font-mono text-foreground">{d.accountNumber}</span>
+            </div>
+          )}
+          {d.accountName && (
+            <div className="flex justify-between gap-3">
+              <span className="text-muted-foreground">Account name</span>
+              <span className="text-foreground">{d.accountName}</span>
+            </div>
+          )}
+          {d.bankName && (
+            <div className="flex justify-between gap-3">
+              <span className="text-muted-foreground">Bank</span>
+              <span className="text-foreground">
+                {d.bankName}
+                {d.bankCode ? ` · ${d.bankCode}` : ""}
+              </span>
+            </div>
+          )}
+          {d.provider && (
+            <div className="flex justify-between gap-3">
+              <span className="text-muted-foreground">Provider</span>
+              <span className="font-mono text-foreground">{d.provider}</span>
+            </div>
+          )}
+          {d.currency && (
+            <div className="flex justify-between gap-3">
+              <span className="text-muted-foreground">Currency</span>
+              <span className="font-mono text-foreground">{d.currency}</span>
+            </div>
+          )}
+          {d.updatedAt && (
+            <p className="pt-1 font-mono text-[10px] text-muted-foreground/70">
+              Updated {timeAgo(d.updatedAt)}
+            </p>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ── BATCH 7 (directive §44): Payments panel — history + manual reconcile ── */
+function PaymentsPanel({
+  data,
+  onReconcile,
+  reconciling,
+}: {
+  data: CustomerDetail;
+  onReconcile: (paymentId: string, invoiceId: string) => void;
+  reconciling: { paymentId: string; invoiceId: string } | null;
+}) {
+  const payments = data.payments ?? [];
+  const openInvoices = data.openInvoices ?? [];
+  if (payments.length === 0) {
+    return (
+      <div className="mt-3 rounded-2xl border border-white/[0.07] bg-white/[0.02] p-4">
+        <p className="eyebrow mb-2 text-[9px] text-muted-foreground">Payments</p>
+        <p className="text-[11px] text-muted-foreground/70">
+          No payment records yet. Payment rows appear here automatically
+          when Paystack fires a charge.success webhook for this customer.
+        </p>
+      </div>
+    );
+  }
+  return (
+    <div className="mt-3 rounded-2xl border border-white/[0.07] bg-white/[0.02] p-4">
+      <div className="mb-2 flex items-center justify-between">
+        <p className="eyebrow text-[9px] text-muted-foreground">Payment history</p>
+        <span className="font-mono text-[9px] text-muted-foreground/70">{payments.length} total</span>
+      </div>
+      <div className="max-h-72 space-y-2 overflow-y-auto pr-1">
+        {payments.map((p) => {
+          const needsReconcile = p.status === "ambiguous" || p.status === "unmatched";
+          const isReconcilingNow =
+            reconciling?.paymentId === p.id && reconciling.invoiceId !== "";
+          return (
+            <div
+              key={p.id}
+              className="rounded-lg border border-white/[0.06] bg-white/[0.015] px-3 py-2 text-[11px]"
+            >
+              <div className="flex items-center justify-between gap-2">
+                <span className="font-mono text-foreground">
+                  {p.currency} {(p.amountMinor / 100).toLocaleString()}
+                </span>
+                <span
+                  className={cn(
+                    "rounded-md border px-1.5 py-0.5 font-mono text-[8.5px] uppercase tracking-wider",
+                    p.status === "successful"
+                      ? "border-teal/40 bg-teal-dim text-teal"
+                      : p.status === "ambiguous"
+                        ? "border-amber-400/40 bg-amber-400/10 text-amber-300"
+                        : p.status === "unmatched"
+                          ? "border-red-500/30 bg-red-500/10 text-red-300"
+                          : "border-white/15 bg-white/[0.04] text-muted-foreground"
+                  )}
+                >
+                  {p.status}
+                </span>
+              </div>
+              <div className="mt-1 grid grid-cols-2 gap-x-2 gap-y-0.5 font-mono text-[10px] text-muted-foreground">
+                <span>ref</span>
+                <span className="truncate text-right text-foreground">{p.reference}</span>
+                <span>channel</span>
+                <span className="text-right">{p.channel ?? "—"}</span>
+                <span>paid</span>
+                <span className="text-right">{p.paidAt ? timeAgo(p.paidAt) : "—"}</span>
+                {p.invoiceId && (
+                  <>
+                    <span>invoice</span>
+                    <span className="text-right text-foreground">{p.invoiceId.slice(-8)}</span>
+                  </>
+                )}
+                {p.reconciledBy && (
+                  <>
+                    <span>by</span>
+                    <span className="text-right">{p.reconciledBy}</span>
+                  </>
+                )}
+              </div>
+              {needsReconcile && openInvoices.length > 0 && (
+                <ManualReconcileControl
+                  paymentId={p.id}
+                  openInvoices={openInvoices}
+                  onReconcile={onReconcile}
+                  disabled={isReconcilingNow}
+                />
+              )}
+              {needsReconcile && openInvoices.length === 0 && (
+                <p className="mt-1.5 text-[10px] text-amber-300/80">
+                  No open invoices for this customer — likely an overpayment
+                  or prepayment; admin will need to verify in Paystack.
+                </p>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function ManualReconcileControl({
+  paymentId,
+  openInvoices,
+  onReconcile,
+  disabled,
+}: {
+  paymentId: string;
+  openInvoices: OpenInvoiceRow[];
+  onReconcile: (paymentId: string, invoiceId: string) => void;
+  disabled: boolean;
+}) {
+  const [selected, setSelected] = useState<string>("");
+  return (
+    <div className="mt-2 flex items-center gap-1.5">
+      <select
+        value={selected}
+        onChange={(e) => setSelected(e.target.value)}
+        disabled={disabled}
+        className="min-w-0 flex-1 rounded-md border border-white/[0.08] bg-[#0b101c] px-2 py-1 text-[10px] text-foreground outline-none focus:border-gold/40"
+      >
+        <option value="">Pick an open invoice…</option>
+        {openInvoices.map((i) => (
+          <option key={i.id} value={i.id} className="bg-[#0b101c]">
+            {i.invoiceNumber} · {i.currency} {i.amountNaira.toLocaleString()} · {i.status}
+          </option>
+        ))}
+      </select>
+      <button
+        type="button"
+        disabled={!selected || disabled}
+        onClick={() => selected && onReconcile(paymentId, selected)}
+        className="shrink-0 rounded-md bg-gradient-to-r from-gold-light to-gold px-2 py-1 text-[10px] font-semibold text-ink shadow-gold transition-transform hover:-translate-y-0.5 disabled:opacity-50"
+      >
+        {disabled ? <Loader2 size={10} className="animate-spin" /> : "Reconcile"}
+      </button>
     </div>
   );
 }
