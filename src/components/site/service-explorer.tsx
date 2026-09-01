@@ -153,15 +153,23 @@ export function ServiceExplorer({ onRequestService }: ServiceExplorerProps) {
     <section
       id="services"
       aria-label="Services — interactive explorer"
-      className="section-light section-pad relative scroll-mt-20 overflow-hidden bg-background"
+      className="section-light section-pad relative isolate scroll-mt-20 overflow-hidden bg-background"
     >
-      {/* ambience */}
+      {/* ambience — vivid color field for the glass panels to refract */}
       <div
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(58%_40%_at_50%_0%,rgba(201,145,10,0.06),transparent)]"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(60%_45%_at_50%_0%,rgba(201,145,10,0.14),transparent)]"
         aria-hidden="true"
       />
       <div
-        className="pointer-events-none absolute -right-32 bottom-0 h-[380px] w-[380px] rounded-full bg-teal/[0.05] blur-[120px]"
+        className="pointer-events-none absolute -right-16 bottom-0 h-[460px] w-[460px] rounded-full bg-teal/[0.22] blur-[120px] animate-aurora-a"
+        aria-hidden="true"
+      />
+      <div
+        className="pointer-events-none absolute -left-12 top-1/4 h-[400px] w-[400px] rounded-full bg-gold/[0.26] blur-[120px] animate-aurora-b"
+        aria-hidden="true"
+      />
+      <div
+        className="pointer-events-none absolute right-1/3 top-1/2 h-[300px] w-[300px] rounded-full bg-gold-light/[0.18] blur-[110px] animate-aurora-c"
         aria-hidden="true"
       />
 
@@ -207,7 +215,7 @@ export function ServiceExplorer({ onRequestService }: ServiceExplorerProps) {
                     "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold",
                     isActive
                       ? "border-gold/35 bg-gold-dim shadow-gold"
-                      : "border-black/[0.08] bg-white hover:border-gold/30 hover:bg-gold-dim/50"
+                      : "border-white/70 bg-white/70 backdrop-blur-md saturate-150 hover:border-gold/30 hover:bg-gold-dim/50"
                   )}
                 >
                   {/* gold left-edge indicator */}
@@ -274,7 +282,7 @@ export function ServiceExplorer({ onRequestService }: ServiceExplorerProps) {
                 const isOpen = open === i;
                 const pServices = servicesOf(p);
                 return (
-                  <div key={p.id} className="surface-card-light overflow-hidden">
+                  <div key={p.id} className="glass-card-premium overflow-hidden">
                     <button
                       id={`pillar-header-${p.id}`}
                       aria-expanded={isOpen}
@@ -350,7 +358,7 @@ type PillarStageProps = {
 
 function PillarStage({ pillar, index, services, flagship, onRequestService }: PillarStageProps) {
   return (
-    <div className="surface-card shadow-float p-4 md:p-6">
+    <div className="glass-card-premium p-4 md:p-6">
       {/* panel header */}
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">

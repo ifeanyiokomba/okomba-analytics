@@ -23,8 +23,13 @@ export function ServicesSection({ onRequestService }: ServicesSectionProps) {
   );
 
   return (
-    <section id="services" className="section-pad relative scroll-mt-20" aria-label="Services">
-      <div className="pointer-events-none absolute right-0 top-24 h-[300px] w-[300px] rounded-full bg-teal/[0.05] blur-[110px]" aria-hidden="true" />
+    <section id="services" className="section-pad relative isolate overflow-hidden scroll-mt-20" aria-label="Services">
+      {/* Ambient color field — gives the glass cards something to refract. */}
+      <div className="pointer-events-none absolute inset-0 -z-10" aria-hidden="true">
+        <div className="absolute right-[6%] top-16 h-[340px] w-[340px] rounded-full bg-teal/[0.10] blur-[120px] animate-aurora-a" />
+        <div className="absolute left-[4%] top-1/3 h-[300px] w-[300px] rounded-full bg-gold/[0.12] blur-[120px] animate-aurora-b" />
+        <div className="absolute right-1/4 bottom-10 h-[260px] w-[260px] rounded-full bg-teal/[0.08] blur-[110px] animate-aurora-c" />
+      </div>
       <div className="container-xl relative">
         <SectionHeading
           eyebrow="What we do"
@@ -107,7 +112,7 @@ function ServiceCard({ svc, index, expanded, onExpand, onRequest }: ServiceCardP
       exit={{ opacity: 0, scale: 0.97 }}
       transition={{ duration: 0.4, delay: Math.min(index * 0.05, 0.3), ease: [0.22, 1, 0.36, 1] }}
       className={cn(
-        "surface-card spotlight group flex flex-col p-6",
+        "glass-card-premium spotlight group flex flex-col p-6",
         expanded && "border-gold/30"
       )}
     >

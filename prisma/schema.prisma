@@ -33,7 +33,11 @@ datasource db {
 
 model Inquiry {
   id          String   @id @default(cuid())
-  name        String
+  name        String   // legacy display/compat field — kept; new contract uses firstName+lastName
+  firstName   String?  // ── BATCH 1: Customer Identity Contract (directive §5,§48) ──
+  lastName    String?  //   new submissions store these explicitly (no name.split)
+  countryCode String?  //   ISO-2 (NG | GH | US | GB | …) — backend-only authority (§7)
+  customerId  String?  //   link to canonical Customer row created on submission (§28)
   email       String
   phone       String?
   whatsapp    String?
@@ -45,6 +49,10 @@ model Inquiry {
   source      String   @default("website") // website | ai_chat (Module 7 AI Service Finder)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  @@index([status])
+  @@index([countryCode])
+  @@index([customerId])
 }
 
 /* ── Phase-2 Module 7: AI Service Finder leads ────────────────
@@ -237,7 +245,12 @@ model Invoice {
   id               String    @id @default(cuid())
   invoiceNumber    String    @unique // INV-2026-0001
   inquiryId        String?
-  customerName     String
+  // ── BATCH 1: Invoice → Customer relation (directive §23) ──
+  // Customer owns the DVA; the invoice snapshots the customer's current
+  // DVA at creation time for historical presentation (§9,§33,§45).
+  customerId       String?
+  customer         Customer? @relation(fields: [customerId], references: [id])
+  customerName     String   // legacy display/snapshot (kept for compat)
   customerEmail    String
   customerPhone    String?
   service          String
@@ -248,10 +261,15 @@ model Invoice {
   durationLabel    String?   // e.g. "3 weeks"
   dueDate          DateTime?
   status           String    @default("draft") // draft | sent | pending | paid | overdue | cancelled
-  // Paystack Dedicated Virtual Account (populated Phase 2)
+  // Paystack Dedicated Virtual Account — INVOICE-LEVEL SNAPSHOT (§33,§45)
+  dvaAccountId     String?  // snapshot of Customer.dvaAccountId at send time
   dvaAccountNumber String?
+  dvaAccountName   String?  // ── BATCH 1: extended snapshot fields (§33) ──
   dvaBankName      String?
   dvaBankCode      String?
+  dvaBankSlug      String?  // provider_slug snapshot
+  dvaProvider      String?
+  dvaCurrency      String?
   // ── Audit fix (Phase 27): unique Paystack transaction reference ──
   // Bound at DVA creation / checkout-session time so the webhook can
   // match a payment to its invoice by an immutable reference (NOT by
@@ -272,9 +290,48 @@ model Invoice {
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
 
+  // ── BATCH 1: relation from Payment.invoiceId ──
+  payments Payment[]
+
   @@index([status])
   @@index([dueDate])
   @@index([customerEmail])
+  @@index([customerId])
+}
+
+/* ── BATCH 1: Payment record (directive §26) ───────────────────
+   A dedicated Payment entity separate from WebhookLog — the canonical
+   "money received" record. Created on webhook charge.success or on
+   manual reconciliation. WebhookLog remains the raw audit trail; this
+   Payment row is the normalized, customer+invoice-linked record the
+   admin CRM's "Payment history" panel reads (directive §44).        */
+model Payment {
+  id                    String    @id @default(cuid())
+  customerId            String?
+  customer              Customer? @relation(fields: [customerId], references: [id])
+  invoiceId             String?
+  invoice               Invoice?  @relation(fields: [invoiceId], references: [id])
+  provider              String    @default("paystack") // paystack | manual | other
+  providerTransactionId String?  // Paystack's data.id (event-level) or transaction.id
+  reference             String?  @unique // data.reference — idempotency key (§26)
+  amountMinor           Int      // kobo (NGN) or pesewas (GHS) — minor units, integer math
+  currency              String   @default("NGN")
+  channel               String?  // bank_transfer | card | ussd | bank | mobile_money | ...
+  accountNumber         String?  // DVA account number if payment came through DVA
+  status                String   @default("pending") // pending | successful | failed | reversed | ambiguous
+  paidAt                DateTime?
+  rawMetadata           String    @default("{}") // bounded JSON snapshot of provider payload
+  webhookLogId          String?  // link back to the audit row in WebhookLog
+  reconciledAt          DateTime? // set when matched to an invoice (success OR manual)
+  reconciledBy          String?  // "auto" | "admin" | null
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@index([customerId])
+  @@index([invoiceId])
+  @@index([status])
+  @@index([reference])
+  @@index([providerTransactionId])
 }
 
 model EventRecord {
@@ -370,7 +427,11 @@ model BackupLog {
    feature ship are visible too — zero migration needed.           */
 model Customer {
   id          String   @id @default(cuid())
-  name        String
+  name        String   // legacy display/compat field — kept; new contract uses firstName+lastName
+  // ── BATCH 1: Customer Identity Contract (directive §5,§10) ──
+  firstName   String?  // canonical first name (no name.split for new rows)
+  lastName    String?  // canonical last name
+  countryCode String?  // ISO-2 — backend authority for DVA eligibility (§7,§8)
   email       String   @unique
   phone       String?
   whatsapp    String?
@@ -388,10 +449,36 @@ model Customer {
   // Convenience flags surfaced on the list view (denormalized for perf)
   lastContactAt DateTime? // most recent of: inquiry createdAt / invoice sentAt / email sentAt
 
+  // ── BATCH 1: Paystack Customer identity (directive §10,§13) ──
+  // Customer → Paystack Customer → DVA — DVA is CUSTOMER-OWNED, not invoice-owned.
+  // Invoices snapshot the customer's current DVA at creation time.
+  paystackCustomerId  String?  // Paystack numeric customer id (e.g. 1234567890)
+  paystackCustomerCode String? // Paystack CUS_xxx customer code
+
+  // ── BATCH 1: Canonical DVA on Customer (directive §9,§10,§12,§20) ──
+  dvaAccountId    String?  // Paystack's DVA account id — supports GET/DELETE by id (§12,§37)
+  dvaAccountNumber String?
+  dvaAccountName  String?
+  dvaBankName     String?
+  dvaBankCode     String?
+  dvaBankSlug     String?  // e.g. "wema-bank" — persisted from available_providers (§16,§20)
+  dvaProvider     String?  // provider_slug actually returned by Paystack
+  dvaCurrency     String?  // NGN | GHS — driven by country (§27)
+  dvaStatus       String?  // not_eligible | eligible | pending | active | failed | deactivated | requires_validation (§11)
+  dvaAssignedAt   DateTime?
+  dvaUpdatedAt    DateTime?
+
+  // ── BATCH 1: relation from Invoice.customerId + Payment.customerId ──
+  invoices  Invoice[]
+  payments  Payment[]
+
   @@index([status])
   @@index([source])
   @@index([lastContactAt])
   @@index([leadScore])
+  @@index([countryCode])
+  @@index([dvaStatus])
+  @@index([paystackCustomerCode])
 }
 
 /* ── Stage 11 CRM: internal note trail per customer ───────────── */

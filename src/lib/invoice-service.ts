@@ -5,11 +5,47 @@
  *   → Paystack DVA → branded PDF → email w/ attachment
  *   → reminder events (Module 5 processes them)
  *   → WhatsApp caption queue (Module 6 dispatches it)
+ *
+ * ── BATCH 5 refactor (directive §9, §15, §23, §27, §29, §32, §33) ──
+ * The DVA is now CUSTOMER-OWNED, not invoice-owned. The pipeline is:
+ *
+ *   load Inquiry
+ *     ↓
+ *   resolve Customer (by inquiry.customerId, fall back to email lookup)
+ *     ↓
+ *   resolve payment eligibility (NG/GH → DVA path; else → standard checkout)
+ *     ↓
+ *   getOrCreateCustomerDva(customer)   ← customer-level, idempotent
+ *     ↓
+ *   create Invoice (customerId FK + DVA snapshot)
+ *     ↓
+ *   generate PDF → email → WhatsApp → portal → reminders
+ *
+ * The invoice snapshots the customer's CURRENT DVA at creation time
+ * (directive §33, §45) — if the customer's DVA changes later, the
+ * historical invoice's displayed DVA does NOT silently change.
+ *
+ * Per directive §29, DVA provisioning does NOT happen at enquiry
+ * submission time — only when a proposal is accepted and an invoice
+ * is created.
+ *
+ * Per directive §27, non-eligible countries (US, GB, KE, ZA, …) skip
+ * the DVA flow entirely. The customer pays via the standard Paystack
+ * checkout route (the admin can generate a checkout URL separately).
+ *
+ * Per directive §21, production FAILS CLOSED for DVA provisioning —
+ * if `PAYSTACK_SECRET_KEY` is unset in production and the customer is
+ * DVA-eligible, we do NOT fabricate a synthetic account. The invoice
+ * still sends (so the customer gets the proposal + portal link), but
+ * the DVA snapshot fields stay NULL and the admin can retry DVA
+ * provisioning from the CRM after configuring the secret key.
  */
 
 import { db } from "@/lib/db";
+import { createInvoiceDva, mintPaystackReference, type DvaResult } from "@/lib/paystack";
 import type { InputJsonValue } from "@prisma/client/runtime/library";
-import { createInvoiceDva } from "@/lib/paystack";
+import { getOrCreateCustomerDva, resolvePaymentEligibility, currencyForCountry, type CustomerDvaResult, type DvaStatus } from "@/lib/payment";
+import { findOrCreateCustomer, type CustomerIdentityInput } from "@/lib/customer-service";
 import { generateProposalPdf } from "@/lib/pdf/proposal-pdf";
 import { sendProposalEmail } from "@/lib/notify";
 import { dispatchWhatsApp } from "@/lib/whatsapp";
@@ -43,6 +79,8 @@ export type SendProposalResult = {
   emailError?: string;
   whatsappQueued?: boolean;
   whatsappCaption?: string;
+  customerId?: string;
+  dvaStatus?: DvaStatus | null;
 };
 
 /* ── INV-YYYY-NNNN sequence ──────────────────────────────── */
@@ -76,15 +114,151 @@ export async function sendProposal(input: SendProposalInput): Promise<SendPropos
   const now = new Date();
   const secureToken = generatePortalToken();
 
-  // 1. Paystack Dedicated Virtual Account (real or sandbox fallback)
-  const dva = await createInvoiceDva({
-    name: inquiry.name,
-    email: inquiry.email,
-    phone: inquiry.phone ?? inquiry.whatsapp ?? null,
-    invoiceNumber,
-  });
+  // ── BATCH 5 (directive §32 step 1-3): resolve Customer ──
+  //   The Customer row was created at enquiry submission (BATCH 2),
+  //   so inquiry.customerId should be set. If a legacy inquiry doesn't
+  //   have one (created before BATCH 2), we backfill via the local
+  //   find-or-create helper using the inquiry's firstName/lastName/
+  //   email/phone/countryCode fields.
+  let customerId: string | null = inquiry.customerId ?? null;
+  let customerCountryCode: string | null = inquiry.countryCode ?? null;
+  let customerFirstName: string | null = inquiry.firstName ?? null;
+  let customerLastName: string | null = inquiry.lastName ?? null;
+  if (!customerId) {
+    try {
+      const identity: CustomerIdentityInput = {
+        firstName: inquiry.firstName ?? inquiry.name?.split(" ")[0] ?? "Client",
+        lastName: inquiry.lastName ?? (inquiry.name?.split(" ").slice(1).join(" ") || ""),
+        email: inquiry.email,
+        phone: inquiry.phone,
+        whatsapp: inquiry.whatsapp,
+        countryCode: inquiry.countryCode,
+        source: "inquiry",
+      };
+      const upsert = await findOrCreateCustomer(identity);
+      customerId = upsert.customer.id;
+      customerCountryCode = upsert.customer.countryCode;
+      customerFirstName = upsert.customer.firstName;
+      customerLastName = upsert.customer.lastName;
+      // Backfill the inquiry's customerId so future runs skip this.
+      await db.inquiry.update({ where: { id: inquiry.id }, data: { customerId } }).catch(() => {});
+    } catch (err) {
+      console.error("[invoice-service] customer backfill failed:", err);
+      // Non-fatal — we can still send the invoice without a customerId;
+      // the existing email/PDF/portal pipeline uses customerEmail/Name
+      // as the snapshot fields.
+    }
+  } else {
+    // Load the Customer row to read the canonical countryCode + names.
+    const c = await db.customer.findUnique({ where: { id: customerId } });
+    if (c) {
+      customerCountryCode = c.countryCode;
+      if (c.firstName) customerFirstName = c.firstName;
+      if (c.lastName) customerLastName = c.lastName;
+    }
+  }
 
-  // 2. Branded proposal + invoice PDF
+  // ── BATCH 5 (directive §32 step 4): resolve payment eligibility ──
+  //   NG/GH → DVA path. Anything else → standard Paystack checkout
+  //   (directive §27). The browser is never the final authority —
+  //   this is server-side.
+  const eligibility = resolvePaymentEligibility(customerCountryCode);
+  const secretKey = process.env.PAYSTACK_SECRET_KEY;
+  const isProduction = process.env.NODE_ENV === "production";
+
+  // The DVA snapshot we'll write into the Invoice row (directive §33).
+  // Stays null for non-eligible countries OR when DVA provisioning fails.
+  let dvaSnapshot: {
+    accountId?: string;
+    accountNumber?: string;
+    accountName?: string;
+    bankName?: string;
+    bankCode?: string;
+    bankSlug?: string;
+    provider?: string;
+    currency?: string;
+  } | null = null;
+
+  // The legacy DvaResult used by the existing PDF generator (carries
+  // accountNumber/bankName/accountName/sandbox flag).
+  let dvaForPdf: DvaResult | null = null;
+  let dvaStatus: DvaStatus | null = null;
+
+  if (eligibility === "eligible" && customerId) {
+    // ── BATCH 5 (directive §32 step 5): getOrCreateCustomerDva ──
+    //   Customer-owned, idempotent. In dev without PAYSTACK_SECRET_KEY,
+    //   this throws DvaProvisioningError — we fall back to the legacy
+    //   sandbox DVA so the local dev workflow still exercises the
+    //   PDF + email + WhatsApp pipeline (directive §22: sandbox is OK
+    //   for tests, never for production).
+    try {
+      const result: CustomerDvaResult = await getOrCreateCustomerDva({
+        id: customerId,
+        firstName: customerFirstName,
+        lastName: customerLastName,
+        email: inquiry.email,
+        phone: inquiry.phone,
+        countryCode: customerCountryCode ?? undefined,
+      });
+      if (result.status === "active" && result.dva) {
+        dvaSnapshot = {
+          accountId: result.dva.accountId,
+          accountNumber: result.dva.accountNumber,
+          accountName: result.dva.accountName,
+          bankName: result.dva.bankName,
+          bankCode: result.dva.bankCode,
+          bankSlug: result.dva.bankSlug,
+          provider: result.dva.provider,
+          currency: result.dva.currency,
+        };
+        dvaForPdf = {
+          accountNumber: result.dva.accountNumber,
+          bankName: result.dva.bankName,
+          bankCode: result.dva.bankCode,
+          bankSlug: result.dva.bankSlug,
+          provider: result.dva.provider,
+          currency: result.dva.currency,
+          accountName: result.dva.accountName || DVA_ACCOUNT_NAME,
+          // B3 GAP-A fix (merged): the customer-level DVA flow mints the
+          // same per-invoice reference as the legacy entrypoint so the
+          // webhook's primary findUnique-by-reference lookup always has
+          // a value to match (tests/paystack-reference-mint.test.ts).
+          reference: mintPaystackReference(invoiceNumber),
+          sandbox: false,
+        };
+        dvaStatus = "active";
+      }
+    } catch (err) {
+      // DVA provisioning failed. In production, NEVER fabricate (§21).
+      // In dev, fall back to the legacy sandbox DVA so the pipeline can
+      // be exercised end-to-end.
+      if (!isProduction && !secretKey) {
+        console.info("[invoice-service] DVA service unavailable in dev — falling back to legacy sandbox DVA");
+        dvaForPdf = await createInvoiceDva({
+          name: inquiry.name,
+          email: inquiry.email,
+          phone: inquiry.phone ?? inquiry.whatsapp ?? null,
+          invoiceNumber,
+        });
+        dvaStatus = "pending";
+      } else {
+        // Production OR Paystack misconfigured in dev. Log + continue
+        // without a DVA snapshot — the customer pays via standard
+        // Paystack checkout. The admin can retry DVA provisioning from
+        // the CRM after fixing the configuration.
+        console.error("[invoice-service] DVA provisioning failed — invoice will send without a DVA snapshot:", err);
+        dvaStatus = "failed";
+      }
+    }
+  } else if (eligibility !== "eligible") {
+    // Non-eligible country — standard Paystack checkout route (§27).
+    dvaStatus = "not_eligible";
+  }
+
+  // ── BATCH 5 (directive §32 step 6): generate the branded PDF ──
+  //   The PDF generator accepts an optional DVA block — when null, it
+  //   omits the "pay into this account" section and shows the standard
+  //   "we'll send you a secure payment link" copy instead.
   const pdfBuffer = await generateProposalPdf({
     invoiceNumber,
     date: now,
@@ -98,9 +272,9 @@ export async function sendProposal(input: SendProposalInput): Promise<SendPropos
     service: inquiry.service,
     description: input.description ?? null,
     amountNaira,
-    currency: "NGN",
+    currency: dvaSnapshot?.currency ?? currencyForCountry(customerCountryCode) ?? "NGN",
     proposal: input.proposal,
-    dva,
+    dva: dvaForPdf ?? null,
   });
   const pdfBase64 = pdfBuffer.toString("base64");
   const pdfFilename = `Okomba_Proposal_${invoiceNumber}.pdf`;
@@ -109,21 +283,26 @@ export async function sendProposal(input: SendProposalInput): Promise<SendPropos
   //     when unconfigured; never breaks the send pipeline.
   const cloudUpload = await uploadProposalPdf(invoiceNumber, pdfBuffer);
 
-  // 3. Persist the invoice row (status: sent)
-  //    B3 GAP-A fix: persist `paystackReference` (minted by
-  //    createInvoiceDva) so the webhook handler's primary lookup
-  //    (findUnique by reference) has something to match against
+  // ── BATCH 5 (directive §32 step 7): create the Invoice row ──
+  //    customerId FK + DVA snapshot fields (directive §33). The legacy
+  //    customerName/customerEmail/customerPhone fields stay as snapshots
+  //    for backward-compat with the existing PDF/email/portal.
+  //
+  //    B3 GAP-A fix (merged from the audit stream): persist
+  //    `paystackReference` (minted via mintPaystackReference — the same
+  //    contract as createInvoiceDva) so the webhook handler's primary
+  //    lookup (findUnique by reference) has something to match against
   //    future checkout-session flows (transaction.initialize /
   //    payment_request echo back the reference in charge.success).
-  //    For the current DVA-bank-transfer flow, Paystack's webhook
-  //    does NOT carry this reference, so the webhook falls through
-  //    to the secondary lookup (dvaAccountNumber, now ambiguity-
-  //    safe per B2's fix). The reference is also surfaced in the
-  //    admin CRM timeline for audit.
+  //    For the current DVA-bank-transfer flow, Paystack's webhook does
+  //    NOT carry this reference, so the webhook falls through to the
+  //    secondary lookup (dvaAccountNumber, now ambiguity-safe per B2's
+  //    fix). The reference is also surfaced in the admin CRM timeline.
   const invoice = await db.invoice.create({
     data: {
       invoiceNumber,
       inquiryId: inquiry.id,
+      customerId, // ── BATCH 1 + BATCH 5: FK to Customer (directive §23)
       customerName: inquiry.name,
       customerEmail: inquiry.email,
       customerPhone: inquiry.phone ?? inquiry.whatsapp ?? null,
@@ -131,13 +310,25 @@ export async function sendProposal(input: SendProposalInput): Promise<SendPropos
       description: input.description ?? null,
       proposalJson: input.proposal as InputJsonValue,
       amountKobo: amountNaira * 100,
-      currency: "NGN",
+      currency: dvaSnapshot?.currency ?? currencyForCountry(customerCountryCode) ?? "NGN",
       durationLabel: input.durationLabel ?? null,
       dueDate: input.dueDate ?? null,
       status: "sent",
-      dvaAccountNumber: dva.accountNumber,
-      dvaBankName: dva.bankName,
-      paystackReference: dva.reference,
+      // ── DVA snapshot (directive §33, §45) — historical copy at send time ──
+      //    (falls back to the legacy dvaForPdf values when only the legacy
+      //    sandbox path ran, so the webhook matcher always has data)
+      dvaAccountId: dvaSnapshot?.accountId ?? null,
+      dvaAccountNumber: dvaSnapshot?.accountNumber ?? dvaForPdf?.accountNumber ?? null,
+      dvaAccountName: dvaSnapshot?.accountName ?? dvaForPdf?.accountName ?? null,
+      dvaBankName: dvaSnapshot?.bankName ?? dvaForPdf?.bankName ?? null,
+      dvaBankCode: dvaSnapshot?.bankCode ?? dvaForPdf?.bankCode ?? null,
+      dvaBankSlug: dvaSnapshot?.bankSlug ?? dvaForPdf?.bankSlug ?? null,
+      dvaProvider: dvaSnapshot?.provider ?? dvaForPdf?.provider ?? null,
+      dvaCurrency: dvaSnapshot?.currency ?? dvaForPdf?.currency ?? null,
+      // B3 GAP-A fix (merged): per-invoice Paystack reference, persisted
+      // at creation for the webhook's primary lookup. Minted with the
+      // same contract as createInvoiceDva — see mintPaystackReference.
+      paystackReference: dvaForPdf?.reference ?? mintPaystackReference(invoiceNumber),
       secureToken,
       pdfUrl: cloudUpload.url,
       pdfStorage: cloudUpload.storage,
@@ -155,12 +346,12 @@ export async function sendProposal(input: SendProposalInput): Promise<SendPropos
     service: inquiry.service,
     description: input.description ?? null,
     amountNaira,
-    currency: "NGN",
+    currency: dvaSnapshot?.currency ?? "NGN",
     durationLabel: input.durationLabel ?? null,
     dueDate: input.dueDate ? input.dueDate.toISOString() : null,
-    dvaAccountNumber: dva.accountNumber,
-    dvaBankName: dva.bankName,
-    dvaAccountName: dva.accountName || DVA_ACCOUNT_NAME,
+    dvaAccountNumber: dvaForPdf?.accountNumber ?? null,
+    dvaBankName: dvaForPdf?.bankName ?? null,
+    dvaAccountName: dvaForPdf?.accountName || DVA_ACCOUNT_NAME,
     pdfBase64,
     pdfFilename,
     portalUrl,
@@ -218,7 +409,11 @@ export async function sendProposal(input: SendProposalInput): Promise<SendPropos
   //    when connected (queued + flushed on reconnect otherwise).
   //    Module 8B: when Cloudinary uploaded OK, send the link (no bytes);
   //    otherwise keep the base64 attachment behaviour.
-  const caption = `Hi ${inquiry.name.split(" ")[0]}, here is your proposal and invoice from Okomba Analytics`;
+  //    ── BATCH 5: prefer firstName for the salutation (directive §48 —
+  //    no name splitting for newly submitted users). For legacy rows
+  //    that only have `name`, fall back to the first word. ──
+  const salutation = customerFirstName ?? inquiry.name.split(" ")[0];
+  const caption = `Hi ${salutation}, here is your proposal and invoice from Okomba Analytics`;
   const waPhone = inquiry.whatsapp ?? inquiry.phone ?? null;
   let whatsappQueued = false;
   if (waPhone) {
@@ -243,10 +438,19 @@ export async function sendProposal(input: SendProposalInput): Promise<SendPropos
     error: emailResult.ok ? undefined : emailResult.error,
     invoiceId: invoice.id,
     invoiceNumber,
-    dva,
+    dva: dvaForPdf
+      ? {
+          accountNumber: dvaForPdf.accountNumber,
+          bankName: dvaForPdf.bankName,
+          accountName: dvaForPdf.accountName,
+          sandbox: dvaForPdf.sandbox,
+        }
+      : undefined,
     emailSent: emailResult.ok,
     emailError: emailResult.error,
     whatsappQueued,
     whatsappCaption: whatsappQueued ? caption : undefined,
+    customerId: customerId ?? undefined,
+    dvaStatus,
   };
 }

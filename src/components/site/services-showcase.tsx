@@ -160,7 +160,12 @@ export function ServicesShowcase({ open, onClose, onRequestService }: ServicesSh
             </header>
 
             {/* Body — grouped grid */}
-            <div className="flex-1 overflow-y-auto px-5 py-5 sm:px-7 sm:py-6">
+            <div className="relative isolate flex-1 overflow-y-auto px-5 py-5 sm:px-7 sm:py-6">
+              {/* Ambient color field behind the glass cards */}
+              <div className="pointer-events-none absolute inset-0 -z-10" aria-hidden="true">
+                <div className="absolute left-[8%] top-10 h-[220px] w-[220px] rounded-full bg-gold/[0.10] blur-[90px] animate-aurora-a" />
+                <div className="absolute right-[10%] bottom-16 h-[200px] w-[200px] rounded-full bg-teal/[0.10] blur-[90px] animate-aurora-b" />
+              </div>
               {grouped.length === 0 ? (
                 <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
                   <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gold-dim text-gold">
@@ -184,7 +189,7 @@ export function ServicesShowcase({ open, onClose, onRequestService }: ServicesSh
                         <span className="font-mono text-[10px] text-muted-foreground/70">{items.length}</span>
                         <span className="h-px flex-1 bg-black/[0.06]" aria-hidden="true" />
                       </div>
-                      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                      <div className="relative grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
                         {items.map((svc, i) => (
                           <ShowcaseCard
                             key={svc.id}
@@ -228,7 +233,7 @@ function ShowcaseCard({ svc, index, onRequest }: { svc: Service; index: number; 
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35, delay: Math.min(index * 0.04, 0.25), ease: [0.22, 1, 0.36, 1] }}
       onClick={onRequest}
-      className="surface-card-light spotlight group flex h-full flex-col text-left"
+      className="glass-card-premium spotlight group flex h-full flex-col text-left"
     >
       <div className="flex flex-1 flex-col p-5">
         <div className="flex items-start justify-between gap-3">

@@ -212,3 +212,15 @@ export async function createInvoiceDva(client: {
   console.error("[paystack] DVA creation failed — sandbox fallback:", dvaError);
   return sandboxDva(`${client.email}|${client.invoiceNumber}`, client.invoiceNumber);
 }
+
+// ── Re-export the typed payment domain for new callers (phase-36 BATCH 4+) ──
+// The legacy `createInvoiceDva` entrypoint above satisfies the audited
+// mint-test contract (tests/paystack-reference-mint.test.ts S8a-S8f).
+// New code should import from `@/lib/payment/*` directly; these re-exports
+// keep `@/lib/paystack` a complete facade over the payment domain.
+export { createPaystackClient, type PaystackDva } from "@/lib/payment/paystack-client";
+export type { PaystackCustomerResolution } from "@/lib/payment/paystack-customer-service";
+export {
+  getOrCreatePaystackCustomer,
+} from "@/lib/payment/paystack-customer-service";
+export type { PaymentError } from "@/lib/payment/errors";

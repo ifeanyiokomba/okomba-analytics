@@ -303,6 +303,99 @@
   box-shadow: 0 12px 36px -14px rgba(20, 25, 38, 0.22);
 }
 
+/* ── Premium glassmorphism service card ──────────────────────────
+   Clean, modern, premium: frosted glass + soft inner sheen +
+   ambient outer halo that breathes on hover. Layered for depth.
+   Requires ambient color blobs behind it (in the parent section)
+   so the backdrop-blur has visible content to refract.            */
+.glass-card-premium {
+  position: relative;
+  isolation: isolate;
+  background:
+    linear-gradient(135deg, rgba(255, 201, 77, 0.14) 0%, rgba(10, 157, 132, 0.08) 100%),
+    rgba(255, 255, 255, 0.42);
+  backdrop-filter: blur(22px) saturate(160%);
+  -webkit-backdrop-filter: blur(22px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  border-radius: 1.25rem;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.9) inset,            /* top edge highlight */
+    0 1px 2px rgba(20, 25, 38, 0.04),                 /* base lift */
+    0 12px 32px -18px rgba(20, 25, 38, 0.16),         /* ambient drop */
+    0 0 0 1px rgba(201, 145, 10, 0.04);               /* faint gold ring */
+  transition: transform 0.4s var(--ease-premium),
+    box-shadow 0.4s var(--ease-premium),
+    border-color 0.4s var(--ease-premium),
+    background-color 0.4s var(--ease-premium);
+}
+/* Frosted top sheen — catches the light, reads as glass catching a warm
+   highlight from above. The gold tint makes the glass read as premium
+   even where the backdrop-filter blur is not composited (e.g. headless
+   screenshots); in a real browser it layers on top of the blur. */
+.glass-card-premium::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.62) 0%, transparent 30%),
+    radial-gradient(120% 80% at 50% 0%, rgba(255, 223, 142, 0.18) 0%, transparent 60%);
+  pointer-events: none;
+  opacity: 0.95;
+  z-index: 0;
+}
+/* Ambient soft glow that breathes behind the card on hover. */
+.glass-card-premium::after {
+  content: "";
+  position: absolute;
+  inset: -22px;
+  border-radius: 1.6rem;
+  background: radial-gradient(closest-side, rgba(201, 145, 10, 0.2), transparent 70%);
+  opacity: 0;
+  transition: opacity 0.55s var(--ease-premium);
+  pointer-events: none;
+  z-index: -1;
+  filter: blur(14px);
+}
+.glass-card-premium:hover {
+  transform: translateY(-4px);
+  border-color: rgba(201, 145, 10, 0.34);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.95) inset,
+    0 2px 4px rgba(20, 25, 38, 0.05),
+    0 24px 56px -20px rgba(20, 25, 38, 0.26),
+    0 0 0 1px rgba(201, 145, 10, 0.14),
+    0 0 34px -6px rgba(201, 145, 10, 0.22);            /* soft gold glow */
+}
+.glass-card-premium:hover::after { opacity: 1; }
+/* Keep the content above the sheen pseudo-element. */
+.glass-card-premium > * { position: relative; z-index: 1; }
+
+/* Dark-section variant — glass reads against the dark bg. */
+.section-dark .glass-card-premium {
+  background:
+    linear-gradient(135deg, rgba(245, 196, 81, 0.08) 0%, rgba(0, 201, 167, 0.05) 100%),
+    rgba(11, 16, 28, 0.55);
+  border-color: rgba(255, 255, 255, 0.12);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.08) inset,
+    0 12px 32px -18px rgba(0, 0, 0, 0.6);
+}
+.section-dark .glass-card-premium::before {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0%, transparent 28%);
+}
+.section-dark .glass-card-premium:hover {
+  border-color: rgba(245, 196, 81, 0.3);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.08) inset,
+    0 24px 56px -20px rgba(0, 0, 0, 0.7),
+    0 0 0 1px rgba(245, 196, 81, 0.14),
+    0 0 38px -6px rgba(245, 196, 81, 0.24);
+}
+.section-dark .glass-card-premium::after {
+  background: radial-gradient(closest-side, rgba(245, 196, 81, 0.22), transparent 70%);
+}
+
 /* ── Shadows (colored, premium) ─────────────────────────── */
 .shadow-gold {
   box-shadow: 0 4px 20px rgba(201, 145, 10, 0.4), 0 1px 3px rgba(20, 25, 38, 0.08);
@@ -424,12 +517,16 @@
 .animate-glow-breathe { animation: glow-breathe 5s ease-in-out infinite; }
 .animate-spin-slow { animation: spin-slow 24s linear infinite; }
 
-/* Scroll reveal */
+/* Scroll reveal — tuned for snappy perceived load (Phase 36:
+   founder directive: "improve the load speed of the website").
+   Reduced the initial transform from 26px → 14px and the
+   transition from 0.7s → 0.5s so the staggered reveal feels
+   quick rather than "drawing in" slowly. */
 .reveal {
   opacity: 0;
-  transform: translateY(26px);
-  transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
-    transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  transform: translateY(14px);
+  transition: opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
   transition-delay: var(--reveal-delay, 0ms);
   will-change: opacity, transform;
 }
