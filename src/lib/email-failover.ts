@@ -160,16 +160,6 @@ export function buildLegacyAppsScriptPayload(
   return payload;
 }
 
-export async function getEnabledProviderCount(): Promise<number> {
-  try {
-    return await db.emailProviderConfig.count({
-      where: { enabled: true, provider: { not: "test_recipient" } },
-    });
-  } catch {
-    return 0;
-  }
-}
-
 export async function deliverWithFailover(
   opts: FailoverOptions
 ): Promise<FailoverResult> {

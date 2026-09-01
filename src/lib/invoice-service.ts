@@ -68,13 +68,8 @@ export type SendProposalResult = {
   error?: string;
   invoiceId?: string;
   invoiceNumber?: string;
-  dva?: {
-    accountNumber: string;
-    bankName: string;
-    accountName: string;
-    reference: string; // OKM-{invoiceNumber} (sandbox) | OKM-{invoiceNumber}-{ts} (real)
-    sandbox: boolean;
-  };
+  /** Full DVA snapshot incl. OKM-{invoiceNumber} reference (see paystack.ts). */
+  dva?: DvaResult;
   emailSent?: boolean;
   emailError?: string;
   whatsappQueued?: boolean;
@@ -442,7 +437,12 @@ export async function sendProposal(input: SendProposalInput): Promise<SendPropos
       ? {
           accountNumber: dvaForPdf.accountNumber,
           bankName: dvaForPdf.bankName,
+          bankCode: dvaForPdf.bankCode,
+          bankSlug: dvaForPdf.bankSlug,
+          provider: dvaForPdf.provider,
+          currency: dvaForPdf.currency,
           accountName: dvaForPdf.accountName,
+          reference: dvaForPdf.reference,
           sandbox: dvaForPdf.sandbox,
         }
       : undefined,

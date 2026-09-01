@@ -30,6 +30,7 @@
 
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { db } from "@/lib/db";
+import type { InputJsonValue } from "@prisma/client/runtime/library";
 import { generateReceiptPdf, receiptNumberFor } from "@/lib/pdf/receipt-pdf";
 import { generatePaymentThanks } from "@/lib/payment-ai";
 import { sendPaymentThankYouEmail } from "@/lib/notify";
@@ -142,7 +143,7 @@ export async function processPaystackEvent(
             where: { id: opts.logId },
             data: {
               status: "duplicate",
-              result: JSON.stringify(dup.detail),
+              result: dup.detail as InputJsonValue,
               processedAt: new Date(),
             },
           })
@@ -159,7 +160,7 @@ export async function processPaystackEvent(
           signatureValid: opts.signatureValid,
           source: opts.source ?? "webhook",
           status: "duplicate",
-          result: JSON.stringify(dup.detail),
+          result: dup.detail as InputJsonValue,
           payload: trimPayload(opts.rawBody),
           processedAt: new Date(),
         },
@@ -216,7 +217,7 @@ export async function processPaystackEvent(
     where: { id: log.id },
     data: {
       status: outcome.status,
-      result: JSON.stringify(outcome.detail),
+      result: outcome.detail as InputJsonValue,
       error: outcome.error ?? null,
       processedAt: new Date(),
       ...(invoiceId ? { invoiceId } : {}),
@@ -412,7 +413,7 @@ async function handleChargeSuccess(data: PaystackChargeData): Promise<WebhookOut
       customerPhone: invoice.customerPhone,
       eventDate: kickoffAt,
       relatedInvoiceId: invoice.id,
-      payload: JSON.stringify({
+      payload: {
         invoiceNumber: invoice.invoiceNumber,
         customerName: invoice.customerName,
         service: invoice.service,
@@ -420,7 +421,7 @@ async function handleChargeSuccess(data: PaystackChargeData): Promise<WebhookOut
         note: "Project kickoff in 24h after payment",
         paidAt: paidAt.toISOString(),
         paymentId: reconciliation.paymentId,
-      }),
+      } as InputJsonValue,
       status: "scheduled",
     },
   });

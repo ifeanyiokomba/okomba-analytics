@@ -18,6 +18,12 @@ export type DvaResult = {
   accountNumber: string;
   bankName: string;
   bankCode?: string;
+  // ── BATCH 5 extended snapshot fields (directive §33) — optional so
+  // the legacy createInvoiceDva path (which doesn't fetch them) stays
+  // assignable; the customer-level DVA flow populates them.
+  bankSlug?: string;
+  provider?: string;
+  currency?: string;
   accountName: string;
   /**
    * Minted per-invoice Paystack reference. The Paystack Dedicated
@@ -77,6 +83,31 @@ type DvaData = {
   currency?: string;
 };
 
+/**
+ * Mint a per-invoice Paystack reference (B3 GAP-A fix, directive §5+§6).
+ *
+ * The Paystack Dedicated Virtual Account API does NOT return a
+ * per-invoice reference (DVAs are per-customer) — so we mint our own:
+ *   • sandbox (no PAYSTACK_SECRET_KEY): `OKM-{invoiceNumber}` —
+ *     deterministic, idempotent across retries for the same invoice
+ *     (satisfies tests/paystack-reference-mint.test.ts S8b-S8d and
+ *     avoids @unique-constraint violations on pipeline re-runs).
+ *   • real Paystack: `OKM-{invoiceNumber}-{Date.now()}` — unique per
+ *     minting attempt so distinct invoices can never collide on the
+ *     @unique constraint.
+ *
+ * Shared by BOTH payment paths so the reference contract holds no
+ * matter which flow provisioned the DVA:
+ *   • the legacy `createInvoiceDva` entrypoint (this file), and
+ *   • the customer-level `getOrCreateCustomerDva` flow used by
+ *     invoice-service (phase-36 BATCH 5) via `mintPaystackReference`.
+ */
+export function mintPaystackReference(invoiceNumber: string): string {
+  const secretKey = process.env.PAYSTACK_SECRET_KEY;
+  if (!secretKey) return `OKM-${invoiceNumber}`;
+  return `OKM-${invoiceNumber}-${Date.now()}`;
+}
+
 function sandboxDva(seed: string, invoiceNumber: string): DvaResult {
   // Deterministic 10-digit NUBAN-style number derived from the seed so
   // retries produce the same account for the same client.
@@ -88,13 +119,8 @@ function sandboxDva(seed: string, invoiceNumber: string): DvaResult {
     accountNumber,
     bankName: "Paystack Test Bank (Sandbox)",
     accountName: DVA_ACCOUNT_NAME,
-    // Deterministic per-invoice reference — idempotent across retries
-    // of `createInvoiceDva` for the same invoiceNumber. Matches the
-    // B3 GAP-A fix contract: OKM-{invoiceNumber} (no timestamp in
-    // sandbox mode so re-runs of the pipeline against the same
-    // invoiceNumber produce the same persisted paystackReference,
-    // avoiding @unique-constraint violations on retry).
-    reference: `OKM-${invoiceNumber}`,
+    // Deterministic per-invoice reference — see mintPaystackReference.
+    reference: mintPaystackReference(invoiceNumber),
     sandbox: true,
   };
 }
@@ -166,12 +192,8 @@ export async function createInvoiceDva(client: {
       accountName: dva.data.account_name || DVA_ACCOUNT_NAME,
       // Mint our own per-invoice reference (Paystack's DVA API does
       // not return one — DVAs are per-customer, not per-invoice).
-      // Unique per creation attempt via Date.now() so two distinct
-      // createInvoiceDva calls for DIFFERENT invoices can never
-      // collide on the @unique constraint. (For the SAME invoice
-      // this branch is only reached once per proposal send; on
-      // retries the existing-DVA fallback below is taken instead.)
-      reference: `OKM-${client.invoiceNumber}-${Date.now()}`,
+      // See mintPaystackReference for the uniqueness rationale.
+      reference: mintPaystackReference(client.invoiceNumber),
       sandbox: false,
     };
   }
@@ -200,7 +222,7 @@ export async function createInvoiceDva(client: {
         // so the SAME account_number may be reused across multiple
         // invoices for repeat customers — that's the GAP-B reality
         // B2's webhook secondary-lookup ambiguity-safe fix handles.)
-        reference: `OKM-${client.invoiceNumber}-${Date.now()}`,
+        reference: mintPaystackReference(client.invoiceNumber),
         sandbox: false,
       };
     }

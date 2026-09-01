@@ -39,8 +39,6 @@ export type NewPostInput = {
   publishedAt?: string | null;
 };
 
-export type UpdatePostInput = Partial<NewPostInput> & { id: string };
-
 /* ── Tag (de)normalization (Phase 28: tags column is Json array) ── */
 export function parseTags(raw: unknown): string[] {
   if (!raw) return [];

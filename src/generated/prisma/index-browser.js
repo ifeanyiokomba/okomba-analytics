@@ -124,6 +124,10 @@ exports.Prisma.TransactionIsolationLevel = makeStrictEnum({
 exports.Prisma.InquiryScalarFieldEnum = {
   id: 'id',
   name: 'name',
+  firstName: 'firstName',
+  lastName: 'lastName',
+  countryCode: 'countryCode',
+  customerId: 'customerId',
   email: 'email',
   phone: 'phone',
   whatsapp: 'whatsapp',
@@ -269,6 +273,7 @@ exports.Prisma.InvoiceScalarFieldEnum = {
   id: 'id',
   invoiceNumber: 'invoiceNumber',
   inquiryId: 'inquiryId',
+  customerId: 'customerId',
   customerName: 'customerName',
   customerEmail: 'customerEmail',
   customerPhone: 'customerPhone',
@@ -280,9 +285,14 @@ exports.Prisma.InvoiceScalarFieldEnum = {
   durationLabel: 'durationLabel',
   dueDate: 'dueDate',
   status: 'status',
+  dvaAccountId: 'dvaAccountId',
   dvaAccountNumber: 'dvaAccountNumber',
+  dvaAccountName: 'dvaAccountName',
   dvaBankName: 'dvaBankName',
   dvaBankCode: 'dvaBankCode',
+  dvaBankSlug: 'dvaBankSlug',
+  dvaProvider: 'dvaProvider',
+  dvaCurrency: 'dvaCurrency',
   paystackReference: 'paystackReference',
   pdfUrl: 'pdfUrl',
   pdfStorage: 'pdfStorage',
@@ -293,6 +303,27 @@ exports.Prisma.InvoiceScalarFieldEnum = {
   paymentProofUploadedAt: 'paymentProofUploadedAt',
   paidAt: 'paidAt',
   sentAt: 'sentAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.PaymentScalarFieldEnum = {
+  id: 'id',
+  customerId: 'customerId',
+  invoiceId: 'invoiceId',
+  provider: 'provider',
+  providerTransactionId: 'providerTransactionId',
+  reference: 'reference',
+  amountMinor: 'amountMinor',
+  currency: 'currency',
+  channel: 'channel',
+  accountNumber: 'accountNumber',
+  status: 'status',
+  paidAt: 'paidAt',
+  rawMetadata: 'rawMetadata',
+  webhookLogId: 'webhookLogId',
+  reconciledAt: 'reconciledAt',
+  reconciledBy: 'reconciledBy',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -349,6 +380,9 @@ exports.Prisma.BackupLogScalarFieldEnum = {
 exports.Prisma.CustomerScalarFieldEnum = {
   id: 'id',
   name: 'name',
+  firstName: 'firstName',
+  lastName: 'lastName',
+  countryCode: 'countryCode',
   email: 'email',
   phone: 'phone',
   whatsapp: 'whatsapp',
@@ -361,7 +395,20 @@ exports.Prisma.CustomerScalarFieldEnum = {
   leadScore: 'leadScore',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
-  lastContactAt: 'lastContactAt'
+  lastContactAt: 'lastContactAt',
+  paystackCustomerId: 'paystackCustomerId',
+  paystackCustomerCode: 'paystackCustomerCode',
+  dvaAccountId: 'dvaAccountId',
+  dvaAccountNumber: 'dvaAccountNumber',
+  dvaAccountName: 'dvaAccountName',
+  dvaBankName: 'dvaBankName',
+  dvaBankCode: 'dvaBankCode',
+  dvaBankSlug: 'dvaBankSlug',
+  dvaProvider: 'dvaProvider',
+  dvaCurrency: 'dvaCurrency',
+  dvaStatus: 'dvaStatus',
+  dvaAssignedAt: 'dvaAssignedAt',
+  dvaUpdatedAt: 'dvaUpdatedAt'
 };
 
 exports.Prisma.CustomerNoteScalarFieldEnum = {
@@ -429,6 +476,7 @@ exports.Prisma.ModelName = {
   EmailProviderConfig: 'EmailProviderConfig',
   ReceivedEmail: 'ReceivedEmail',
   Invoice: 'Invoice',
+  Payment: 'Payment',
   EventRecord: 'EventRecord',
   WhatsAppMessage: 'WhatsAppMessage',
   AnalyticsEvent: 'AnalyticsEvent',
