@@ -433,6 +433,35 @@ exports.Prisma.CustomerMessageScalarFieldEnum = {
   sentAt: 'sentAt'
 };
 
+exports.Prisma.ImportJobScalarFieldEnum = {
+  id: 'id',
+  source: 'source',
+  sourceUrl: 'sourceUrl',
+  fileName: 'fileName',
+  format: 'format',
+  fileSize: 'fileSize',
+  status: 'status',
+  stage: 'stage',
+  error: 'error',
+  recordsFound: 'recordsFound',
+  validCount: 'validCount',
+  duplicateCount: 'duplicateCount',
+  invalidCount: 'invalidCount',
+  columnsDetected: 'columnsDetected',
+  importedCount: 'importedCount',
+  existingCount: 'existingCount',
+  failedCount: 'failedCount',
+  totalChunks: 'totalChunks',
+  chunkStates: 'chunkStates',
+  rows: 'rows',
+  usedFallback: 'usedFallback',
+  approvedAt: 'approvedAt',
+  startedAt: 'startedAt',
+  finishedAt: 'finishedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -483,7 +512,8 @@ exports.Prisma.ModelName = {
   BackupLog: 'BackupLog',
   Customer: 'Customer',
   CustomerNote: 'CustomerNote',
-  CustomerMessage: 'CustomerMessage'
+  CustomerMessage: 'CustomerMessage',
+  ImportJob: 'ImportJob'
 };
 
 /**

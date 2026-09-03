@@ -152,7 +152,10 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
     }
     const body = (await req.json()) as {
-      name: string;
+      name?: string;
+      firstName?: string;
+      lastName?: string;
+      countryCode?: string;
       email: string;
       phone?: string;
       whatsapp?: string;
@@ -165,17 +168,42 @@ export async function POST(req: Request) {
       leadScore?: number;
     };
 
-    if (!body.email || !body.name) {
-      return NextResponse.json({ ok: false, error: "Name and email are required" }, { status: 400 });
+    /* Customer Identity Contract (directive §13/§15): accept
+       firstName/lastName/countryCode explicitly. Legacy `name`
+       callers still work (§120 backward compat) — we derive
+       display `name` from the parts. ISO-2 country is validated
+       against the catalogue (§11 backend authority). */
+    const firstName = body.firstName?.trim() || null;
+    const lastName = body.lastName?.trim() || null;
+    const display =
+      body.name?.trim() || [firstName, lastName].filter(Boolean).join(" ") || null;
+    if (!body.email || (!display && !firstName)) {
+      return NextResponse.json(
+        { ok: false, error: "First name and email are required" },
+        { status: 400 }
+      );
+    }
+    let countryCode: string | null = null;
+    if (body.countryCode?.trim()) {
+      const iso = body.countryCode.trim().toUpperCase();
+      if (!/^[A-Z]{2}$/.test(iso)) {
+        return NextResponse.json({ ok: false, error: "Country must be an ISO-2 code (e.g. NG)" }, { status: 400 });
+      }
+      countryCode = iso;
     }
 
     const tagList = Array.isArray(body.tags) ? body.tags.filter(Boolean) : [];
+    const email = body.email.toLowerCase().trim();
+    const displayName = (display ?? email.split("@")[0]).slice(0, 120);
 
     const c = await db.customer.upsert({
-      where: { email: body.email.toLowerCase().trim() },
+      where: { email },
       create: {
-        name: body.name.trim(),
-        email: body.email.toLowerCase().trim(),
+        name: displayName,
+        firstName,
+        lastName,
+        countryCode,
+        email,
         phone: body.phone?.trim() || null,
         whatsapp: body.whatsapp?.trim() || null,
         company: body.company?.trim() || null,
@@ -187,7 +215,10 @@ export async function POST(req: Request) {
         leadScore: body.leadScore ?? null,
       },
       update: {
-        name: body.name.trim(),
+        name: displayName,
+        firstName: firstName ?? undefined,
+        lastName: lastName ?? undefined,
+        countryCode: countryCode ?? undefined,
         phone: body.phone?.trim() || null,
         whatsapp: body.whatsapp?.trim() || null,
         company: body.company?.trim() || null,

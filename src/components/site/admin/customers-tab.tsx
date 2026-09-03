@@ -22,6 +22,7 @@ import {
 } from "./types";
 import { CustomerDetailDialog } from "./customer-detail-dialog";
 import { CustomerImportDialog } from "./customer-import-dialog";
+import { QuickAddCustomerDialog } from "./quick-add-customer-dialog";
 
 /* ─────────────────────────────────────────────────────────────
    CustomersTab — the CRM customer book.
@@ -51,6 +52,7 @@ export function CustomersTab() {
 
   const [detailId, setDetailId] = useState<string | null>(null);
   const [importOpen, setImportOpen] = useState(false);
+  const [quickAddOpen, setQuickAddOpen] = useState(false);
 
   // Debounce search so we don't spam the API on every keystroke
   useEffect(() => {
@@ -124,7 +126,7 @@ export function CustomersTab() {
                 className="inline-flex items-center gap-1.5 rounded-xl border border-gold/30 bg-gold-dim px-3.5 py-2 text-[12px] font-semibold text-gold transition-colors hover:bg-gold/20"
               >
                 <Upload size={13} aria-hidden="true" />
-                <span className="hidden sm:inline">Import CSV / Excel</span>
+                <span className="hidden sm:inline">Import customers</span>
                 <span className="sm:hidden">Import</span>
               </button>
               <a
@@ -140,10 +142,9 @@ export function CustomersTab() {
               </a>
               <button
                 onClick={() => {
-                  /* Quick manual add — open the import dialog in pick mode
-                     then they can paste a single row, or just go to the
-                     detail dialog of an existing customer to edit. */
-                  setImportOpen(true);
+                  /* §15 quick manual creation — dedicated form,
+                     no file import needed. */
+                  setQuickAddOpen(true);
                 }}
                 className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-gold-light to-gold px-3.5 py-2 text-[12px] font-semibold text-ink shadow-gold transition-transform hover:-translate-y-0.5"
               >
@@ -209,18 +210,18 @@ export function CustomersTab() {
           <div className="flex flex-col items-center gap-3 py-16 text-center">
             <Users size={30} className="text-muted-foreground/40" aria-hidden="true" />
             <p className="max-w-md text-[13.5px] leading-relaxed text-muted-foreground">
-              No customers yet. Add one manually, or import a CSV/Excel file — the AI will map the
-              columns to the right fields automatically.
+              No customers yet. Add one manually, or import from any file or source — CSV, Excel,
+              PDF, Word, Google Sheets or Drive — the AI maps the fields automatically.
             </p>
             <div className="mt-1 flex flex-wrap items-center justify-center gap-2">
               <button
                 onClick={() => setImportOpen(true)}
                 className="inline-flex items-center gap-2 rounded-xl border border-gold/30 bg-gold-dim px-4 py-2.5 text-[12.5px] font-semibold text-gold transition-colors hover:bg-gold/20"
               >
-                <Upload size={14} aria-hidden="true" /> Import CSV / Excel
+                <Upload size={14} aria-hidden="true" /> Import from file / Drive / Sheets
               </button>
               <button
-                onClick={() => setImportOpen(true)}
+                onClick={() => setQuickAddOpen(true)}
                 className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-gold-light to-gold px-4 py-2.5 text-[12.5px] font-semibold text-ink shadow-gold transition-transform hover:-translate-y-0.5"
               >
                 <Plus size={14} aria-hidden="true" /> Add customer
@@ -275,11 +276,19 @@ export function CustomersTab() {
         />
       )}
 
-      {/* Import dialog */}
+      {/* Import wizard (§16/§17/§18) */}
       {importOpen && (
         <CustomerImportDialog
           onClose={() => setImportOpen(false)}
           onImported={() => void load()}
+        />
+      )}
+
+      {/* Quick manual add (§15) */}
+      {quickAddOpen && (
+        <QuickAddCustomerDialog
+          onClose={() => setQuickAddOpen(false)}
+          onSaved={() => void load()}
         />
       )}
     </div>

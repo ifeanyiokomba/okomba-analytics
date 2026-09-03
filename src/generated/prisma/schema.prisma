@@ -536,3 +536,56 @@ model CustomerMessage {
   @@index([channel])
   @@index([sentAt])
 }
+
+/**
+ * ── Master Platform Evolution Directive §16/§17 — AI CRM Import ──
+ * Background import job for LARGE customer imports (thousands of
+ * rows). Lifecycle:
+ * created → fetching → extracting → mapping → awaiting_approval
+ * → importing → completed | failed | cancelled
+ * The admin always gets a preview + approval gate before any DB
+ * write (§16 "Do not blindly import AI-extracted records").
+ * Import happens in CHUNKS (default 200 rows/chunk); failed chunks
+ * are tracked individually and can be RETRIED (§17).
+ * rows Json holds the canonical mapped rows (validated preview +
+ * import source). For 10k rows ≈ 3 MB jsonb — fine for Postgres.
+ */
+model ImportJob {
+  id        String  @id @default(cuid())
+  // Source: upload | url | google_sheets | google_drive
+  source    String  @default("upload")
+  sourceUrl String? // original reference for url/sheets/drive imports
+  fileName  String // display name
+  format    String // csv | tsv | xlsx | xls | pdf | docx | txt | json
+  fileSize  Int?    @default(0)
+
+  status String  @default("created")
+  stage  String? // human-readable current-phase note for the UI
+  error  String?
+
+  // Extraction / mapping stats (§17 admin dashboard counters)
+  recordsFound    Int  @default(0)
+  validCount      Int  @default(0)
+  duplicateCount  Int  @default(0) // duplicate emails WITHIN the file
+  invalidCount    Int  @default(0)
+  columnsDetected Json @default("[]")
+
+  // Import stats
+  importedCount Int  @default(0) // newly created customers
+  existingCount Int  @default(0) // matched existing customers (updated)
+  failedCount   Int  @default(0) // rows that failed the DB write
+  totalChunks   Int  @default(0)
+  chunkStates   Json @default("[]") // ["done"|"failed"|"pending", ...]
+
+  rows         Json    @default("[]") // canonical mapped rows
+  usedFallback Boolean @default(false) // deterministic mapper used (LLM failed/opt-out)
+
+  approvedAt DateTime?
+  startedAt  DateTime?
+  finishedAt DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  @@index([status])
+  @@index([createdAt])
+}
