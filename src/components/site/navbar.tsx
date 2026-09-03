@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ArrowRight, Mail, Menu, Phone, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { CONTACT } from "@/lib/content";
@@ -23,6 +23,7 @@ export function Navbar({ onGetStarted }: NavbarProps) {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const [activeSection, setActiveSection] = useState<string | null>(null);
+  const menuToggleRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
@@ -55,11 +56,21 @@ export function Navbar({ onGetStarted }: NavbarProps) {
     return () => obs.disconnect();
   }, []);
 
-  // Lock body scroll when mobile menu is open
+  // Lock body scroll when mobile menu is open + Escape closes (directive §14)
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        // close + restore focus to the hamburger toggle (focus management §14)
+        setOpen(false);
+        menuToggleRef.current?.focus();
+      }
+    };
+    document.addEventListener("keydown", onKey);
     return () => {
       document.body.style.overflow = "";
+      document.removeEventListener("keydown", onKey);
     };
   }, [open]);
 
@@ -147,6 +158,7 @@ export function Navbar({ onGetStarted }: NavbarProps) {
 
             {/* Mobile hamburger */}
             <button
+              ref={menuToggleRef}
               onClick={() => setOpen((v) => !v)}
               aria-label={open ? "Close menu" : "Open menu"}
               aria-expanded={open}

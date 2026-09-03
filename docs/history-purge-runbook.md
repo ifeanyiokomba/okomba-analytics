@@ -1,4 +1,4 @@
-# History Purge Runbook — Customer Payment PDFs (R57)
+# History Purge Runbook — Customer Payment PDFs (R57) + Revoked PAT String (Task 39)
 
 **Task ID:** B9 (Master Directive §9 — production readiness audit)
 **Owner:** Founder (this is a deliberate founder-side security-incident action; agents DO NOT execute this)
@@ -33,6 +33,7 @@ This is therefore a security incident on TWO fronts:
 
 - **Front A — current HEAD:** `data/uploads/proposals/INV-2026-0010.pdf` is publicly accessible RIGHT NOW via `git clone https://github.com/ifeanyiokomba/okomba-analytics.git` + `cat data/uploads/proposals/INV-2026-0010.pdf`. Anyone with the repo URL has this customer's full proposal PDF (3 pages, customer name + service + price + scope + duration + bank account number for DVA).
 - **Front B — git history:** the 6 PDFs (INV-2026-0001/0007/0008/0009/0010 + payment-proof-0007 + receipt-INV-2026-0001) in commits `fddfcc3` + `a9fe579` + `d8a6ca7` are publicly accessible via `git checkout <old-commit>` or `git show <old-commit>:<path>`.
+- **Front C (Task 39, 2026-09-03) — revoked PAT string in history:** the Phase-36 GitHub PAT that the founder pasted into the IM chat (and which GitHub's secret-scanning auto-revoked within seconds — verified dead via 401 Bad credentials) was recorded verbatim inside `worklog.md` in commits `a52d381` + `139a406`. It is NOT a live credential, but the literal string should not live in a public repo's history. The current worktree was scrubbed to `[REDACTED:github_token]` placeholders in the same Task-39 commit; this runbook's single `filter-repo --replace-text` pass (step 4) purges it from history in the SAME force-push as Fronts A+B — no extra history rewrite needed.
 
 **Treat this as a security incident.** Assume that every customer proposal PDF and the payment-proof PDF was accessed by anyone who cloned the repo pre-purge. The purge below is the remediation step.
 
@@ -147,10 +148,22 @@ git rev-list --all -- data/uploads/proposals/INV-2026-0010.pdf
 git rev-list --all -- data/uploads/proofs/
 git rev-list --all -- e2e-shots/module7/receipt-INV-2026-0001.pdf
 
+# ── Task 39 addition: scrub the REVOKED GitHub PAT string from history ──────
+# The Phase-36 PAT (auto-revoked by GitHub secret-scanning, verified dead — 401
+# Bad credentials) was recorded verbatim in worklog.md commits (a52d381, 139a406).
+# It is NOT a live credential, but the string should not live in git history.
+# Create the replace-text expressions file (replace the literal token with a
+# placeholder in EVERY blob of EVERY commit):
+cat > /tmp/pat-expressions.txt <<'EOF'
+ghp_2x0cREPLACE_WITH_FULL_36_CHAR_TOKEN==>REDACTED:github_token
+EOF
+# ⚠ Fill in the complete token string in place of REPLACE_WITH_FULL_36_CHAR_TOKEN
+# (recover it from the pre-purge history: git log --all -p | grep -oE 'ghp_[A-Za-z0-9]{36}' | sort -u)
+
 # Run the purge.
 # This rewrites EVERY commit, removing ALL files under data/uploads/ AND the specific
-# receipt PDF, across ALL branches and ALL tags, in ALL of history.
-git filter-repo --path data/uploads/ --path e2e-shots/module7/receipt-INV-2026-0001.pdf --invert-paths
+# receipt PDF AND the revoked PAT string, across ALL branches and ALL tags, in ALL of history.
+git filter-repo --path data/uploads/ --path e2e-shots/module7/receipt-INV-2026-0001.pdf --invert-paths --replace-text /tmp/pat-expressions.txt
 
 # filter-repo automatically:
 #   • removes the origin remote (defensive — forces you to re-add it before pushing)
@@ -179,6 +192,12 @@ git log --all -- e2e-shots/module7/receipt-INV-2026-0001.pdf
 # Also verify NO pdf remains under data/uploads/ in any historical commit:
 git log --all --name-only --pretty=format: | grep -E '^data/uploads/.*\.pdf$' | sort -u
 # Expected: empty output
+
+# ── Task 39 addition: verify the revoked PAT string is GONE from history ─────
+git log --all -p | grep -cE 'ghp_[A-Za-z0-9]{36}'
+# Expected: 0 (zero occurrences across all rewritten history)
+git log --all -p | grep -c 'REDACTED:github_token'
+# Expected: 2+ (the placeholders that replaced the token in the worklog blobs)
 
 # Verify the rest of the repo is intact (latest commit subject + file count):
 git log --oneline -5

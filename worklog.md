@@ -2255,7 +2255,7 @@ Stage Summary:
   tab via /favicon.svg.
 
 Unresolved issues / risks:
-- CRITICAL: revoke the PAT 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
+- CRITICAL: revoke the PAT [REDACTED:github_token]
   IMMEDIATELY. It has been pasted into chat twice now (this
   phase + Phase 16 was a different PAT also exposed). Even with
   sed-redaction in command output, the original bytes are in
@@ -5192,7 +5192,7 @@ Stage Summary:
 ---
 Task ID: 36-PUSH-BLOCKED (PAT auto-revoked + origin/main divergence identified)
 Agent: main (orchestrator)
-Task: Founder provided a GitHub PAT (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) via the IM chat to push the Phase 36 local commits to origin/main. Push attempt failed because the PAT was auto-revoked by GitHub's secret-scanning service. Investigation also surfaced a significant divergence between the local branch and origin/main.
+Task: Founder provided a GitHub PAT ([REDACTED:github_token]) via the IM chat to push the Phase 36 local commits to origin/main. Push attempt failed because the PAT was auto-revoked by GitHub's secret-scanning service. Investigation also surfaced a significant divergence between the local branch and origin/main.
 
 Work Log:
 - TESTED the PAT via GitHub REST API:
@@ -5310,3 +5310,34 @@ Stage Summary:
 - SANDBOX DB: embedded PostgreSQL 16.4 at 127.0.0.1:54329 (scripts/start-local-db.sh); schema byte-parity with production Neon direction; test rows: 1 inquiry (Ada Obi/NG) + 1 customer + 1 receivedEmail + 1 subscriber.
 - UNRESOLVED: (1) PUSH BLOCKED — needs new credential outside IM chat; origin/main still lacks the merge (divergence now only 8 commits ahead, clean fast-forwardable — no more parallel-stream conflict). (2) WhatsApp service needs interactive QR auth to go live. (3) Neon production DB must receive the merged schema via `prisma db push` on next deploy (additive-only: new nullable columns + Payment table — safe). (4) The e2e-shots/task38/ screenshots + .gitignore hygiene staged for the next commit.
 - NEXT-PHASE PRIORITY: founder delivers new PAT → `git push origin main` (fast-forward, no conflicts) → Render deploy picks up merged schema → run Neon db push → verify webhook flow against real Paystack test keys.
+
+---
+Task ID: 39-DIRECTIVE-RERUN
+Agent: main (orchestrator)
+Task: Founder re-uploaded the full master directive (OKOMBA_ANALYTICS_TERMII_INSPIRED_UI_UX_TRANSFORMATION_DIRECTIVE-1.md) with instruction to "follow and carry out appropriately and in order as directed." Executed the directive's final-phase mandate on the reconciled codebase: state re-verification (tree-reversion guard), quality gates, full E2E golden-path re-run, §39/§42 final audits, one a11y fix, PAT scrub + runbook extension, commit, push status check.
+
+Work Log:
+- STATE GUARD (lesson from Task 38's cron-reversion incident): checked git branch/log/reflog FIRST. Tree intact: `main` at 139a406 (Task 38's hygiene commit — e2e-shots + .gitignore + worklog record were already committed), working tree clean, dev server alive (GET / 200 in ~300-550ms, /api/health/ready {database: ok, env: ok} 9ms DB latency), embedded PostgreSQL 16.4 live at 127.0.0.1:54329.
+- QUALITY GATES: `bunx tsc --noEmit` → 0 errors; `bun run lint` → 0 errors.
+- E2E GOLDEN PATHS (agent-browser, directive §38 connected-behavior gate):
+  • Homepage: full render (hero + animated headline + nav + capabilities + all sections), no page/console errors.
+  • Inquiry modal: fill (Chidi Eze / chidi.eze.recheck@testmail.com / NG / Web & Mobile App Development) → POST /api/inquiries 201 → DB verified: Inquiry row (firstName "Chidi", lastName "Eze", countryCode "NG", customerId cmtkzhat2000…), canonical Customer row (same id, source "inquiry", country NG) — identity pipeline intact; EmailLog audit row written + email-failover stub chain fired (no providers configured + NOTIFY_WEBHOOK_URL unset → stub delivery, by design).
+  • Admin portal #/admin: auto-session → dashboard with all 12 tabs; Inquiries count live-updated to 2; Inquiries tab renders the new record with status combobox + "Create proposal" action.
+  • Newsletter: proper React fill → POST /api/subscribe 201 → Subscriber row persisted (status "pending" double opt-in). (First 400 was a test-harness artifact — JS value-set doesn't sync React controlled inputs; re-tested with fill → 201.)
+  • Mobile 390×844: zero horizontal overflow; h1 40.8px/42.4lh; CTAs stack full-width 350px at 52-55px height (≥44px touch targets); mobile drawer opens with full menu.
+  • Footer: flush to viewport bottom at scroll-end on mobile AND desktop (1440×900); structural guarantee verified (wrapper `flex min-h-screen flex-col`) → sticks on short pages, pushes naturally on long pages.
+  • Screenshots → e2e-shots/task39/ (mobile-footer.png, desktop-footer.png, desktop-home.png).
+- DEFECT FOUND + FIXED (directive §14 "Escape closes overlays" + focus management): the mobile nav drawer (navbar.tsx) had NO Escape handler — every other overlay (inquiry-modal, blog-article-dialog, project-dialog) has one; navbar was the outlier. Fix: keydown listener added to the existing open-state effect (same document.addEventListener pattern as the other dialogs) + focus restored to the hamburger toggle on Escape-close via new menuToggleRef. Browser-verified: Escape → drawer visibility:hidden/opacity:0, aria-expanded false, label reverts to "Open menu", document.activeElement === toggle button.
+- §39 STALE-PATTERN SEARCH: bg-yellow-/text-yellow-/border-yellow- → ZERO matches (yellow-reduction directive §7 clean); TODO/FIXME → only 1, inside vendored src/generated/prisma runtime (untouchable generated code); "legacy"/"placeholder" matches → all intentional backward-compat doc comments + HTML form input placeholders (legitimate per §39 "determine whether it remains intentionally used"); console usage → only 1 console.error inside a catch block for admin reconcile diagnostics (appropriate); prefers-reduced-motion → 3 touchpoints in globals.css.
+- §42/PAT FINAL AUDIT (the directive's final "PAT nowhere in codebase" mandate): full-worktree regex scan (ghp_ + github_pat_ patterns) found the REVOKED Phase-36 PAT string recorded verbatim in worklog.md lines 2258 + 5195 (and echoed in untracked tool-results scratch). GitHub already auto-revoked it (verified 401 Bad credentials in Task 36) so it is DEAD — but the literal string must not remain. Actions:
+  1. Worktree scrubbed: sed replaced the token with [REDACTED:github_token] (5 placeholders now in worklog). Re-scan → 0 matches.
+  2. git history: token string exists in commits a52d381 + 139a406 (worklog blobs). Since the founder ALREADY must run docs/history-purge-runbook.md (R57: filter-repo force-push for the customer payment PDFs), I EXTENDED that runbook with Front C + a --replace-text expressions file so ONE filter-repo pass + ONE force-push purges the PDFs AND the revoked PAT string together (no extra history rewrite). Verification steps added to runbook §5.
+  3. No PAT exists in git config (no credential helper, plain https remote).
+- PUSH STATUS: attempted `git push origin main` → "could not read Username" — BLOCKED, no credential delivered this session (previous PAT auto-revoked by GitHub secret-scanning). Merge + Task-39 commits (9+ ahead of origin/main, clean fast-forward) await a new credential via a NON-IM channel: `GH_TOKEN` env var → `git push https://x-access-token:$GH_TOKEN@github.com/ifeanyiokomba/okomba-analytics.git main`, or `gh auth login` device flow, or SSH deploy key (see Task 36 options).
+- Committed: navbar Escape/focus fix + worklog PAT scrub + history-purge-runbook Front C extension + e2e-shots/task39 evidence.
+
+Stage Summary:
+- DIRECTIVE STATE: Batches 0-12 all executed and re-verified on the reconciled codebase. Quality gates: tsc 0 · lint 0 · dev healthy · DB live. E2E: inquiry→DB→admin, subscribe→DB, mobile, footer, navigation — ALL PASS.
+- ONE FIX SHIPPED: navbar mobile drawer now closes on Escape with focus restoration (directive §14 — last a11y outlier; all other overlays already compliant).
+- PAT MANDATE: worktree is 100% token-free; history purge of the revoked string is folded into the R57 runbook (single force-push covers PDFs + token). Push still blocked on credential delivery outside IM chat.
+- FOUNDER ACTION LIST (unchanged from Task 38 + matrix §I): (1) new PAT via env/gh/SSH → push main (fast-forward); (2) execute history-purge runbook (now covers Front A+B+C); (3) Render deploy + Neon `prisma db push` (merged schema is additive-only: nullable columns + Payment table — safe); (4) email provider credentials + Test in admin Settings tab (R39/R107); (5) Code.gs v6 deploy + NOTIFY_WEBHOOK_URL (R48/R74); (6) WhatsApp Cloud API migration decision (R42); (7) Redis rate-limit/BullMQ swaps when scaling (R62/R69).
