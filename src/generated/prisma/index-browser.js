@@ -206,8 +206,68 @@ exports.Prisma.PostScalarFieldEnum = {
   status: 'status',
   publishedAt: 'publishedAt',
   notifySentAt: 'notifySentAt',
+  authorId: 'authorId',
+  coverImageUrl: 'coverImageUrl',
+  attachments: 'attachments',
+  seoTitle: 'seoTitle',
+  seoDescription: 'seoDescription',
+  socialImageUrl: 'socialImageUrl',
+  scheduledAt: 'scheduledAt',
+  notifyPlanned: 'notifyPlanned',
+  notifySegment: 'notifySegment',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
+};
+
+exports.Prisma.PostAuthorScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  slug: 'slug',
+  role: 'role',
+  bio: 'bio',
+  avatarUrl: 'avatarUrl',
+  active: 'active',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.CommentScalarFieldEnum = {
+  id: 'id',
+  postId: 'postId',
+  parentId: 'parentId',
+  authorName: 'authorName',
+  authorEmail: 'authorEmail',
+  body: 'body',
+  status: 'status',
+  reportedCount: 'reportedCount',
+  reporterNote: 'reporterNote',
+  flagged: 'flagged',
+  ipHash: 'ipHash',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  moderatedAt: 'moderatedAt'
+};
+
+exports.Prisma.ReactionScalarFieldEnum = {
+  id: 'id',
+  postId: 'postId',
+  type: 'type',
+  visitorKey: 'visitorKey',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.MediaAssetScalarFieldEnum = {
+  id: 'id',
+  kind: 'kind',
+  originalName: 'originalName',
+  storedName: 'storedName',
+  url: 'url',
+  thumbUrl: 'thumbUrl',
+  bytes: 'bytes',
+  mime: 'mime',
+  width: 'width',
+  height: 'height',
+  createdAt: 'createdAt'
 };
 
 exports.Prisma.TestimonialScalarFieldEnum = {
@@ -462,6 +522,47 @@ exports.Prisma.ImportJobScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.AdRequestScalarFieldEnum = {
+  id: 'id',
+  firstName: 'firstName',
+  lastName: 'lastName',
+  company: 'company',
+  email: 'email',
+  phone: 'phone',
+  whatsapp: 'whatsapp',
+  countryCode: 'countryCode',
+  websiteUrl: 'websiteUrl',
+  adType: 'adType',
+  placement: 'placement',
+  startDate: 'startDate',
+  durationDays: 'durationDays',
+  budget: 'budget',
+  description: 'description',
+  attachmentId: 'attachmentId',
+  termsConsent: 'termsConsent',
+  status: 'status',
+  statusHistory: 'statusHistory',
+  paymentStatus: 'paymentStatus',
+  amount: 'amount',
+  currency: 'currency',
+  paidAt: 'paidAt',
+  startAt: 'startAt',
+  endAt: 'endAt',
+  publishedAt: 'publishedAt',
+  creativeId: 'creativeId',
+  creativeUrl: 'creativeUrl',
+  headline: 'headline',
+  bodyCopy: 'bodyCopy',
+  ctaLabel: 'ctaLabel',
+  ctaUrl: 'ctaUrl',
+  adminNotes: 'adminNotes',
+  reviewedAt: 'reviewedAt',
+  clicks: 'clicks',
+  views: 'views',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -500,6 +601,10 @@ exports.Prisma.ModelName = {
   AdminSession: 'AdminSession',
   Subscriber: 'Subscriber',
   Post: 'Post',
+  PostAuthor: 'PostAuthor',
+  Comment: 'Comment',
+  Reaction: 'Reaction',
+  MediaAsset: 'MediaAsset',
   Testimonial: 'Testimonial',
   EmailLog: 'EmailLog',
   EmailProviderConfig: 'EmailProviderConfig',
@@ -513,7 +618,8 @@ exports.Prisma.ModelName = {
   Customer: 'Customer',
   CustomerNote: 'CustomerNote',
   CustomerMessage: 'CustomerMessage',
-  ImportJob: 'ImportJob'
+  ImportJob: 'ImportJob',
+  AdRequest: 'AdRequest'
 };
 
 /**

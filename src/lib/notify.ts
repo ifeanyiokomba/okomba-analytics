@@ -402,26 +402,40 @@ export async function notifyNewSubscriber(
 }
 
 /**
- * Notify all confirmed subscribers about a newly published post.
+ * Notify confirmed subscribers about a newly published post.
  * Returns the count of recipients actually queued.
  *
+ * BATCH 5 (§28): `opts.segment` selects the recipient segment —
+ * "all" (every confirmed subscriber) or "recent90" (confirmed in
+ * the last 90 days — the "new subscribers" segment). The notify
+ * decision itself is carried by the caller (post.notifyPlanned).
+ *
  * @param post The post that was just published
+ * @param opts.segment Recipient segment (default "all")
  * @returns number of confirmed subscribers notified
  */
-export async function notifyPostPublished(post: {
-  id: string;
-  title: string;
-  slug: string;
-  excerpt: string;
-  category: string;
-  author: string;
-  publishedAt: string;
-}): Promise<number> {
+export async function notifyPostPublished(
+  post: {
+    id: string;
+    title: string;
+    slug: string;
+    excerpt: string;
+    category: string;
+    author: string;
+    publishedAt: string;
+  },
+  opts?: { segment?: "all" | "recent90" }
+): Promise<number> {
   if (!enabled) return 0;
 
   try {
+    const segment = opts?.segment ?? "all";
+    const ninetyDaysAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000);
     const subscribers = await db.subscriber.findMany({
-      where: { status: "confirmed" },
+      where: {
+        status: "confirmed",
+        ...(segment === "recent90" ? { confirmedAt: { gte: ninetyDaysAgo } } : {}),
+      },
       select: { id: true, email: true },
     });
 
@@ -464,6 +478,47 @@ export async function notifyPostPublished(post: {
   } catch (err) {
     console.error("[notify] post notification failed:", err);
     return 0;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────
+   BATCH 5 (§23): new-comment admin notification. Fire-and-forget
+   from the public comment route; uses the operational-alert
+   pipeline (branded email + EmailLog audit + failover delivery).
+   Keyed per-comment so every submitted comment notifies exactly
+   once — comment rate limiting bounds the volume.
+   ───────────────────────────────────────────────────────────── */
+export async function notifyNewComment(c: {
+  id: string;
+  postTitle: string;
+  postSlug: string;
+  authorName: string;
+  authorEmail: string | null;
+  body: string;
+  status: string; // pending | spam (both deserve an admin look)
+}): Promise<void> {
+  try {
+    const preview = c.body.length > 400 ? `${c.body.slice(0, 400)}…` : c.body;
+    await sendAdminAlertEmail({
+      key: `comment.new.${c.id}`,
+      subject: `New comment awaiting moderation — ${c.postTitle}`,
+      bodyText: [
+        `${c.authorName} commented on "${c.postTitle}".`,
+        "",
+        `Status: ${c.status}`,
+        c.authorEmail ? `Author email: ${c.authorEmail}` : "No email provided",
+        "",
+        preview,
+      ].join("\n"),
+      blocks: [
+        { kind: "text", text: `${c.authorName} commented on "${c.postTitle}" (status: ${c.status}).` },
+        { kind: "text", text: preview },
+      ],
+      ctaText: "Moderate in admin",
+      ctaUrl: `${BASE_URL}/#admin`,
+    });
+  } catch (err) {
+    console.error("[notify] new-comment alert failed:", err);
   }
 }
 
@@ -1154,5 +1209,326 @@ export async function sendPaymentThankYouEmail(
       } catch {}
     }
     return { ok: false, error: msg };
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────
+   BATCH 6 (§37–42) — Advertisement emails.
+
+   §39 rules:
+   • Immediately after a public request, the advertiser receives
+     "Your advertising request has been received." and Okomba
+     receives "New advertising request." (with a useful summary +
+     contact info).
+   • Internal adminNotes are NEVER disclosed in advertiser emails.
+   • Decision emails carry the pricing/payment instructions on
+     approval (§38 workflow) and confirmation on payment.
+   ───────────────────────────────────────────────────────────── */
+
+export type AdEmailRow = {
+  id: string;
+  firstName: string;
+  lastName: string;
+  company: string | null;
+  email: string;
+  phone: string | null;
+  whatsapp: string | null;
+  countryCode: string | null;
+  websiteUrl: string | null;
+  adType: string;
+  placement: string;
+  durationDays: number | null;
+  budget: string | null;
+  description: string;
+  amount: { toString(): string } | null;
+  currency: string;
+  startAt: Date | null;
+  endAt: Date | null;
+};
+
+const AD_PAYMENT_INSTRUCTIONS = [
+  "Payment instructions:",
+  "• Bank transfer (NGN) — Okomba Analytics, details below",
+  "• International — a payment link will be issued on request",
+  "",
+  "Bank: Guaranty Trust Bank (GTB)",
+  "Account name: Okomba Analytics",
+  "Account number: 0123456789",
+  "Reference: use your request ID above",
+].join("\n");
+
+function adFullName(ad: AdEmailRow): string {
+  return `${ad.firstName} ${ad.lastName}`.trim();
+}
+
+function money(ad: AdEmailRow): string | null {
+  if (ad.amount == null) return null;
+  const n = Number(ad.amount.toString());
+  if (!Number.isFinite(n)) return null;
+  try {
+    return new Intl.NumberFormat("en-NG", {
+      style: "currency",
+      currency: ad.currency || "NGN",
+      maximumFractionDigits: 0,
+    }).format(n);
+  } catch {
+    return `${ad.currency} ${n.toLocaleString()}`;
+  }
+}
+
+/* Internal shared sender for advertiser-facing ad emails. */
+async function sendAdEmail(
+  ad: AdEmailRow,
+  subject: string,
+  blocks: EmailBlock[],
+  bodyText: string,
+  type: string
+): Promise<{ ok: boolean }> {
+  if (!enabled) return { ok: false };
+
+  const html = brandedEmailHtml({
+    title: subject,
+    preheader: bodyText.split("\n")[0]?.slice(0, 120) ?? subject,
+    blocks,
+    footerNote: "This is an advertising-related email from the Okomba Analytics platform.",
+  });
+
+  let logId: string | null = null;
+  try {
+    const created = await db.emailLog.create({
+      data: {
+        type,
+        recipientEmail: ad.email,
+        subject,
+        status: "sent",
+        bodyText,
+        bodyHtml: html,
+      },
+      select: { id: true },
+    });
+    logId = created.id;
+  } catch (err) {
+    console.error("[notify:ad] log persist failed:", err);
+  }
+
+  try {
+    const result = await deliverWithFailover({
+      to: ad.email,
+      subject,
+      bodyHtml: html,
+      bodyText,
+      attachments: [],
+      type,
+      legacyAction: "sendEmail",
+    });
+    if (logId) {
+      try {
+        await db.emailLog.updateMany({
+          where: { id: logId },
+          data: {
+            provider: result.provider,
+            ...(result.ok ? {} : { status: "failed", error: result.error ?? "delivery failed" }),
+          },
+        });
+      } catch {}
+    }
+    if (!result.ok) {
+      console.error("[notify:ad] delivery failed:", result.error);
+      return { ok: false };
+    }
+    return { ok: true };
+  } catch (err) {
+    console.error("[notify:ad] delivery threw:", err instanceof Error ? err.message : err);
+    return { ok: false };
+  }
+}
+
+/* §39 — advertiser receipt immediately after the public request. */
+export async function notifyAdRequestReceived(ad: AdEmailRow): Promise<void> {
+  try {
+    await sendAdEmail(
+      ad,
+      "Your advertising request has been received",
+      [
+        { kind: "text", text: `Hi ${ad.firstName}, thank you for your interest in advertising with Okomba Analytics.` },
+        { kind: "text", text: `We've received your request for a ${ad.adType} placement (${ad.placement})${ad.durationDays ? ` for ${ad.durationDays} days` : ""}. Our team reviews every request personally and will reply within 1–2 business days.` },
+        { kind: "text", text: `Reference ID: ${ad.id}` },
+      ],
+      [
+        `Hi ${ad.firstName},`,
+        "",
+        "Your advertising request has been received.",
+        "",
+        `Request: ${ad.adType} · ${ad.placement}${ad.durationDays ? ` · ${ad.durationDays} days` : ""}`,
+        `Reference ID: ${ad.id}`,
+        "",
+        "We will review your campaign details and reply within 1–2 business days",
+        "with pricing and next steps.",
+      ].join("\n"),
+      "ad.request_received"
+    );
+  } catch (err) {
+    console.error("[notify] ad-request receipt failed:", err);
+  }
+}
+
+/* §39 — internal alert with a useful summary + contact info. */
+export async function notifyAdRequestAdmin(ad: AdEmailRow): Promise<void> {
+  const lines = [
+    "New advertising request.",
+    "",
+    `Advertiser: ${adFullName(ad)}${ad.company ? ` — ${ad.company}` : ""}`,
+    `Email: ${ad.email}`,
+    ad.phone ? `Phone: ${ad.phone}` : null,
+    ad.whatsapp ? `WhatsApp: ${ad.whatsapp}` : null,
+    ad.countryCode ? `Country: ${ad.countryCode}` : null,
+    ad.websiteUrl ? `Website: ${ad.websiteUrl}` : null,
+    "",
+    `Placement: ${ad.placement} (${ad.adType})`,
+    ad.durationDays ? `Duration: ${ad.durationDays} days` : null,
+    ad.budget ? `Budget: ${ad.budget}` : null,
+    "",
+    "Campaign description:",
+    ad.description.length > 600 ? `${ad.description.slice(0, 600)}…` : ad.description,
+  ].filter((l): l is string => l !== null);
+
+  try {
+    await sendAdminAlertEmail({
+      key: `ad.new.${ad.id}`,
+      subject: `New advertising request — ${adFullName(ad)}${ad.company ? ` (${ad.company})` : ""}`,
+      bodyText: lines.join("\n"),
+      blocks: [
+        { kind: "text", text: `New advertising request from ${adFullName(ad)}${ad.company ? ` — ${ad.company}` : ""}.` },
+        { kind: "text", text: lines.filter((l) => !l.startsWith("Campaign")).slice(2, 8).join("\n") },
+        { kind: "text", text: ad.description.length > 300 ? `${ad.description.slice(0, 300)}…` : ad.description },
+      ],
+      ctaText: "Review in admin",
+      ctaUrl: `${BASE_URL}/#admin`,
+    });
+  } catch (err) {
+    console.error("[notify] ad-request admin alert failed:", err);
+  }
+}
+
+/* §38/§39 — decision emails. The note passed here is admin-authored
+   OUTBOUND text (safe to show the advertiser) — never internalNotes. */
+export async function notifyAdDecision(
+  ad: AdEmailRow,
+  kind: "approved" | "clarification" | "rejected" | "paid" | "scheduled",
+  outboundNote?: string
+): Promise<void> {
+  const amount = money(ad);
+  const window: string | null =
+    ad.startAt || ad.endAt
+      ? [
+          ad.startAt ? new Date(ad.startAt).toDateString() : null,
+          ad.endAt ? `until ${new Date(ad.endAt).toDateString()}` : null,
+        ]
+          .filter((s): s is string => s !== null)
+          .join(" ")
+      : null;
+
+  let subject = "";
+  let blocks: EmailBlock[] = [];
+  let bodyText = "";
+  let type = "ad.decision";
+
+  if (kind === "approved") {
+    subject = "Your advertising request is approved — pricing & payment";
+    blocks = [
+      { kind: "text", text: `Hi ${ad.firstName}, good news — your advertising request has been approved.` },
+      { kind: "text", text: amount ? `Campaign price: ${amount}${window ? ` · ${window}` : ""}` : `Campaign details: ${window ?? "to be confirmed"}` },
+      { kind: "text", text: AD_PAYMENT_INSTRUCTIONS },
+      ...(outboundNote ? [{ kind: "text", text: outboundNote } as EmailBlock] : []),
+      { kind: "text", text: "As soon as your payment is confirmed we will schedule the campaign and notify you." },
+    ];
+    bodyText = [
+      `Hi ${ad.firstName},`,
+      "",
+      "Your advertising request has been approved.",
+      amount ? `Campaign price: ${amount}${window ? ` · ${window}` : ""}` : null,
+      "",
+      AD_PAYMENT_INSTRUCTIONS,
+      outboundNote ?? null,
+      "",
+      "Once payment is confirmed your campaign will be scheduled and you'll receive a confirmation.",
+    ]
+      .filter((l): l is string => l !== null)
+      .join("\n");
+    type = "ad.approved";
+  } else if (kind === "clarification") {
+    subject = "A few details about your advertising request";
+    blocks = [
+      { kind: "text", text: `Hi ${ad.firstName}, thanks again for your advertising request.` },
+      { kind: "text", text: "Before we finalize the proposal, we need a few details:" },
+      ...(outboundNote ? [{ kind: "text", text: outboundNote } as EmailBlock] : [{ kind: "text", text: "Could you reply with your preferred start date and any creative assets?" } as EmailBlock]),
+    ];
+    bodyText = [
+      `Hi ${ad.firstName},`,
+      "",
+      "Before we finalize your advertising proposal, we need a few details:",
+      "",
+      outboundNote ?? "Could you reply with your preferred start date and any creative assets?",
+    ].join("\n");
+    type = "ad.clarification";
+  } else if (kind === "rejected") {
+    subject = "About your advertising request";
+    blocks = [
+      { kind: "text", text: `Hi ${ad.firstName}, thank you for considering Okomba Analytics for your campaign.` },
+      { kind: "text", text: "After review, we're unable to proceed with this request at the moment." },
+      ...(outboundNote ? [{ kind: "text", text: outboundNote } as EmailBlock] : []),
+      { kind: "text", text: "We'd be glad to revisit this in the future — inventory opens up regularly." },
+    ];
+    bodyText = [
+      `Hi ${ad.firstName},`,
+      "",
+      "Thank you for considering Okomba Analytics for your campaign.",
+      "After review, we're unable to proceed with this request at the moment.",
+      outboundNote ? `\n${outboundNote}` : "",
+      "",
+      "We'd be glad to revisit this in the future — ad inventory opens up regularly.",
+    ].join("\n");
+    type = "ad.rejected";
+  } else if (kind === "paid") {
+    subject = "Payment received — your campaign is being scheduled";
+    blocks = [
+      { kind: "text", text: `Hi ${ad.firstName}, we've received your payment. Thank you!` },
+      { kind: "text", text: amount ? `Amount: ${amount}` : "Payment confirmed." },
+      { kind: "text", text: "Your campaign is now being scheduled and will go live automatically at the agreed start." },
+    ];
+    bodyText = [
+      `Hi ${ad.firstName},`,
+      "",
+      "Payment received — thank you!",
+      amount ? `Amount: ${amount}` : null,
+      "",
+      "Your campaign will be scheduled and go live automatically at the agreed start date.",
+    ]
+      .filter((l): l is string => l !== null)
+      .join("\n");
+    type = "ad.paid";
+  } else {
+    subject = "Your campaign is scheduled";
+    blocks = [
+      { kind: "text", text: `Hi ${ad.firstName}, your campaign is scheduled and will publish automatically.` },
+      { kind: "text", text: window ? `Live window: ${window}` : "You'll be notified the moment it goes live." },
+      ...(outboundNote ? [{ kind: "text", text: outboundNote } as EmailBlock] : []),
+    ];
+    bodyText = [
+      `Hi ${ad.firstName},`,
+      "",
+      "Your campaign is scheduled.",
+      window ? `Live window: ${window}` : null,
+      outboundNote ?? null,
+    ]
+      .filter((l): l is string => l !== null)
+      .join("\n");
+    type = "ad.scheduled";
+  }
+
+  try {
+    await sendAdEmail(ad, subject, blocks, bodyText, type);
+  } catch (err) {
+    console.error("[notify] ad-decision email failed:", err);
   }
 }

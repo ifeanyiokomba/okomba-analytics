@@ -344,7 +344,7 @@ export type InquiryStatus = (typeof INQUIRY_STATUSES)[number];
 export const SUBSCRIBER_STATUSES = ["pending", "confirmed", "unsubscribed"] as const;
 export type SubscriberStatus = (typeof SUBSCRIBER_STATUSES)[number];
 
-export const POST_STATUSES = ["draft", "published"] as const;
+export const POST_STATUSES = ["draft", "scheduled", "published"] as const;
 export type PostStatus = (typeof POST_STATUSES)[number];
 
 /* ── Status → Tailwind classes (used in chips + selects) ──── */
@@ -363,7 +363,39 @@ export const SUBSCRIBER_STATUS_STYLES: Record<string, string> = {
 
 export const POST_STATUS_STYLES: Record<string, string> = {
   draft: "border-purple-400/35 bg-purple-400/10 text-purple-300",
+  scheduled: "border-[#5b9eff]/35 bg-[#5b9eff]/10 text-[#5b9eff]",
   published: "border-teal/35 bg-teal-dim text-teal",
+};
+
+/* ── BATCH 5 (§23/§92): comment moderation types ─────────── */
+export type AdminComment = {
+  id: string;
+  postId: string;
+  postTitle: string;
+  postSlug: string;
+  parentId: string | null;
+  authorName: string;
+  authorEmail: string | null;
+  body: string;
+  status: string;
+  reportedCount: number;
+  reporterNote: string | null;
+  flagged: { checks?: string[]; score?: number };
+  createdAt: string;
+  moderatedAt: string | null;
+};
+
+/* ── BATCH 5 (§43): author profiles ────────────────────── */
+export type AuthorRow = {
+  id: string;
+  name: string;
+  slug: string;
+  role: string;
+  bio: string | null;
+  avatarUrl: string | null;
+  active: boolean;
+  postCount: number;
+  createdAt: string;
 };
 
 /* ── Email log type labels ─────────────────────────────────── */

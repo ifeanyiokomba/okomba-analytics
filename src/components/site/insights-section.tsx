@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { SponsoredSlot } from "./sponsored-slot";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowUpRight, CalendarDays, Clock, Loader2 } from "lucide-react";
+import { ArrowUpRight, CalendarDays, Clock, Heart, Loader2, MessageSquare } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SectionHeading } from "./section-heading";
 import { Reveal } from "./reveal";
@@ -150,8 +151,26 @@ export function InsightsSection() {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.97 }}
                   transition={{ duration: 0.4, delay: Math.min(i * 0.06, 0.3), ease: [0.22, 1, 0.36, 1] }}
-                  className="surface-card group flex h-full flex-col p-6 md:p-7"
+                  className="surface-card group flex h-full flex-col p-0 md:p-0"
                 >
+                  {/* §25 cover image */}
+                  {p.coverImageUrl && (
+                    <button
+                      onClick={() => setOpenSlug(p.slug)}
+                      className="block w-full overflow-hidden rounded-t-[20px]"
+                      aria-hidden="true"
+                      tabIndex={-1}
+                    >
+                      { }
+                      <img
+                        src={p.coverImageUrl}
+                        alt=""
+                        loading="lazy"
+                        className="h-36 w-full object-cover transition-transform duration-500 group-hover:scale-[1.03] md:h-40"
+                      />
+                    </button>
+                  )}
+                  <div className="flex flex-1 flex-col p-6 md:p-7">
                   <div className="flex items-center justify-between gap-3">
                     <span className="eyebrow rounded-full border border-gold/25 bg-gold-dim px-3 py-1 text-[9px] text-gold">
                       {p.category}
@@ -167,7 +186,22 @@ export function InsightsSection() {
                   </h3>
                   <p className="mt-2.5 flex-1 text-[13.5px] leading-relaxed text-muted-foreground">{p.excerpt}</p>
 
-                  <div className="mt-6 flex items-center justify-between border-t border-black/[0.07] pt-5">
+                  {/* §43 author + §23/§24 engagement */}
+                  <div className="mt-4 flex items-center gap-2 text-[11.5px] text-muted-foreground/80">
+                    <span className="font-medium">{(p.authorProfile?.name ?? p.author).split(" ")[0]}</span>
+                    {(p.commentCount ?? 0) > 0 && (
+                      <span className="inline-flex items-center gap-1 font-mono text-[10.5px]">
+                        <MessageSquare size={11} aria-hidden="true" /> {p.commentCount}
+                      </span>
+                    )}
+                    {(p.reactionCount ?? 0) > 0 && (
+                      <span className="inline-flex items-center gap-1 font-mono text-[10.5px]">
+                        <Heart size={11} aria-hidden="true" /> {p.reactionCount}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="mt-3 flex items-center justify-between border-t border-black/[0.07] pt-5">
                     <span className="flex items-center gap-1.5 font-mono text-[10.5px] text-muted-foreground">
                       <Clock size={12} aria-hidden="true" /> {readTimeFor(p.content)}
                     </span>
@@ -180,11 +214,21 @@ export function InsightsSection() {
                       <ArrowUpRight size={14} className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" aria-hidden="true" />
                     </button>
                   </div>
+                  </div>
                 </motion.article>
               ))}
             </AnimatePresence>
           </div>
         )}
+
+        {/* §41 insights sponsored card — appended AFTER the post grid
+            so it never displaces editorial content; hidden with zero
+            live campaigns. */}
+        <div className={cn("grid grid-cols-1 gap-4", filtered.length >= 3 ? "md:grid-cols-2 lg:grid-cols-3" : "md:grid-cols-2")}>
+          <div className="md:col-span-1">
+            <SponsoredSlot variant="card" placement="insights-card" />
+          </div>
+        </div>
       </div>
 
       <BlogArticleDialog post={post} onClose={() => setOpenSlug(null)} />

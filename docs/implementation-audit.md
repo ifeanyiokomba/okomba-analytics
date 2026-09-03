@@ -26,12 +26,12 @@
 | 20 | Media storage audit | ✅ | Phase 20/27 audit + upload hardening | |
 | 21 | Photo upload (crop etc.) | 🟡 | Upload works; no crop UI | Batch 3 (deferred) |
 | 22 | Public ratings | ✅ | `Testimonial` model + moderation status | |
-| 23 | Post comments | ❌ | Not present | Batch 5 (next after CRM) |
-| 24 | Post reactions | ❌ | Not present | Batch 5 |
-| 25 | Post attachments | 🟡 | Post editor exists; media attachments partial | Batch 5 |
-| 26 | Professional post editor | 🟡 | `post-editor-dialog.tsx` (title/excerpt/content/category/tags/schedule) | Rich-text + SEO meta in Batch 5 |
-| 27 | AI post assistant | 🟡 | Broadcast AI exists; post AI not wired | Batch 5 |
-| 28 | Subscriber notifications on publish | ✅ | `Post.notifySentAt` + notify option | |
+| 23 | Post comments | ✅ | `Comment` model + `/api/comments` (GET+POST) + article comments section + admin Comments tab | **Batch 5 (Task 41)** — moderation-first; E2E: submit→pending→approve→public; nested replies verified (Chidi→Ada) |
+| 24 | Post reactions | ✅ | `Reaction` model + `/api/posts/reactions` + 4-button bar (like/helpful/insightful/interested) | **Task 41 E2E** — toggle on/off, one-per-visitor unique constraint, two visitors both counted |
+| 25 | Post attachments | ✅ | `MediaAsset` model + `/api/admin/media` upload (magic-byte validation + sharp 1920px/WebP + thumb) + `/api/media/[id]` streaming + cover/gallery/video/PDF in editor & article | **Task 41 E2E** — 90KB 2400px JPG → 20KB 1920px WebP (−78%); fake-jpeg + oversize rejected |
+| 26 | Professional post editor | ✅ | `post-editor-dialog.tsx` rewrite: 10-button markdown toolbar, cover upload, attachments manager, SEO tab w/ social preview + email preview, scheduled publishing, live preview | **Task 41 E2E** — scheduler flipped a post scheduled +8s to published automatically |
+| 27 | AI post assistant | ✅ | `post-ai.ts` + `/api/admin/posts/ai-assist` + editor AI panel (headlines/excerpts/structure/grammar/SEO/captions/announcement/CTA w/ Apply+Copy) | **Task 41 E2E** — real LLM run: 6 sections rendered; grounded-to-draft prompt; POST_AI_NO_LLM opt-out |
+| 28 | Subscriber notifications on publish | ✅ | `Post.notifyPlanned` + `notifySegment` (all/recent90/none) + editor notify select + email preview before send | **Task 41** — segments in `notifyPostPublished`; default `all` preserves §120 compat |
 | 29 | Subscriber broadcast AI | ✅ | `broadcast-dialog.tsx` + LLM assist | |
 | 30 | AI email quality grounding | ✅ | notify.ts templates use real invoice/customer data | |
 | 31 | Branded email templates | ✅ | 15+ templates via Apps Script pipeline | |
@@ -41,7 +41,7 @@
 | 35 | Invoice expiration reminders | ✅ | Reminder logic + stop-when-paid | |
 | 36 | Cron/background job architecture | ✅ | DB-tracked ImportJob pattern + fire-and-forget webhook | Reusable pattern for future batches |
 | 37–42 | Advertising system | ❌ | Not present | Batch 6 (next major) |
-| 43 | Author profiles on posts | 🟡 | `Post.author` string; no author entity | Batch 5 |
+| 43 | Author profiles on posts | ✅ | `PostAuthor` model + authors CRUD + AuthorsDialog + editor author picker + article author block (avatar/initials, name, role, bio) + card byline | **Task 41 E2E** — "Ifeanyi Okomba / Founder & Lead Analyst" + bio rendered on article + card |
 | 44–47 | Multi-admin RBAC + dashboard actions | ❌ | Single admin (env credentials) | Batch 7 |
 | 48–51 | AI customer chat + knowledge config | 🟡 | `ai-chat-widget` + `ai-chat.ts` knowledge layer | Batch 11 |
 | 52–57 | AI autonomy + mass email AI | 🟡 | Draft proposal auto-create from AI chat | Batch 12 |
@@ -56,8 +56,8 @@
 | 86 | Code.gs audit | ✅ | v6 reconciled | 🚀 founder deploy |
 | 87 | Analytics events | ✅ | `AnalyticsEvent` model + track route | |
 | 88–89 | Performance + DB indexes | ✅ | Batch audits + indexed query patterns | |
-| 90–93 | Security (uploads/SSRF/spam) | ✅ | Phase 27 hardening + import SSRF guard (DNS-resolve, private-IP block, redirect re-guard, size cap) | E2E: loopback blocked with clear error (Task 40) |
-| 94–95 | Observability + admin notifications | 🟡 | Email log + diagnostic logging | Notification center Batch 14 |
+| 90–93 | Security (uploads/SSRF/spam) | ✅ | Phase 27 hardening + import SSRF guard + §93 media validation (magic bytes/MIME/size/sanitized name/generated keys/local non-exec storage) + §92 comment defenses (rate limit 5/10min, honeypot, time-trap, link budget, shortener blocklist, profanity blocklist, duplicate guard, report auto-hide ×3) | **Task 41 E2E** — profanity→spam w/ flagged trail; 3-link→422; 7th comment→429; 3 reports→auto-hidden |
+| 94–95 | Observability + admin notifications | 🟡 | Email log + diagnostic logging + §23 new-comment admin alerts (notifyNewComment) + §92 report alerts | Notification center UI Batch 14 |
 | 96 | Global admin search | ❌ | Per-tab search only | Batch 14 |
 | 97 | Audit trail | ✅ | WebhookLog/EmailLog/AuditLog patterns | |
 | 98–100 | Configuration center | 🟡 | Settings tab (email providers) | Extended Batch 14 |
@@ -72,7 +72,7 @@
 ## Priority order (directive + founder emphasis)
 
 1. **BATCH 4-CRM-IMPORT (DONE — Task 40)** — §15 quick-add + §16/§17/§18/§19 import pipeline: any-format extraction (CSV/TSV/XLSX/XLS/PDF/DOCX/TXT/JSON), sources (device/URL/Google Sheets/Google Drive), background job + chunks + progress + retry, AI field mapping with firstName/lastName/countryCode canonical output, preview + approval gate, duplicate resolution. Founder: *"import large data… google drive, sheets, etc… regardless of what format, means, location."* — E2E verified: 2,500-row import in 13 chunks; URL import; Google Sheets fetch; SSRF block; quick-add.
-2. BATCH 5 — Publishing (comments/reactions/author profiles/rich editor)
+2. **BATCH 5-PUBLISHING (DONE — Task 41)** — §23 comments (moderation-first, nested replies, rate/spam/honeypot/report defenses) · §24 reactions (like/helpful/insightful/interested, one-per-visitor) · §25 attachments (MediaAsset + optimized upload + cover/gallery/video/PDF) · §26 pro editor (markdown toolbar, SEO + social preview, scheduling w/ auto-publish scheduler) · §27 AI post assistant (grounded) · §28 notify segments (all/recent90/none + email preview) · §43 author profiles. All E2E-verified; DB restored to pre-test state.
 3. BATCH 6 — Advertising system
 4. BATCH 7 — Multi-admin RBAC
 5. Batches 10–15 per directive sequence.

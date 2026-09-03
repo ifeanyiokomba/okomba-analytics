@@ -10,6 +10,7 @@ import {
   Search,
   Send,
   Trash2,
+  UserRound,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -32,6 +33,7 @@ export function PostsTab({
   onEdit,
   onDelete,
   deletingId,
+  onManageAuthors,
 }: {
   posts: Post[];
   loading: boolean;
@@ -39,6 +41,7 @@ export function PostsTab({
   onEdit: (post: Post) => void;
   onDelete: (post: Post) => Promise<void>;
   deletingId: string | null;
+  onManageAuthors: () => void;
 }) {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
@@ -65,15 +68,17 @@ export function PostsTab({
   }, [posts, search, statusFilter]);
 
   const draftCount = posts.filter((p) => p.status === "draft").length;
+  const scheduledCount = posts.filter((p) => p.status === "scheduled").length;
   const publishedCount = posts.filter((p) => p.status === "published").length;
   const notifiedCount = posts.filter((p) => p.notifySentAt).length;
 
   return (
     <div className="space-y-4">
       {/* Top row: KPIs + New post */}
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
         <PostsStatCard label="Total posts" value={posts.length} icon={FileText} accent="text-gold" bg="border-gold/25 bg-gold-dim" />
         <PostsStatCard label="Published" value={publishedCount} icon={Send} accent="text-teal" bg="border-teal/25 bg-teal-dim" />
+        <PostsStatCard label="Scheduled" value={scheduledCount} icon={CalendarDays} accent="text-[#5b9eff]" bg="border-[#5b9eff]/25 bg-[#5b9eff]/10" />
         <PostsStatCard label="Drafts" value={draftCount} icon={Pencil} accent="text-purple-300" bg="border-purple-400/25 bg-purple-400/10" />
         <PostsStatCard label="Subscriber blasts" value={notifiedCount} icon={Send} accent="text-gold-light" bg="border-gold-light/25 bg-gold-light/10" />
       </div>
@@ -92,13 +97,22 @@ export function PostsTab({
             </p>
           </div>
         </div>
-        <button
-          onClick={onCreateNew}
-          className="btn-shine inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-gold-light to-gold px-5 py-2.5 text-[13px] font-semibold text-ink shadow-gold transition-transform hover:-translate-y-0.5"
-        >
-          <Plus size={13} aria-hidden="true" />
-          New post
-        </button>
+        <div className="flex flex-wrap items-center gap-2.5">
+          <button
+            onClick={onManageAuthors}
+            className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl border border-white/[0.1] bg-white/[0.03] px-4 py-2.5 text-[13px] font-medium text-foreground transition-colors hover:border-gold/40 hover:text-gold"
+          >
+            <UserRound size={13} aria-hidden="true" />
+            Authors
+          </button>
+          <button
+            onClick={onCreateNew}
+            className="btn-shine inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-gold-light to-gold px-5 py-2.5 text-[13px] font-semibold text-ink shadow-gold transition-transform hover:-translate-y-0.5"
+          >
+            <Plus size={13} aria-hidden="true" />
+            New post
+          </button>
+        </div>
       </div>
 
       {/* Posts list */}
@@ -195,9 +209,11 @@ export function PostsTab({
                       )}
                       <span className="flex items-center gap-1.5 font-mono text-[10.5px] text-muted-foreground/70">
                         <CalendarDays size={11} aria-hidden="true" />
-                        {p.publishedAt
-                          ? `Published ${formatDate(p.publishedAt, { withYear: true })}`
-                          : `Updated ${formatDate(p.updatedAt, { withYear: true })}`}
+                        {p.status === "scheduled" && p.scheduledAt
+                          ? `Scheduled ${formatDate(p.scheduledAt, { withYear: true })}`
+                          : p.publishedAt
+                            ? `Published ${formatDate(p.publishedAt, { withYear: true })}`
+                            : `Updated ${formatDate(p.updatedAt, { withYear: true })}`}
                       </span>
                     </div>
                     <h3 className="mt-1.5 truncate text-[14px] font-semibold text-foreground transition-colors group-hover:text-gold">

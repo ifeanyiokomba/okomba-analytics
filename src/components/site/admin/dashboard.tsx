@@ -13,7 +13,9 @@ import {
   Loader2,
   LogOut,
   Mail,
+  Megaphone,
   MessageCircle,
+  MessageSquare,
   MessageSquareQuote,
   RefreshCw,
   Send,
@@ -28,12 +30,16 @@ import type { Service } from "@/lib/content";
 import { ServiceDetailDialog } from "./service-detail-dialog";
 import { InquiryDetailDialog } from "./inquiry-detail-dialog";
 import { PostEditorDialog } from "./post-editor-dialog";
+import { AuthorsDialog } from "./authors-dialog";
 import { TestimonialEditorDialog } from "./testimonial-editor-dialog";
 import { BroadcastDialog } from "./broadcast-dialog";
 import { OverviewTab } from "./overview-tab";
 import { InquiriesTab } from "./inquiries-tab";
 import { SubscribersTab } from "./subscribers-tab";
 import { PostsTab } from "./posts-tab";
+import { CommentsTab, type AdminComment } from "./comments-tab";
+import { AdsTab, type AdRequestRow, type AdStats } from "./ads-tab";
+import { AdDetailDialog } from "./ad-detail-dialog";
 import { TestimonialsTab } from "./testimonials-tab";
 import { EmailLogTab } from "./email-log-tab";
 import { InvoicesTab } from "./invoices-tab";
@@ -62,6 +68,8 @@ type Tab =
   | "analytics"
   | "subscribers"
   | "posts"
+  | "comments"
+  | "ads"
   | "testimonials"
   | "whatsapp"
   | "email"
@@ -76,6 +84,8 @@ const TABS: { id: Tab; label: string; icon: typeof Inbox }[] = [
   { id: "analytics", label: "Analytics", icon: BarChart3 },
   { id: "subscribers", label: "Subscribers", icon: Users },
   { id: "posts", label: "Posts", icon: FileText },
+  { id: "comments", label: "Comments", icon: MessageSquare },
+  { id: "ads", label: "Ads", icon: Megaphone },
   { id: "testimonials", label: "Testimonials", icon: MessageSquareQuote },
   { id: "whatsapp", label: "WhatsApp", icon: MessageCircle },
   { id: "email", label: "Email log", icon: Mail },
@@ -95,6 +105,15 @@ export function AdminDashboard({
   const [inquiries, setInquiries] = useState<Inquiry[]>([]);
   const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
   const [posts, setPosts] = useState<Post[]>([]);
+  const [comments, setComments] = useState<AdminComment[]>([]);
+  const [commentBusyId, setCommentBusyId] = useState<string | null>(null);
+  const [showAuthors, setShowAuthors] = useState(false);
+
+  /* ── BATCH 6: advertising requests (§40) ── */
+  const [ads, setAds] = useState<AdRequestRow[]>([]);
+  const [adStats, setAdStats] = useState<AdStats | null>(null);
+  const [detailAd, setDetailAd] = useState<AdRequestRow | null>(null);
+  const [adBusy, setAdBusy] = useState(false);
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
   const [emailLogs, setEmailLogs] = useState<EmailLog[]>([]);
   const [invoices, setInvoices] = useState<Invoice[]>([]);
@@ -106,7 +125,7 @@ export function AdminDashboard({
   const [error, setError] = useState<string | null>(null);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [deletingPostId, setDeletingPostId] = useState<string | null>(null);
-  const [savingPost, setSavingPost] = useState<null | "draft" | "published">(null);
+  const [savingPost, setSavingPost] = useState<null | "draft" | "scheduled" | "published">(null);
   const [deletingTestimonialId, setDeletingTestimonialId] = useState<string | null>(null);
 
   // Dialogs
@@ -168,7 +187,7 @@ export function AdminDashboard({
   const load = useCallback(async () => {
     setError(null);
     try {
-      const [listRes, statsRes, subsRes, postsRes, logRes, testimonialsRes, invoicesRes, draftsRes] = await Promise.all([
+      const [listRes, statsRes, subsRes, postsRes, logRes, testimonialsRes, invoicesRes, draftsRes, commentsRes, adsRes] = await Promise.all([
         fetch("/api/inquiries"),
         fetch("/api/inquiries?stats=1"),
         fetch("/api/subscribers"),
@@ -177,6 +196,8 @@ export function AdminDashboard({
         fetch("/api/admin/testimonials"),
         fetch("/api/admin/invoices"),
         fetch("/api/admin/proposal-drafts"),
+        fetch("/api/admin/comments"),
+        fetch("/api/admin/ads?stats=1"),
       ]);
       if (!listRes.ok || !statsRes.ok) throw new Error("Failed to load data — session may have expired");
       const list = await listRes.json();
@@ -191,6 +212,15 @@ export function AdminDashboard({
       if (postsRes.ok) {
         const p = await postsRes.json();
         setPosts(p.posts ?? []);
+      }
+      if (commentsRes.ok) {
+        const c = await commentsRes.json();
+        setComments(c.comments ?? []);
+      }
+      if (adsRes.ok) {
+        const a = await adsRes.json();
+        setAds(a.ads ?? []);
+        setAdStats(a.stats ?? null);
       }
       if (logRes.ok) {
         const l = await logRes.json();
@@ -290,7 +320,16 @@ export function AdminDashboard({
       category: string;
       tags: string[];
       author: string;
-      status: "draft" | "published";
+      status: "draft" | "scheduled" | "published";
+      authorId?: string | null;
+      coverImageUrl?: string | null;
+      attachments?: { name: string; url: string; bytes: number; mime: string; kind: string }[];
+      seoTitle?: string | null;
+      seoDescription?: string | null;
+      socialImageUrl?: string | null;
+      scheduledAt?: string | null;
+      notifyPlanned?: boolean;
+      notifySegment?: "all" | "recent90";
     }): Promise<void> => {
       setSavingPost(data.status);
       try {
@@ -305,9 +344,11 @@ export function AdminDashboard({
           throw new Error(j?.error ?? "Save failed");
         }
         if (data.status === "published" && !isEdit) {
-          setToast({ text: "Post published — subscribers notified", type: "ok" });
+          setToast({ text: data.notifyPlanned === false ? "Post published" : "Post published — subscribers notified", type: "ok" });
         } else if (data.status === "published" && isEdit) {
           setToast({ text: "Post updated & published", type: "ok" });
+        } else if (data.status === "scheduled") {
+          setToast({ text: "Post scheduled — it will publish automatically", type: "ok" });
         } else if (isEdit) {
           setToast({ text: "Post updated", type: "ok" });
         } else {
@@ -325,6 +366,162 @@ export function AdminDashboard({
       }
     },
     [load]
+  );
+
+  /* ── BATCH 5 (§23/§92): comment moderation handlers ────── */
+  const moderateComment = useCallback(
+    async (id: string, action: "approve" | "reject" | "spam" | "pending") => {
+      setCommentBusyId(id);
+      try {
+        const res = await fetch("/api/admin/comments", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id, action }),
+        });
+        if (!res.ok) throw new Error("Moderation failed");
+        setToast({
+          text:
+            action === "approve"
+              ? "Comment approved — now public"
+              : action === "spam"
+                ? "Comment marked as spam"
+                : action === "reject"
+                  ? "Comment rejected"
+                  : "Comment back in the review queue",
+          type: "ok",
+        });
+        const refreshed = await fetch("/api/admin/comments");
+        if (refreshed.ok) {
+          const j = await refreshed.json();
+          setComments(j.comments ?? []);
+        }
+      } catch (err) {
+        setToast({ text: err instanceof Error ? err.message : "Moderation failed", type: "err" });
+      } finally {
+        setCommentBusyId(null);
+      }
+    },
+    []
+  );
+
+  const deleteComment = useCallback(
+    async (id: string) => {
+      setCommentBusyId(id);
+      try {
+        const res = await fetch(`/api/admin/comments?id=${id}`, { method: "DELETE" });
+        if (!res.ok) throw new Error("Delete failed");
+        setToast({ text: "Comment deleted", type: "ok" });
+        setComments((prev) => prev.filter((c) => c.id !== id));
+      } catch (err) {
+        setToast({ text: err instanceof Error ? err.message : "Delete failed", type: "err" });
+      } finally {
+        setCommentBusyId(null);
+      }
+    },
+    []
+  );
+
+  /* ── BATCH 6: ad request management (§38/§40) ────────────── */
+  const refreshAds = useCallback(async () => {
+    const refreshed = await fetch("/api/admin/ads?stats=1");
+    if (refreshed.ok) {
+      const j = await refreshed.json();
+      setAds(j.ads ?? []);
+      setAdStats(j.stats ?? null);
+      return j.ads ?? [];
+    }
+    return null;
+  }, []);
+
+  const updateAd = useCallback(
+    async (id: string, patch: Record<string, unknown>): Promise<boolean> => {
+      setAdBusy(true);
+      try {
+        const res = await fetch(`/api/admin/ads/${id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(patch),
+        });
+        const j = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(j?.error ?? "Update failed");
+        const status = patch.status as string | undefined;
+        setToast({
+          text:
+            status === "approved"
+              ? "Approved — pricing & payment instructions emailed"
+              : status === "awaiting_customer"
+                ? "Clarification request emailed"
+                : status === "rejected"
+                  ? "Request rejected — notice emailed"
+                  : status === "scheduled"
+                    ? "Campaign scheduled — goes live automatically"
+                    : status === "active"
+                      ? "Campaign live"
+                      : status === "paused"
+                        ? "Campaign paused"
+                        : patch.paymentStatus === "paid"
+                          ? "Payment recorded — receipt emailed"
+                          : "Ad request updated",
+          type: "ok",
+        });
+        const fresh = await refreshAds();
+        if (fresh) {
+          const updated = (fresh as AdRequestRow[]).find((a) => a.id === id);
+          if (updated) setDetailAd(updated);
+        }
+        return true;
+      } catch (err) {
+        setToast({ text: err instanceof Error ? err.message : "Update failed", type: "err" });
+        return false;
+      } finally {
+        setAdBusy(false);
+      }
+    },
+    [refreshAds]
+  );
+
+  const uploadAdCreative = useCallback(
+    async (id: string, file: File): Promise<boolean> => {
+      setAdBusy(true);
+      try {
+        const form = new FormData();
+        form.append("file", file);
+        const res = await fetch(`/api/admin/ads/${id}/creative`, { method: "POST", body: form });
+        const j = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(j?.error ?? "Upload failed");
+        setToast({ text: "Creative uploaded", type: "ok" });
+        const fresh = await refreshAds();
+        if (fresh) {
+          const updated = (fresh as AdRequestRow[]).find((a) => a.id === id);
+          if (updated) setDetailAd(updated);
+        }
+        return true;
+      } catch (err) {
+        setToast({ text: err instanceof Error ? err.message : "Upload failed", type: "err" });
+        return false;
+      } finally {
+        setAdBusy(false);
+      }
+    },
+    [refreshAds]
+  );
+
+  const deleteAd = useCallback(
+    async (id: string) => {
+      setAdBusy(true);
+      try {
+        const res = await fetch(`/api/admin/ads/${id}`, { method: "DELETE" });
+        if (!res.ok) throw new Error("Delete failed");
+        setToast({ text: "Ad request deleted", type: "ok" });
+        setDetailAd(null);
+        await refreshAds();
+      } catch (err) {
+        setToast({ text: err instanceof Error ? err.message : "Delete failed", type: "err" });
+      } finally {
+        setAdBusy(false);
+      }
+    },
+    [refreshAds]
   );
 
   const deletePost = useCallback(
@@ -575,9 +772,13 @@ export function AdminDashboard({
                     ? confirmedSubs
                     : t.id === "posts"
                       ? posts.filter((p) => p.status === "draft").length
-                      : t.id === "testimonials"
-                        ? testimonials.filter((t2) => t2.status === "draft").length
-                        : undefined;
+                      : t.id === "comments"
+                        ? comments.filter((c) => c.status === "pending").length
+                        : t.id === "ads"
+                          ? (adStats?.awaitingAdmin ?? ads.filter((a) => a.status === "new").length)
+                          : t.id === "testimonials"
+                            ? testimonials.filter((t2) => t2.status === "draft").length
+                            : undefined;
             const waDot =
               t.id === "whatsapp" ? (waStatus?.status ?? "unknown") : null;
             return (
@@ -715,7 +916,20 @@ export function AdminDashboard({
                 onEdit={(p) => setEditingPost({ post: p, mode: "edit" })}
                 onDelete={deletePost}
                 deletingId={deletingPostId}
+                onManageAuthors={() => setShowAuthors(true)}
               />
+            )}
+            {tab === "comments" && (
+              <CommentsTab
+                comments={comments}
+                loading={false}
+                onModerate={moderateComment}
+                onDelete={deleteComment}
+                busyId={commentBusyId}
+              />
+            )}
+            {tab === "ads" && (
+              <AdsTab ads={ads} stats={adStats} loading={false} onOpen={(a) => setDetailAd(a)} />
             )}
             {tab === "testimonials" && (
               <TestimonialsTab
@@ -760,6 +974,12 @@ export function AdminDashboard({
           onSave={savePost}
         />
       )}
+      {showAuthors && (
+        <AuthorsDialog
+          onClose={() => setShowAuthors(false)}
+          onChanged={load}
+        />
+      )}
       {editingTestimonial && (
         <TestimonialEditorDialog
           testimonial={editingTestimonial.testimonial}
@@ -779,6 +999,17 @@ export function AdminDashboard({
             });
             load();
           }}
+        />
+      )}
+      {detailAd && (
+        <AdDetailDialog
+          key={`${detailAd.id}:${detailAd.updatedAt}`}
+          ad={detailAd}
+          busy={adBusy}
+          onClose={() => setDetailAd(null)}
+          onUpdate={updateAd}
+          onUploadCreative={uploadAdCreative}
+          onDelete={deleteAd}
         />
       )}
       <ProposalComposerDialog

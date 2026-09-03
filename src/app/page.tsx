@@ -18,6 +18,8 @@ import { WhySection } from "@/components/site/why-section";
 import { ProcessSection } from "@/components/site/process-section";
 import { TestimonialsSection } from "@/components/site/testimonials-section";
 import { InsightsSection } from "@/components/site/insights-section";
+import { AdvertiseSection } from "@/components/site/advertise-section";
+import { SponsoredSlot } from "@/components/site/sponsored-slot";
 import { AboutSection } from "@/components/site/about-section";
 import { FaqSection } from "@/components/site/faq-section";
 import { NewsletterSection } from "@/components/site/newsletter-section";
@@ -144,6 +146,8 @@ export default function Home() {
         />
         <CapabilityTicker />
         <StatsBand />
+        {/* §41 sponsored banner — renders only when a campaign is live */}
+        <SponsoredSlot variant="banner" placement="home-banner" dismissKey="home-banner" />
         <ProblemSection />
         <ServiceExplorer onRequestService={(svc) => openInquiry((svc as Service) ?? null)} />
         <WorkflowDemo />
@@ -155,6 +159,8 @@ export default function Home() {
         <ProcessSection onGetStarted={() => openInquiry(null)} />
         <TestimonialsSection />
         <InsightsSection />
+        {/* §37 Advertise With Us — public ad request workflow */}
+        <AdvertiseSection />
         <NewsletterSection />
         <AboutSection />
         <FaqSection />

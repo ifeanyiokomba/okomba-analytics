@@ -131,22 +131,136 @@ model Subscriber {
 }
 
 model Post {
-  id           String    @id @default(cuid())
-  title        String
-  slug         String    @unique
-  excerpt      String
-  content      String
-  category     String
-  tags         Json      @default("[]") // JSON-serialized string array
-  author       String    @default("OKOMBA ANALYTICS")
-  status       String    @default("draft") // draft | published
-  publishedAt  DateTime?
-  notifySentAt DateTime? // when subscriber email blast was sent
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  id             String    @id @default(cuid())
+  title          String
+  slug           String    @unique
+  excerpt        String
+  content        String
+  category       String
+  tags           Json      @default("[]") // JSON-serialized string array
+  author         String    @default("OKOMBA ANALYTICS") // legacy display fallback (kept in sync with authorId)
+  status         String    @default("draft") // draft | scheduled | published
+  publishedAt    DateTime?
+  notifySentAt   DateTime? // when subscriber email blast was sent
+  // ── BATCH 5 (directive §25/§26/§28/§43): publishing upgrade ──
+  authorId       String? // FK → PostAuthor (§43 author profiles)
+  coverImageUrl  String? // §25 featured image (public /api/media/{id} URL)
+  attachments    Json      @default("[]") // §25 [{name,url,bytes,mime,kind}]
+  seoTitle       String? // §26 SEO metadata (falls back to title)
+  seoDescription String? // §26 (falls back to excerpt)
+  socialImageUrl String? // §26 social preview image (falls back to cover)
+  scheduledAt    DateTime? // §26 scheduled publishing (status = scheduled)
+  notifyPlanned  Boolean   @default(true) // §28 notify subscribers on publish?
+  notifySegment  String    @default("all") // §28 recipient segment: all | recent90
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  authorRef PostAuthor? @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  comments  Comment[]
+  reactions Reaction[]
 
   @@index([status])
   @@index([publishedAt])
+  @@index([status, scheduledAt])
+}
+
+/**
+ * ── BATCH 5 (§43): author profiles ─────────────────────
+ * Public articles show a real author entity (name / role / bio /
+ * avatar) instead of a hardcoded string. Posts keep the legacy
+ * `author` string for email-template back-compat; it is kept in
+ * sync with the selected profile's name.
+ */
+model PostAuthor {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  role      String   @default("Contributor") // e.g. "Founder & Lead Analyst"
+  bio       String? // short public bio (max ~400 chars)
+  avatarUrl String? // /api/media/{id} URL (optimized upload)
+  active    Boolean  @default(true) // inactive authors hidden from picker
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  posts Post[]
+}
+
+/**
+ * ── BATCH 5 (§23/§92): post comments with moderation ──
+ * Moderation-first: every comment starts `pending` and only
+ * appears publicly after admin approval — anonymous commenting
+ * is never a direct spam vector. Replies nest one level
+ * (parentId → top-level comment).
+ */
+model Comment {
+  id            String    @id @default(cuid())
+  postId        String
+  parentId      String? // reply → top-level comment id
+  authorName    String
+  authorEmail   String? // optional contact for moderation follow-up
+  body          String
+  status        String    @default("pending") // pending | approved | rejected | spam
+  reportedCount Int       @default(0) // §92 report mechanism
+  reporterNote  String? // last report reason (optional)
+  flagged       Json      @default("{}") // §92 spam-check trail {checks:[],score}
+  ipHash        String? // salted hash (never raw IP at rest)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  moderatedAt   DateTime?
+
+  post    Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
+  parent  Comment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies Comment[] @relation("CommentReplies")
+
+  @@index([postId, status])
+  @@index([status, createdAt])
+  @@index([parentId])
+}
+
+/**
+ * ── BATCH 5 (§24): lightweight post reactions ──────────
+ * One reaction per (visitor, type) — the unique constraint
+ * makes duplicate reactions impossible; toggle-off deletes.
+ */
+model Reaction {
+  id         String   @id @default(cuid())
+  postId     String
+  type       String // like | helpful | insightful | interested
+  visitorKey String // httpOnly random cookie (anonymous session)
+  createdAt  DateTime @default(now())
+
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, visitorKey, type])
+  @@index([postId, type])
+}
+
+/**
+ * ── BATCH 5 (§20/§21/§25/§93): media assets ────────────
+ * Optimized uploads (sharp resize + webp for images),
+ * validated (magic bytes + MIME + size + sanitized name),
+ * stored under data/uploads/media/ (gitignored, outside
+ * executable dirs) and streamed via /api/media/{id}.
+ */
+model MediaAsset {
+  id           String   @id @default(cuid())
+  kind         String // image | video | document
+  originalName String // sanitized client name (display only)
+  storedName   String // generated storage key — never trust client name
+  url          String // public URL (/api/media/{id} or Cloudinary)
+  thumbUrl     String? // 480px webp preview for images
+  bytes        Int      @default(0)
+  mime         String
+  width        Int?
+  height       Int?
+  createdAt    DateTime @default(now())
+
+  // BATCH 6 ad relations (§37 intake attachment + §41 creative)
+  adAttachments AdRequest[] @relation("AdRequestAttachment")
+  adCreatives   AdRequest[] @relation("AdRequestCreative")
+
+  @@index([kind])
+  @@index([createdAt])
 }
 
 model Testimonial {
@@ -588,4 +702,77 @@ model ImportJob {
 
   @@index([status])
   @@index([createdAt])
+}
+
+/**
+ * ── BATCH 6 (§37–42): Advertisement marketplace ──────────────
+ * Lifecycle (§38):  new → reviewing → (awaiting_customer)? →
+ * approved (pricing sent) → payment_pending → paid →
+ * scheduled → active → completed | rejected | expired | paused
+ * Display window is authoritative on startAt/endAt (§42) — the
+ * status engine flips scheduled→active and active→completed/expired
+ * lazily on read (same pattern as Post.publishDuePosts).
+ */
+model AdRequest {
+  id String @id @default(cuid())
+
+  // §37 Advertiser identity
+  firstName   String
+  lastName    String
+  company     String?
+  email       String
+  phone       String?
+  whatsapp    String?
+  countryCode String? // ISO-2 (countries.ts)
+  websiteUrl  String? // website/social URL
+
+  // §37 Campaign request (intake)
+  adType       String // banner | card | sidebar | inline | carousel
+  placement    String // preferred placement key (AD_PLACEMENTS)
+  startDate    DateTime? // preferred start at intake
+  durationDays Int?
+  budget       String? // free-text budget signal at intake
+  description  String // campaign description
+  attachmentId String? // optional brief/reference upload at intake
+  attachment   MediaAsset? @relation("AdRequestAttachment", fields: [attachmentId], references: [id], onDelete: SetNull)
+  termsConsent Boolean     @default(false)
+
+  // §40 approval status (one of AD_STATUSES)
+  status        String @default("new")
+  statusHistory Json? // [{status, at, note?}] trail for the admin timeline
+
+  // §40 payment state
+  paymentStatus String    @default("unpaid") // unpaid | pending | paid | waived | refunded
+  amount        Decimal? // agreed price set by admin
+  currency      String    @default("NGN")
+  paidAt        DateTime?
+
+  // §42 scheduling (authoritative display window)
+  startAt     DateTime?
+  endAt       DateTime?
+  publishedAt DateTime?
+
+  // §41 creative + copy (admin-managed after approval)
+  creativeId  String?
+  creative    MediaAsset? @relation("AdRequestCreative", fields: [creativeId], references: [id], onDelete: SetNull)
+  creativeUrl String? // external creative URL alternative
+  headline    String?
+  bodyCopy    String?
+  ctaLabel    String?
+  ctaUrl      String?
+
+  adminNotes String? // internal only — NEVER included in advertiser emails (§39)
+  reviewedAt DateTime?
+
+  // engagement
+  clicks Int @default(0)
+  views  Int @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+  @@index([paymentStatus])
+  @@index([placement])
+  @@index([startAt, endAt])
 }
