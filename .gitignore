@@ -78,3 +78,6 @@ e2e-shots/**/*.db
 .zscripts/*.pid
 mini-services/**/data/
 mini-services/**/node_modules/
+ whatsapp-service/data/
+*.pma
+first_party_sets.db
