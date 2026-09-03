@@ -6,6 +6,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { SERVICES, type Service } from "@/lib/content";
 import { ServiceIcon } from "./service-icon";
+import { COUNTRIES } from "@/lib/countries";
 
 type InquiryModalProps = {
   service: Service | null; // preselected service
@@ -13,11 +14,20 @@ type InquiryModalProps = {
   onSuccess: (name: string) => void;
 };
 
+// ── BATCH 2 (directive §5,§6): canonical customer identity contract ──
+//   Required: firstName, lastName, email, phone, country, service, message
+//   Optional: whatsapp, addlService, budget
+//   The single `name` field is gone — we collect first + last name
+//   separately so the backend never has to split a combined string
+//   (directive §48: "Do not use name splitting for newly submitted users").
+//   Country is a structured ISO-2 <select> (directive §7) — no free text.
 type FormState = {
-  name: string;
+  firstName: string;
+  lastName: string;
   email: string;
   phone: string;
   whatsapp: string;
+  country: string;
   service: string;
   addlService: string;
   budget: string;
@@ -25,10 +35,12 @@ type FormState = {
 };
 
 const INITIAL_FORM: FormState = {
-  name: "",
+  firstName: "",
+  lastName: "",
   email: "",
   phone: "",
   whatsapp: "",
+  country: "",
   service: "",
   addlService: "",
   budget: "",
@@ -111,8 +123,11 @@ export function InquiryModal({ service, onClose, onSuccess }: InquiryModalProps)
 
   const validate = (): boolean => {
     const er: typeof errors = {};
-    if (form.name.trim().length < 2) er.name = "Please enter your full name";
+    if (form.firstName.trim().length < 1) er.firstName = "First name is required";
+    if (form.lastName.trim().length < 1) er.lastName = "Last name is required";
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) er.email = "A valid email is required";
+    if (form.phone.trim().length < 7) er.phone = "A valid phone number is required";
+    if (!form.country) er.country = "Please select your country";
     if (!form.service) er.service = "Please select a service";
     if (form.message.trim().length < 10) er.message = "Tell us a little more (min. 10 characters)";
     setErrors(er);
@@ -129,10 +144,12 @@ export function InquiryModal({ service, onClose, onSuccess }: InquiryModalProps)
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name: form.name.trim(),
+          firstName: form.firstName.trim(),
+          lastName: form.lastName.trim(),
           email: form.email.trim(),
-          phone: form.phone.trim() || undefined,
+          phone: form.phone.trim(),
           whatsapp: form.whatsapp.trim() || undefined,
+          country: form.country,
           service: form.service,
           addlService: form.addlService || undefined,
           budget: form.budget || undefined,
@@ -141,7 +158,11 @@ export function InquiryModal({ service, onClose, onSuccess }: InquiryModalProps)
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data?.error || "Submission failed. Please try again.");
-      onSuccess(form.name.trim());
+      // For the thank-you toast, derive a display name from the two
+      // explicit fields — never split a combined string on the client
+      // (directive §48).
+      const displayName = `${form.firstName.trim()} ${form.lastName.trim()}`.trim();
+      onSuccess(displayName);
       onClose();
     } catch (err) {
       setApiError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
@@ -200,26 +221,52 @@ export function InquiryModal({ service, onClose, onSuccess }: InquiryModalProps)
         {/* Form body */}
         <form onSubmit={submit} noValidate className="flex flex-col overflow-y-auto">
           <div className="space-y-4.5 px-6 py-6 md:px-7" style={{ display: "grid", gap: "1.05rem" }}>
+            {/* ── BATCH 2: First name + Last name (directive §5, §48) ──
+                The single `name` field is gone — we collect the two
+                explicitly so the backend never has to split a combined
+                string. The "Full name" label is replaced with two
+                side-by-side required inputs. */}
             <div className="grid gap-4 sm:grid-cols-2" style={{ gap: "1.05rem" }}>
               <div>
-                <label htmlFor="iq-name" className={labelCls}>
-                  Full name <span className="text-gold">*</span>
+                <label htmlFor="iq-first" className={labelCls}>
+                  First name <span className="text-gold">*</span>
                 </label>
                 <input
                   ref={firstFieldRef}
-                  id="iq-name"
+                  id="iq-first"
                   type="text"
-                  autoComplete="name"
-                  value={form.name}
-                  onChange={set("name")}
-                  placeholder="Adaeze Nwosu"
-                  className={inputCls("name")}
-                  aria-invalid={!!errors.name}
+                  autoComplete="given-name"
+                  value={form.firstName}
+                  onChange={set("firstName")}
+                  placeholder="Adaeze"
+                  className={inputCls("firstName")}
+                  aria-invalid={!!errors.firstName}
                 />
-                {errors.name && (
-                  <p className={errorCls}><AlertCircle size={12} aria-hidden="true" />{errors.name}</p>
+                {errors.firstName && (
+                  <p className={errorCls}><AlertCircle size={12} aria-hidden="true" />{errors.firstName}</p>
                 )}
               </div>
+              <div>
+                <label htmlFor="iq-last" className={labelCls}>
+                  Last name <span className="text-gold">*</span>
+                </label>
+                <input
+                  id="iq-last"
+                  type="text"
+                  autoComplete="family-name"
+                  value={form.lastName}
+                  onChange={set("lastName")}
+                  placeholder="Nwosu"
+                  className={inputCls("lastName")}
+                  aria-invalid={!!errors.lastName}
+                />
+                {errors.lastName && (
+                  <p className={errorCls}><AlertCircle size={12} aria-hidden="true" />{errors.lastName}</p>
+                )}
+              </div>
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2" style={{ gap: "1.05rem" }}>
               <div>
                 <label htmlFor="iq-email" className={labelCls}>
                   Email <span className="text-gold">*</span>
@@ -238,11 +285,37 @@ export function InquiryModal({ service, onClose, onSuccess }: InquiryModalProps)
                   <p className={errorCls}><AlertCircle size={12} aria-hidden="true" />{errors.email}</p>
                 )}
               </div>
+              {/* Country — structured ISO-2 select, no free text (directive §7) */}
+              <div>
+                <label htmlFor="iq-country" className={labelCls}>
+                  Country <span className="text-gold">*</span>
+                </label>
+                <select
+                  id="iq-country"
+                  value={form.country}
+                  onChange={set("country")}
+                  className={cn(inputCls("country"), "cursor-pointer appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2212%22%20height%3D%2212%22%20viewBox%3D%220%200%2012%2012%22%3E%3Cpath%20fill%3D%22%239aa3b8%22%20d%3D%22M6%208L1%203h10z%22%2F%3E%3C%2Fsvg%3E')] bg-[position:right_1rem_center] bg-no-repeat pr-10")}
+                  aria-invalid={!!errors.country}
+                >
+                  <option value="">Select your country…</option>
+                  {COUNTRIES.map((c) => (
+                    <option key={c.code} value={c.code} className="bg-[#0b101c]">
+                      {c.label}{c.dialCode ? ` (${c.dialCode})` : ""}
+                    </option>
+                  ))}
+                </select>
+                {errors.country && (
+                  <p className={errorCls}><AlertCircle size={12} aria-hidden="true" />{errors.country}</p>
+                )}
+              </div>
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2" style={{ gap: "1.05rem" }}>
+              {/* Phone — now REQUIRED (directive §6) */}
               <div>
-                <label htmlFor="iq-phone" className={labelCls}>Phone</label>
+                <label htmlFor="iq-phone" className={labelCls}>
+                  Phone <span className="text-gold">*</span>
+                </label>
                 <input
                   id="iq-phone"
                   type="tel"
@@ -251,7 +324,11 @@ export function InquiryModal({ service, onClose, onSuccess }: InquiryModalProps)
                   onChange={set("phone")}
                   placeholder="+234 800 000 0000"
                   className={inputCls("phone")}
+                  aria-invalid={!!errors.phone}
                 />
+                {errors.phone && (
+                  <p className={errorCls}><AlertCircle size={12} aria-hidden="true" />{errors.phone}</p>
+                )}
               </div>
               <div>
                 <label htmlFor="iq-wa" className={labelCls}>WhatsApp number</label>
@@ -260,7 +337,7 @@ export function InquiryModal({ service, onClose, onSuccess }: InquiryModalProps)
                   type="tel"
                   value={form.whatsapp}
                   onChange={set("whatsapp")}
-                  placeholder="+234 800 000 0000"
+                  placeholder="Optional — defaults to phone"
                   className={inputCls("whatsapp")}
                 />
               </div>

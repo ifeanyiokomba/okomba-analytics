@@ -35,6 +35,7 @@ import { generateReceiptPdf, receiptNumberFor } from "@/lib/pdf/receipt-pdf";
 import { generatePaymentThanks } from "@/lib/payment-ai";
 import { sendPaymentThankYouEmail } from "@/lib/notify";
 import { dispatchWhatsApp } from "@/lib/whatsapp";
+import { reconcilePayment, type NormalizedPaymentInput } from "@/lib/payment";
 
 export function paystackWebhookSecret(): string | null {
   return process.env.PAYSTACK_WEBHOOK_SECRET || process.env.PAYSTACK_SECRET_KEY || null;
@@ -239,28 +240,19 @@ export async function processPaystackEvent(
 /* ── charge.success handler (the money path) ───────────────── */
 
 async function handleChargeSuccess(data: PaystackChargeData): Promise<WebhookOutcome> {
-  // Audit fix (Phase 27 + B2 deep-trace): invoice matching uses an
-  // IMMUTABLE binding chain — never email+amount (which can collide
-  // across multiple open invoices for the same customer). The lookup
-  // order is:
-  //   1. paystackReference (data.reference) — strongest, intended to
-  //      be set at DVA / checkout creation time, unique per invoice.
-  //      NOTE (B2 deep-trace): in the current production DVA-only
-  //      flow this field is NOT actually written at invoice creation
-  //      (src/lib/invoice-service.ts omits it from the create call),
-  //      so for bank-transfer payments the primary lookup is dead
-  //      code — only the secondary below actually matches. Switching
-  //      to Paystack transaction.initialize / payment_request would
-  //      let us mint our own reference at creation time and have it
-  //      echoed in the webhook. Tracked as a recommended future fix
-  //      in docs/paystack-flow-trace.md §E.
-  //   2. dvaAccountNumber — per-customer (NOT per-invoice) on real
-  //      Paystack; see the inline note in the secondary block below
-  //      for how the multi-invoice case is handled (ambiguous →
-  //      manual reconciliation, never "guess most recent").
-  //   3. NO FALLBACK. If neither uniquely resolves, the payment lands
-  //      in a "needs manual reconciliation" queue + alerts the admin.
-  //      We do NOT auto-mark any invoice paid by email+amount heuristic.
+  // ── BATCH 6 (directive §25, §26, §35, §36): Payment reconciliation ──
+  //   A Payment row is created on EVERY charge.success — even when no
+  //   invoice can be safely matched. The matching chain:
+  //     1. paystackReference on Invoice (data.reference, unique per invoice)
+  //     2. dvaAccountNumber → Customer (DVA is customer-owned, directive §9)
+  //     3. Customer has exactly ONE open invoice → auto-bind (safe)
+  //     4. Customer has MULTIPLE open invoices → ambiguity queue (admin)
+  //     5. NEVER email + amount (directive §36 — Phase 27 audit fix
+  //        already removed this heuristic)
+  //   Side-effects (stop reminders, receipt email, WhatsApp, kickoff event)
+  //   fire ONLY when an invoice is freshly marked paid — a duplicate
+  //   webhook for an already-paid invoice records the Payment row but
+  //   skips the side-effects.
   const reference =
     typeof data.reference === "string" && data.reference.trim()
       ? data.reference.trim()
@@ -269,104 +261,96 @@ async function handleChargeSuccess(data: PaystackChargeData): Promise<WebhookOut
   const accountNumber =
     typeof dva.account_number === "string" ? dva.account_number : null;
 
-  let invoice: Awaited<ReturnType<typeof db.invoice.findFirst>> = null;
-
-  // 1. Primary — paystackReference (intended unique-per-invoice; see
-  //    the header note above for the B2 deep-trace caveat that the
-  //    production DVA-only flow currently leaves this NULL at invoice
-  //    creation, so this branch only fires for test-webhook admin
-  //    smoke tests + future checkout-session flows).
-  if (reference) {
-    invoice = await db.invoice.findUnique({
-      where: { paystackReference: reference },
-    });
-  }
-
-  // 2. Secondary — DVA account_number.
-  //
-  // B2 deep-trace finding (Master Directive §5 / §13): the original
-  // Phase 27 audit fix comment claimed "Paystack issues a fresh DVA
-  // per invoice", but the production createInvoiceDva() path (see
-  // src/lib/paystack.ts) actually REUSES the customer's existing DVA
-  // on a second invoice — Paystack's DVA model is per-customer, not
-  // per-invoice. The previous `findFirst({ orderBy: createdAt desc })`
-  // would silently pick the most-recent invoice sharing that DVA,
-  // re-introducing the original "wrong invoice marked paid" class of
-  // bug for repeat customers with multiple outstanding invoices.
-  //
-  // The B1-A regression test (tests/paystack-account-isolation.test.ts)
-  // does not catch this because every test invoice has a UNIQUE
-  // dvaAccountNumber. In production, a single customer with two open
-  // invoices shares the SAME dvaAccountNumber.
-  //
-  // Minimal fix: enumerate ALL invoices sharing this DVA. Only auto-
-  // pay when exactly one match exists. When 2+ matches exist, route
-  // to manual reconciliation so the admin picks the right invoice
-  // (matches §13's "use stable database identifiers + explicit
-  // relationships" rule — never guess by recency).
-  if (!invoice && accountNumber) {
-    const matches = await db.invoice.findMany({
-      where: { dvaAccountNumber: accountNumber },
-      orderBy: { createdAt: "desc" },
-    });
-    if (matches.length === 1) {
-      invoice = matches[0] ?? null;
-    } else if (matches.length > 1) {
-      // Ambiguous: multiple invoices share this DVA. DO NOT guess.
-      return {
-        status: "failed",
-        detail: {
-          note:
-            "multiple invoices share this DVA account_number — admin must manually reconcile to avoid marking the wrong invoice paid",
-          lookedUpReference: reference,
-          lookedUpAccount: accountNumber,
-          customerEmail: data.customer?.email ?? null,
-          amountKobo: typeof data.amount === "number" ? data.amount : null,
-          ambiguousInvoiceIds: matches.map((m) => m.id),
-          ambiguousInvoiceNumbers: matches.map((m) => m.invoiceNumber),
-        },
-        error: "ambiguous_dva_match_needs_manual_reconciliation",
-      };
-    }
-  }
-
-  // 3. No match — manual reconciliation queue (NEVER auto-pick by email+amount)
-  if (!invoice) {
+  if (!reference) {
     return {
       status: "failed",
       detail: {
-        note: "no invoice matched this payment by reference or DVA — queued for manual reconciliation",
-        lookedUpReference: reference,
-        lookedUpAccount: accountNumber,
+        note: "charge.success missing data.reference — cannot create a Payment row",
         customerEmail: data.customer?.email ?? null,
         amountKobo: typeof data.amount === "number" ? data.amount : null,
-        // The admin opens the failed webhook in the dashboard, verifies
-        // the payment in Paystack, then manually marks the correct
-        // invoice paid. Zero risk of marking the wrong invoice.
       },
-      error: "invoice_not_found_needs_manual_reconciliation",
+      error: "missing_reference_cannot_reconcile",
     };
   }
 
-  const base = { invoiceId: invoice.id, invoiceNumber: invoice.invoiceNumber };
+  const normalized: NormalizedPaymentInput = {
+    paystackEventId: data.id,
+    reference,
+    amountMinor: typeof data.amount === "number" ? data.amount : null,
+    currency: typeof data.currency === "string" ? data.currency : null,
+    channel: typeof data.channel === "string" ? data.channel : null,
+    accountNumber,
+    paidAt: typeof data.paid_at === "string" ? data.paid_at : null,
+    raw: data as Record<string, unknown>,
+  };
 
-  // Idempotency: already paid → nothing to do
-  if (invoice.status === "paid") {
+  let reconciliation: Awaited<ReturnType<typeof reconcilePayment>>;
+  try {
+    reconciliation = await reconcilePayment(normalized);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "reconcilePayment failed";
+    console.error("[paystack-webhook] reconcilePayment threw:", msg);
+    return {
+      status: "failed",
+      detail: {
+        note: "reconciliation threw — Payment row not created",
+        reference,
+        accountNumber,
+        error: msg,
+      },
+      error: "reconciliation_threw",
+    };
+  }
+
+  // ── Ambiguous / unmatched — Payment row recorded, invoice not bound ──
+  //   Admin opens the failed webhook in the dashboard, verifies the
+  //   payment in Paystack, then manually reconciles via the CRM (BATCH 7).
+  if (!reconciliation.invoiceId || !reconciliation.invoicePaid) {
+    return {
+      status: reconciliation.status === "successful" ? "duplicate" : "failed",
+      detail: {
+        note: reconciliation.invoiceId
+          ? "invoice already paid before this payment arrived — Payment row recorded for audit; no side-effects fired"
+          : "no invoice safely matched — Payment row created with status=" + reconciliation.status,
+        paymentId: reconciliation.paymentId,
+        reference,
+        accountNumber,
+        customerId: reconciliation.customerId,
+        amountKobo: typeof data.amount === "number" ? data.amount : null,
+        customerEmail: data.customer?.email ?? null,
+        reconciliationDetail: reconciliation.detail,
+      },
+      error: reconciliation.invoiceId ? undefined : "invoice_not_found_needs_manual_reconciliation",
+    };
+  }
+
+  // ── Invoice was freshly marked paid by reconcilePayment() ──
+  //   Pull the invoice row for the downstream side-effects.
+  const invoice = await db.invoice.findUnique({
+    where: { id: reconciliation.invoiceId },
+  });
+  if (!invoice) {
+    // Extremely unlikely — the row existed when reconcilePayment updated
+    // it a few lines above. Treat as a duplicate to avoid duplicate side-effects.
     return {
       status: "duplicate",
-      detail: { ...base, note: "invoice already marked paid — no action" },
+      detail: {
+        note: "invoice disappeared after reconcilePayment marked it paid — treating as duplicate",
+        paymentId: reconciliation.paymentId,
+        reference,
+      },
     };
   }
+
+  const base = {
+    invoiceId: invoice.id,
+    invoiceNumber: invoice.invoiceNumber,
+    paymentId: reconciliation.paymentId,
+  };
 
   const paidAt = data.paid_at ? new Date(data.paid_at) : new Date();
   if (Number.isNaN(paidAt.getTime())) paidAt.setTime(Date.now());
   const amountNaira = Math.round(invoice.amountKobo / 100);
-
-  // b. Update invoice.status = "paid"
-  invoice = await db.invoice.update({
-    where: { id: invoice.id },
-    data: { status: "paid", paidAt },
-  });
 
   // c. Stop all reminders for this invoice
   const stopped = await db.eventRecord.updateMany({
@@ -445,6 +429,7 @@ async function handleChargeSuccess(data: PaystackChargeData): Promise<WebhookOut
         amountNaira,
         note: "Project kickoff in 24h after payment",
         paidAt: paidAt.toISOString(),
+        paymentId: reconciliation.paymentId,
       },
       status: "scheduled",
     },
@@ -454,7 +439,7 @@ async function handleChargeSuccess(data: PaystackChargeData): Promise<WebhookOut
     status: "processed",
     detail: {
       ...base,
-      note: "payment confirmed — invoice marked paid",
+      note: "payment reconciled — invoice marked paid",
       amountNaira,
       receiptNumber,
       remindersStopped: stopped.count,
@@ -462,6 +447,8 @@ async function handleChargeSuccess(data: PaystackChargeData): Promise<WebhookOut
       whatsapp: whatsapp.status,
       aiUsedFallback: thanks.usedFallback,
       kickoffScheduledFor: kickoffAt.toISOString(),
+      customerId: reconciliation.customerId,
+      reconciliation: reconciliation.detail,
     },
   };
 }
