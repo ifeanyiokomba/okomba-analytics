@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { isAdminAuthorized } from "@/lib/admin-auth";
+import { authorizeAdmin } from "@/lib/admin-auth";
 import { normalizePhone } from "@/lib/whatsapp";
 
 export const runtime = "nodejs";
@@ -15,8 +15,9 @@ export const runtime = "nodejs";
 
 export async function GET() {
   try {
-    if (!(await isAdminAuthorized())) {
-      return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
+    const guard = await authorizeAdmin(undefined, "view_customers");
+    if (!guard.ok) {
+      return NextResponse.json({ ok: false, error: guard.error }, { status: guard.status });
     }
 
     const [invoices, inquiries, messages] = await Promise.all([

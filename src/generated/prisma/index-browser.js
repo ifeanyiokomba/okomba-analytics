@@ -180,6 +180,46 @@ exports.Prisma.AdminSessionScalarFieldEnum = {
   id: 'id',
   token: 'token',
   expiresAt: 'expiresAt',
+  createdAt: 'createdAt',
+  userEmail: 'userEmail',
+  isMaster: 'isMaster'
+};
+
+exports.Prisma.AdminUserScalarFieldEnum = {
+  id: 'id',
+  email: 'email',
+  name: 'name',
+  roleKey: 'roleKey',
+  status: 'status',
+  inviteToken: 'inviteToken',
+  inviteExpiresAt: 'inviteExpiresAt',
+  invitedBy: 'invitedBy',
+  passwordHash: 'passwordHash',
+  passwordSalt: 'passwordSalt',
+  lastLoginAt: 'lastLoginAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.AdminRoleScalarFieldEnum = {
+  key: 'key',
+  label: 'label',
+  description: 'description',
+  permissions: 'permissions',
+  isSystem: 'isSystem',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.AdminAuditLogScalarFieldEnum = {
+  id: 'id',
+  actorEmail: 'actorEmail',
+  actorRole: 'actorRole',
+  action: 'action',
+  targetType: 'targetType',
+  targetId: 'targetId',
+  meta: 'meta',
+  ip: 'ip',
   createdAt: 'createdAt'
 };
 
@@ -599,6 +639,9 @@ exports.Prisma.ModelName = {
   DraftProposal: 'DraftProposal',
   WebhookLog: 'WebhookLog',
   AdminSession: 'AdminSession',
+  AdminUser: 'AdminUser',
+  AdminRole: 'AdminRole',
+  AdminAuditLog: 'AdminAuditLog',
   Subscriber: 'Subscriber',
   Post: 'Post',
   PostAuthor: 'PostAuthor',

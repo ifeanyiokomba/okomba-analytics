@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { isAdminAuthorized } from "@/lib/admin-auth";
+import { authorizeAdmin } from "@/lib/admin-auth";
 import {
   WHATSAPP_INTERNAL_TOKEN,
   WHATSAPP_SERVICE_URL,
@@ -27,8 +27,9 @@ const DEMO_REPLIES = [
 
 export async function POST(req: Request) {
   try {
-    if (!(await isAdminAuthorized())) {
-      return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
+    const guard = await authorizeAdmin(req, "manage_settings");
+    if (!guard.ok) {
+      return NextResponse.json({ ok: false, error: guard.error }, { status: guard.status });
     }
     const body = (await req.json().catch(() => null)) as {
       action?: string;

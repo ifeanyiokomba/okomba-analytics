@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { isAdminAuthorized } from "@/lib/admin-auth";
+import { authorizeAdmin } from "@/lib/admin-auth";
 import { retryFailedChunks } from "@/lib/import/job-runner";
 
 export const runtime = "nodejs";
@@ -10,8 +10,9 @@ export const dynamic = "force-dynamic";
    chunks." Re-runs ONLY chunks marked failed. */
 export async function POST(req: Request) {
   try {
-    if (!(await isAdminAuthorized(req))) {
-      return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
+    const guard = await authorizeAdmin(req, "import_customers");
+    if (!guard.ok) {
+      return NextResponse.json({ ok: false, error: guard.error }, { status: guard.status });
     }
     const body = (await req.json().catch(() => null)) as { jobId?: string } | null;
     if (!body?.jobId) {

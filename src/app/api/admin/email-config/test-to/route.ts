@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { isAdminAuthorized } from "@/lib/admin-auth";
+import { authorizeAdmin } from "@/lib/admin-auth";
 import {
   getTestRecipient,
   saveTestRecipient,
@@ -15,8 +15,9 @@ export const dynamic = "force-dynamic";
 /* ------------------------------------------------------------------ */
 export async function GET() {
   try {
-    if (!(await isAdminAuthorized())) {
-      return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
+    const guard = await authorizeAdmin(undefined, "manage_settings");
+    if (!guard.ok) {
+      return NextResponse.json({ ok: false, error: guard.error }, { status: guard.status });
     }
     const to = await getTestRecipient();
     return NextResponse.json({ ok: true, to });
@@ -39,8 +40,9 @@ export async function GET() {
 /* ------------------------------------------------------------------ */
 export async function POST(req: Request) {
   try {
-    if (!(await isAdminAuthorized())) {
-      return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
+    const guard = await authorizeAdmin(undefined, "manage_settings");
+    if (!guard.ok) {
+      return NextResponse.json({ ok: false, error: guard.error }, { status: guard.status });
     }
     const body = (await req.json()) as { to?: string };
     const to = body?.to?.trim();

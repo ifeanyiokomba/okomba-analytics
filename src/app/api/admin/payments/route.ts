@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { isAdminAuthorized } from "@/lib/admin-auth";
+import { authorizeAdmin } from "@/lib/admin-auth";
 
 export const runtime = "nodejs";
 
@@ -12,8 +12,9 @@ export const runtime = "nodejs";
 
 export async function GET(req: Request) {
   try {
-    if (!(await isAdminAuthorized(req))) {
-      return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
+    const guard = await authorizeAdmin(req, "manage_payments");
+    if (!guard.ok) {
+      return NextResponse.json({ ok: false, error: guard.error }, { status: guard.status });
     }
     const url = new URL(req.url);
     const limit = Math.min(Math.max(Number(url.searchParams.get("limit") ?? 50), 1), 200);

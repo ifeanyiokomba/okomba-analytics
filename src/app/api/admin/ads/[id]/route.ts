@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { db } from "@/lib/db";
-import { isAdminAuthorized } from "@/lib/admin-auth";
+import { authorizeAdmin } from "@/lib/admin-auth";
 import { AD_PAYMENT_STATUSES, AD_STATUSES } from "@/lib/ads";
 import { notifyAdDecision } from "@/lib/notify";
 
@@ -57,8 +57,9 @@ function parseDate(v: string | undefined | null): Date | null | undefined {
 
 export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }> }) {
   try {
-    if (!(await isAdminAuthorized(req))) {
-      return NextResponse.json({ ok: false }, { status: 401 });
+    const guard = await authorizeAdmin(req, "manage_ads");
+    if (!guard.ok) {
+      return NextResponse.json({ ok: false, error: guard.error }, { status: guard.status });
     }
     const { id } = await ctx.params;
 
@@ -238,8 +239,9 @@ export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }>
 
 export async function DELETE(req: Request, ctx: { params: Promise<{ id: string }> }) {
   try {
-    if (!(await isAdminAuthorized(req))) {
-      return NextResponse.json({ ok: false }, { status: 401 });
+    const guard = await authorizeAdmin(req, "manage_ads");
+    if (!guard.ok) {
+      return NextResponse.json({ ok: false, error: guard.error }, { status: guard.status });
     }
     const { id } = await ctx.params;
     const existing = await db.adRequest.findUnique({ where: { id } });

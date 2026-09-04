@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { isAdminAuthorized } from "@/lib/admin-auth";
+import { authorizeAdmin, authorizeAdminAny } from "@/lib/admin-auth";
 import { generatePostAssistance } from "@/lib/post-ai";
 
 export const runtime = "nodejs";
@@ -21,8 +21,9 @@ const schema = z.object({
 
 export async function POST(req: Request) {
   try {
-    if (!(await isAdminAuthorized())) {
-      return NextResponse.json({ ok: false }, { status: 401 });
+    const guard = await authorizeAdminAny(req, ["access_ai", "manage_posts"]);
+    if (!guard.ok) {
+      return NextResponse.json({ ok: false, error: guard.error }, { status: guard.status });
     }
 
     let body: unknown;

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { Prisma } from "@/generated/prisma";
 import { z } from "zod";
 import { db } from "@/lib/db";
-import { isAdminAuthorized } from "@/lib/admin-auth";
+import { authorizeAdmin } from "@/lib/admin-auth";
 
 export const runtime = "nodejs";
 
@@ -26,8 +26,9 @@ const patchSchema = z.object({
  */
 export async function PATCH(req: Request) {
   try {
-    if (!(await isAdminAuthorized())) {
-      return NextResponse.json({ ok: false }, { status: 401 });
+    const guard = await authorizeAdmin(req, "broadcast_subscribers");
+    if (!guard.ok) {
+      return NextResponse.json({ ok: false, error: guard.error }, { status: guard.status });
     }
 
     let body: unknown;

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { readFile } from "fs/promises";
 import path from "path";
-import { isAdminAuthorized } from "@/lib/admin-auth";
+import { authorizeAdmin } from "@/lib/admin-auth";
 import { db } from "@/lib/db";
 
 export const runtime = "nodejs";
@@ -25,8 +25,9 @@ export async function GET(
   { params }: { params: Promise<{ fileName: string }> }
 ) {
   try {
-    if (!(await isAdminAuthorized())) {
-      return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
+    const guard = await authorizeAdmin(undefined, "manage_settings");
+    if (!guard.ok) {
+      return NextResponse.json({ ok: false, error: guard.error }, { status: guard.status });
     }
     const { fileName } = await params;
     if (!SAFE_NAME.test(fileName)) {

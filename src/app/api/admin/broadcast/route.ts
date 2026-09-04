@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { db } from "@/lib/db";
-import { isAdminAuthorized } from "@/lib/admin-auth";
+import { authorizeAdmin } from "@/lib/admin-auth";
 import { notifyBroadcast } from "@/lib/notify";
 
 export const runtime = "nodejs";
@@ -30,8 +30,9 @@ const broadcastSchema = z.object({
  */
 export async function POST(req: Request) {
   try {
-    if (!(await isAdminAuthorized())) {
-      return NextResponse.json({ ok: false }, { status: 401 });
+    const guard = await authorizeAdmin(req, "broadcast_subscribers");
+    if (!guard.ok) {
+      return NextResponse.json({ ok: false, error: guard.error }, { status: guard.status });
     }
 
     let body: unknown;

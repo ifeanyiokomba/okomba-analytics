@@ -115,6 +115,67 @@ model AdminSession {
   token     String   @unique
   expiresAt DateTime
   createdAt DateTime @default(now())
+
+  // ── Batch 7 (§44) multi-admin identity ─────────────────────────
+  // Sessions now belong to an admin identity. Legacy rows (pre-Batch-7)
+  // have userEmail = null and are treated as the env master admin —
+  // backward-compatible with every existing cookie.
+  userEmail String?
+  isMaster  Boolean @default(false)
+}
+
+// ── Batch 7 (§44–47) — Multi-admin system + RBAC ──────────────────
+// Master admin (env ADMIN_EMAIL) is unrestricted and auto-synced to a
+// super_admin AdminUser row on every login. Additional admins are
+// invited, accept via token, activate, and act within their role's
+// server-side-enforced permission set.
+model AdminUser {
+  id              String    @id @default(cuid())
+  email           String    @unique
+  name            String?
+  roleKey         String    @default("support_agent")
+  status          String    @default("invited") // invited | active | disabled
+  // Invitation state (§44): token + expiry until the invitee accepts
+  inviteToken     String?
+  inviteExpiresAt DateTime?
+  invitedBy       String?
+  passwordHash    String?
+  passwordSalt    String?
+  lastLoginAt     DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([status])
+  @@index([roleKey])
+}
+
+// §45 — configurable capabilities. System roles are seeded from the
+// directive's list; permissions are editable (and custom roles can be
+// created) through the role editor. super_admin = all permissions.
+model AdminRole {
+  key         String   @id
+  label       String
+  description String   @default("")
+  permissions Json // string[] of ADMIN_PERMISSIONS keys
+  isSystem    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// §44 batch list "Audit log" — trail of admin-side actions.
+model AdminAuditLog {
+  id         String   @id @default(cuid())
+  actorEmail String
+  actorRole  String?
+  action     String // e.g. admin.login, admin.invite, ads.status, comments.moderate
+  targetType String?
+  targetId   String?
+  meta       Json?
+  ip         String?
+  createdAt  DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([actorEmail])
 }
 
 model Subscriber {

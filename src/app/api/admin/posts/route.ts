@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { Prisma } from "@/generated/prisma";
 import { z } from "zod";
 import { db } from "@/lib/db";
-import { isAdminAuthorized } from "@/lib/admin-auth";
+import { authorizeAdmin } from "@/lib/admin-auth";
 import {
   attachEngagement,
   ensureUniqueSlug,
@@ -64,8 +64,9 @@ const patchSchema = postSchema.partial().extend({
 /* ------------------------------------------------------------------ */
 export async function GET(req: Request) {
   try {
-    if (!(await isAdminAuthorized())) {
-      return NextResponse.json({ ok: false }, { status: 401 });
+    const guard = await authorizeAdmin(req, "manage_posts");
+    if (!guard.ok) {
+      return NextResponse.json({ ok: false, error: guard.error }, { status: guard.status });
     }
 
     await publishDuePosts().catch((err) =>
@@ -104,8 +105,9 @@ export async function GET(req: Request) {
 /* ------------------------------------------------------------------ */
 export async function POST(req: Request) {
   try {
-    if (!(await isAdminAuthorized())) {
-      return NextResponse.json({ ok: false }, { status: 401 });
+    const guard = await authorizeAdmin(req, "manage_posts");
+    if (!guard.ok) {
+      return NextResponse.json({ ok: false, error: guard.error }, { status: guard.status });
     }
 
     let body: unknown;
@@ -221,8 +223,9 @@ export async function POST(req: Request) {
 /* ------------------------------------------------------------------ */
 export async function PATCH(req: Request) {
   try {
-    if (!(await isAdminAuthorized())) {
-      return NextResponse.json({ ok: false }, { status: 401 });
+    const guard = await authorizeAdmin(req, "manage_posts");
+    if (!guard.ok) {
+      return NextResponse.json({ ok: false, error: guard.error }, { status: guard.status });
     }
 
     let body: unknown;

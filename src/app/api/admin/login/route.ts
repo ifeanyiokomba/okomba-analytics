@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { db } from "@/lib/db";
-import { ADMIN_COOKIE_NAME, hashSessionToken } from "@/lib/admin-auth";
+import { ADMIN_COOKIE_NAME, ensureRbacSeeded, hashSessionToken, masterAdminEmail } from "@/lib/admin-auth";
+import { auditAdmin, verifyPassword } from "@/lib/admin-rbac";
 
 export const runtime = "nodejs";
 
@@ -120,7 +121,41 @@ export async function POST(req: Request) {
       parsed.data.email.toLowerCase() === adminEmail.toLowerCase();
     const passwordMatches = parsed.data.password === adminPassword;
 
-    if (!emailMatches || !passwordMatches) {
+    /* ── Batch 7 (§44): dual identity sources ─────────────────────
+     * 1. Env master admin (founder) — always the unrestricted path.
+     * 2. AdminUser rows (invited team) — status=active + scrypt hash.
+     * Sessions are stamped with userEmail + isMaster so every guarded
+     * route can resolve the caller's role/permissions server-side. */
+    let sessionEmail: string | null = null;
+    let sessionIsMaster = false;
+
+    if (emailMatches && passwordMatches) {
+      sessionEmail = adminEmail.toLowerCase();
+      sessionIsMaster = true;
+    } else {
+      const user = await db.adminUser.findUnique({
+        where: { email: parsed.data.email.toLowerCase() },
+      });
+      const masterEmail = masterAdminEmail();
+      const isMasterRow = masterEmail
+        ? user?.email === masterEmail.toLowerCase()
+        : false;
+      // Master row falls back to the env password check above, so a
+      // stale hash can never lock the founder out.
+      if (
+        user &&
+        !isMasterRow &&
+        user.status === "active" &&
+        user.passwordHash &&
+        user.passwordSalt &&
+        verifyPassword(parsed.data.password, user.passwordHash, user.passwordSalt)
+      ) {
+        sessionEmail = user.email;
+        sessionIsMaster = false;
+      }
+    }
+
+    if (!sessionEmail) {
       recordFailure(ip);
       return NextResponse.json(
         { ok: false, error: "Invalid credentials" },
@@ -128,10 +163,39 @@ export async function POST(req: Request) {
       );
     }
 
+    // Self-seed roles + master AdminUser mirror (idempotent).
+    if (sessionIsMaster) {
+      try {
+        await ensureRbacSeeded();
+      } catch (err) {
+        console.error("[admin/login] RBAC seed failed:", err);
+      }
+    }
+
     const token = crypto.randomUUID();
     const expiresAt = new Date(Date.now() + SESSION_TTL_MS);
 
     resetAttempts(ip);
+
+    if (sessionIsMaster) {
+      // Keep the founder's mirror row's login stamp fresh.
+      await db.adminUser.updateMany({
+        where: { email: sessionEmail },
+        data: { lastLoginAt: new Date() },
+      });
+    } else {
+      await db.adminUser.update({
+        where: { email: sessionEmail },
+        data: { lastLoginAt: new Date() },
+      });
+    }
+
+    await auditAdmin({
+      actorEmail: sessionEmail,
+      action: "admin.login",
+      meta: { master: sessionIsMaster },
+      ip,
+    });
 
     // Audit fix (Phase 27): store only the SHA-256 hash in the DB so a
     // SQLite exfiltration cannot be replayed. The raw token lives in
@@ -139,7 +203,7 @@ export async function POST(req: Request) {
     // request's lookup (which hashes the cookie value + matches).
     const tokenHash = hashSessionToken(token);
     await db.adminSession.create({
-      data: { token: tokenHash, expiresAt },
+      data: { token: tokenHash, expiresAt, userEmail: sessionEmail, isMaster: sessionIsMaster },
     });
 
     const res = NextResponse.json({ ok: true });

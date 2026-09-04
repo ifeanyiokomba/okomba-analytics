@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { Prisma } from "@/generated/prisma";
 import { z } from "zod";
 import { db } from "@/lib/db";
-import { isAdminAuthorized } from "@/lib/admin-auth";
+import { authorizeAdmin } from "@/lib/admin-auth";
 import { notifyNewInquiry } from "@/lib/notify";
 import { COUNTRY_CODES, normalizeEmail, normalizePhone } from "@/lib/countries";
 import { findOrCreateCustomer, linkInquiryToCustomer } from "@/lib/customer-service";
@@ -268,8 +268,9 @@ export async function POST(req: Request) {
 /* ------------------------------------------------------------------ */
 export async function GET(req: Request) {
   try {
-    if (!(await isAdminAuthorized(req))) {
-      return NextResponse.json({ ok: false }, { status: 401 });
+    const guard = await authorizeAdmin(req, "view_customers");
+    if (!guard.ok) {
+      return NextResponse.json({ ok: false, error: guard.error }, { status: guard.status });
     }
 
     const url = new URL(req.url);
@@ -368,8 +369,9 @@ export async function GET(req: Request) {
 /* ------------------------------------------------------------------ */
 export async function PATCH(req: Request) {
   try {
-    if (!(await isAdminAuthorized(req))) {
-      return NextResponse.json({ ok: false }, { status: 401 });
+    const guard = await authorizeAdmin(req, "edit_customers");
+    if (!guard.ok) {
+      return NextResponse.json({ ok: false, error: guard.error }, { status: guard.status });
     }
 
     let body: unknown;

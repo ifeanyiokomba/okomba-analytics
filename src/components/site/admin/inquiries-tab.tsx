@@ -35,6 +35,7 @@ export function InquiriesTab({
   inquiries,
   loading,
   error,
+  initialStatus,
   onUpdateStatus,
   updatingId,
   onOpenInquiry,
@@ -45,6 +46,8 @@ export function InquiriesTab({
   inquiries: Inquiry[];
   loading: boolean;
   error: string | null;
+  /** §46 — deep-link from an Overview KPI card (e.g. "new"). */
+  initialStatus?: string;
   onUpdateStatus: (id: string, status: string) => Promise<void>;
   updatingId: string | null;
   onOpenInquiry: (i: Inquiry) => void;
@@ -53,7 +56,7 @@ export function InquiriesTab({
   onCreateProposal: (i: Inquiry) => void;
 }) {
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [statusFilter, setStatusFilter] = useState<string>(initialStatus ?? "all");
   const [budgetFilter, setBudgetFilter] = useState<string>("all");
   const [page, setPage] = useState(1);
   const [sortKey, setSortKey] = useState<"createdAt" | "name" | "service">("createdAt");
@@ -129,7 +132,7 @@ export function InquiriesTab({
       {/* Toolbar */}
       <div className="flex flex-col gap-4 border-b border-white/[0.06] px-6 py-5 md:flex-row md:items-center md:justify-between">
         <h2 className="text-[14.5px] font-semibold text-foreground">
-          All inquiries{" "}
+          {statusFilter === "all" ? "All inquiries" : statusFilter === "new" ? "New inquiries" : statusFilter.replace("_", " ")}{" "}
           <span className="ml-1.5 font-mono text-[11px] font-normal text-muted-foreground">
             ({filteredInquiries.length}
             {filteredInquiries.length !== inquiries.length ? ` of ${inquiries.length}` : ""})

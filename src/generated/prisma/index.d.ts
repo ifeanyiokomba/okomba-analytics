@@ -39,6 +39,21 @@ export type WebhookLog = $Result.DefaultSelection<Prisma.$WebhookLogPayload>
  */
 export type AdminSession = $Result.DefaultSelection<Prisma.$AdminSessionPayload>
 /**
+ * Model AdminUser
+ * 
+ */
+export type AdminUser = $Result.DefaultSelection<Prisma.$AdminUserPayload>
+/**
+ * Model AdminRole
+ * 
+ */
+export type AdminRole = $Result.DefaultSelection<Prisma.$AdminRolePayload>
+/**
+ * Model AdminAuditLog
+ * 
+ */
+export type AdminAuditLog = $Result.DefaultSelection<Prisma.$AdminAuditLogPayload>
+/**
  * Model Subscriber
  * 
  */
@@ -381,6 +396,36 @@ export class PrismaClient<
     * ```
     */
   get adminSession(): Prisma.AdminSessionDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.adminUser`: Exposes CRUD operations for the **AdminUser** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more AdminUsers
+    * const adminUsers = await prisma.adminUser.findMany()
+    * ```
+    */
+  get adminUser(): Prisma.AdminUserDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.adminRole`: Exposes CRUD operations for the **AdminRole** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more AdminRoles
+    * const adminRoles = await prisma.adminRole.findMany()
+    * ```
+    */
+  get adminRole(): Prisma.AdminRoleDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.adminAuditLog`: Exposes CRUD operations for the **AdminAuditLog** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more AdminAuditLogs
+    * const adminAuditLogs = await prisma.adminAuditLog.findMany()
+    * ```
+    */
+  get adminAuditLog(): Prisma.AdminAuditLogDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.subscriber`: Exposes CRUD operations for the **Subscriber** model.
@@ -1036,6 +1081,9 @@ export namespace Prisma {
     DraftProposal: 'DraftProposal',
     WebhookLog: 'WebhookLog',
     AdminSession: 'AdminSession',
+    AdminUser: 'AdminUser',
+    AdminRole: 'AdminRole',
+    AdminAuditLog: 'AdminAuditLog',
     Subscriber: 'Subscriber',
     Post: 'Post',
     PostAuthor: 'PostAuthor',
@@ -1075,7 +1123,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "inquiry" | "draftProposal" | "webhookLog" | "adminSession" | "subscriber" | "post" | "postAuthor" | "comment" | "reaction" | "mediaAsset" | "testimonial" | "emailLog" | "emailProviderConfig" | "receivedEmail" | "invoice" | "payment" | "eventRecord" | "whatsAppMessage" | "analyticsEvent" | "backupLog" | "customer" | "customerNote" | "customerMessage" | "importJob" | "adRequest"
+      modelProps: "inquiry" | "draftProposal" | "webhookLog" | "adminSession" | "adminUser" | "adminRole" | "adminAuditLog" | "subscriber" | "post" | "postAuthor" | "comment" | "reaction" | "mediaAsset" | "testimonial" | "emailLog" | "emailProviderConfig" | "receivedEmail" | "invoice" | "payment" | "eventRecord" | "whatsAppMessage" | "analyticsEvent" | "backupLog" | "customer" | "customerNote" | "customerMessage" | "importJob" | "adRequest"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1372,6 +1420,228 @@ export namespace Prisma {
           count: {
             args: Prisma.AdminSessionCountArgs<ExtArgs>
             result: $Utils.Optional<AdminSessionCountAggregateOutputType> | number
+          }
+        }
+      }
+      AdminUser: {
+        payload: Prisma.$AdminUserPayload<ExtArgs>
+        fields: Prisma.AdminUserFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.AdminUserFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AdminUserPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.AdminUserFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AdminUserPayload>
+          }
+          findFirst: {
+            args: Prisma.AdminUserFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AdminUserPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.AdminUserFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AdminUserPayload>
+          }
+          findMany: {
+            args: Prisma.AdminUserFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AdminUserPayload>[]
+          }
+          create: {
+            args: Prisma.AdminUserCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AdminUserPayload>
+          }
+          createMany: {
+            args: Prisma.AdminUserCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.AdminUserCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AdminUserPayload>[]
+          }
+          delete: {
+            args: Prisma.AdminUserDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AdminUserPayload>
+          }
+          update: {
+            args: Prisma.AdminUserUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AdminUserPayload>
+          }
+          deleteMany: {
+            args: Prisma.AdminUserDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.AdminUserUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.AdminUserUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AdminUserPayload>[]
+          }
+          upsert: {
+            args: Prisma.AdminUserUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AdminUserPayload>
+          }
+          aggregate: {
+            args: Prisma.AdminUserAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateAdminUser>
+          }
+          groupBy: {
+            args: Prisma.AdminUserGroupByArgs<ExtArgs>
+            result: $Utils.Optional<AdminUserGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.AdminUserCountArgs<ExtArgs>
+            result: $Utils.Optional<AdminUserCountAggregateOutputType> | number
+          }
+        }
+      }
+      AdminRole: {
+        payload: Prisma.$AdminRolePayload<ExtArgs>
+        fields: Prisma.AdminRoleFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.AdminRoleFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AdminRolePayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.AdminRoleFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AdminRolePayload>
+          }
+          findFirst: {
+            args: Prisma.AdminRoleFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AdminRolePayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.AdminRoleFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AdminRolePayload>
+          }
+          findMany: {
+            args: Prisma.AdminRoleFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AdminRolePayload>[]
+          }
+          create: {
+            args: Prisma.AdminRoleCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AdminRolePayload>
+          }
+          createMany: {
+            args: Prisma.AdminRoleCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.AdminRoleCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AdminRolePayload>[]
+          }
+          delete: {
+            args: Prisma.AdminRoleDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AdminRolePayload>
+          }
+          update: {
+            args: Prisma.AdminRoleUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AdminRolePayload>
+          }
+          deleteMany: {
+            args: Prisma.AdminRoleDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.AdminRoleUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.AdminRoleUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AdminRolePayload>[]
+          }
+          upsert: {
+            args: Prisma.AdminRoleUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AdminRolePayload>
+          }
+          aggregate: {
+            args: Prisma.AdminRoleAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateAdminRole>
+          }
+          groupBy: {
+            args: Prisma.AdminRoleGroupByArgs<ExtArgs>
+            result: $Utils.Optional<AdminRoleGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.AdminRoleCountArgs<ExtArgs>
+            result: $Utils.Optional<AdminRoleCountAggregateOutputType> | number
+          }
+        }
+      }
+      AdminAuditLog: {
+        payload: Prisma.$AdminAuditLogPayload<ExtArgs>
+        fields: Prisma.AdminAuditLogFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.AdminAuditLogFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AdminAuditLogPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.AdminAuditLogFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AdminAuditLogPayload>
+          }
+          findFirst: {
+            args: Prisma.AdminAuditLogFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AdminAuditLogPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.AdminAuditLogFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AdminAuditLogPayload>
+          }
+          findMany: {
+            args: Prisma.AdminAuditLogFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AdminAuditLogPayload>[]
+          }
+          create: {
+            args: Prisma.AdminAuditLogCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AdminAuditLogPayload>
+          }
+          createMany: {
+            args: Prisma.AdminAuditLogCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.AdminAuditLogCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AdminAuditLogPayload>[]
+          }
+          delete: {
+            args: Prisma.AdminAuditLogDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AdminAuditLogPayload>
+          }
+          update: {
+            args: Prisma.AdminAuditLogUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AdminAuditLogPayload>
+          }
+          deleteMany: {
+            args: Prisma.AdminAuditLogDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.AdminAuditLogUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.AdminAuditLogUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AdminAuditLogPayload>[]
+          }
+          upsert: {
+            args: Prisma.AdminAuditLogUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AdminAuditLogPayload>
+          }
+          aggregate: {
+            args: Prisma.AdminAuditLogAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateAdminAuditLog>
+          }
+          groupBy: {
+            args: Prisma.AdminAuditLogGroupByArgs<ExtArgs>
+            result: $Utils.Optional<AdminAuditLogGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.AdminAuditLogCountArgs<ExtArgs>
+            result: $Utils.Optional<AdminAuditLogCountAggregateOutputType> | number
           }
         }
       }
@@ -3029,6 +3299,9 @@ export namespace Prisma {
     draftProposal?: DraftProposalOmit
     webhookLog?: WebhookLogOmit
     adminSession?: AdminSessionOmit
+    adminUser?: AdminUserOmit
+    adminRole?: AdminRoleOmit
+    adminAuditLog?: AdminAuditLogOmit
     subscriber?: SubscriberOmit
     post?: PostOmit
     postAuthor?: PostAuthorOmit
@@ -6801,6 +7074,8 @@ export namespace Prisma {
     token: string | null
     expiresAt: Date | null
     createdAt: Date | null
+    userEmail: string | null
+    isMaster: boolean | null
   }
 
   export type AdminSessionMaxAggregateOutputType = {
@@ -6808,6 +7083,8 @@ export namespace Prisma {
     token: string | null
     expiresAt: Date | null
     createdAt: Date | null
+    userEmail: string | null
+    isMaster: boolean | null
   }
 
   export type AdminSessionCountAggregateOutputType = {
@@ -6815,6 +7092,8 @@ export namespace Prisma {
     token: number
     expiresAt: number
     createdAt: number
+    userEmail: number
+    isMaster: number
     _all: number
   }
 
@@ -6824,6 +7103,8 @@ export namespace Prisma {
     token?: true
     expiresAt?: true
     createdAt?: true
+    userEmail?: true
+    isMaster?: true
   }
 
   export type AdminSessionMaxAggregateInputType = {
@@ -6831,6 +7112,8 @@ export namespace Prisma {
     token?: true
     expiresAt?: true
     createdAt?: true
+    userEmail?: true
+    isMaster?: true
   }
 
   export type AdminSessionCountAggregateInputType = {
@@ -6838,6 +7121,8 @@ export namespace Prisma {
     token?: true
     expiresAt?: true
     createdAt?: true
+    userEmail?: true
+    isMaster?: true
     _all?: true
   }
 
@@ -6918,6 +7203,8 @@ export namespace Prisma {
     token: string
     expiresAt: Date
     createdAt: Date
+    userEmail: string | null
+    isMaster: boolean
     _count: AdminSessionCountAggregateOutputType | null
     _min: AdminSessionMinAggregateOutputType | null
     _max: AdminSessionMaxAggregateOutputType | null
@@ -6942,6 +7229,8 @@ export namespace Prisma {
     token?: boolean
     expiresAt?: boolean
     createdAt?: boolean
+    userEmail?: boolean
+    isMaster?: boolean
   }, ExtArgs["result"]["adminSession"]>
 
   export type AdminSessionSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -6949,6 +7238,8 @@ export namespace Prisma {
     token?: boolean
     expiresAt?: boolean
     createdAt?: boolean
+    userEmail?: boolean
+    isMaster?: boolean
   }, ExtArgs["result"]["adminSession"]>
 
   export type AdminSessionSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -6956,6 +7247,8 @@ export namespace Prisma {
     token?: boolean
     expiresAt?: boolean
     createdAt?: boolean
+    userEmail?: boolean
+    isMaster?: boolean
   }, ExtArgs["result"]["adminSession"]>
 
   export type AdminSessionSelectScalar = {
@@ -6963,9 +7256,11 @@ export namespace Prisma {
     token?: boolean
     expiresAt?: boolean
     createdAt?: boolean
+    userEmail?: boolean
+    isMaster?: boolean
   }
 
-  export type AdminSessionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "token" | "expiresAt" | "createdAt", ExtArgs["result"]["adminSession"]>
+  export type AdminSessionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "token" | "expiresAt" | "createdAt" | "userEmail" | "isMaster", ExtArgs["result"]["adminSession"]>
 
   export type $AdminSessionPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "AdminSession"
@@ -6975,6 +7270,8 @@ export namespace Prisma {
       token: string
       expiresAt: Date
       createdAt: Date
+      userEmail: string | null
+      isMaster: boolean
     }, ExtArgs["result"]["adminSession"]>
     composites: {}
   }
@@ -7402,6 +7699,8 @@ export namespace Prisma {
     readonly token: FieldRef<"AdminSession", 'String'>
     readonly expiresAt: FieldRef<"AdminSession", 'DateTime'>
     readonly createdAt: FieldRef<"AdminSession", 'DateTime'>
+    readonly userEmail: FieldRef<"AdminSession", 'String'>
+    readonly isMaster: FieldRef<"AdminSession", 'Boolean'>
   }
     
 
@@ -7765,6 +8064,3165 @@ export namespace Prisma {
      * Omit specific fields from the AdminSession
      */
     omit?: AdminSessionOmit<ExtArgs> | null
+  }
+
+
+  /**
+   * Model AdminUser
+   */
+
+  export type AggregateAdminUser = {
+    _count: AdminUserCountAggregateOutputType | null
+    _min: AdminUserMinAggregateOutputType | null
+    _max: AdminUserMaxAggregateOutputType | null
+  }
+
+  export type AdminUserMinAggregateOutputType = {
+    id: string | null
+    email: string | null
+    name: string | null
+    roleKey: string | null
+    status: string | null
+    inviteToken: string | null
+    inviteExpiresAt: Date | null
+    invitedBy: string | null
+    passwordHash: string | null
+    passwordSalt: string | null
+    lastLoginAt: Date | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type AdminUserMaxAggregateOutputType = {
+    id: string | null
+    email: string | null
+    name: string | null
+    roleKey: string | null
+    status: string | null
+    inviteToken: string | null
+    inviteExpiresAt: Date | null
+    invitedBy: string | null
+    passwordHash: string | null
+    passwordSalt: string | null
+    lastLoginAt: Date | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type AdminUserCountAggregateOutputType = {
+    id: number
+    email: number
+    name: number
+    roleKey: number
+    status: number
+    inviteToken: number
+    inviteExpiresAt: number
+    invitedBy: number
+    passwordHash: number
+    passwordSalt: number
+    lastLoginAt: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type AdminUserMinAggregateInputType = {
+    id?: true
+    email?: true
+    name?: true
+    roleKey?: true
+    status?: true
+    inviteToken?: true
+    inviteExpiresAt?: true
+    invitedBy?: true
+    passwordHash?: true
+    passwordSalt?: true
+    lastLoginAt?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type AdminUserMaxAggregateInputType = {
+    id?: true
+    email?: true
+    name?: true
+    roleKey?: true
+    status?: true
+    inviteToken?: true
+    inviteExpiresAt?: true
+    invitedBy?: true
+    passwordHash?: true
+    passwordSalt?: true
+    lastLoginAt?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type AdminUserCountAggregateInputType = {
+    id?: true
+    email?: true
+    name?: true
+    roleKey?: true
+    status?: true
+    inviteToken?: true
+    inviteExpiresAt?: true
+    invitedBy?: true
+    passwordHash?: true
+    passwordSalt?: true
+    lastLoginAt?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type AdminUserAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which AdminUser to aggregate.
+     */
+    where?: AdminUserWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AdminUsers to fetch.
+     */
+    orderBy?: AdminUserOrderByWithRelationInput | AdminUserOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: AdminUserWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AdminUsers from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AdminUsers.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned AdminUsers
+    **/
+    _count?: true | AdminUserCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: AdminUserMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: AdminUserMaxAggregateInputType
+  }
+
+  export type GetAdminUserAggregateType<T extends AdminUserAggregateArgs> = {
+        [P in keyof T & keyof AggregateAdminUser]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateAdminUser[P]>
+      : GetScalarType<T[P], AggregateAdminUser[P]>
+  }
+
+
+
+
+  export type AdminUserGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: AdminUserWhereInput
+    orderBy?: AdminUserOrderByWithAggregationInput | AdminUserOrderByWithAggregationInput[]
+    by: AdminUserScalarFieldEnum[] | AdminUserScalarFieldEnum
+    having?: AdminUserScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: AdminUserCountAggregateInputType | true
+    _min?: AdminUserMinAggregateInputType
+    _max?: AdminUserMaxAggregateInputType
+  }
+
+  export type AdminUserGroupByOutputType = {
+    id: string
+    email: string
+    name: string | null
+    roleKey: string
+    status: string
+    inviteToken: string | null
+    inviteExpiresAt: Date | null
+    invitedBy: string | null
+    passwordHash: string | null
+    passwordSalt: string | null
+    lastLoginAt: Date | null
+    createdAt: Date
+    updatedAt: Date
+    _count: AdminUserCountAggregateOutputType | null
+    _min: AdminUserMinAggregateOutputType | null
+    _max: AdminUserMaxAggregateOutputType | null
+  }
+
+  type GetAdminUserGroupByPayload<T extends AdminUserGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<AdminUserGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof AdminUserGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], AdminUserGroupByOutputType[P]>
+            : GetScalarType<T[P], AdminUserGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type AdminUserSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    email?: boolean
+    name?: boolean
+    roleKey?: boolean
+    status?: boolean
+    inviteToken?: boolean
+    inviteExpiresAt?: boolean
+    invitedBy?: boolean
+    passwordHash?: boolean
+    passwordSalt?: boolean
+    lastLoginAt?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["adminUser"]>
+
+  export type AdminUserSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    email?: boolean
+    name?: boolean
+    roleKey?: boolean
+    status?: boolean
+    inviteToken?: boolean
+    inviteExpiresAt?: boolean
+    invitedBy?: boolean
+    passwordHash?: boolean
+    passwordSalt?: boolean
+    lastLoginAt?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["adminUser"]>
+
+  export type AdminUserSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    email?: boolean
+    name?: boolean
+    roleKey?: boolean
+    status?: boolean
+    inviteToken?: boolean
+    inviteExpiresAt?: boolean
+    invitedBy?: boolean
+    passwordHash?: boolean
+    passwordSalt?: boolean
+    lastLoginAt?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["adminUser"]>
+
+  export type AdminUserSelectScalar = {
+    id?: boolean
+    email?: boolean
+    name?: boolean
+    roleKey?: boolean
+    status?: boolean
+    inviteToken?: boolean
+    inviteExpiresAt?: boolean
+    invitedBy?: boolean
+    passwordHash?: boolean
+    passwordSalt?: boolean
+    lastLoginAt?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type AdminUserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "email" | "name" | "roleKey" | "status" | "inviteToken" | "inviteExpiresAt" | "invitedBy" | "passwordHash" | "passwordSalt" | "lastLoginAt" | "createdAt" | "updatedAt", ExtArgs["result"]["adminUser"]>
+
+  export type $AdminUserPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "AdminUser"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      email: string
+      name: string | null
+      roleKey: string
+      status: string
+      inviteToken: string | null
+      inviteExpiresAt: Date | null
+      invitedBy: string | null
+      passwordHash: string | null
+      passwordSalt: string | null
+      lastLoginAt: Date | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["adminUser"]>
+    composites: {}
+  }
+
+  type AdminUserGetPayload<S extends boolean | null | undefined | AdminUserDefaultArgs> = $Result.GetResult<Prisma.$AdminUserPayload, S>
+
+  type AdminUserCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<AdminUserFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: AdminUserCountAggregateInputType | true
+    }
+
+  export interface AdminUserDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['AdminUser'], meta: { name: 'AdminUser' } }
+    /**
+     * Find zero or one AdminUser that matches the filter.
+     * @param {AdminUserFindUniqueArgs} args - Arguments to find a AdminUser
+     * @example
+     * // Get one AdminUser
+     * const adminUser = await prisma.adminUser.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends AdminUserFindUniqueArgs>(args: SelectSubset<T, AdminUserFindUniqueArgs<ExtArgs>>): Prisma__AdminUserClient<$Result.GetResult<Prisma.$AdminUserPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one AdminUser that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {AdminUserFindUniqueOrThrowArgs} args - Arguments to find a AdminUser
+     * @example
+     * // Get one AdminUser
+     * const adminUser = await prisma.adminUser.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends AdminUserFindUniqueOrThrowArgs>(args: SelectSubset<T, AdminUserFindUniqueOrThrowArgs<ExtArgs>>): Prisma__AdminUserClient<$Result.GetResult<Prisma.$AdminUserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first AdminUser that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AdminUserFindFirstArgs} args - Arguments to find a AdminUser
+     * @example
+     * // Get one AdminUser
+     * const adminUser = await prisma.adminUser.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends AdminUserFindFirstArgs>(args?: SelectSubset<T, AdminUserFindFirstArgs<ExtArgs>>): Prisma__AdminUserClient<$Result.GetResult<Prisma.$AdminUserPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first AdminUser that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AdminUserFindFirstOrThrowArgs} args - Arguments to find a AdminUser
+     * @example
+     * // Get one AdminUser
+     * const adminUser = await prisma.adminUser.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends AdminUserFindFirstOrThrowArgs>(args?: SelectSubset<T, AdminUserFindFirstOrThrowArgs<ExtArgs>>): Prisma__AdminUserClient<$Result.GetResult<Prisma.$AdminUserPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more AdminUsers that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AdminUserFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all AdminUsers
+     * const adminUsers = await prisma.adminUser.findMany()
+     * 
+     * // Get first 10 AdminUsers
+     * const adminUsers = await prisma.adminUser.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const adminUserWithIdOnly = await prisma.adminUser.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends AdminUserFindManyArgs>(args?: SelectSubset<T, AdminUserFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AdminUserPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a AdminUser.
+     * @param {AdminUserCreateArgs} args - Arguments to create a AdminUser.
+     * @example
+     * // Create one AdminUser
+     * const AdminUser = await prisma.adminUser.create({
+     *   data: {
+     *     // ... data to create a AdminUser
+     *   }
+     * })
+     * 
+     */
+    create<T extends AdminUserCreateArgs>(args: SelectSubset<T, AdminUserCreateArgs<ExtArgs>>): Prisma__AdminUserClient<$Result.GetResult<Prisma.$AdminUserPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many AdminUsers.
+     * @param {AdminUserCreateManyArgs} args - Arguments to create many AdminUsers.
+     * @example
+     * // Create many AdminUsers
+     * const adminUser = await prisma.adminUser.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends AdminUserCreateManyArgs>(args?: SelectSubset<T, AdminUserCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many AdminUsers and returns the data saved in the database.
+     * @param {AdminUserCreateManyAndReturnArgs} args - Arguments to create many AdminUsers.
+     * @example
+     * // Create many AdminUsers
+     * const adminUser = await prisma.adminUser.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many AdminUsers and only return the `id`
+     * const adminUserWithIdOnly = await prisma.adminUser.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends AdminUserCreateManyAndReturnArgs>(args?: SelectSubset<T, AdminUserCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AdminUserPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a AdminUser.
+     * @param {AdminUserDeleteArgs} args - Arguments to delete one AdminUser.
+     * @example
+     * // Delete one AdminUser
+     * const AdminUser = await prisma.adminUser.delete({
+     *   where: {
+     *     // ... filter to delete one AdminUser
+     *   }
+     * })
+     * 
+     */
+    delete<T extends AdminUserDeleteArgs>(args: SelectSubset<T, AdminUserDeleteArgs<ExtArgs>>): Prisma__AdminUserClient<$Result.GetResult<Prisma.$AdminUserPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one AdminUser.
+     * @param {AdminUserUpdateArgs} args - Arguments to update one AdminUser.
+     * @example
+     * // Update one AdminUser
+     * const adminUser = await prisma.adminUser.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends AdminUserUpdateArgs>(args: SelectSubset<T, AdminUserUpdateArgs<ExtArgs>>): Prisma__AdminUserClient<$Result.GetResult<Prisma.$AdminUserPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more AdminUsers.
+     * @param {AdminUserDeleteManyArgs} args - Arguments to filter AdminUsers to delete.
+     * @example
+     * // Delete a few AdminUsers
+     * const { count } = await prisma.adminUser.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends AdminUserDeleteManyArgs>(args?: SelectSubset<T, AdminUserDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more AdminUsers.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AdminUserUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many AdminUsers
+     * const adminUser = await prisma.adminUser.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends AdminUserUpdateManyArgs>(args: SelectSubset<T, AdminUserUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more AdminUsers and returns the data updated in the database.
+     * @param {AdminUserUpdateManyAndReturnArgs} args - Arguments to update many AdminUsers.
+     * @example
+     * // Update many AdminUsers
+     * const adminUser = await prisma.adminUser.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more AdminUsers and only return the `id`
+     * const adminUserWithIdOnly = await prisma.adminUser.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends AdminUserUpdateManyAndReturnArgs>(args: SelectSubset<T, AdminUserUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AdminUserPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one AdminUser.
+     * @param {AdminUserUpsertArgs} args - Arguments to update or create a AdminUser.
+     * @example
+     * // Update or create a AdminUser
+     * const adminUser = await prisma.adminUser.upsert({
+     *   create: {
+     *     // ... data to create a AdminUser
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the AdminUser we want to update
+     *   }
+     * })
+     */
+    upsert<T extends AdminUserUpsertArgs>(args: SelectSubset<T, AdminUserUpsertArgs<ExtArgs>>): Prisma__AdminUserClient<$Result.GetResult<Prisma.$AdminUserPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of AdminUsers.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AdminUserCountArgs} args - Arguments to filter AdminUsers to count.
+     * @example
+     * // Count the number of AdminUsers
+     * const count = await prisma.adminUser.count({
+     *   where: {
+     *     // ... the filter for the AdminUsers we want to count
+     *   }
+     * })
+    **/
+    count<T extends AdminUserCountArgs>(
+      args?: Subset<T, AdminUserCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], AdminUserCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a AdminUser.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AdminUserAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends AdminUserAggregateArgs>(args: Subset<T, AdminUserAggregateArgs>): Prisma.PrismaPromise<GetAdminUserAggregateType<T>>
+
+    /**
+     * Group by AdminUser.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AdminUserGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends AdminUserGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: AdminUserGroupByArgs['orderBy'] }
+        : { orderBy?: AdminUserGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, AdminUserGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetAdminUserGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the AdminUser model
+   */
+  readonly fields: AdminUserFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for AdminUser.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__AdminUserClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the AdminUser model
+   */
+  interface AdminUserFieldRefs {
+    readonly id: FieldRef<"AdminUser", 'String'>
+    readonly email: FieldRef<"AdminUser", 'String'>
+    readonly name: FieldRef<"AdminUser", 'String'>
+    readonly roleKey: FieldRef<"AdminUser", 'String'>
+    readonly status: FieldRef<"AdminUser", 'String'>
+    readonly inviteToken: FieldRef<"AdminUser", 'String'>
+    readonly inviteExpiresAt: FieldRef<"AdminUser", 'DateTime'>
+    readonly invitedBy: FieldRef<"AdminUser", 'String'>
+    readonly passwordHash: FieldRef<"AdminUser", 'String'>
+    readonly passwordSalt: FieldRef<"AdminUser", 'String'>
+    readonly lastLoginAt: FieldRef<"AdminUser", 'DateTime'>
+    readonly createdAt: FieldRef<"AdminUser", 'DateTime'>
+    readonly updatedAt: FieldRef<"AdminUser", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * AdminUser findUnique
+   */
+  export type AdminUserFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AdminUser
+     */
+    select?: AdminUserSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AdminUser
+     */
+    omit?: AdminUserOmit<ExtArgs> | null
+    /**
+     * Filter, which AdminUser to fetch.
+     */
+    where: AdminUserWhereUniqueInput
+  }
+
+  /**
+   * AdminUser findUniqueOrThrow
+   */
+  export type AdminUserFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AdminUser
+     */
+    select?: AdminUserSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AdminUser
+     */
+    omit?: AdminUserOmit<ExtArgs> | null
+    /**
+     * Filter, which AdminUser to fetch.
+     */
+    where: AdminUserWhereUniqueInput
+  }
+
+  /**
+   * AdminUser findFirst
+   */
+  export type AdminUserFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AdminUser
+     */
+    select?: AdminUserSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AdminUser
+     */
+    omit?: AdminUserOmit<ExtArgs> | null
+    /**
+     * Filter, which AdminUser to fetch.
+     */
+    where?: AdminUserWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AdminUsers to fetch.
+     */
+    orderBy?: AdminUserOrderByWithRelationInput | AdminUserOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for AdminUsers.
+     */
+    cursor?: AdminUserWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AdminUsers from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AdminUsers.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of AdminUsers.
+     */
+    distinct?: AdminUserScalarFieldEnum | AdminUserScalarFieldEnum[]
+  }
+
+  /**
+   * AdminUser findFirstOrThrow
+   */
+  export type AdminUserFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AdminUser
+     */
+    select?: AdminUserSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AdminUser
+     */
+    omit?: AdminUserOmit<ExtArgs> | null
+    /**
+     * Filter, which AdminUser to fetch.
+     */
+    where?: AdminUserWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AdminUsers to fetch.
+     */
+    orderBy?: AdminUserOrderByWithRelationInput | AdminUserOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for AdminUsers.
+     */
+    cursor?: AdminUserWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AdminUsers from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AdminUsers.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of AdminUsers.
+     */
+    distinct?: AdminUserScalarFieldEnum | AdminUserScalarFieldEnum[]
+  }
+
+  /**
+   * AdminUser findMany
+   */
+  export type AdminUserFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AdminUser
+     */
+    select?: AdminUserSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AdminUser
+     */
+    omit?: AdminUserOmit<ExtArgs> | null
+    /**
+     * Filter, which AdminUsers to fetch.
+     */
+    where?: AdminUserWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AdminUsers to fetch.
+     */
+    orderBy?: AdminUserOrderByWithRelationInput | AdminUserOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing AdminUsers.
+     */
+    cursor?: AdminUserWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AdminUsers from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AdminUsers.
+     */
+    skip?: number
+    distinct?: AdminUserScalarFieldEnum | AdminUserScalarFieldEnum[]
+  }
+
+  /**
+   * AdminUser create
+   */
+  export type AdminUserCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AdminUser
+     */
+    select?: AdminUserSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AdminUser
+     */
+    omit?: AdminUserOmit<ExtArgs> | null
+    /**
+     * The data needed to create a AdminUser.
+     */
+    data: XOR<AdminUserCreateInput, AdminUserUncheckedCreateInput>
+  }
+
+  /**
+   * AdminUser createMany
+   */
+  export type AdminUserCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many AdminUsers.
+     */
+    data: AdminUserCreateManyInput | AdminUserCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * AdminUser createManyAndReturn
+   */
+  export type AdminUserCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AdminUser
+     */
+    select?: AdminUserSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the AdminUser
+     */
+    omit?: AdminUserOmit<ExtArgs> | null
+    /**
+     * The data used to create many AdminUsers.
+     */
+    data: AdminUserCreateManyInput | AdminUserCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * AdminUser update
+   */
+  export type AdminUserUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AdminUser
+     */
+    select?: AdminUserSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AdminUser
+     */
+    omit?: AdminUserOmit<ExtArgs> | null
+    /**
+     * The data needed to update a AdminUser.
+     */
+    data: XOR<AdminUserUpdateInput, AdminUserUncheckedUpdateInput>
+    /**
+     * Choose, which AdminUser to update.
+     */
+    where: AdminUserWhereUniqueInput
+  }
+
+  /**
+   * AdminUser updateMany
+   */
+  export type AdminUserUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update AdminUsers.
+     */
+    data: XOR<AdminUserUpdateManyMutationInput, AdminUserUncheckedUpdateManyInput>
+    /**
+     * Filter which AdminUsers to update
+     */
+    where?: AdminUserWhereInput
+    /**
+     * Limit how many AdminUsers to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * AdminUser updateManyAndReturn
+   */
+  export type AdminUserUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AdminUser
+     */
+    select?: AdminUserSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the AdminUser
+     */
+    omit?: AdminUserOmit<ExtArgs> | null
+    /**
+     * The data used to update AdminUsers.
+     */
+    data: XOR<AdminUserUpdateManyMutationInput, AdminUserUncheckedUpdateManyInput>
+    /**
+     * Filter which AdminUsers to update
+     */
+    where?: AdminUserWhereInput
+    /**
+     * Limit how many AdminUsers to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * AdminUser upsert
+   */
+  export type AdminUserUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AdminUser
+     */
+    select?: AdminUserSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AdminUser
+     */
+    omit?: AdminUserOmit<ExtArgs> | null
+    /**
+     * The filter to search for the AdminUser to update in case it exists.
+     */
+    where: AdminUserWhereUniqueInput
+    /**
+     * In case the AdminUser found by the `where` argument doesn't exist, create a new AdminUser with this data.
+     */
+    create: XOR<AdminUserCreateInput, AdminUserUncheckedCreateInput>
+    /**
+     * In case the AdminUser was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<AdminUserUpdateInput, AdminUserUncheckedUpdateInput>
+  }
+
+  /**
+   * AdminUser delete
+   */
+  export type AdminUserDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AdminUser
+     */
+    select?: AdminUserSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AdminUser
+     */
+    omit?: AdminUserOmit<ExtArgs> | null
+    /**
+     * Filter which AdminUser to delete.
+     */
+    where: AdminUserWhereUniqueInput
+  }
+
+  /**
+   * AdminUser deleteMany
+   */
+  export type AdminUserDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which AdminUsers to delete
+     */
+    where?: AdminUserWhereInput
+    /**
+     * Limit how many AdminUsers to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * AdminUser without action
+   */
+  export type AdminUserDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AdminUser
+     */
+    select?: AdminUserSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AdminUser
+     */
+    omit?: AdminUserOmit<ExtArgs> | null
+  }
+
+
+  /**
+   * Model AdminRole
+   */
+
+  export type AggregateAdminRole = {
+    _count: AdminRoleCountAggregateOutputType | null
+    _min: AdminRoleMinAggregateOutputType | null
+    _max: AdminRoleMaxAggregateOutputType | null
+  }
+
+  export type AdminRoleMinAggregateOutputType = {
+    key: string | null
+    label: string | null
+    description: string | null
+    isSystem: boolean | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type AdminRoleMaxAggregateOutputType = {
+    key: string | null
+    label: string | null
+    description: string | null
+    isSystem: boolean | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type AdminRoleCountAggregateOutputType = {
+    key: number
+    label: number
+    description: number
+    permissions: number
+    isSystem: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type AdminRoleMinAggregateInputType = {
+    key?: true
+    label?: true
+    description?: true
+    isSystem?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type AdminRoleMaxAggregateInputType = {
+    key?: true
+    label?: true
+    description?: true
+    isSystem?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type AdminRoleCountAggregateInputType = {
+    key?: true
+    label?: true
+    description?: true
+    permissions?: true
+    isSystem?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type AdminRoleAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which AdminRole to aggregate.
+     */
+    where?: AdminRoleWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AdminRoles to fetch.
+     */
+    orderBy?: AdminRoleOrderByWithRelationInput | AdminRoleOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: AdminRoleWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AdminRoles from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AdminRoles.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned AdminRoles
+    **/
+    _count?: true | AdminRoleCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: AdminRoleMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: AdminRoleMaxAggregateInputType
+  }
+
+  export type GetAdminRoleAggregateType<T extends AdminRoleAggregateArgs> = {
+        [P in keyof T & keyof AggregateAdminRole]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateAdminRole[P]>
+      : GetScalarType<T[P], AggregateAdminRole[P]>
+  }
+
+
+
+
+  export type AdminRoleGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: AdminRoleWhereInput
+    orderBy?: AdminRoleOrderByWithAggregationInput | AdminRoleOrderByWithAggregationInput[]
+    by: AdminRoleScalarFieldEnum[] | AdminRoleScalarFieldEnum
+    having?: AdminRoleScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: AdminRoleCountAggregateInputType | true
+    _min?: AdminRoleMinAggregateInputType
+    _max?: AdminRoleMaxAggregateInputType
+  }
+
+  export type AdminRoleGroupByOutputType = {
+    key: string
+    label: string
+    description: string
+    permissions: JsonValue
+    isSystem: boolean
+    createdAt: Date
+    updatedAt: Date
+    _count: AdminRoleCountAggregateOutputType | null
+    _min: AdminRoleMinAggregateOutputType | null
+    _max: AdminRoleMaxAggregateOutputType | null
+  }
+
+  type GetAdminRoleGroupByPayload<T extends AdminRoleGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<AdminRoleGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof AdminRoleGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], AdminRoleGroupByOutputType[P]>
+            : GetScalarType<T[P], AdminRoleGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type AdminRoleSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    key?: boolean
+    label?: boolean
+    description?: boolean
+    permissions?: boolean
+    isSystem?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["adminRole"]>
+
+  export type AdminRoleSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    key?: boolean
+    label?: boolean
+    description?: boolean
+    permissions?: boolean
+    isSystem?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["adminRole"]>
+
+  export type AdminRoleSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    key?: boolean
+    label?: boolean
+    description?: boolean
+    permissions?: boolean
+    isSystem?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["adminRole"]>
+
+  export type AdminRoleSelectScalar = {
+    key?: boolean
+    label?: boolean
+    description?: boolean
+    permissions?: boolean
+    isSystem?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type AdminRoleOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"key" | "label" | "description" | "permissions" | "isSystem" | "createdAt" | "updatedAt", ExtArgs["result"]["adminRole"]>
+
+  export type $AdminRolePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "AdminRole"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      key: string
+      label: string
+      description: string
+      permissions: Prisma.JsonValue
+      isSystem: boolean
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["adminRole"]>
+    composites: {}
+  }
+
+  type AdminRoleGetPayload<S extends boolean | null | undefined | AdminRoleDefaultArgs> = $Result.GetResult<Prisma.$AdminRolePayload, S>
+
+  type AdminRoleCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<AdminRoleFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: AdminRoleCountAggregateInputType | true
+    }
+
+  export interface AdminRoleDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['AdminRole'], meta: { name: 'AdminRole' } }
+    /**
+     * Find zero or one AdminRole that matches the filter.
+     * @param {AdminRoleFindUniqueArgs} args - Arguments to find a AdminRole
+     * @example
+     * // Get one AdminRole
+     * const adminRole = await prisma.adminRole.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends AdminRoleFindUniqueArgs>(args: SelectSubset<T, AdminRoleFindUniqueArgs<ExtArgs>>): Prisma__AdminRoleClient<$Result.GetResult<Prisma.$AdminRolePayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one AdminRole that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {AdminRoleFindUniqueOrThrowArgs} args - Arguments to find a AdminRole
+     * @example
+     * // Get one AdminRole
+     * const adminRole = await prisma.adminRole.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends AdminRoleFindUniqueOrThrowArgs>(args: SelectSubset<T, AdminRoleFindUniqueOrThrowArgs<ExtArgs>>): Prisma__AdminRoleClient<$Result.GetResult<Prisma.$AdminRolePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first AdminRole that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AdminRoleFindFirstArgs} args - Arguments to find a AdminRole
+     * @example
+     * // Get one AdminRole
+     * const adminRole = await prisma.adminRole.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends AdminRoleFindFirstArgs>(args?: SelectSubset<T, AdminRoleFindFirstArgs<ExtArgs>>): Prisma__AdminRoleClient<$Result.GetResult<Prisma.$AdminRolePayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first AdminRole that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AdminRoleFindFirstOrThrowArgs} args - Arguments to find a AdminRole
+     * @example
+     * // Get one AdminRole
+     * const adminRole = await prisma.adminRole.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends AdminRoleFindFirstOrThrowArgs>(args?: SelectSubset<T, AdminRoleFindFirstOrThrowArgs<ExtArgs>>): Prisma__AdminRoleClient<$Result.GetResult<Prisma.$AdminRolePayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more AdminRoles that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AdminRoleFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all AdminRoles
+     * const adminRoles = await prisma.adminRole.findMany()
+     * 
+     * // Get first 10 AdminRoles
+     * const adminRoles = await prisma.adminRole.findMany({ take: 10 })
+     * 
+     * // Only select the `key`
+     * const adminRoleWithKeyOnly = await prisma.adminRole.findMany({ select: { key: true } })
+     * 
+     */
+    findMany<T extends AdminRoleFindManyArgs>(args?: SelectSubset<T, AdminRoleFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AdminRolePayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a AdminRole.
+     * @param {AdminRoleCreateArgs} args - Arguments to create a AdminRole.
+     * @example
+     * // Create one AdminRole
+     * const AdminRole = await prisma.adminRole.create({
+     *   data: {
+     *     // ... data to create a AdminRole
+     *   }
+     * })
+     * 
+     */
+    create<T extends AdminRoleCreateArgs>(args: SelectSubset<T, AdminRoleCreateArgs<ExtArgs>>): Prisma__AdminRoleClient<$Result.GetResult<Prisma.$AdminRolePayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many AdminRoles.
+     * @param {AdminRoleCreateManyArgs} args - Arguments to create many AdminRoles.
+     * @example
+     * // Create many AdminRoles
+     * const adminRole = await prisma.adminRole.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends AdminRoleCreateManyArgs>(args?: SelectSubset<T, AdminRoleCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many AdminRoles and returns the data saved in the database.
+     * @param {AdminRoleCreateManyAndReturnArgs} args - Arguments to create many AdminRoles.
+     * @example
+     * // Create many AdminRoles
+     * const adminRole = await prisma.adminRole.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many AdminRoles and only return the `key`
+     * const adminRoleWithKeyOnly = await prisma.adminRole.createManyAndReturn({
+     *   select: { key: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends AdminRoleCreateManyAndReturnArgs>(args?: SelectSubset<T, AdminRoleCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AdminRolePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a AdminRole.
+     * @param {AdminRoleDeleteArgs} args - Arguments to delete one AdminRole.
+     * @example
+     * // Delete one AdminRole
+     * const AdminRole = await prisma.adminRole.delete({
+     *   where: {
+     *     // ... filter to delete one AdminRole
+     *   }
+     * })
+     * 
+     */
+    delete<T extends AdminRoleDeleteArgs>(args: SelectSubset<T, AdminRoleDeleteArgs<ExtArgs>>): Prisma__AdminRoleClient<$Result.GetResult<Prisma.$AdminRolePayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one AdminRole.
+     * @param {AdminRoleUpdateArgs} args - Arguments to update one AdminRole.
+     * @example
+     * // Update one AdminRole
+     * const adminRole = await prisma.adminRole.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends AdminRoleUpdateArgs>(args: SelectSubset<T, AdminRoleUpdateArgs<ExtArgs>>): Prisma__AdminRoleClient<$Result.GetResult<Prisma.$AdminRolePayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more AdminRoles.
+     * @param {AdminRoleDeleteManyArgs} args - Arguments to filter AdminRoles to delete.
+     * @example
+     * // Delete a few AdminRoles
+     * const { count } = await prisma.adminRole.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends AdminRoleDeleteManyArgs>(args?: SelectSubset<T, AdminRoleDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more AdminRoles.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AdminRoleUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many AdminRoles
+     * const adminRole = await prisma.adminRole.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends AdminRoleUpdateManyArgs>(args: SelectSubset<T, AdminRoleUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more AdminRoles and returns the data updated in the database.
+     * @param {AdminRoleUpdateManyAndReturnArgs} args - Arguments to update many AdminRoles.
+     * @example
+     * // Update many AdminRoles
+     * const adminRole = await prisma.adminRole.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more AdminRoles and only return the `key`
+     * const adminRoleWithKeyOnly = await prisma.adminRole.updateManyAndReturn({
+     *   select: { key: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends AdminRoleUpdateManyAndReturnArgs>(args: SelectSubset<T, AdminRoleUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AdminRolePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one AdminRole.
+     * @param {AdminRoleUpsertArgs} args - Arguments to update or create a AdminRole.
+     * @example
+     * // Update or create a AdminRole
+     * const adminRole = await prisma.adminRole.upsert({
+     *   create: {
+     *     // ... data to create a AdminRole
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the AdminRole we want to update
+     *   }
+     * })
+     */
+    upsert<T extends AdminRoleUpsertArgs>(args: SelectSubset<T, AdminRoleUpsertArgs<ExtArgs>>): Prisma__AdminRoleClient<$Result.GetResult<Prisma.$AdminRolePayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of AdminRoles.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AdminRoleCountArgs} args - Arguments to filter AdminRoles to count.
+     * @example
+     * // Count the number of AdminRoles
+     * const count = await prisma.adminRole.count({
+     *   where: {
+     *     // ... the filter for the AdminRoles we want to count
+     *   }
+     * })
+    **/
+    count<T extends AdminRoleCountArgs>(
+      args?: Subset<T, AdminRoleCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], AdminRoleCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a AdminRole.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AdminRoleAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends AdminRoleAggregateArgs>(args: Subset<T, AdminRoleAggregateArgs>): Prisma.PrismaPromise<GetAdminRoleAggregateType<T>>
+
+    /**
+     * Group by AdminRole.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AdminRoleGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends AdminRoleGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: AdminRoleGroupByArgs['orderBy'] }
+        : { orderBy?: AdminRoleGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, AdminRoleGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetAdminRoleGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the AdminRole model
+   */
+  readonly fields: AdminRoleFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for AdminRole.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__AdminRoleClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the AdminRole model
+   */
+  interface AdminRoleFieldRefs {
+    readonly key: FieldRef<"AdminRole", 'String'>
+    readonly label: FieldRef<"AdminRole", 'String'>
+    readonly description: FieldRef<"AdminRole", 'String'>
+    readonly permissions: FieldRef<"AdminRole", 'Json'>
+    readonly isSystem: FieldRef<"AdminRole", 'Boolean'>
+    readonly createdAt: FieldRef<"AdminRole", 'DateTime'>
+    readonly updatedAt: FieldRef<"AdminRole", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * AdminRole findUnique
+   */
+  export type AdminRoleFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AdminRole
+     */
+    select?: AdminRoleSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AdminRole
+     */
+    omit?: AdminRoleOmit<ExtArgs> | null
+    /**
+     * Filter, which AdminRole to fetch.
+     */
+    where: AdminRoleWhereUniqueInput
+  }
+
+  /**
+   * AdminRole findUniqueOrThrow
+   */
+  export type AdminRoleFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AdminRole
+     */
+    select?: AdminRoleSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AdminRole
+     */
+    omit?: AdminRoleOmit<ExtArgs> | null
+    /**
+     * Filter, which AdminRole to fetch.
+     */
+    where: AdminRoleWhereUniqueInput
+  }
+
+  /**
+   * AdminRole findFirst
+   */
+  export type AdminRoleFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AdminRole
+     */
+    select?: AdminRoleSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AdminRole
+     */
+    omit?: AdminRoleOmit<ExtArgs> | null
+    /**
+     * Filter, which AdminRole to fetch.
+     */
+    where?: AdminRoleWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AdminRoles to fetch.
+     */
+    orderBy?: AdminRoleOrderByWithRelationInput | AdminRoleOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for AdminRoles.
+     */
+    cursor?: AdminRoleWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AdminRoles from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AdminRoles.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of AdminRoles.
+     */
+    distinct?: AdminRoleScalarFieldEnum | AdminRoleScalarFieldEnum[]
+  }
+
+  /**
+   * AdminRole findFirstOrThrow
+   */
+  export type AdminRoleFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AdminRole
+     */
+    select?: AdminRoleSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AdminRole
+     */
+    omit?: AdminRoleOmit<ExtArgs> | null
+    /**
+     * Filter, which AdminRole to fetch.
+     */
+    where?: AdminRoleWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AdminRoles to fetch.
+     */
+    orderBy?: AdminRoleOrderByWithRelationInput | AdminRoleOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for AdminRoles.
+     */
+    cursor?: AdminRoleWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AdminRoles from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AdminRoles.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of AdminRoles.
+     */
+    distinct?: AdminRoleScalarFieldEnum | AdminRoleScalarFieldEnum[]
+  }
+
+  /**
+   * AdminRole findMany
+   */
+  export type AdminRoleFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AdminRole
+     */
+    select?: AdminRoleSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AdminRole
+     */
+    omit?: AdminRoleOmit<ExtArgs> | null
+    /**
+     * Filter, which AdminRoles to fetch.
+     */
+    where?: AdminRoleWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AdminRoles to fetch.
+     */
+    orderBy?: AdminRoleOrderByWithRelationInput | AdminRoleOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing AdminRoles.
+     */
+    cursor?: AdminRoleWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AdminRoles from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AdminRoles.
+     */
+    skip?: number
+    distinct?: AdminRoleScalarFieldEnum | AdminRoleScalarFieldEnum[]
+  }
+
+  /**
+   * AdminRole create
+   */
+  export type AdminRoleCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AdminRole
+     */
+    select?: AdminRoleSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AdminRole
+     */
+    omit?: AdminRoleOmit<ExtArgs> | null
+    /**
+     * The data needed to create a AdminRole.
+     */
+    data: XOR<AdminRoleCreateInput, AdminRoleUncheckedCreateInput>
+  }
+
+  /**
+   * AdminRole createMany
+   */
+  export type AdminRoleCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many AdminRoles.
+     */
+    data: AdminRoleCreateManyInput | AdminRoleCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * AdminRole createManyAndReturn
+   */
+  export type AdminRoleCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AdminRole
+     */
+    select?: AdminRoleSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the AdminRole
+     */
+    omit?: AdminRoleOmit<ExtArgs> | null
+    /**
+     * The data used to create many AdminRoles.
+     */
+    data: AdminRoleCreateManyInput | AdminRoleCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * AdminRole update
+   */
+  export type AdminRoleUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AdminRole
+     */
+    select?: AdminRoleSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AdminRole
+     */
+    omit?: AdminRoleOmit<ExtArgs> | null
+    /**
+     * The data needed to update a AdminRole.
+     */
+    data: XOR<AdminRoleUpdateInput, AdminRoleUncheckedUpdateInput>
+    /**
+     * Choose, which AdminRole to update.
+     */
+    where: AdminRoleWhereUniqueInput
+  }
+
+  /**
+   * AdminRole updateMany
+   */
+  export type AdminRoleUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update AdminRoles.
+     */
+    data: XOR<AdminRoleUpdateManyMutationInput, AdminRoleUncheckedUpdateManyInput>
+    /**
+     * Filter which AdminRoles to update
+     */
+    where?: AdminRoleWhereInput
+    /**
+     * Limit how many AdminRoles to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * AdminRole updateManyAndReturn
+   */
+  export type AdminRoleUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AdminRole
+     */
+    select?: AdminRoleSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the AdminRole
+     */
+    omit?: AdminRoleOmit<ExtArgs> | null
+    /**
+     * The data used to update AdminRoles.
+     */
+    data: XOR<AdminRoleUpdateManyMutationInput, AdminRoleUncheckedUpdateManyInput>
+    /**
+     * Filter which AdminRoles to update
+     */
+    where?: AdminRoleWhereInput
+    /**
+     * Limit how many AdminRoles to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * AdminRole upsert
+   */
+  export type AdminRoleUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AdminRole
+     */
+    select?: AdminRoleSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AdminRole
+     */
+    omit?: AdminRoleOmit<ExtArgs> | null
+    /**
+     * The filter to search for the AdminRole to update in case it exists.
+     */
+    where: AdminRoleWhereUniqueInput
+    /**
+     * In case the AdminRole found by the `where` argument doesn't exist, create a new AdminRole with this data.
+     */
+    create: XOR<AdminRoleCreateInput, AdminRoleUncheckedCreateInput>
+    /**
+     * In case the AdminRole was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<AdminRoleUpdateInput, AdminRoleUncheckedUpdateInput>
+  }
+
+  /**
+   * AdminRole delete
+   */
+  export type AdminRoleDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AdminRole
+     */
+    select?: AdminRoleSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AdminRole
+     */
+    omit?: AdminRoleOmit<ExtArgs> | null
+    /**
+     * Filter which AdminRole to delete.
+     */
+    where: AdminRoleWhereUniqueInput
+  }
+
+  /**
+   * AdminRole deleteMany
+   */
+  export type AdminRoleDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which AdminRoles to delete
+     */
+    where?: AdminRoleWhereInput
+    /**
+     * Limit how many AdminRoles to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * AdminRole without action
+   */
+  export type AdminRoleDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AdminRole
+     */
+    select?: AdminRoleSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AdminRole
+     */
+    omit?: AdminRoleOmit<ExtArgs> | null
+  }
+
+
+  /**
+   * Model AdminAuditLog
+   */
+
+  export type AggregateAdminAuditLog = {
+    _count: AdminAuditLogCountAggregateOutputType | null
+    _min: AdminAuditLogMinAggregateOutputType | null
+    _max: AdminAuditLogMaxAggregateOutputType | null
+  }
+
+  export type AdminAuditLogMinAggregateOutputType = {
+    id: string | null
+    actorEmail: string | null
+    actorRole: string | null
+    action: string | null
+    targetType: string | null
+    targetId: string | null
+    ip: string | null
+    createdAt: Date | null
+  }
+
+  export type AdminAuditLogMaxAggregateOutputType = {
+    id: string | null
+    actorEmail: string | null
+    actorRole: string | null
+    action: string | null
+    targetType: string | null
+    targetId: string | null
+    ip: string | null
+    createdAt: Date | null
+  }
+
+  export type AdminAuditLogCountAggregateOutputType = {
+    id: number
+    actorEmail: number
+    actorRole: number
+    action: number
+    targetType: number
+    targetId: number
+    meta: number
+    ip: number
+    createdAt: number
+    _all: number
+  }
+
+
+  export type AdminAuditLogMinAggregateInputType = {
+    id?: true
+    actorEmail?: true
+    actorRole?: true
+    action?: true
+    targetType?: true
+    targetId?: true
+    ip?: true
+    createdAt?: true
+  }
+
+  export type AdminAuditLogMaxAggregateInputType = {
+    id?: true
+    actorEmail?: true
+    actorRole?: true
+    action?: true
+    targetType?: true
+    targetId?: true
+    ip?: true
+    createdAt?: true
+  }
+
+  export type AdminAuditLogCountAggregateInputType = {
+    id?: true
+    actorEmail?: true
+    actorRole?: true
+    action?: true
+    targetType?: true
+    targetId?: true
+    meta?: true
+    ip?: true
+    createdAt?: true
+    _all?: true
+  }
+
+  export type AdminAuditLogAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which AdminAuditLog to aggregate.
+     */
+    where?: AdminAuditLogWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AdminAuditLogs to fetch.
+     */
+    orderBy?: AdminAuditLogOrderByWithRelationInput | AdminAuditLogOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: AdminAuditLogWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AdminAuditLogs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AdminAuditLogs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned AdminAuditLogs
+    **/
+    _count?: true | AdminAuditLogCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: AdminAuditLogMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: AdminAuditLogMaxAggregateInputType
+  }
+
+  export type GetAdminAuditLogAggregateType<T extends AdminAuditLogAggregateArgs> = {
+        [P in keyof T & keyof AggregateAdminAuditLog]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateAdminAuditLog[P]>
+      : GetScalarType<T[P], AggregateAdminAuditLog[P]>
+  }
+
+
+
+
+  export type AdminAuditLogGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: AdminAuditLogWhereInput
+    orderBy?: AdminAuditLogOrderByWithAggregationInput | AdminAuditLogOrderByWithAggregationInput[]
+    by: AdminAuditLogScalarFieldEnum[] | AdminAuditLogScalarFieldEnum
+    having?: AdminAuditLogScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: AdminAuditLogCountAggregateInputType | true
+    _min?: AdminAuditLogMinAggregateInputType
+    _max?: AdminAuditLogMaxAggregateInputType
+  }
+
+  export type AdminAuditLogGroupByOutputType = {
+    id: string
+    actorEmail: string
+    actorRole: string | null
+    action: string
+    targetType: string | null
+    targetId: string | null
+    meta: JsonValue | null
+    ip: string | null
+    createdAt: Date
+    _count: AdminAuditLogCountAggregateOutputType | null
+    _min: AdminAuditLogMinAggregateOutputType | null
+    _max: AdminAuditLogMaxAggregateOutputType | null
+  }
+
+  type GetAdminAuditLogGroupByPayload<T extends AdminAuditLogGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<AdminAuditLogGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof AdminAuditLogGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], AdminAuditLogGroupByOutputType[P]>
+            : GetScalarType<T[P], AdminAuditLogGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type AdminAuditLogSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    actorEmail?: boolean
+    actorRole?: boolean
+    action?: boolean
+    targetType?: boolean
+    targetId?: boolean
+    meta?: boolean
+    ip?: boolean
+    createdAt?: boolean
+  }, ExtArgs["result"]["adminAuditLog"]>
+
+  export type AdminAuditLogSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    actorEmail?: boolean
+    actorRole?: boolean
+    action?: boolean
+    targetType?: boolean
+    targetId?: boolean
+    meta?: boolean
+    ip?: boolean
+    createdAt?: boolean
+  }, ExtArgs["result"]["adminAuditLog"]>
+
+  export type AdminAuditLogSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    actorEmail?: boolean
+    actorRole?: boolean
+    action?: boolean
+    targetType?: boolean
+    targetId?: boolean
+    meta?: boolean
+    ip?: boolean
+    createdAt?: boolean
+  }, ExtArgs["result"]["adminAuditLog"]>
+
+  export type AdminAuditLogSelectScalar = {
+    id?: boolean
+    actorEmail?: boolean
+    actorRole?: boolean
+    action?: boolean
+    targetType?: boolean
+    targetId?: boolean
+    meta?: boolean
+    ip?: boolean
+    createdAt?: boolean
+  }
+
+  export type AdminAuditLogOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "actorEmail" | "actorRole" | "action" | "targetType" | "targetId" | "meta" | "ip" | "createdAt", ExtArgs["result"]["adminAuditLog"]>
+
+  export type $AdminAuditLogPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "AdminAuditLog"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      actorEmail: string
+      actorRole: string | null
+      action: string
+      targetType: string | null
+      targetId: string | null
+      meta: Prisma.JsonValue | null
+      ip: string | null
+      createdAt: Date
+    }, ExtArgs["result"]["adminAuditLog"]>
+    composites: {}
+  }
+
+  type AdminAuditLogGetPayload<S extends boolean | null | undefined | AdminAuditLogDefaultArgs> = $Result.GetResult<Prisma.$AdminAuditLogPayload, S>
+
+  type AdminAuditLogCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<AdminAuditLogFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: AdminAuditLogCountAggregateInputType | true
+    }
+
+  export interface AdminAuditLogDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['AdminAuditLog'], meta: { name: 'AdminAuditLog' } }
+    /**
+     * Find zero or one AdminAuditLog that matches the filter.
+     * @param {AdminAuditLogFindUniqueArgs} args - Arguments to find a AdminAuditLog
+     * @example
+     * // Get one AdminAuditLog
+     * const adminAuditLog = await prisma.adminAuditLog.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends AdminAuditLogFindUniqueArgs>(args: SelectSubset<T, AdminAuditLogFindUniqueArgs<ExtArgs>>): Prisma__AdminAuditLogClient<$Result.GetResult<Prisma.$AdminAuditLogPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one AdminAuditLog that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {AdminAuditLogFindUniqueOrThrowArgs} args - Arguments to find a AdminAuditLog
+     * @example
+     * // Get one AdminAuditLog
+     * const adminAuditLog = await prisma.adminAuditLog.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends AdminAuditLogFindUniqueOrThrowArgs>(args: SelectSubset<T, AdminAuditLogFindUniqueOrThrowArgs<ExtArgs>>): Prisma__AdminAuditLogClient<$Result.GetResult<Prisma.$AdminAuditLogPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first AdminAuditLog that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AdminAuditLogFindFirstArgs} args - Arguments to find a AdminAuditLog
+     * @example
+     * // Get one AdminAuditLog
+     * const adminAuditLog = await prisma.adminAuditLog.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends AdminAuditLogFindFirstArgs>(args?: SelectSubset<T, AdminAuditLogFindFirstArgs<ExtArgs>>): Prisma__AdminAuditLogClient<$Result.GetResult<Prisma.$AdminAuditLogPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first AdminAuditLog that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AdminAuditLogFindFirstOrThrowArgs} args - Arguments to find a AdminAuditLog
+     * @example
+     * // Get one AdminAuditLog
+     * const adminAuditLog = await prisma.adminAuditLog.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends AdminAuditLogFindFirstOrThrowArgs>(args?: SelectSubset<T, AdminAuditLogFindFirstOrThrowArgs<ExtArgs>>): Prisma__AdminAuditLogClient<$Result.GetResult<Prisma.$AdminAuditLogPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more AdminAuditLogs that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AdminAuditLogFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all AdminAuditLogs
+     * const adminAuditLogs = await prisma.adminAuditLog.findMany()
+     * 
+     * // Get first 10 AdminAuditLogs
+     * const adminAuditLogs = await prisma.adminAuditLog.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const adminAuditLogWithIdOnly = await prisma.adminAuditLog.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends AdminAuditLogFindManyArgs>(args?: SelectSubset<T, AdminAuditLogFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AdminAuditLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a AdminAuditLog.
+     * @param {AdminAuditLogCreateArgs} args - Arguments to create a AdminAuditLog.
+     * @example
+     * // Create one AdminAuditLog
+     * const AdminAuditLog = await prisma.adminAuditLog.create({
+     *   data: {
+     *     // ... data to create a AdminAuditLog
+     *   }
+     * })
+     * 
+     */
+    create<T extends AdminAuditLogCreateArgs>(args: SelectSubset<T, AdminAuditLogCreateArgs<ExtArgs>>): Prisma__AdminAuditLogClient<$Result.GetResult<Prisma.$AdminAuditLogPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many AdminAuditLogs.
+     * @param {AdminAuditLogCreateManyArgs} args - Arguments to create many AdminAuditLogs.
+     * @example
+     * // Create many AdminAuditLogs
+     * const adminAuditLog = await prisma.adminAuditLog.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends AdminAuditLogCreateManyArgs>(args?: SelectSubset<T, AdminAuditLogCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many AdminAuditLogs and returns the data saved in the database.
+     * @param {AdminAuditLogCreateManyAndReturnArgs} args - Arguments to create many AdminAuditLogs.
+     * @example
+     * // Create many AdminAuditLogs
+     * const adminAuditLog = await prisma.adminAuditLog.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many AdminAuditLogs and only return the `id`
+     * const adminAuditLogWithIdOnly = await prisma.adminAuditLog.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends AdminAuditLogCreateManyAndReturnArgs>(args?: SelectSubset<T, AdminAuditLogCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AdminAuditLogPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a AdminAuditLog.
+     * @param {AdminAuditLogDeleteArgs} args - Arguments to delete one AdminAuditLog.
+     * @example
+     * // Delete one AdminAuditLog
+     * const AdminAuditLog = await prisma.adminAuditLog.delete({
+     *   where: {
+     *     // ... filter to delete one AdminAuditLog
+     *   }
+     * })
+     * 
+     */
+    delete<T extends AdminAuditLogDeleteArgs>(args: SelectSubset<T, AdminAuditLogDeleteArgs<ExtArgs>>): Prisma__AdminAuditLogClient<$Result.GetResult<Prisma.$AdminAuditLogPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one AdminAuditLog.
+     * @param {AdminAuditLogUpdateArgs} args - Arguments to update one AdminAuditLog.
+     * @example
+     * // Update one AdminAuditLog
+     * const adminAuditLog = await prisma.adminAuditLog.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends AdminAuditLogUpdateArgs>(args: SelectSubset<T, AdminAuditLogUpdateArgs<ExtArgs>>): Prisma__AdminAuditLogClient<$Result.GetResult<Prisma.$AdminAuditLogPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more AdminAuditLogs.
+     * @param {AdminAuditLogDeleteManyArgs} args - Arguments to filter AdminAuditLogs to delete.
+     * @example
+     * // Delete a few AdminAuditLogs
+     * const { count } = await prisma.adminAuditLog.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends AdminAuditLogDeleteManyArgs>(args?: SelectSubset<T, AdminAuditLogDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more AdminAuditLogs.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AdminAuditLogUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many AdminAuditLogs
+     * const adminAuditLog = await prisma.adminAuditLog.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends AdminAuditLogUpdateManyArgs>(args: SelectSubset<T, AdminAuditLogUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more AdminAuditLogs and returns the data updated in the database.
+     * @param {AdminAuditLogUpdateManyAndReturnArgs} args - Arguments to update many AdminAuditLogs.
+     * @example
+     * // Update many AdminAuditLogs
+     * const adminAuditLog = await prisma.adminAuditLog.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more AdminAuditLogs and only return the `id`
+     * const adminAuditLogWithIdOnly = await prisma.adminAuditLog.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends AdminAuditLogUpdateManyAndReturnArgs>(args: SelectSubset<T, AdminAuditLogUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AdminAuditLogPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one AdminAuditLog.
+     * @param {AdminAuditLogUpsertArgs} args - Arguments to update or create a AdminAuditLog.
+     * @example
+     * // Update or create a AdminAuditLog
+     * const adminAuditLog = await prisma.adminAuditLog.upsert({
+     *   create: {
+     *     // ... data to create a AdminAuditLog
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the AdminAuditLog we want to update
+     *   }
+     * })
+     */
+    upsert<T extends AdminAuditLogUpsertArgs>(args: SelectSubset<T, AdminAuditLogUpsertArgs<ExtArgs>>): Prisma__AdminAuditLogClient<$Result.GetResult<Prisma.$AdminAuditLogPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of AdminAuditLogs.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AdminAuditLogCountArgs} args - Arguments to filter AdminAuditLogs to count.
+     * @example
+     * // Count the number of AdminAuditLogs
+     * const count = await prisma.adminAuditLog.count({
+     *   where: {
+     *     // ... the filter for the AdminAuditLogs we want to count
+     *   }
+     * })
+    **/
+    count<T extends AdminAuditLogCountArgs>(
+      args?: Subset<T, AdminAuditLogCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], AdminAuditLogCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a AdminAuditLog.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AdminAuditLogAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends AdminAuditLogAggregateArgs>(args: Subset<T, AdminAuditLogAggregateArgs>): Prisma.PrismaPromise<GetAdminAuditLogAggregateType<T>>
+
+    /**
+     * Group by AdminAuditLog.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AdminAuditLogGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends AdminAuditLogGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: AdminAuditLogGroupByArgs['orderBy'] }
+        : { orderBy?: AdminAuditLogGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, AdminAuditLogGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetAdminAuditLogGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the AdminAuditLog model
+   */
+  readonly fields: AdminAuditLogFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for AdminAuditLog.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__AdminAuditLogClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the AdminAuditLog model
+   */
+  interface AdminAuditLogFieldRefs {
+    readonly id: FieldRef<"AdminAuditLog", 'String'>
+    readonly actorEmail: FieldRef<"AdminAuditLog", 'String'>
+    readonly actorRole: FieldRef<"AdminAuditLog", 'String'>
+    readonly action: FieldRef<"AdminAuditLog", 'String'>
+    readonly targetType: FieldRef<"AdminAuditLog", 'String'>
+    readonly targetId: FieldRef<"AdminAuditLog", 'String'>
+    readonly meta: FieldRef<"AdminAuditLog", 'Json'>
+    readonly ip: FieldRef<"AdminAuditLog", 'String'>
+    readonly createdAt: FieldRef<"AdminAuditLog", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * AdminAuditLog findUnique
+   */
+  export type AdminAuditLogFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AdminAuditLog
+     */
+    select?: AdminAuditLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AdminAuditLog
+     */
+    omit?: AdminAuditLogOmit<ExtArgs> | null
+    /**
+     * Filter, which AdminAuditLog to fetch.
+     */
+    where: AdminAuditLogWhereUniqueInput
+  }
+
+  /**
+   * AdminAuditLog findUniqueOrThrow
+   */
+  export type AdminAuditLogFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AdminAuditLog
+     */
+    select?: AdminAuditLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AdminAuditLog
+     */
+    omit?: AdminAuditLogOmit<ExtArgs> | null
+    /**
+     * Filter, which AdminAuditLog to fetch.
+     */
+    where: AdminAuditLogWhereUniqueInput
+  }
+
+  /**
+   * AdminAuditLog findFirst
+   */
+  export type AdminAuditLogFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AdminAuditLog
+     */
+    select?: AdminAuditLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AdminAuditLog
+     */
+    omit?: AdminAuditLogOmit<ExtArgs> | null
+    /**
+     * Filter, which AdminAuditLog to fetch.
+     */
+    where?: AdminAuditLogWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AdminAuditLogs to fetch.
+     */
+    orderBy?: AdminAuditLogOrderByWithRelationInput | AdminAuditLogOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for AdminAuditLogs.
+     */
+    cursor?: AdminAuditLogWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AdminAuditLogs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AdminAuditLogs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of AdminAuditLogs.
+     */
+    distinct?: AdminAuditLogScalarFieldEnum | AdminAuditLogScalarFieldEnum[]
+  }
+
+  /**
+   * AdminAuditLog findFirstOrThrow
+   */
+  export type AdminAuditLogFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AdminAuditLog
+     */
+    select?: AdminAuditLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AdminAuditLog
+     */
+    omit?: AdminAuditLogOmit<ExtArgs> | null
+    /**
+     * Filter, which AdminAuditLog to fetch.
+     */
+    where?: AdminAuditLogWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AdminAuditLogs to fetch.
+     */
+    orderBy?: AdminAuditLogOrderByWithRelationInput | AdminAuditLogOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for AdminAuditLogs.
+     */
+    cursor?: AdminAuditLogWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AdminAuditLogs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AdminAuditLogs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of AdminAuditLogs.
+     */
+    distinct?: AdminAuditLogScalarFieldEnum | AdminAuditLogScalarFieldEnum[]
+  }
+
+  /**
+   * AdminAuditLog findMany
+   */
+  export type AdminAuditLogFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AdminAuditLog
+     */
+    select?: AdminAuditLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AdminAuditLog
+     */
+    omit?: AdminAuditLogOmit<ExtArgs> | null
+    /**
+     * Filter, which AdminAuditLogs to fetch.
+     */
+    where?: AdminAuditLogWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AdminAuditLogs to fetch.
+     */
+    orderBy?: AdminAuditLogOrderByWithRelationInput | AdminAuditLogOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing AdminAuditLogs.
+     */
+    cursor?: AdminAuditLogWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AdminAuditLogs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AdminAuditLogs.
+     */
+    skip?: number
+    distinct?: AdminAuditLogScalarFieldEnum | AdminAuditLogScalarFieldEnum[]
+  }
+
+  /**
+   * AdminAuditLog create
+   */
+  export type AdminAuditLogCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AdminAuditLog
+     */
+    select?: AdminAuditLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AdminAuditLog
+     */
+    omit?: AdminAuditLogOmit<ExtArgs> | null
+    /**
+     * The data needed to create a AdminAuditLog.
+     */
+    data: XOR<AdminAuditLogCreateInput, AdminAuditLogUncheckedCreateInput>
+  }
+
+  /**
+   * AdminAuditLog createMany
+   */
+  export type AdminAuditLogCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many AdminAuditLogs.
+     */
+    data: AdminAuditLogCreateManyInput | AdminAuditLogCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * AdminAuditLog createManyAndReturn
+   */
+  export type AdminAuditLogCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AdminAuditLog
+     */
+    select?: AdminAuditLogSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the AdminAuditLog
+     */
+    omit?: AdminAuditLogOmit<ExtArgs> | null
+    /**
+     * The data used to create many AdminAuditLogs.
+     */
+    data: AdminAuditLogCreateManyInput | AdminAuditLogCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * AdminAuditLog update
+   */
+  export type AdminAuditLogUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AdminAuditLog
+     */
+    select?: AdminAuditLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AdminAuditLog
+     */
+    omit?: AdminAuditLogOmit<ExtArgs> | null
+    /**
+     * The data needed to update a AdminAuditLog.
+     */
+    data: XOR<AdminAuditLogUpdateInput, AdminAuditLogUncheckedUpdateInput>
+    /**
+     * Choose, which AdminAuditLog to update.
+     */
+    where: AdminAuditLogWhereUniqueInput
+  }
+
+  /**
+   * AdminAuditLog updateMany
+   */
+  export type AdminAuditLogUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update AdminAuditLogs.
+     */
+    data: XOR<AdminAuditLogUpdateManyMutationInput, AdminAuditLogUncheckedUpdateManyInput>
+    /**
+     * Filter which AdminAuditLogs to update
+     */
+    where?: AdminAuditLogWhereInput
+    /**
+     * Limit how many AdminAuditLogs to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * AdminAuditLog updateManyAndReturn
+   */
+  export type AdminAuditLogUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AdminAuditLog
+     */
+    select?: AdminAuditLogSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the AdminAuditLog
+     */
+    omit?: AdminAuditLogOmit<ExtArgs> | null
+    /**
+     * The data used to update AdminAuditLogs.
+     */
+    data: XOR<AdminAuditLogUpdateManyMutationInput, AdminAuditLogUncheckedUpdateManyInput>
+    /**
+     * Filter which AdminAuditLogs to update
+     */
+    where?: AdminAuditLogWhereInput
+    /**
+     * Limit how many AdminAuditLogs to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * AdminAuditLog upsert
+   */
+  export type AdminAuditLogUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AdminAuditLog
+     */
+    select?: AdminAuditLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AdminAuditLog
+     */
+    omit?: AdminAuditLogOmit<ExtArgs> | null
+    /**
+     * The filter to search for the AdminAuditLog to update in case it exists.
+     */
+    where: AdminAuditLogWhereUniqueInput
+    /**
+     * In case the AdminAuditLog found by the `where` argument doesn't exist, create a new AdminAuditLog with this data.
+     */
+    create: XOR<AdminAuditLogCreateInput, AdminAuditLogUncheckedCreateInput>
+    /**
+     * In case the AdminAuditLog was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<AdminAuditLogUpdateInput, AdminAuditLogUncheckedUpdateInput>
+  }
+
+  /**
+   * AdminAuditLog delete
+   */
+  export type AdminAuditLogDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AdminAuditLog
+     */
+    select?: AdminAuditLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AdminAuditLog
+     */
+    omit?: AdminAuditLogOmit<ExtArgs> | null
+    /**
+     * Filter which AdminAuditLog to delete.
+     */
+    where: AdminAuditLogWhereUniqueInput
+  }
+
+  /**
+   * AdminAuditLog deleteMany
+   */
+  export type AdminAuditLogDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which AdminAuditLogs to delete
+     */
+    where?: AdminAuditLogWhereInput
+    /**
+     * Limit how many AdminAuditLogs to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * AdminAuditLog without action
+   */
+  export type AdminAuditLogDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AdminAuditLog
+     */
+    select?: AdminAuditLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AdminAuditLog
+     */
+    omit?: AdminAuditLogOmit<ExtArgs> | null
   }
 
 
@@ -32817,10 +36275,59 @@ export namespace Prisma {
     id: 'id',
     token: 'token',
     expiresAt: 'expiresAt',
-    createdAt: 'createdAt'
+    createdAt: 'createdAt',
+    userEmail: 'userEmail',
+    isMaster: 'isMaster'
   };
 
   export type AdminSessionScalarFieldEnum = (typeof AdminSessionScalarFieldEnum)[keyof typeof AdminSessionScalarFieldEnum]
+
+
+  export const AdminUserScalarFieldEnum: {
+    id: 'id',
+    email: 'email',
+    name: 'name',
+    roleKey: 'roleKey',
+    status: 'status',
+    inviteToken: 'inviteToken',
+    inviteExpiresAt: 'inviteExpiresAt',
+    invitedBy: 'invitedBy',
+    passwordHash: 'passwordHash',
+    passwordSalt: 'passwordSalt',
+    lastLoginAt: 'lastLoginAt',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type AdminUserScalarFieldEnum = (typeof AdminUserScalarFieldEnum)[keyof typeof AdminUserScalarFieldEnum]
+
+
+  export const AdminRoleScalarFieldEnum: {
+    key: 'key',
+    label: 'label',
+    description: 'description',
+    permissions: 'permissions',
+    isSystem: 'isSystem',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type AdminRoleScalarFieldEnum = (typeof AdminRoleScalarFieldEnum)[keyof typeof AdminRoleScalarFieldEnum]
+
+
+  export const AdminAuditLogScalarFieldEnum: {
+    id: 'id',
+    actorEmail: 'actorEmail',
+    actorRole: 'actorRole',
+    action: 'action',
+    targetType: 'targetType',
+    targetId: 'targetId',
+    meta: 'meta',
+    ip: 'ip',
+    createdAt: 'createdAt'
+  };
+
+  export type AdminAuditLogScalarFieldEnum = (typeof AdminAuditLogScalarFieldEnum)[keyof typeof AdminAuditLogScalarFieldEnum]
 
 
   export const SubscriberScalarFieldEnum: {
@@ -33737,6 +37244,8 @@ export namespace Prisma {
     token?: StringFilter<"AdminSession"> | string
     expiresAt?: DateTimeFilter<"AdminSession"> | Date | string
     createdAt?: DateTimeFilter<"AdminSession"> | Date | string
+    userEmail?: StringNullableFilter<"AdminSession"> | string | null
+    isMaster?: BoolFilter<"AdminSession"> | boolean
   }
 
   export type AdminSessionOrderByWithRelationInput = {
@@ -33744,6 +37253,8 @@ export namespace Prisma {
     token?: SortOrder
     expiresAt?: SortOrder
     createdAt?: SortOrder
+    userEmail?: SortOrderInput | SortOrder
+    isMaster?: SortOrder
   }
 
   export type AdminSessionWhereUniqueInput = Prisma.AtLeast<{
@@ -33754,6 +37265,8 @@ export namespace Prisma {
     NOT?: AdminSessionWhereInput | AdminSessionWhereInput[]
     expiresAt?: DateTimeFilter<"AdminSession"> | Date | string
     createdAt?: DateTimeFilter<"AdminSession"> | Date | string
+    userEmail?: StringNullableFilter<"AdminSession"> | string | null
+    isMaster?: BoolFilter<"AdminSession"> | boolean
   }, "id" | "token">
 
   export type AdminSessionOrderByWithAggregationInput = {
@@ -33761,6 +37274,8 @@ export namespace Prisma {
     token?: SortOrder
     expiresAt?: SortOrder
     createdAt?: SortOrder
+    userEmail?: SortOrderInput | SortOrder
+    isMaster?: SortOrder
     _count?: AdminSessionCountOrderByAggregateInput
     _max?: AdminSessionMaxOrderByAggregateInput
     _min?: AdminSessionMinOrderByAggregateInput
@@ -33774,6 +37289,234 @@ export namespace Prisma {
     token?: StringWithAggregatesFilter<"AdminSession"> | string
     expiresAt?: DateTimeWithAggregatesFilter<"AdminSession"> | Date | string
     createdAt?: DateTimeWithAggregatesFilter<"AdminSession"> | Date | string
+    userEmail?: StringNullableWithAggregatesFilter<"AdminSession"> | string | null
+    isMaster?: BoolWithAggregatesFilter<"AdminSession"> | boolean
+  }
+
+  export type AdminUserWhereInput = {
+    AND?: AdminUserWhereInput | AdminUserWhereInput[]
+    OR?: AdminUserWhereInput[]
+    NOT?: AdminUserWhereInput | AdminUserWhereInput[]
+    id?: StringFilter<"AdminUser"> | string
+    email?: StringFilter<"AdminUser"> | string
+    name?: StringNullableFilter<"AdminUser"> | string | null
+    roleKey?: StringFilter<"AdminUser"> | string
+    status?: StringFilter<"AdminUser"> | string
+    inviteToken?: StringNullableFilter<"AdminUser"> | string | null
+    inviteExpiresAt?: DateTimeNullableFilter<"AdminUser"> | Date | string | null
+    invitedBy?: StringNullableFilter<"AdminUser"> | string | null
+    passwordHash?: StringNullableFilter<"AdminUser"> | string | null
+    passwordSalt?: StringNullableFilter<"AdminUser"> | string | null
+    lastLoginAt?: DateTimeNullableFilter<"AdminUser"> | Date | string | null
+    createdAt?: DateTimeFilter<"AdminUser"> | Date | string
+    updatedAt?: DateTimeFilter<"AdminUser"> | Date | string
+  }
+
+  export type AdminUserOrderByWithRelationInput = {
+    id?: SortOrder
+    email?: SortOrder
+    name?: SortOrderInput | SortOrder
+    roleKey?: SortOrder
+    status?: SortOrder
+    inviteToken?: SortOrderInput | SortOrder
+    inviteExpiresAt?: SortOrderInput | SortOrder
+    invitedBy?: SortOrderInput | SortOrder
+    passwordHash?: SortOrderInput | SortOrder
+    passwordSalt?: SortOrderInput | SortOrder
+    lastLoginAt?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type AdminUserWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    email?: string
+    AND?: AdminUserWhereInput | AdminUserWhereInput[]
+    OR?: AdminUserWhereInput[]
+    NOT?: AdminUserWhereInput | AdminUserWhereInput[]
+    name?: StringNullableFilter<"AdminUser"> | string | null
+    roleKey?: StringFilter<"AdminUser"> | string
+    status?: StringFilter<"AdminUser"> | string
+    inviteToken?: StringNullableFilter<"AdminUser"> | string | null
+    inviteExpiresAt?: DateTimeNullableFilter<"AdminUser"> | Date | string | null
+    invitedBy?: StringNullableFilter<"AdminUser"> | string | null
+    passwordHash?: StringNullableFilter<"AdminUser"> | string | null
+    passwordSalt?: StringNullableFilter<"AdminUser"> | string | null
+    lastLoginAt?: DateTimeNullableFilter<"AdminUser"> | Date | string | null
+    createdAt?: DateTimeFilter<"AdminUser"> | Date | string
+    updatedAt?: DateTimeFilter<"AdminUser"> | Date | string
+  }, "id" | "email">
+
+  export type AdminUserOrderByWithAggregationInput = {
+    id?: SortOrder
+    email?: SortOrder
+    name?: SortOrderInput | SortOrder
+    roleKey?: SortOrder
+    status?: SortOrder
+    inviteToken?: SortOrderInput | SortOrder
+    inviteExpiresAt?: SortOrderInput | SortOrder
+    invitedBy?: SortOrderInput | SortOrder
+    passwordHash?: SortOrderInput | SortOrder
+    passwordSalt?: SortOrderInput | SortOrder
+    lastLoginAt?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: AdminUserCountOrderByAggregateInput
+    _max?: AdminUserMaxOrderByAggregateInput
+    _min?: AdminUserMinOrderByAggregateInput
+  }
+
+  export type AdminUserScalarWhereWithAggregatesInput = {
+    AND?: AdminUserScalarWhereWithAggregatesInput | AdminUserScalarWhereWithAggregatesInput[]
+    OR?: AdminUserScalarWhereWithAggregatesInput[]
+    NOT?: AdminUserScalarWhereWithAggregatesInput | AdminUserScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"AdminUser"> | string
+    email?: StringWithAggregatesFilter<"AdminUser"> | string
+    name?: StringNullableWithAggregatesFilter<"AdminUser"> | string | null
+    roleKey?: StringWithAggregatesFilter<"AdminUser"> | string
+    status?: StringWithAggregatesFilter<"AdminUser"> | string
+    inviteToken?: StringNullableWithAggregatesFilter<"AdminUser"> | string | null
+    inviteExpiresAt?: DateTimeNullableWithAggregatesFilter<"AdminUser"> | Date | string | null
+    invitedBy?: StringNullableWithAggregatesFilter<"AdminUser"> | string | null
+    passwordHash?: StringNullableWithAggregatesFilter<"AdminUser"> | string | null
+    passwordSalt?: StringNullableWithAggregatesFilter<"AdminUser"> | string | null
+    lastLoginAt?: DateTimeNullableWithAggregatesFilter<"AdminUser"> | Date | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"AdminUser"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"AdminUser"> | Date | string
+  }
+
+  export type AdminRoleWhereInput = {
+    AND?: AdminRoleWhereInput | AdminRoleWhereInput[]
+    OR?: AdminRoleWhereInput[]
+    NOT?: AdminRoleWhereInput | AdminRoleWhereInput[]
+    key?: StringFilter<"AdminRole"> | string
+    label?: StringFilter<"AdminRole"> | string
+    description?: StringFilter<"AdminRole"> | string
+    permissions?: JsonFilter<"AdminRole">
+    isSystem?: BoolFilter<"AdminRole"> | boolean
+    createdAt?: DateTimeFilter<"AdminRole"> | Date | string
+    updatedAt?: DateTimeFilter<"AdminRole"> | Date | string
+  }
+
+  export type AdminRoleOrderByWithRelationInput = {
+    key?: SortOrder
+    label?: SortOrder
+    description?: SortOrder
+    permissions?: SortOrder
+    isSystem?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type AdminRoleWhereUniqueInput = Prisma.AtLeast<{
+    key?: string
+    AND?: AdminRoleWhereInput | AdminRoleWhereInput[]
+    OR?: AdminRoleWhereInput[]
+    NOT?: AdminRoleWhereInput | AdminRoleWhereInput[]
+    label?: StringFilter<"AdminRole"> | string
+    description?: StringFilter<"AdminRole"> | string
+    permissions?: JsonFilter<"AdminRole">
+    isSystem?: BoolFilter<"AdminRole"> | boolean
+    createdAt?: DateTimeFilter<"AdminRole"> | Date | string
+    updatedAt?: DateTimeFilter<"AdminRole"> | Date | string
+  }, "key">
+
+  export type AdminRoleOrderByWithAggregationInput = {
+    key?: SortOrder
+    label?: SortOrder
+    description?: SortOrder
+    permissions?: SortOrder
+    isSystem?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: AdminRoleCountOrderByAggregateInput
+    _max?: AdminRoleMaxOrderByAggregateInput
+    _min?: AdminRoleMinOrderByAggregateInput
+  }
+
+  export type AdminRoleScalarWhereWithAggregatesInput = {
+    AND?: AdminRoleScalarWhereWithAggregatesInput | AdminRoleScalarWhereWithAggregatesInput[]
+    OR?: AdminRoleScalarWhereWithAggregatesInput[]
+    NOT?: AdminRoleScalarWhereWithAggregatesInput | AdminRoleScalarWhereWithAggregatesInput[]
+    key?: StringWithAggregatesFilter<"AdminRole"> | string
+    label?: StringWithAggregatesFilter<"AdminRole"> | string
+    description?: StringWithAggregatesFilter<"AdminRole"> | string
+    permissions?: JsonWithAggregatesFilter<"AdminRole">
+    isSystem?: BoolWithAggregatesFilter<"AdminRole"> | boolean
+    createdAt?: DateTimeWithAggregatesFilter<"AdminRole"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"AdminRole"> | Date | string
+  }
+
+  export type AdminAuditLogWhereInput = {
+    AND?: AdminAuditLogWhereInput | AdminAuditLogWhereInput[]
+    OR?: AdminAuditLogWhereInput[]
+    NOT?: AdminAuditLogWhereInput | AdminAuditLogWhereInput[]
+    id?: StringFilter<"AdminAuditLog"> | string
+    actorEmail?: StringFilter<"AdminAuditLog"> | string
+    actorRole?: StringNullableFilter<"AdminAuditLog"> | string | null
+    action?: StringFilter<"AdminAuditLog"> | string
+    targetType?: StringNullableFilter<"AdminAuditLog"> | string | null
+    targetId?: StringNullableFilter<"AdminAuditLog"> | string | null
+    meta?: JsonNullableFilter<"AdminAuditLog">
+    ip?: StringNullableFilter<"AdminAuditLog"> | string | null
+    createdAt?: DateTimeFilter<"AdminAuditLog"> | Date | string
+  }
+
+  export type AdminAuditLogOrderByWithRelationInput = {
+    id?: SortOrder
+    actorEmail?: SortOrder
+    actorRole?: SortOrderInput | SortOrder
+    action?: SortOrder
+    targetType?: SortOrderInput | SortOrder
+    targetId?: SortOrderInput | SortOrder
+    meta?: SortOrderInput | SortOrder
+    ip?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type AdminAuditLogWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: AdminAuditLogWhereInput | AdminAuditLogWhereInput[]
+    OR?: AdminAuditLogWhereInput[]
+    NOT?: AdminAuditLogWhereInput | AdminAuditLogWhereInput[]
+    actorEmail?: StringFilter<"AdminAuditLog"> | string
+    actorRole?: StringNullableFilter<"AdminAuditLog"> | string | null
+    action?: StringFilter<"AdminAuditLog"> | string
+    targetType?: StringNullableFilter<"AdminAuditLog"> | string | null
+    targetId?: StringNullableFilter<"AdminAuditLog"> | string | null
+    meta?: JsonNullableFilter<"AdminAuditLog">
+    ip?: StringNullableFilter<"AdminAuditLog"> | string | null
+    createdAt?: DateTimeFilter<"AdminAuditLog"> | Date | string
+  }, "id">
+
+  export type AdminAuditLogOrderByWithAggregationInput = {
+    id?: SortOrder
+    actorEmail?: SortOrder
+    actorRole?: SortOrderInput | SortOrder
+    action?: SortOrder
+    targetType?: SortOrderInput | SortOrder
+    targetId?: SortOrderInput | SortOrder
+    meta?: SortOrderInput | SortOrder
+    ip?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    _count?: AdminAuditLogCountOrderByAggregateInput
+    _max?: AdminAuditLogMaxOrderByAggregateInput
+    _min?: AdminAuditLogMinOrderByAggregateInput
+  }
+
+  export type AdminAuditLogScalarWhereWithAggregatesInput = {
+    AND?: AdminAuditLogScalarWhereWithAggregatesInput | AdminAuditLogScalarWhereWithAggregatesInput[]
+    OR?: AdminAuditLogScalarWhereWithAggregatesInput[]
+    NOT?: AdminAuditLogScalarWhereWithAggregatesInput | AdminAuditLogScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"AdminAuditLog"> | string
+    actorEmail?: StringWithAggregatesFilter<"AdminAuditLog"> | string
+    actorRole?: StringNullableWithAggregatesFilter<"AdminAuditLog"> | string | null
+    action?: StringWithAggregatesFilter<"AdminAuditLog"> | string
+    targetType?: StringNullableWithAggregatesFilter<"AdminAuditLog"> | string | null
+    targetId?: StringNullableWithAggregatesFilter<"AdminAuditLog"> | string | null
+    meta?: JsonNullableWithAggregatesFilter<"AdminAuditLog">
+    ip?: StringNullableWithAggregatesFilter<"AdminAuditLog"> | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"AdminAuditLog"> | Date | string
   }
 
   export type SubscriberWhereInput = {
@@ -36395,6 +40138,8 @@ export namespace Prisma {
     token: string
     expiresAt: Date | string
     createdAt?: Date | string
+    userEmail?: string | null
+    isMaster?: boolean
   }
 
   export type AdminSessionUncheckedCreateInput = {
@@ -36402,6 +40147,8 @@ export namespace Prisma {
     token: string
     expiresAt: Date | string
     createdAt?: Date | string
+    userEmail?: string | null
+    isMaster?: boolean
   }
 
   export type AdminSessionUpdateInput = {
@@ -36409,6 +40156,8 @@ export namespace Prisma {
     token?: StringFieldUpdateOperationsInput | string
     expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    userEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    isMaster?: BoolFieldUpdateOperationsInput | boolean
   }
 
   export type AdminSessionUncheckedUpdateInput = {
@@ -36416,6 +40165,8 @@ export namespace Prisma {
     token?: StringFieldUpdateOperationsInput | string
     expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    userEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    isMaster?: BoolFieldUpdateOperationsInput | boolean
   }
 
   export type AdminSessionCreateManyInput = {
@@ -36423,6 +40174,8 @@ export namespace Prisma {
     token: string
     expiresAt: Date | string
     createdAt?: Date | string
+    userEmail?: string | null
+    isMaster?: boolean
   }
 
   export type AdminSessionUpdateManyMutationInput = {
@@ -36430,12 +40183,282 @@ export namespace Prisma {
     token?: StringFieldUpdateOperationsInput | string
     expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    userEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    isMaster?: BoolFieldUpdateOperationsInput | boolean
   }
 
   export type AdminSessionUncheckedUpdateManyInput = {
     id?: StringFieldUpdateOperationsInput | string
     token?: StringFieldUpdateOperationsInput | string
     expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    userEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    isMaster?: BoolFieldUpdateOperationsInput | boolean
+  }
+
+  export type AdminUserCreateInput = {
+    id?: string
+    email: string
+    name?: string | null
+    roleKey?: string
+    status?: string
+    inviteToken?: string | null
+    inviteExpiresAt?: Date | string | null
+    invitedBy?: string | null
+    passwordHash?: string | null
+    passwordSalt?: string | null
+    lastLoginAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type AdminUserUncheckedCreateInput = {
+    id?: string
+    email: string
+    name?: string | null
+    roleKey?: string
+    status?: string
+    inviteToken?: string | null
+    inviteExpiresAt?: Date | string | null
+    invitedBy?: string | null
+    passwordHash?: string | null
+    passwordSalt?: string | null
+    lastLoginAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type AdminUserUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    roleKey?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    inviteToken?: NullableStringFieldUpdateOperationsInput | string | null
+    inviteExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    invitedBy?: NullableStringFieldUpdateOperationsInput | string | null
+    passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
+    passwordSalt?: NullableStringFieldUpdateOperationsInput | string | null
+    lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AdminUserUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    roleKey?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    inviteToken?: NullableStringFieldUpdateOperationsInput | string | null
+    inviteExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    invitedBy?: NullableStringFieldUpdateOperationsInput | string | null
+    passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
+    passwordSalt?: NullableStringFieldUpdateOperationsInput | string | null
+    lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AdminUserCreateManyInput = {
+    id?: string
+    email: string
+    name?: string | null
+    roleKey?: string
+    status?: string
+    inviteToken?: string | null
+    inviteExpiresAt?: Date | string | null
+    invitedBy?: string | null
+    passwordHash?: string | null
+    passwordSalt?: string | null
+    lastLoginAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type AdminUserUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    roleKey?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    inviteToken?: NullableStringFieldUpdateOperationsInput | string | null
+    inviteExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    invitedBy?: NullableStringFieldUpdateOperationsInput | string | null
+    passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
+    passwordSalt?: NullableStringFieldUpdateOperationsInput | string | null
+    lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AdminUserUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    roleKey?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    inviteToken?: NullableStringFieldUpdateOperationsInput | string | null
+    inviteExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    invitedBy?: NullableStringFieldUpdateOperationsInput | string | null
+    passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
+    passwordSalt?: NullableStringFieldUpdateOperationsInput | string | null
+    lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AdminRoleCreateInput = {
+    key: string
+    label: string
+    description?: string
+    permissions: JsonNullValueInput | InputJsonValue
+    isSystem?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type AdminRoleUncheckedCreateInput = {
+    key: string
+    label: string
+    description?: string
+    permissions: JsonNullValueInput | InputJsonValue
+    isSystem?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type AdminRoleUpdateInput = {
+    key?: StringFieldUpdateOperationsInput | string
+    label?: StringFieldUpdateOperationsInput | string
+    description?: StringFieldUpdateOperationsInput | string
+    permissions?: JsonNullValueInput | InputJsonValue
+    isSystem?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AdminRoleUncheckedUpdateInput = {
+    key?: StringFieldUpdateOperationsInput | string
+    label?: StringFieldUpdateOperationsInput | string
+    description?: StringFieldUpdateOperationsInput | string
+    permissions?: JsonNullValueInput | InputJsonValue
+    isSystem?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AdminRoleCreateManyInput = {
+    key: string
+    label: string
+    description?: string
+    permissions: JsonNullValueInput | InputJsonValue
+    isSystem?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type AdminRoleUpdateManyMutationInput = {
+    key?: StringFieldUpdateOperationsInput | string
+    label?: StringFieldUpdateOperationsInput | string
+    description?: StringFieldUpdateOperationsInput | string
+    permissions?: JsonNullValueInput | InputJsonValue
+    isSystem?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AdminRoleUncheckedUpdateManyInput = {
+    key?: StringFieldUpdateOperationsInput | string
+    label?: StringFieldUpdateOperationsInput | string
+    description?: StringFieldUpdateOperationsInput | string
+    permissions?: JsonNullValueInput | InputJsonValue
+    isSystem?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AdminAuditLogCreateInput = {
+    id?: string
+    actorEmail: string
+    actorRole?: string | null
+    action: string
+    targetType?: string | null
+    targetId?: string | null
+    meta?: NullableJsonNullValueInput | InputJsonValue
+    ip?: string | null
+    createdAt?: Date | string
+  }
+
+  export type AdminAuditLogUncheckedCreateInput = {
+    id?: string
+    actorEmail: string
+    actorRole?: string | null
+    action: string
+    targetType?: string | null
+    targetId?: string | null
+    meta?: NullableJsonNullValueInput | InputJsonValue
+    ip?: string | null
+    createdAt?: Date | string
+  }
+
+  export type AdminAuditLogUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    actorEmail?: StringFieldUpdateOperationsInput | string
+    actorRole?: NullableStringFieldUpdateOperationsInput | string | null
+    action?: StringFieldUpdateOperationsInput | string
+    targetType?: NullableStringFieldUpdateOperationsInput | string | null
+    targetId?: NullableStringFieldUpdateOperationsInput | string | null
+    meta?: NullableJsonNullValueInput | InputJsonValue
+    ip?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AdminAuditLogUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    actorEmail?: StringFieldUpdateOperationsInput | string
+    actorRole?: NullableStringFieldUpdateOperationsInput | string | null
+    action?: StringFieldUpdateOperationsInput | string
+    targetType?: NullableStringFieldUpdateOperationsInput | string | null
+    targetId?: NullableStringFieldUpdateOperationsInput | string | null
+    meta?: NullableJsonNullValueInput | InputJsonValue
+    ip?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AdminAuditLogCreateManyInput = {
+    id?: string
+    actorEmail: string
+    actorRole?: string | null
+    action: string
+    targetType?: string | null
+    targetId?: string | null
+    meta?: NullableJsonNullValueInput | InputJsonValue
+    ip?: string | null
+    createdAt?: Date | string
+  }
+
+  export type AdminAuditLogUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    actorEmail?: StringFieldUpdateOperationsInput | string
+    actorRole?: NullableStringFieldUpdateOperationsInput | string | null
+    action?: StringFieldUpdateOperationsInput | string
+    targetType?: NullableStringFieldUpdateOperationsInput | string | null
+    targetId?: NullableStringFieldUpdateOperationsInput | string | null
+    meta?: NullableJsonNullValueInput | InputJsonValue
+    ip?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AdminAuditLogUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    actorEmail?: StringFieldUpdateOperationsInput | string
+    actorRole?: NullableStringFieldUpdateOperationsInput | string | null
+    action?: StringFieldUpdateOperationsInput | string
+    targetType?: NullableStringFieldUpdateOperationsInput | string | null
+    targetId?: NullableStringFieldUpdateOperationsInput | string | null
+    meta?: NullableJsonNullValueInput | InputJsonValue
+    ip?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -39522,6 +43545,8 @@ export namespace Prisma {
     token?: SortOrder
     expiresAt?: SortOrder
     createdAt?: SortOrder
+    userEmail?: SortOrder
+    isMaster?: SortOrder
   }
 
   export type AdminSessionMaxOrderByAggregateInput = {
@@ -39529,6 +43554,8 @@ export namespace Prisma {
     token?: SortOrder
     expiresAt?: SortOrder
     createdAt?: SortOrder
+    userEmail?: SortOrder
+    isMaster?: SortOrder
   }
 
   export type AdminSessionMinOrderByAggregateInput = {
@@ -39536,6 +43563,167 @@ export namespace Prisma {
     token?: SortOrder
     expiresAt?: SortOrder
     createdAt?: SortOrder
+    userEmail?: SortOrder
+    isMaster?: SortOrder
+  }
+
+  export type AdminUserCountOrderByAggregateInput = {
+    id?: SortOrder
+    email?: SortOrder
+    name?: SortOrder
+    roleKey?: SortOrder
+    status?: SortOrder
+    inviteToken?: SortOrder
+    inviteExpiresAt?: SortOrder
+    invitedBy?: SortOrder
+    passwordHash?: SortOrder
+    passwordSalt?: SortOrder
+    lastLoginAt?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type AdminUserMaxOrderByAggregateInput = {
+    id?: SortOrder
+    email?: SortOrder
+    name?: SortOrder
+    roleKey?: SortOrder
+    status?: SortOrder
+    inviteToken?: SortOrder
+    inviteExpiresAt?: SortOrder
+    invitedBy?: SortOrder
+    passwordHash?: SortOrder
+    passwordSalt?: SortOrder
+    lastLoginAt?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type AdminUserMinOrderByAggregateInput = {
+    id?: SortOrder
+    email?: SortOrder
+    name?: SortOrder
+    roleKey?: SortOrder
+    status?: SortOrder
+    inviteToken?: SortOrder
+    inviteExpiresAt?: SortOrder
+    invitedBy?: SortOrder
+    passwordHash?: SortOrder
+    passwordSalt?: SortOrder
+    lastLoginAt?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type AdminRoleCountOrderByAggregateInput = {
+    key?: SortOrder
+    label?: SortOrder
+    description?: SortOrder
+    permissions?: SortOrder
+    isSystem?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type AdminRoleMaxOrderByAggregateInput = {
+    key?: SortOrder
+    label?: SortOrder
+    description?: SortOrder
+    isSystem?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type AdminRoleMinOrderByAggregateInput = {
+    key?: SortOrder
+    label?: SortOrder
+    description?: SortOrder
+    isSystem?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+  export type JsonNullableFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<JsonNullableFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonNullableFilterBase<$PrismaModel>>, 'path'>>,
+        Required<JsonNullableFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<JsonNullableFilterBase<$PrismaModel>>, 'path'>>
+
+  export type JsonNullableFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+  }
+
+  export type AdminAuditLogCountOrderByAggregateInput = {
+    id?: SortOrder
+    actorEmail?: SortOrder
+    actorRole?: SortOrder
+    action?: SortOrder
+    targetType?: SortOrder
+    targetId?: SortOrder
+    meta?: SortOrder
+    ip?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type AdminAuditLogMaxOrderByAggregateInput = {
+    id?: SortOrder
+    actorEmail?: SortOrder
+    actorRole?: SortOrder
+    action?: SortOrder
+    targetType?: SortOrder
+    targetId?: SortOrder
+    ip?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type AdminAuditLogMinOrderByAggregateInput = {
+    id?: SortOrder
+    actorEmail?: SortOrder
+    actorRole?: SortOrder
+    action?: SortOrder
+    targetType?: SortOrder
+    targetId?: SortOrder
+    ip?: SortOrder
+    createdAt?: SortOrder
+  }
+  export type JsonNullableWithAggregatesFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, 'path'>>,
+        Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, 'path'>>
+
+  export type JsonNullableWithAggregatesFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedJsonNullableFilter<$PrismaModel>
+    _max?: NestedJsonNullableFilter<$PrismaModel>
   }
 
   export type SubscriberCountOrderByAggregateInput = {
@@ -40099,29 +44287,6 @@ export namespace Prisma {
   export type ReceivedEmailSumOrderByAggregateInput = {
     leadScore?: SortOrder
   }
-  export type JsonNullableFilter<$PrismaModel = never> =
-    | PatchUndefined<
-        Either<Required<JsonNullableFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonNullableFilterBase<$PrismaModel>>, 'path'>>,
-        Required<JsonNullableFilterBase<$PrismaModel>>
-      >
-    | OptionalFlat<Omit<Required<JsonNullableFilterBase<$PrismaModel>>, 'path'>>
-
-  export type JsonNullableFilterBase<$PrismaModel = never> = {
-    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
-    path?: string[]
-    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
-    string_contains?: string | StringFieldRefInput<$PrismaModel>
-    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
-    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
-    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
-  }
 
   export type CustomerNullableScalarRelationFilter = {
     is?: CustomerWhereInput | null
@@ -40256,32 +44421,6 @@ export namespace Prisma {
 
   export type InvoiceSumOrderByAggregateInput = {
     amountKobo?: SortOrder
-  }
-  export type JsonNullableWithAggregatesFilter<$PrismaModel = never> =
-    | PatchUndefined<
-        Either<Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, 'path'>>,
-        Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>
-      >
-    | OptionalFlat<Omit<Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, 'path'>>
-
-  export type JsonNullableWithAggregatesFilterBase<$PrismaModel = never> = {
-    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
-    path?: string[]
-    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
-    string_contains?: string | StringFieldRefInput<$PrismaModel>
-    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
-    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
-    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedJsonNullableFilter<$PrismaModel>
-    _max?: NestedJsonNullableFilter<$PrismaModel>
   }
 
   export type InvoiceNullableScalarRelationFilter = {
@@ -41727,6 +45866,29 @@ export namespace Prisma {
     _min?: NestedDateTimeNullableFilter<$PrismaModel>
     _max?: NestedDateTimeNullableFilter<$PrismaModel>
   }
+  export type NestedJsonNullableFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<NestedJsonNullableFilterBase<$PrismaModel>>, Exclude<keyof Required<NestedJsonNullableFilterBase<$PrismaModel>>, 'path'>>,
+        Required<NestedJsonNullableFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<NestedJsonNullableFilterBase<$PrismaModel>>, 'path'>>
+
+  export type NestedJsonNullableFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+  }
 
   export type NestedIntWithAggregatesFilter<$PrismaModel = never> = {
     equals?: number | IntFieldRefInput<$PrismaModel>
@@ -41753,29 +45915,6 @@ export namespace Prisma {
     gt?: number | FloatFieldRefInput<$PrismaModel>
     gte?: number | FloatFieldRefInput<$PrismaModel>
     not?: NestedFloatFilter<$PrismaModel> | number
-  }
-  export type NestedJsonNullableFilter<$PrismaModel = never> =
-    | PatchUndefined<
-        Either<Required<NestedJsonNullableFilterBase<$PrismaModel>>, Exclude<keyof Required<NestedJsonNullableFilterBase<$PrismaModel>>, 'path'>>,
-        Required<NestedJsonNullableFilterBase<$PrismaModel>>
-      >
-    | OptionalFlat<Omit<Required<NestedJsonNullableFilterBase<$PrismaModel>>, 'path'>>
-
-  export type NestedJsonNullableFilterBase<$PrismaModel = never> = {
-    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
-    path?: string[]
-    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
-    string_contains?: string | StringFieldRefInput<$PrismaModel>
-    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
-    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
-    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
   }
 
   export type NestedDecimalNullableFilter<$PrismaModel = never> = {

@@ -1532,3 +1532,113 @@ export async function notifyAdDecision(
     console.error("[notify] ad-decision email failed:", err);
   }
 }
+
+/* ─────────────────────────────────────────────────────────────────
+   BATCH 7 (§44) — admin invitation emails.
+   notifyAdminInvite → to the INVITEE (accept link + role summary).
+   notifyAdminInviteAccepted → operational alert to the admin team.
+   ───────────────────────────────────────────────────────────────── */
+
+export async function notifyAdminInvite(p: {
+  to: string;
+  roleLabel: string;
+  roleDescription?: string;
+  invitedBy: string;
+  acceptUrl: string;
+}): Promise<void> {
+  if (!enabled) return;
+
+  const subject = "You're invited to the Okomba Analytics admin portal";
+  const bodyText = [
+    "Hello,",
+    "",
+    `${p.invitedBy} has invited you to join the Okomba Analytics team as a ${p.roleLabel}.`,
+    p.roleDescription ? `Role summary: ${p.roleDescription}` : null,
+    "",
+    "Accept the invitation and set your password:",
+    p.acceptUrl,
+    "",
+    "The link expires in 7 days. If you weren't expecting this email you can ignore it.",
+  ]
+    .filter((l): l is string => l !== null)
+    .join("\n");
+
+  const html = brandedEmailHtml({
+    title: subject,
+    preheader: `You've been invited as a ${p.roleLabel}`,
+    blocks: [
+      { kind: "text", text: `Hello,` },
+      { kind: "text", text: `${p.invitedBy} has invited you to join the Okomba Analytics team as a **${p.roleLabel}**.` },
+      ...(p.roleDescription ? [{ kind: "text", text: p.roleDescription } as EmailBlock] : []),
+    ],
+    ctaText: "Accept invitation",
+    ctaUrl: p.acceptUrl,
+    footerNote: "Invitation email from the Okomba Analytics platform. Links expire after 7 days.",
+  });
+
+  let logId: string | null = null;
+  try {
+    const created = await db.emailLog.create({
+      data: { type: "admin.invite", recipientEmail: p.to, subject, status: "sent", bodyText, bodyHtml: html },
+      select: { id: true },
+    });
+    logId = created.id;
+  } catch (err) {
+    console.error("[notify:admin-invite] log persist failed:", err);
+  }
+
+  try {
+    const result = await deliverWithFailover({
+      to: p.to,
+      subject,
+      bodyHtml: html,
+      bodyText,
+      attachments: [],
+      type: "admin.invite",
+    });
+    if (logId) {
+      try {
+        await db.emailLog.updateMany({
+          where: { id: logId },
+          data: {
+            provider: result.provider,
+            ...(result.ok ? {} : { status: "failed", error: result.error ?? "delivery failed" }),
+          },
+        });
+      } catch {}
+    }
+    if (!result.ok) {
+      console.error("[notify:admin-invite] delivery failed:", result.error);
+    }
+  } catch (err) {
+    console.error("[notify:admin-invite] delivery threw:", err instanceof Error ? err.message : err);
+  }
+}
+
+export async function notifyAdminInviteAccepted(p: {
+  name: string | null;
+  email: string;
+  roleLabel: string;
+}): Promise<void> {
+  try {
+    await sendAdminAlertEmail({
+      key: `admin.accepted.${p.email}`,
+      subject: `Admin activated — ${p.name ?? p.email}`,
+      bodyText: [
+        "A new administrator has activated their account.",
+        "",
+        `Name: ${p.name ?? "(not provided)"}`,
+        `Email: ${p.email}`,
+        `Role: ${p.roleLabel}`,
+      ].join("\n"),
+      blocks: [
+        { kind: "text", text: `A new administrator has activated their account.` },
+        { kind: "text", text: `${p.name ?? p.email} — ${p.roleLabel} (${p.email}) is now able to sign in.` },
+      ],
+      ctaText: "Manage admins",
+      ctaUrl: `${BASE_URL}/#admin`,
+    });
+  } catch (err) {
+    console.error("[notify:admin-accepted] alert failed:", err);
+  }
+}

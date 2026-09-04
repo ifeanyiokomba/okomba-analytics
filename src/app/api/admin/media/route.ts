@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { isAdminAuthorized } from "@/lib/admin-auth";
+import { authorizeAdmin, authorizeAdminAny } from "@/lib/admin-auth";
 import { saveMediaUpload } from "@/lib/media";
 
 export const runtime = "nodejs";
@@ -11,8 +11,9 @@ export const runtime = "nodejs";
 /* ------------------------------------------------------------------ */
 export async function POST(req: Request) {
   try {
-    if (!(await isAdminAuthorized())) {
-      return NextResponse.json({ ok: false }, { status: 401 });
+    const guard = await authorizeAdminAny(req, ["manage_posts", "manage_ads"]);
+    if (!guard.ok) {
+      return NextResponse.json({ ok: false, error: guard.error }, { status: guard.status });
     }
 
     const contentType = req.headers.get("content-type") ?? "";

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { Prisma } from "@/generated/prisma";
 import { z } from "zod";
 import { db } from "@/lib/db";
-import { isAdminAuthorized } from "@/lib/admin-auth";
+import { authorizeAdmin } from "@/lib/admin-auth";
 import { slugify } from "@/lib/posts";
 
 export const runtime = "nodejs";
@@ -44,8 +44,9 @@ const patchSchema = createSchema.partial().extend({
 /* GET /api/admin/posts/authors — list with post counts */
 export async function GET() {
   try {
-    if (!(await isAdminAuthorized())) {
-      return NextResponse.json({ ok: false }, { status: 401 });
+    const guard = await authorizeAdmin(undefined, "manage_posts");
+    if (!guard.ok) {
+      return NextResponse.json({ ok: false, error: guard.error }, { status: guard.status });
     }
     const authors = await db.postAuthor.findMany({
       orderBy: [{ active: "desc" }, { createdAt: "asc" }],
@@ -74,8 +75,9 @@ export async function GET() {
 /* POST /api/admin/posts/authors — create */
 export async function POST(req: Request) {
   try {
-    if (!(await isAdminAuthorized())) {
-      return NextResponse.json({ ok: false }, { status: 401 });
+    const guard = await authorizeAdmin(undefined, "manage_posts");
+    if (!guard.ok) {
+      return NextResponse.json({ ok: false, error: guard.error }, { status: guard.status });
     }
     let body: unknown;
     try {
@@ -109,8 +111,9 @@ export async function POST(req: Request) {
 /* PATCH /api/admin/posts/authors — update */
 export async function PATCH(req: Request) {
   try {
-    if (!(await isAdminAuthorized())) {
-      return NextResponse.json({ ok: false }, { status: 401 });
+    const guard = await authorizeAdmin(undefined, "manage_posts");
+    if (!guard.ok) {
+      return NextResponse.json({ ok: false, error: guard.error }, { status: guard.status });
     }
     let body: unknown;
     try {
@@ -158,8 +161,9 @@ export async function PATCH(req: Request) {
    legacy author string; authorId is cleared via FK onDelete SetNull) */
 export async function DELETE(req: Request) {
   try {
-    if (!(await isAdminAuthorized())) {
-      return NextResponse.json({ ok: false }, { status: 401 });
+    const guard = await authorizeAdmin(undefined, "manage_posts");
+    if (!guard.ok) {
+      return NextResponse.json({ ok: false, error: guard.error }, { status: guard.status });
     }
     const id = new URL(req.url).searchParams.get("id");
     if (!id) {

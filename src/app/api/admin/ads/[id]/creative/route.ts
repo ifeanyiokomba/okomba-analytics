@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { isAdminAuthorized } from "@/lib/admin-auth";
+import { authorizeAdmin } from "@/lib/admin-auth";
 import { saveMediaUpload } from "@/lib/media";
 
 export const runtime = "nodejs";
@@ -13,8 +13,9 @@ export const runtime = "nodejs";
 /* ------------------------------------------------------------------ */
 export async function POST(req: Request, ctx: { params: Promise<{ id: string }> }) {
   try {
-    if (!(await isAdminAuthorized(req))) {
-      return NextResponse.json({ ok: false }, { status: 401 });
+    const guard = await authorizeAdmin(req, "manage_ads");
+    if (!guard.ok) {
+      return NextResponse.json({ ok: false, error: guard.error }, { status: guard.status });
     }
     const { id } = await ctx.params;
 

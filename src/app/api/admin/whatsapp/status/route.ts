@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { isAdminAuthorized } from "@/lib/admin-auth";
+import { authorizeAdmin } from "@/lib/admin-auth";
 import { getWhatsAppStatus } from "@/lib/whatsapp";
 
 export const runtime = "nodejs";
@@ -10,8 +10,9 @@ export const runtime = "nodejs";
 
 export async function GET() {
   try {
-    if (!(await isAdminAuthorized())) {
-      return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
+    const guard = await authorizeAdmin(undefined, "manage_settings");
+    if (!guard.ok) {
+      return NextResponse.json({ ok: false, error: guard.error }, { status: guard.status });
     }
     const status = await getWhatsAppStatus();
     return NextResponse.json({ ok: true, status });

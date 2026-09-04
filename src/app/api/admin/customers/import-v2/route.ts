@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { isAdminAuthorized } from "@/lib/admin-auth";
+import { authorizeAdmin } from "@/lib/admin-auth";
 import { db } from "@/lib/db";
 import { detectImportFormat, IMPORT_FORMATS, type ImportFormat } from "@/lib/import/extract";
 import { runUploadPipeline, startImportJob } from "@/lib/import/job-runner";
@@ -24,8 +24,9 @@ const MAX_PREVIEW_ROWS_RETURNED = 200;
 
 export async function POST(req: Request) {
   try {
-    if (!(await isAdminAuthorized(req))) {
-      return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
+    const guard = await authorizeAdmin(req, "import_customers");
+    if (!guard.ok) {
+      return NextResponse.json({ ok: false, error: guard.error }, { status: guard.status });
     }
 
     const contentType = req.headers.get("content-type") ?? "";
@@ -142,8 +143,9 @@ const PREVIEW_FIELDS = [
 
 export async function GET(req: Request) {
   try {
-    if (!(await isAdminAuthorized(req))) {
-      return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
+    const guard = await authorizeAdmin(req, "import_customers");
+    if (!guard.ok) {
+      return NextResponse.json({ ok: false, error: guard.error }, { status: guard.status });
     }
     const { searchParams } = new URL(req.url);
 

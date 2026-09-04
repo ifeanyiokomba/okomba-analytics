@@ -72,7 +72,9 @@ export default function Home() {
       if (h.startsWith("#/portal/")) {
         const token = h.slice("#/portal/".length).split(/[?&]/)[0] || "";
         setRoute(token ? { portal: token } : "home");
-      } else if (h === "#/admin") {
+      } else if (h === "#/admin" || h.startsWith("#/invite/")) {
+        // §44 — invite acceptance links (/#/invite/<token>) render the
+        // admin portal in activation mode (see portal.tsx).
         setRoute("admin");
       } else {
         setRoute("home");

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { isAdminAuthorized } from "@/lib/admin-auth";
+import { authorizeAdmin } from "@/lib/admin-auth";
 import {
   DEFAULT_PROVIDER_DISPLAY_NAMES,
   ALL_PROVIDER_SLOTS,
@@ -25,8 +25,9 @@ const VALID_PROVIDERS = new Set<string>(ALL_PROVIDER_SLOTS);
 
 export async function GET() {
   try {
-    if (!(await isAdminAuthorized())) {
-      return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
+    const guard = await authorizeAdmin(undefined, "manage_settings");
+    if (!guard.ok) {
+      return NextResponse.json({ ok: false, error: guard.error }, { status: guard.status });
     }
     const providers = await listPublicProviders();
     // Always return all 4 slots, even if a row doesn't exist yet —
@@ -79,8 +80,9 @@ export async function GET() {
 
 export async function POST(req: Request) {
   try {
-    if (!(await isAdminAuthorized())) {
-      return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
+    const guard = await authorizeAdmin(undefined, "manage_settings");
+    if (!guard.ok) {
+      return NextResponse.json({ ok: false, error: guard.error }, { status: guard.status });
     }
     const body = (await req.json()) as {
       provider: string;

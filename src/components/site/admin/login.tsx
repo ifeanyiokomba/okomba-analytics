@@ -1,19 +1,27 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowLeft, Eye, EyeOff, Loader2, Lock, Mail, User } from "lucide-react";
+import { ArrowLeft, CheckCircle2, Eye, EyeOff, KeyRound, Loader2, Lock, Mail, User, UserPlus } from "lucide-react";
 import { OkombaNavLogo } from "../logo";
 
 /* Admin login — env-credential flow with session cookie.
-   Preserved exactly from the original implementation, just polished.
    Stage 11 (founder directive): show/hide password eye toggle so the
-   admin doesn't mistype credentials on mobile. */
+   admin doesn't mistype credentials on mobile.
+
+   BATCH 7 (§44): when inviteToken is provided (arrived via an
+   invitation email link, /#/invite/<token>), renders the account
+   ACTIVATION form instead — set name + password, account activates,
+   session starts immediately. */
 export function AdminLogin({
   onLogin,
   onExit,
+  inviteToken,
+  onCancelInvite,
 }: {
   onLogin: () => void;
   onExit: () => void;
+  inviteToken?: string;
+  onCancelInvite?: () => void;
 }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -21,11 +29,29 @@ export function AdminLogin({
   const [busy, setBusy] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
+  // Activation-mode state (§44)
+  const [name, setName] = useState("");
+  const [confirm, setConfirm] = useState("");
+
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setBusy(true);
     try {
+      if (inviteToken) {
+        if (password !== confirm) {
+          throw new Error("Passwords do not match");
+        }
+        const res = await fetch("/api/admin/admins/accept", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ token: inviteToken, name, password }),
+        });
+        const data = (await res.json().catch(() => ({}))) as { ok?: boolean; error?: string };
+        if (!res.ok || !data.ok) throw new Error(data.error ?? "Activation failed");
+        onLogin();
+        return;
+      }
       const res = await fetch("/api/admin/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -48,7 +74,7 @@ export function AdminLogin({
 
       <div className="relative w-full max-w-md">
         <button
-          onClick={onExit}
+          onClick={inviteToken && onCancelInvite ? onCancelInvite : onExit}
           className="mb-8 inline-flex items-center gap-2 text-[13px] font-medium text-muted-foreground transition-colors hover:text-foreground"
         >
           <ArrowLeft size={15} aria-hidden="true" /> Back to website
@@ -57,35 +83,66 @@ export function AdminLogin({
         <div className="surface-card p-8 md:p-9">
           <div className="flex items-center gap-4">
             <span className="flex h-12 w-12 items-center justify-center rounded-2xl border border-gold/25 bg-gold-dim text-gold shadow-gold">
-              <Lock size={20} aria-hidden="true" />
+              {inviteToken ? <KeyRound size={20} aria-hidden="true" /> : <Lock size={20} aria-hidden="true" />}
             </span>
             <div>
-              <h1 className="font-display text-[22px] font-bold text-foreground">Admin portal</h1>
+              <h1 className="font-display text-[22px] font-bold text-foreground">
+                {inviteToken ? "Activate your account" : "Admin portal"}
+              </h1>
               <p className="mt-1 text-[12.5px] text-muted-foreground">
-                Sign in to manage inquiries, posts & subscribers.
+                {inviteToken
+                  ? "Set your name and password to finish joining the team."
+                  : "Sign in to manage inquiries, posts & subscribers."}
               </p>
             </div>
           </div>
 
           <form onSubmit={submit} className="mt-7 space-y-4">
-            <div>
-              <label htmlFor="admin-email" className="mb-1.5 block text-[12.5px] font-medium text-muted-foreground">
-                Email
-              </label>
-              <div className="relative">
-                <Mail size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground/60" aria-hidden="true" />
-                <input
-                  id="admin-email"
-                  type="email"
-                  required
-                  autoComplete="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="admin@okomba.com"
-                  className="w-full rounded-xl border border-white/[0.09] bg-white/[0.03] py-3 pl-10 pr-4 text-[14px] text-foreground outline-none transition-colors placeholder:text-muted-foreground/60 focus:border-gold/60 focus:bg-white/[0.05]"
-                />
+            {inviteToken ? (
+              <>
+                <div>
+                  <label htmlFor="invite-name" className="mb-1.5 block text-[12.5px] font-medium text-muted-foreground">
+                    Your name
+                  </label>
+                  <div className="relative">
+                    <UserPlus size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground/60" aria-hidden="true" />
+                    <input
+                      id="invite-name"
+                      type="text"
+                      required
+                      autoComplete="name"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder="e.g. Ngozi Eze"
+                      className="w-full rounded-xl border border-white/[0.09] bg-white/[0.03] py-3 pl-10 pr-4 text-[14px] text-foreground outline-none transition-colors placeholder:text-muted-foreground/60 focus:border-gold/60 focus:bg-white/[0.05]"
+                    />
+                  </div>
+                </div>
+                <p className="rounded-lg border border-gold/20 bg-gold-dim/60 px-3.5 py-2.5 text-[11.5px] text-gold-light/90">
+                  <CheckCircle2 size={12} className="mr-1.5 -mt-0.5 inline" aria-hidden="true" />
+                  You were invited by the team. Your role and capabilities were assigned with the invitation.
+                </p>
+              </>
+            ) : (
+              <div>
+                <label htmlFor="admin-email" className="mb-1.5 block text-[12.5px] font-medium text-muted-foreground">
+                  Email
+                </label>
+                <div className="relative">
+                  <Mail size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground/60" aria-hidden="true" />
+                  <input
+                    id="admin-email"
+                    type="email"
+                    required
+                    autoComplete="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="admin@okomba.com"
+                    className="w-full rounded-xl border border-white/[0.09] bg-white/[0.03] py-3 pl-10 pr-4 text-[14px] text-foreground outline-none transition-colors placeholder:text-muted-foreground/60 focus:border-gold/60 focus:bg-white/[0.05]"
+                  />
+                </div>
               </div>
-            </div>
+            )}
             <div>
               <label htmlFor="admin-pass" className="mb-1.5 block text-[12.5px] font-medium text-muted-foreground">
                 Password
@@ -122,6 +179,27 @@ export function AdminLogin({
               </div>
             </div>
 
+            {inviteToken && (
+              <div>
+                <label htmlFor="invite-confirm" className="mb-1.5 block text-[12.5px] font-medium text-muted-foreground">
+                  Confirm password
+                </label>
+                <div className="relative">
+                  <CheckCircle2 size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground/60" aria-hidden="true" />
+                  <input
+                    id="invite-confirm"
+                    type={showPassword ? "text" : "password"}
+                    required
+                    autoComplete="new-password"
+                    value={confirm}
+                    onChange={(e) => setConfirm(e.target.value)}
+                    placeholder="Repeat your password"
+                    className="w-full rounded-xl border border-white/[0.09] bg-white/[0.03] py-3 pl-10 pr-12 text-[14px] text-foreground outline-none transition-colors placeholder:text-muted-foreground/60 focus:border-gold/60 focus:bg-white/[0.05]"
+                  />
+                </div>
+              </div>
+            )}
+
             {error && (
               <p role="alert" className="rounded-lg border border-red-500/25 bg-red-500/[0.08] px-3.5 py-2.5 text-[12.5px] text-red-300">
                 {error}
@@ -138,7 +216,13 @@ export function AdminLogin({
               ) : (
                 <Lock size={14} aria-hidden="true" />
               )}
-              {busy ? "Signing in…" : "Sign in"}
+              {busy
+                ? inviteToken
+                  ? "Activating…"
+                  : "Signing in…"
+                : inviteToken
+                  ? "Activate account"
+                  : "Sign in"}
             </button>
           </form>
 

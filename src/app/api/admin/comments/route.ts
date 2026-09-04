@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { Prisma } from "@/generated/prisma";
 import { z } from "zod";
 import { db } from "@/lib/db";
-import { isAdminAuthorized } from "@/lib/admin-auth";
+import { authorizeAdmin } from "@/lib/admin-auth";
 import {
   COMMENT_MODERATION_ACTIONS,
   COMMENT_STATUSES,
@@ -60,8 +60,9 @@ function parseFlagged(raw: unknown): { checks?: string[]; score?: number } {
 
 export async function GET(req: Request) {
   try {
-    if (!(await isAdminAuthorized())) {
-      return NextResponse.json({ ok: false }, { status: 401 });
+    const guard = await authorizeAdmin(req, "moderate_comments");
+    if (!guard.ok) {
+      return NextResponse.json({ ok: false, error: guard.error }, { status: guard.status });
     }
 
     const statusFilter = new URL(req.url).searchParams.get("status");
@@ -103,8 +104,9 @@ export async function GET(req: Request) {
 
 export async function PATCH(req: Request) {
   try {
-    if (!(await isAdminAuthorized())) {
-      return NextResponse.json({ ok: false }, { status: 401 });
+    const guard = await authorizeAdmin(req, "moderate_comments");
+    if (!guard.ok) {
+      return NextResponse.json({ ok: false, error: guard.error }, { status: guard.status });
     }
 
     let body: unknown;
@@ -135,8 +137,9 @@ export async function PATCH(req: Request) {
 
 export async function DELETE(req: Request) {
   try {
-    if (!(await isAdminAuthorized())) {
-      return NextResponse.json({ ok: false }, { status: 401 });
+    const guard = await authorizeAdmin(req, "moderate_comments");
+    if (!guard.ok) {
+      return NextResponse.json({ ok: false, error: guard.error }, { status: guard.status });
     }
     const id = new URL(req.url).searchParams.get("id");
     if (!id) {

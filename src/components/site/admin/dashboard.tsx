@@ -20,6 +20,7 @@ import {
   RefreshCw,
   Send,
   Settings,
+  ShieldCheck,
   Users,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -48,6 +49,8 @@ import { WhatsAppTab } from "./whatsapp-tab";
 import { PaymentsTab } from "./payments-tab";
 import { AnalyticsTab } from "./analytics-tab";
 import { SettingsTab } from "./settings-tab";
+import { AdminsTab } from "./admins-tab";
+import { QuickAddCustomerDialog } from "./quick-add-customer-dialog";
 import { ProposalComposerDialog } from "./proposal-composer-dialog";
 import type {
   DraftProposalRow,
@@ -70,6 +73,7 @@ type Tab =
   | "posts"
   | "comments"
   | "ads"
+  | "admins"
   | "testimonials"
   | "whatsapp"
   | "email"
@@ -86,6 +90,7 @@ const TABS: { id: Tab; label: string; icon: typeof Inbox }[] = [
   { id: "posts", label: "Posts", icon: FileText },
   { id: "comments", label: "Comments", icon: MessageSquare },
   { id: "ads", label: "Ads", icon: Megaphone },
+  { id: "admins", label: "Admins", icon: ShieldCheck },
   { id: "testimonials", label: "Testimonials", icon: MessageSquareQuote },
   { id: "whatsapp", label: "WhatsApp", icon: MessageCircle },
   { id: "email", label: "Email log", icon: Mail },
@@ -183,11 +188,34 @@ export function AdminDashboard({
     };
   }, []);
 
+  /* ── BATCH 7 (§44): signed-in admin identity + permissions ── */
+  const [me, setMe] = useState<{
+    email: string;
+    name: string | null;
+    roleLabel: string;
+    roleKey: string;
+    isMaster: boolean;
+    permissions: string[];
+  } | null>(null);
+  const [inquiryFocus, setInquiryFocus] = useState<string | undefined>(undefined);
+  const [showQuickAdd, setShowQuickAdd] = useState(false);
+
+  const can = useCallback(
+    (perm: string) => Boolean(me?.isMaster || me?.permissions.includes(perm)),
+    [me]
+  );
+
+  const visibleTabs = useMemo(
+    () => TABS.filter((t) => (t.id === "admins" ? can("manage_admins") : true)),
+    [can]
+  );
+
   /* ── Data loader ─────────────────────────────────────────── */
   const load = useCallback(async () => {
     setError(null);
     try {
-      const [listRes, statsRes, subsRes, postsRes, logRes, testimonialsRes, invoicesRes, draftsRes, commentsRes, adsRes] = await Promise.all([
+      const [meRes, listRes, statsRes, subsRes, postsRes, logRes, testimonialsRes, invoicesRes, draftsRes, commentsRes, adsRes] = await Promise.all([
+        fetch("/api/admin/me"),
         fetch("/api/inquiries"),
         fetch("/api/inquiries?stats=1"),
         fetch("/api/subscribers"),
@@ -199,6 +227,17 @@ export function AdminDashboard({
         fetch("/api/admin/comments"),
         fetch("/api/admin/ads?stats=1"),
       ]);
+      if (meRes.ok) {
+        const m = (await meRes.json()) as { me?: {
+          email: string;
+          name: string | null;
+          roleLabel: string;
+          roleKey: string;
+          isMaster: boolean;
+          permissions: string[];
+        } };
+        setMe(m.me ?? null);
+      }
       if (!listRes.ok || !statsRes.ok) throw new Error("Failed to load data — session may have expired");
       const list = await listRes.json();
       const s = await statsRes.json();
@@ -730,6 +769,14 @@ export function AdminDashboard({
             <span className="hidden rounded-full border border-gold/30 bg-gold-dim px-3 py-1 font-mono text-[10px] text-gold sm:inline-block">
               ADMIN
             </span>
+            {/* §44 — signed-in identity chip (role from RBAC) */}
+            {me && (
+              <span className="hidden items-center gap-2 rounded-full border border-white/[0.09] bg-white/[0.03] px-3 py-1 text-[11px] text-muted-foreground md:inline-flex">
+                <ShieldCheck size={11} className="text-gold" aria-hidden="true" />
+                <span className="max-w-[140px] truncate font-medium text-foreground">{me.name ?? me.email}</span>
+                <span className="text-gold">{me.roleLabel}</span>
+              </span>
+            )}
           </div>
           <div className="flex items-center gap-1.5 sm:gap-2.5">
             <button
@@ -760,7 +807,7 @@ export function AdminDashboard({
       {/* Tabs nav */}
       <nav className="sticky top-16 z-30 border-b border-white/[0.06] bg-[#05070d]/75 backdrop-blur-md">
         <div className="container-xl flex items-center gap-1 overflow-x-auto py-2.5 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-          {TABS.map((t) => {
+          {visibleTabs.map((t) => {
             const isActive = tab === t.id;
             const Icon = t.icon;
             const badge =
@@ -863,13 +910,45 @@ export function AdminDashboard({
                 recentInquiries={recentInquiries}
                 recentPosts={recentPosts}
                 recentEmails={recentEmails}
+                me={me}
+                outstandingInvoices={invoices.filter(
+                  (i) => i.status !== "paid" && i.status !== "void"
+                ).length}
+                liveAds={adStats?.active ?? ads.filter((a) => a.status === "active").length}
+                pendingComments={comments.filter((c) => c.status === "pending").length}
+                can={can}
+                onNavigate={(target, filter) => {
+                  if (target === "inquiries" && filter) {
+                    setInquiryFocus(filter);
+                  }
+                  setTab(target);
+                }}
+                onQuickAction={(action) => {
+                  if (action === "new-customer" || action === "new-inquiry") {
+                    setShowQuickAdd(true);
+                  } else if (action === "new-post") {
+                    setEditingPost({ post: null, mode: "create" });
+                  } else if (action === "broadcast") {
+                    setShowBroadcast(true);
+                  } else if (action === "invite-admin") {
+                    setTab("admins");
+                  } else if (action === "new-proposal" || action === "review-drafts") {
+                    setTab("proposals");
+                  } else if (action === "new-invoice") {
+                    setTab("payments");
+                  } else if (action === "new-ad") {
+                    setTab("ads");
+                  }
+                }}
               />
             )}
             {tab === "inquiries" && (
               <InquiriesTab
+                key={inquiryFocus ?? "all"}
                 inquiries={inquiries}
                 loading={false}
                 error={error}
+                initialStatus={inquiryFocus}
                 onUpdateStatus={updateInquiryStatus}
                 updatingId={updatingId}
                 onOpenInquiry={(i) => setDetailInquiry(i)}
@@ -930,6 +1009,12 @@ export function AdminDashboard({
             )}
             {tab === "ads" && (
               <AdsTab ads={ads} stats={adStats} loading={false} onOpen={(a) => setDetailAd(a)} />
+            )}
+            {tab === "admins" && (
+              <AdminsTab
+                canManageAdmins={can("manage_admins")}
+                onChanged={() => void load()}
+              />
             )}
             {tab === "testimonials" && (
               <TestimonialsTab
@@ -997,6 +1082,17 @@ export function AdminDashboard({
               text: `Broadcast sent to ${sent} subscriber${sent === 1 ? "" : "s"}`,
               type: "ok",
             });
+            load();
+          }}
+        />
+      )}
+      {/* §47 quick action — New customer / New inquiry (quick-add) */}
+      {showQuickAdd && (
+        <QuickAddCustomerDialog
+          onClose={() => setShowQuickAdd(false)}
+          onSaved={() => {
+            setShowQuickAdd(false);
+            setToast({ text: "Customer created", type: "ok" });
             load();
           }}
         />
