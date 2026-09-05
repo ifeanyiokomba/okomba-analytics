@@ -57,11 +57,6 @@ export function formatPhoneDisplay(msisdn: string): string {
   return `+${n}`;
 }
 
-/** Chat grouping key — normalised digits, or a stable fallback. */
-export function chatKeyFor(phone: string | null | undefined): string | null {
-  return normalizePhone(phone);
-}
-
 /* ── Dispatch ──────────────────────────────────────────────── */
 
 export type DispatchWhatsAppInput = {

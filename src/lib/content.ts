@@ -579,40 +579,6 @@ export const TESTIMONIALS = [
   },
 ];
 
-/* ── Process ──────────────────────────────────────────────── */
-export const PROCESS_STEPS = [
-  {
-    step: "01",
-    title: "Discover",
-    desc: "We start by understanding your business, your users and the outcome you actually need — not just the feature list.",
-  },
-  {
-    step: "02",
-    title: "Strategize",
-    desc: "We define the right solution and architecture, with a clear scope, timeline and delivery plan.",
-  },
-  {
-    step: "03",
-    title: "Design",
-    desc: "We build the experience and system blueprint — interfaces, workflows and data structure.",
-  },
-  {
-    step: "04",
-    title: "Build",
-    desc: "We develop and integrate the solution in disciplined iterations, with progress you can see.",
-  },
-  {
-    step: "05",
-    title: "Launch",
-    desc: "We test, deploy and optimize — pressure-checking every flow before it faces your customers.",
-  },
-  {
-    step: "06",
-    title: "Grow",
-    desc: "We continue improving the product after launch, with support that doesn't disappear.",
-  },
-];
-
 /* ── Why Okomba ───────────────────────────────────────────── */
 export const DIFFERENTIATORS = [
   {

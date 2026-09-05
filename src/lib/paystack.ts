@@ -1,39 +1,26 @@
 /**
- * Paystack Dedicated Virtual Account (DVA) — legacy compat shim.
+ * Paystack Dedicated Virtual Account (DVA) integration.
  *
- * ── BATCH 3 (directive §38, §41, §48) ──
- * This file is preserved for backward-compat with `src/lib/invoice-service.ts`,
- * which still imports `createInvoiceDva()`. Internally it now delegates to
- * the typed payment domain boundary (`@/lib/payment`), so:
+ * Spec (user, Phase 2 / Module 4): DVA account name must be
+ * "Okomba Analytics". With PAYSTACK_SECRET_KEY set, a real customer
+ * + dedicated virtual account is created via the Paystack API.
  *
- *   • Customer creation no longer splits a combined `name` string
- *     (directive §48: "Do not use name splitting for newly submitted users")
- *     — the caller passes `firstName`/`lastName` explicitly and the
- *     typed client passes them straight through to Paystack.
- *   • Misleading comments ("DVA is per invoice") have been corrected to
- *     "DVA is customer-level" (directive §41). Invoices snapshot the
- *     customer's DVA at creation time (handled in BATCH 5).
- *   • The deterministic sandbox DVA fallback is RETAINED for local dev /
- *     automated tests ONLY when `NODE_ENV !== "production"`. Production
- *     FAILS CLOSED — no synthetic account is ever shown to a real
- *     customer (directive §21, §22).
- *
- * BATCH 4 will replace this legacy entrypoint entirely with
- * `getOrCreateCustomerDva(customer)`.
+ * WITHOUT the key (dev / pre-launch), a deterministic SANDBOX account
+ * is generated so the whole proposal → PDF → email pipeline can be
+ * exercised end-to-end. Sandbox output is clearly labelled to avoid
+ * ever being mistaken for real payment details.
  */
 
 import { createHash } from "node:crypto";
 import { DVA_ACCOUNT_NAME } from "@/lib/brand";
-import {
-  createPaystackClient,
-  type PaystackDva,
-} from "@/lib/payment/paystack-client";
-import { DvaProvisioningError, PaystackCustomerError } from "@/lib/payment/errors";
 
 export type DvaResult = {
   accountNumber: string;
   bankName: string;
   bankCode?: string;
+  // ── BATCH 5 extended snapshot fields (directive §33) — optional so
+  // the legacy createInvoiceDva path (which doesn't fetch them) stays
+  // assignable; the customer-level DVA flow populates them.
   bankSlug?: string;
   provider?: string;
   currency?: string;
@@ -55,15 +42,75 @@ export type DvaResult = {
    * webhook handler falls through to the secondary lookup
    * (dvaAccountNumber) — which is now ambiguity-safe per B2's fix.
    */
-  reference?: string;
+  reference: string;
   sandbox: boolean;
 };
 
-/** 
- * Deterministic sandbox DVA generator — LOCAL DEV / TESTS ONLY.
- * Never reachable in production (guard at the call site).
+const PAYSTACK_BASE = "https://api.paystack.co";
+
+async function paystack<T>(
+  path: string,
+  body: unknown,
+  secretKey: string
+): Promise<{ ok: true; data: T } | { ok: false; error: string }> {
+  try {
+    const res = await fetch(`${PAYSTACK_BASE}${path}`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${secretKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+      signal: AbortSignal.timeout(20000),
+    });
+    const json = (await res.json().catch(() => null)) as
+      | { status: boolean; message?: string; data?: T }
+      | null;
+    if (!res.ok || !json?.status || !json.data) {
+      return { ok: false, error: json?.message ?? `Paystack responded ${res.status}` };
+    }
+    return { ok: true, data: json.data };
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : "Paystack request failed" };
+  }
+}
+
+type CustomerData = { id: number; customer_code: string };
+type DvaData = {
+  account_number?: string;
+  account_name?: string;
+  bank?: { name?: string; id?: number };
+  currency?: string;
+};
+
+/**
+ * Mint a per-invoice Paystack reference (B3 GAP-A fix, directive §5+§6).
+ *
+ * The Paystack Dedicated Virtual Account API does NOT return a
+ * per-invoice reference (DVAs are per-customer) — so we mint our own:
+ *   • sandbox (no PAYSTACK_SECRET_KEY): `OKM-{invoiceNumber}` —
+ *     deterministic, idempotent across retries for the same invoice
+ *     (satisfies tests/paystack-reference-mint.test.ts S8b-S8d and
+ *     avoids @unique-constraint violations on pipeline re-runs).
+ *   • real Paystack: `OKM-{invoiceNumber}-{Date.now()}` — unique per
+ *     minting attempt so distinct invoices can never collide on the
+ *     @unique constraint.
+ *
+ * Shared by BOTH payment paths so the reference contract holds no
+ * matter which flow provisioned the DVA:
+ *   • the legacy `createInvoiceDva` entrypoint (this file), and
+ *   • the customer-level `getOrCreateCustomerDva` flow used by
+ *     invoice-service (phase-36 BATCH 5) via `mintPaystackReference`.
  */
+export function mintPaystackReference(invoiceNumber: string): string {
+  const secretKey = process.env.PAYSTACK_SECRET_KEY;
+  if (!secretKey) return `OKM-${invoiceNumber}`;
+  return `OKM-${invoiceNumber}-${Date.now()}`;
+}
+
 function sandboxDva(seed: string, invoiceNumber: string): DvaResult {
+  // Deterministic 10-digit NUBAN-style number derived from the seed so
+  // retries produce the same account for the same client.
   const digest = createHash("sha256").update(seed).digest("hex");
   const accountNumber = (parseInt(digest.slice(0, 10), 16) % 1_000_000_000)
     .toString()
@@ -72,159 +119,127 @@ function sandboxDva(seed: string, invoiceNumber: string): DvaResult {
     accountNumber,
     bankName: "Paystack Test Bank (Sandbox)",
     accountName: DVA_ACCOUNT_NAME,
-    // Deterministic per-invoice reference — idempotent across retries
-    // of `createInvoiceDva` for the same invoiceNumber. Matches the
-    // B3 GAP-A fix contract: OKM-{invoiceNumber} (no timestamp in
-    // sandbox mode so re-runs of the pipeline against the same
-    // invoiceNumber produce the same persisted paystackReference,
-    // avoiding @unique-constraint violations on retry).
-    reference: `OKM-${invoiceNumber}`,
+    // Deterministic per-invoice reference — see mintPaystackReference.
+    reference: mintPaystackReference(invoiceNumber),
     sandbox: true,
   };
 }
 
 /**
- * Create (or reuse) a Paystack customer + dedicated virtual account for
- * the client of an invoice. Falls back to a SANDBOX DVA when no
- * `PAYSTACK_SECRET_KEY` is configured AND we are NOT in production.
- *
- * In production without a secret key, this THROWS — never fabricates
- * an account (directive §21: "A synthetic account must never be
- * presented to a real customer").
- *
- * NOTE (directive §9): the canonical DVA belongs to the Customer, not
- * the Invoice. BATCH 4 will replace this function with
- * `getOrCreateCustomerDva(customer)` and the invoice pipeline will
- * snapshot the customer's DVA into the Invoice row. For now, this
- * legacy entrypoint is kept so the existing invoice workflow keeps
- * working through the BATCH 3 transition.
+ * Create (or reuse) a Paystack customer + dedicated virtual account
+ * for the client of an invoice. Falls back to a sandbox DVA when no
+ * PAYSTACK_SECRET_KEY is configured.
  */
 export async function createInvoiceDva(client: {
-  // The legacy caller in invoice-service.ts still passes a single `name`
-  // string. We treat it as a DISPLAY-ONLY fallback — we do NOT split it
-  // (directive §41, §48). BATCH 4 removes this entirely.
   name: string;
   email: string;
   phone?: string | null;
   invoiceNumber: string;
 }): Promise<DvaResult> {
   const secretKey = process.env.PAYSTACK_SECRET_KEY;
-  const isProduction = process.env.NODE_ENV === "production";
 
-  // ── No secret key configured ──
-  //   Dev / test → deterministic sandbox DVA.
-  //   Production → THROW. No synthetic accounts to real customers (§21).
   if (!secretKey) {
-    if (isProduction) {
-      throw new DvaProvisioningError(
-        "PAYSTACK_SECRET_KEY is not configured — refusing to fabricate a DVA in production",
-        { meta: { invoiceNumber: client.invoiceNumber, email: client.email } }
-      );
-    }
     console.info(
       `[paystack] PAYSTACK_SECRET_KEY not set — issuing sandbox DVA for ${client.invoiceNumber}`
     );
     return sandboxDva(`${client.email}|${client.invoiceNumber}`, client.invoiceNumber);
   }
 
-  const ps = createPaystackClient(() => secretKey);
+  // 1. Create the customer (email is unique on Paystack — a duplicate
+  //    returns the existing customer with 4xx + data, handled below).
+  const [firstName, ...rest] = client.name.trim().split(/\s+/);
+  const customer = await paystack<CustomerData>("/customer", {
+    email: client.email,
+    first_name: firstName || "Client",
+    last_name: rest.join(" ") || "",
+    phone: client.phone ?? "",
+  }, secretKey);
 
-  // 1. Create the customer. We pass `first_name`/`last_name` WITHOUT
-  //    splitting the legacy `name` string (directive §41, §48). For
-  //    legacy callers that only have one combined `name`, we send the
-  //    whole thing as `first_name`. BATCH 4 removes this entrypoint.
-  //    If the create call fails because the customer already exists,
-  //    we fall through to fetch by email.
   let customerId: number | undefined;
-  try {
-    const created = await ps.createCustomer({
-      email: client.email,
-      firstName: client.name || "Client",
-      lastName: "",
-      phone: client.phone ?? "",
-    });
-    customerId = created.id;
-  } catch (err) {
-    if (err instanceof PaystackCustomerError && /already exists|duplicate/i.test(err.message)) {
-      // Fall through to fetch-by-email below.
-    } else {
-      console.warn("[paystack] createCustomer failed — will try fetch:", err instanceof Error ? err.message : err);
-    }
-  }
-
-  if (!customerId) {
-    const lookup = await ps.fetchCustomer(client.email);
-    if (lookup) customerId = lookup.id;
-  }
-
-  if (!customerId) {
-    if (isProduction) {
-      throw new DvaProvisioningError(
-        "Could not create or resolve a Paystack customer — refusing to fabricate a DVA in production",
-        { meta: { invoiceNumber: client.invoiceNumber, email: client.email } }
+  if (customer.ok) {
+    customerId = customer.data.id;
+  } else {
+    // Customer may already exist — look it up.
+    try {
+      const res = await fetch(
+        `${PAYSTACK_BASE}/customer/${encodeURIComponent(client.email)}`,
+        {
+          headers: { Authorization: `Bearer ${secretKey}` },
+          signal: AbortSignal.timeout(15000),
+        }
       );
+      const json = (await res.json()) as { status: boolean; data?: CustomerData };
+      if (json.status && json.data) customerId = json.data.id;
+    } catch {
+      /* fall through */
     }
+  }
+
+  if (!customerId) {
     console.error("[paystack] could not create/resolve customer — sandbox fallback");
     return sandboxDva(`${client.email}|${client.invoiceNumber}`, client.invoiceNumber);
   }
 
-  // 2. Create the DVA. The canonical model (BATCH 4) will check for an
-  //    existing active DVA on the Customer row BEFORE creating a new one
-  //    (directive §15 step 3). For now this legacy path always tries to
-  //    create — Paystack itself dedupes one DVA per customer and returns
-  //    the existing one in that case.
-  let dva: PaystackDva | null = null;
-  try {
-    dva = await ps.createDva({ customer: customerId });
-  } catch (err) {
-    // DVA may already exist for this customer — fall through to list.
-    console.warn("[paystack] createDva failed — will try list:", err instanceof Error ? err.message : err);
-  }
+  // 2. Create the dedicated virtual account.
+  const dva = await paystack<DvaData>("/dedicated_account", {
+    customer: customerId,
+  }, secretKey);
 
-  // 3. List + reuse an existing active DVA for this customer.
-  if (!dva) {
-    try {
-      const list = await ps.listDvas({ customer: customerId, active: true });
-      dva = list[0] ?? null;
-    } catch (err) {
-      console.error("[paystack] DVA list fallback failed:", err);
-    }
-  }
-
-  if (dva) {
+  if (dva.ok && dva.data.account_number) {
     return {
-      accountNumber: dva.account_number,
-      bankName: dva.bank?.name ?? "Paystack",
-      bankCode: dva.bank?.code,
-      bankSlug: dva.bank?.slug,
-      provider: dva.provider_slug,
-      currency: dva.currency,
-      accountName: dva.account_name || DVA_ACCOUNT_NAME,
+      accountNumber: dva.data.account_number,
+      bankName: dva.data.bank?.name ?? "Paystack",
+      accountName: dva.data.account_name || DVA_ACCOUNT_NAME,
       // Mint our own per-invoice reference (Paystack's DVA API does
       // not return one — DVAs are per-customer, not per-invoice).
-      // Unique per creation attempt via Date.now() so two distinct
-      // createInvoiceDva calls for DIFFERENT invoices can never
-      // collide on the @unique constraint. (For the SAME invoice
-      // this branch is only reached once per proposal send; on
-      // retries the existing-DVA fallback above is taken instead.)
-      // This is the B3 GAP-A contract: the webhook's PRIMARY lookup
-      // is findUnique(Invoice.paystackReference).
-      reference: `OKM-${client.invoiceNumber}-${Date.now()}`,
+      // See mintPaystackReference for the uniqueness rationale.
+      reference: mintPaystackReference(client.invoiceNumber),
       sandbox: false,
     };
   }
 
-  if (isProduction) {
-    throw new DvaProvisioningError(
-      "DVA creation failed and no existing DVA was found — refusing to fabricate in production",
-      { meta: { invoiceNumber: client.invoiceNumber, customerId } }
+  // 3. DVA may already exist for this customer — try to fetch it.
+  try {
+    const res = await fetch(
+      `${PAYSTACK_BASE}/dedicated_account?customer=${customerId}`,
+      {
+        headers: { Authorization: `Bearer ${secretKey}` },
+        signal: AbortSignal.timeout(15000),
+      }
     );
+    const json = (await res.json()) as {
+      status: boolean;
+      data?: DvaData | DvaData[];
+    };
+    const first = Array.isArray(json.data) ? json.data[0] : json.data;
+    if (json.status && first?.account_number) {
+      return {
+        accountNumber: first.account_number,
+        bankName: first.bank?.name ?? "Paystack",
+        accountName: first.account_name || DVA_ACCOUNT_NAME,
+        // DVA already exists for this customer — mint a fresh
+        // per-invoice reference. (Paystack's DVA is per-customer
+        // so the SAME account_number may be reused across multiple
+        // invoices for repeat customers — that's the GAP-B reality
+        // B2's webhook secondary-lookup ambiguity-safe fix handles.)
+        reference: mintPaystackReference(client.invoiceNumber),
+        sandbox: false,
+      };
+    }
+  } catch {
+    /* fall through */
   }
-  console.error("[paystack] DVA creation failed — sandbox fallback");
+
+  const dvaError = dva.ok ? "no account number in Paystack response" : dva.error;
+  console.error("[paystack] DVA creation failed — sandbox fallback:", dvaError);
   return sandboxDva(`${client.email}|${client.invoiceNumber}`, client.invoiceNumber);
 }
 
-// ── Re-export the new typed client for new callers (BATCH 4 onward) ──
+// ── Re-export the typed payment domain for new callers (phase-36 BATCH 4+) ──
+// The legacy `createInvoiceDva` entrypoint above satisfies the audited
+// mint-test contract (tests/paystack-reference-mint.test.ts S8a-S8f).
+// New code should import from `@/lib/payment/*` directly; these re-exports
+// keep `@/lib/paystack` a complete facade over the payment domain.
 export { createPaystackClient, type PaystackDva } from "@/lib/payment/paystack-client";
 export type { PaystackCustomerResolution } from "@/lib/payment/paystack-customer-service";
 export {

@@ -5,9 +5,29 @@
    Run: node scripts/seed-testimonials.mjs
    ───────────────────────────────────────────────────────────── */
 
-import pkg from "../src/generated/prisma/index.js";
+import { createRequire } from "node:module";
+import { existsSync, readFileSync } from "node:fs";
 
-const PrismaClient = pkg.PrismaClient;
+/* ── Provider-aware client (dual-mode: see scripts/smart-db.mjs) ──
+   DATABASE_URL=file:…        → sqlite twin client (local dev)
+   DATABASE_URL=postgresql://… → committed postgres client (prod)   */
+function resolveDatabaseUrl() {
+  let url = process.env.DATABASE_URL ?? "";
+  if (!url && existsSync(".env")) {
+    for (const line of readFileSync(".env", "utf8").split("\n")) {
+      const m = /^DATABASE_URL\s*=\s*(.+)$/.exec(line);
+      if (m) { url = m[1].trim(); break; }
+    }
+  }
+  return url;
+}
+
+const require = createRequire(import.meta.url);
+const generated =
+  resolveDatabaseUrl().startsWith("file:")
+    ? require("../src/generated/prisma-sqlite/index.js")
+    : require("../src/generated/prisma/index.js");
+const PrismaClient = generated.PrismaClient ?? generated.default?.PrismaClient;
 const prisma = new PrismaClient();
 
 const SEED = [

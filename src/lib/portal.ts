@@ -28,11 +28,6 @@ export function portalUrlFor(token: string): string {
   return `${base}/portal/${token}`;
 }
 
-/** Relative in-app portal path (hash routing in the sandbox preview). */
-export function portalHashPath(token: string): string {
-  return `/portal/${token}`;
-}
-
 /**
  * Ensure an invoice has a secure token — generates + persists one
  * when missing. Safe to call repeatedly (idempotent).

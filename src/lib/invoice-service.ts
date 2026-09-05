@@ -42,8 +42,8 @@
  */
 
 import { db } from "@/lib/db";
+import { createInvoiceDva, mintPaystackReference, type DvaResult } from "@/lib/paystack";
 import type { InputJsonValue } from "@prisma/client/runtime/library";
-import { createInvoiceDva, type DvaResult } from "@/lib/paystack";
 import { getOrCreateCustomerDva, resolvePaymentEligibility, currencyForCountry, type CustomerDvaResult, type DvaStatus } from "@/lib/payment";
 import { findOrCreateCustomer, type CustomerIdentityInput } from "@/lib/customer-service";
 import { generateProposalPdf } from "@/lib/pdf/proposal-pdf";
@@ -68,13 +68,8 @@ export type SendProposalResult = {
   error?: string;
   invoiceId?: string;
   invoiceNumber?: string;
-  dva?: {
-    accountNumber: string;
-    bankName: string;
-    accountName: string;
-    reference?: string; // OKM-{invoiceNumber} (sandbox) | OKM-{invoiceNumber}-{ts} (real)
-    sandbox: boolean;
-  };
+  /** Full DVA snapshot incl. OKM-{invoiceNumber} reference (see paystack.ts). */
+  dva?: DvaResult;
   emailSent?: boolean;
   emailError?: string;
   whatsappQueued?: boolean;
@@ -219,10 +214,11 @@ export async function sendProposal(input: SendProposalInput): Promise<SendPropos
           provider: result.dva.provider,
           currency: result.dva.currency,
           accountName: result.dva.accountName || DVA_ACCOUNT_NAME,
-          // B3 GAP-A: mint the per-invoice reference (Paystack's DVA
-          // API returns none) so Invoice.paystackReference is always
-          // bound for the webhook's primary lookup.
-          reference: `OKM-${invoiceNumber}-${Date.now()}`,
+          // B3 GAP-A fix (merged): the customer-level DVA flow mints the
+          // same per-invoice reference as the legacy entrypoint so the
+          // webhook's primary findUnique-by-reference lookup always has
+          // a value to match (tests/paystack-reference-mint.test.ts).
+          reference: mintPaystackReference(invoiceNumber),
           sandbox: false,
         };
         dvaStatus = "active";
@@ -283,16 +279,20 @@ export async function sendProposal(input: SendProposalInput): Promise<SendPropos
   const cloudUpload = await uploadProposalPdf(invoiceNumber, pdfBuffer);
 
   // ── BATCH 5 (directive §32 step 7): create the Invoice row ──
-  //  customerId FK + DVA snapshot fields (directive §33). The legacy
-  //  customerName/customerEmail/customerPhone fields stay as snapshots
-  //  for backward-compat with the existing PDF/email/portal pipeline.
-  //  B3 GAP-A fix: persist `paystackReference` (minted per-invoice —
-  //  Paystack's DVA API returns no reference since DVAs are
-  //  per-customer) so the webhook handler's primary lookup
-  //  (findUnique by reference) can match future checkout-session
-  //  flows that echo the reference back. For the DVA-bank-transfer
-  //  flow the webhook falls through to the secondary lookup
-  //  (dvaAccountNumber — ambiguity-safe per B2's fix).
+  //    customerId FK + DVA snapshot fields (directive §33). The legacy
+  //    customerName/customerEmail/customerPhone fields stay as snapshots
+  //    for backward-compat with the existing PDF/email/portal.
+  //
+  //    B3 GAP-A fix (merged from the audit stream): persist
+  //    `paystackReference` (minted via mintPaystackReference — the same
+  //    contract as createInvoiceDva) so the webhook handler's primary
+  //    lookup (findUnique by reference) has something to match against
+  //    future checkout-session flows (transaction.initialize /
+  //    payment_request echo back the reference in charge.success).
+  //    For the current DVA-bank-transfer flow, Paystack's webhook does
+  //    NOT carry this reference, so the webhook falls through to the
+  //    secondary lookup (dvaAccountNumber, now ambiguity-safe per B2's
+  //    fix). The reference is also surfaced in the admin CRM timeline.
   const invoice = await db.invoice.create({
     data: {
       invoiceNumber,
@@ -310,17 +310,20 @@ export async function sendProposal(input: SendProposalInput): Promise<SendPropos
       dueDate: input.dueDate ?? null,
       status: "sent",
       // ── DVA snapshot (directive §33, §45) — historical copy at send time ──
+      //    (falls back to the legacy dvaForPdf values when only the legacy
+      //    sandbox path ran, so the webhook matcher always has data)
       dvaAccountId: dvaSnapshot?.accountId ?? null,
-      dvaAccountNumber: dvaSnapshot?.accountNumber ?? null,
-      dvaAccountName: dvaSnapshot?.accountName ?? null,
-      dvaBankName: dvaSnapshot?.bankName ?? null,
-      dvaBankCode: dvaSnapshot?.bankCode ?? null,
-      dvaBankSlug: dvaSnapshot?.bankSlug ?? null,
-      dvaProvider: dvaSnapshot?.provider ?? null,
-      dvaCurrency: dvaSnapshot?.currency ?? null,
-      // ── B3 GAP-A: per-invoice Paystack reference (minted, not
-      //    returned by the DVA API) — webhook primary lookup key. ──
-      paystackReference: dvaForPdf?.reference ?? null,
+      dvaAccountNumber: dvaSnapshot?.accountNumber ?? dvaForPdf?.accountNumber ?? null,
+      dvaAccountName: dvaSnapshot?.accountName ?? dvaForPdf?.accountName ?? null,
+      dvaBankName: dvaSnapshot?.bankName ?? dvaForPdf?.bankName ?? null,
+      dvaBankCode: dvaSnapshot?.bankCode ?? dvaForPdf?.bankCode ?? null,
+      dvaBankSlug: dvaSnapshot?.bankSlug ?? dvaForPdf?.bankSlug ?? null,
+      dvaProvider: dvaSnapshot?.provider ?? dvaForPdf?.provider ?? null,
+      dvaCurrency: dvaSnapshot?.currency ?? dvaForPdf?.currency ?? null,
+      // B3 GAP-A fix (merged): per-invoice Paystack reference, persisted
+      // at creation for the webhook's primary lookup. Minted with the
+      // same contract as createInvoiceDva — see mintPaystackReference.
+      paystackReference: dvaForPdf?.reference ?? mintPaystackReference(invoiceNumber),
       secureToken,
       pdfUrl: cloudUpload.url,
       pdfStorage: cloudUpload.storage,
@@ -434,7 +437,12 @@ export async function sendProposal(input: SendProposalInput): Promise<SendPropos
       ? {
           accountNumber: dvaForPdf.accountNumber,
           bankName: dvaForPdf.bankName,
+          bankCode: dvaForPdf.bankCode,
+          bankSlug: dvaForPdf.bankSlug,
+          provider: dvaForPdf.provider,
+          currency: dvaForPdf.currency,
           accountName: dvaForPdf.accountName,
+          reference: dvaForPdf.reference,
           sandbox: dvaForPdf.sandbox,
         }
       : undefined,

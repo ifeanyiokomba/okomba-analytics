@@ -90,18 +90,9 @@ export type WebhookOutcome = {
   error?: string;
 };
 
-function trimPayload(raw: string): object {
-  // Keep a bounded snapshot for the audit log (payloads can be big).
-  try {
-    const obj = JSON.parse(raw) as object;
-    const json = JSON.stringify(obj);
-    if (json.length > 6000) {
-      return { truncated: json.slice(0, 6000) + "…[truncated]" };
-    }
-    return obj;
-  } catch {
-    return { raw: raw.length > 6000 ? raw.slice(0, 6000) + "…[truncated]" : raw };
-  }
+function trimPayload(raw: string): string {
+  // Keep a bounded snapshot for the audit log (payloads can be big)
+  return raw.length > 6000 ? `${raw.slice(0, 6000)}…[truncated]` : raw;
 }
 
 function paidLabel(d: Date): string {
@@ -430,7 +421,7 @@ async function handleChargeSuccess(data: PaystackChargeData): Promise<WebhookOut
         note: "Project kickoff in 24h after payment",
         paidAt: paidAt.toISOString(),
         paymentId: reconciliation.paymentId,
-      },
+      } as InputJsonValue,
       status: "scheduled",
     },
   });
