@@ -1642,3 +1642,290 @@ export async function notifyAdminInviteAccepted(p: {
     console.error("[notify:admin-accepted] alert failed:", err);
   }
 }
+
+/* ─────────────────────────────────────────────────────────────
+   BATCH 10 (§34) — event / webinar registration emails.
+
+   notifyEventRegistration       → registrant confirmation
+   notifyEventRegistrationAdmin  → admin alert (operational pipeline)
+   sendEventReminderEmail        → pre-event / same-day / post-event
+                                   reminder with the join link.
+   All follow the sendAdEmail pattern (branded HTML + EmailLog
+   audit row + failover delivery); email failures NEVER block the
+   registration itself (fire-and-forget at the call site).
+   ───────────────────────────────────────────────────────────── */
+
+const LAGOS_TZ = "Africa/Lagos";
+
+/** "Saturday, 14 February 2026 · 10:00 WAT" — §33 render rule. */
+function eventDateLabel(iso: string): string {
+  const d = new Date(iso);
+  const day = d.toLocaleDateString("en-NG", {
+    timeZone: LAGOS_TZ,
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+  const time = d.toLocaleTimeString("en-NG", {
+    timeZone: LAGOS_TZ,
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  });
+  return `${day} · ${time} WAT`;
+}
+
+export type EventRegistrationEmailPayload = {
+  eventId: string;
+  eventTitle: string;
+  eventType: string;
+  startAt: string; // ISO
+  location?: string | null;
+  meetingUrl?: string | null;
+  firstName: string;
+  email: string;
+};
+
+export function eventRegistrationSubject(p: EventRegistrationEmailPayload): string {
+  return `You're registered — ${p.eventTitle}`;
+}
+
+export function composeEventRegistrationBody(p: EventRegistrationEmailPayload): string {
+  return [
+    `Hi ${p.firstName},`,
+    "",
+    `You're registered for ${p.eventTitle}.`,
+    "",
+    `When: ${eventDateLabel(p.startAt)}`,
+    p.location ? `Where: ${p.location}` : null,
+    p.meetingUrl ? `Join link: ${p.meetingUrl}` : "Your join link will be included in the event reminder.",
+    "",
+    "We'll send you a reminder before the event so you don't miss it.",
+    "",
+    "— Okomba Analytics",
+  ]
+    .filter((l): l is string => l !== null)
+    .join("\n");
+}
+
+export async function notifyEventRegistration(p: EventRegistrationEmailPayload): Promise<{ ok: boolean }> {
+  return sendEventEmail(p.email, "event.registration", eventRegistrationSubject(p), composeEventRegistrationBody(p), [
+    { kind: "text", text: `Hi ${p.firstName}, you're registered for **${p.eventTitle}**.` },
+    {
+      kind: "kv",
+      rows: [
+        ["When", eventDateLabel(p.startAt)],
+        ...(p.location ? ([["Where", p.location]] as [string, string][]) : []),
+        ["Join", p.meetingUrl ?? "Link arrives with your event reminder"],
+      ],
+    },
+    { kind: "text", text: "We'll send you a reminder before the event so you don't miss it." },
+  ]);
+}
+
+/* §34 — admin alert (registration received; rate-limited per event
+   via the sendAdminAlertEmail cooldown — one alert per event per
+   hour, the volume is bounded by registration rate limiting). */
+export async function notifyEventRegistrationAdmin(p: {
+  eventId: string;
+  eventTitle: string;
+  startAt: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  countryCode?: string | null;
+  phone?: string | null;
+  ip?: string;
+}): Promise<void> {
+  try {
+    await sendAdminAlertEmail({
+      key: `event.registration.${p.eventId}`,
+      subject: `New registration — ${p.eventTitle}`,
+      bodyText: [
+        `New registration for ${p.eventTitle}.`,
+        "",
+        `Registrant: ${p.firstName} ${p.lastName}`,
+        `Email:    ${p.email}`,
+        p.phone ? `Phone:    ${p.phone}` : null,
+        p.countryCode ? `Country:  ${p.countryCode}` : null,
+        `Event:    ${eventDateLabel(p.startAt)}`,
+        p.ip ? `Source IP: ${p.ip}` : null,
+      ]
+        .filter((l): l is string => l !== null)
+        .join("\n"),
+      blocks: [
+        { kind: "text", text: `New registration for **${p.eventTitle}**.` },
+        {
+          kind: "kv",
+          rows: [
+            ["Registrant", `${p.firstName} ${p.lastName}`],
+            ["Email", p.email],
+            ...(p.phone ? ([["Phone", p.phone]] as [string, string][]) : []),
+            ...(p.countryCode ? ([["Country", p.countryCode]] as [string, string][]) : []),
+            ["Event", eventDateLabel(p.startAt)],
+          ],
+        },
+      ],
+      ctaText: "Open calendar",
+      ctaUrl: `${BASE_URL}/#admin`,
+    });
+  } catch (err) {
+    console.error("[notify:event-registration-admin] alert failed:", err);
+  }
+}
+
+/* §34 — reminder email. kind: "pre" (distance label), "sameday"
+   (starting now), "followup" (post-event thank-you). Carries the
+   join link for the registrant. */
+export type EventReminderEmailPayload = {
+  eventId: string;
+  eventTitle: string;
+  startAt: string; // ISO
+  location?: string | null;
+  meetingUrl?: string | null;
+  firstName: string;
+  email: string;
+  kind: "pre" | "sameday" | "followup";
+  offsetMinutes: number; // >0 pre, 0 at start, <0 post
+};
+
+function eventReminderSubject(p: EventReminderEmailPayload): string {
+  if (p.kind === "pre") {
+    const days = Math.round(p.offsetMinutes / 1440);
+    const hours = Math.round(p.offsetMinutes / 60);
+    const distance = days >= 1 ? `${days} day${days === 1 ? "" : "s"}` : `${hours} hour${hours === 1 ? "" : "s"}`;
+    return `Reminder: ${p.eventTitle} starts in ${distance}`;
+  }
+  if (p.kind === "sameday") return `Starting now: ${p.eventTitle}`;
+  return `Thank you for joining ${p.eventTitle}`;
+}
+
+export function composeEventReminderBody(p: EventReminderEmailPayload): string {
+  const when = eventDateLabel(p.startAt);
+  if (p.kind === "followup") {
+    return [
+      `Hi ${p.firstName},`,
+      "",
+      `Thank you for joining ${p.eventTitle}.`,
+      "",
+      `Held: ${when}`,
+      "",
+      "We'd love your feedback — reply to this email with one thing",
+      "you'd want us to cover next time.",
+      "",
+      "— Okomba Analytics",
+    ].join("\n");
+  }
+  return [
+    `Hi ${p.firstName},`,
+    "",
+    p.kind === "sameday"
+      ? `${p.eventTitle} is starting now.`
+      : `A reminder that ${p.eventTitle} is coming up.`,
+    "",
+    `When: ${when}`,
+    p.location ? `Where: ${p.location}` : null,
+    p.meetingUrl ? `Join:  ${p.meetingUrl}` : "Your join link is included when the session opens.",
+    "",
+    "— Okomba Analytics",
+  ]
+    .filter((l): l is string => l !== null)
+    .join("\n");
+}
+
+export async function sendEventReminderEmail(
+  p: EventReminderEmailPayload
+): Promise<{ ok: boolean; error?: string }> {
+  const subject = eventReminderSubject(p);
+  const blocks: EmailBlock[] = [
+    {
+      kind: "text",
+      text:
+        p.kind === "sameday"
+          ? `Hi ${p.firstName}, **${p.eventTitle}** is starting now.`
+          : p.kind === "followup"
+            ? `Hi ${p.firstName}, thank you for joining **${p.eventTitle}**.`
+            : `Hi ${p.firstName}, a reminder that **${p.eventTitle}** is coming up.`,
+    },
+    {
+      kind: "kv",
+      rows: [
+        [p.kind === "followup" ? "Held" : "When", eventDateLabel(p.startAt)],
+        ...(p.location ? ([["Where", p.location]] as [string, string][]) : []),
+      ],
+    },
+    ...(p.kind !== "followup" && p.meetingUrl
+      ? ([
+          { kind: "text", text: `Join the session:\n${p.meetingUrl}` },
+        ] as EmailBlock[])
+      : []),
+    ...(p.kind === "followup"
+      ? ([{ kind: "text", text: "We'd love your feedback — reply with one thing you'd want us to cover next time." }] as EmailBlock[])
+      : []),
+  ];
+  return sendEventEmail(p.email, "event.reminder", subject, composeEventReminderBody(p), blocks, p.meetingUrl ?? undefined);
+}
+
+/* Internal shared sender for event emails (EmailLog + failover). */
+async function sendEventEmail(
+  to: string,
+  type: string,
+  subject: string,
+  bodyText: string,
+  blocks: EmailBlock[],
+  ctaUrl?: string
+): Promise<{ ok: boolean; error?: string }> {
+  if (!enabled) return { ok: false, error: "notifications disabled" };
+
+  const html = brandedEmailHtml({
+    title: subject,
+    preheader: bodyText.split("\n")[0]?.slice(0, 120) ?? subject,
+    blocks,
+    ...(ctaUrl ? { ctaText: "Join the event", ctaUrl } : {}),
+    footerNote: "Event email from the Okomba Analytics platform.",
+  });
+
+  let logId: string | null = null;
+  try {
+    const created = await db.emailLog.create({
+      data: { type, recipientEmail: to, subject, status: "sent", bodyText, bodyHtml: html },
+      select: { id: true },
+    });
+    logId = created.id;
+  } catch (err) {
+    console.error(`[notify:${type}] log persist failed:`, err);
+  }
+
+  try {
+    const result = await deliverWithFailover({
+      to,
+      subject,
+      bodyHtml: html,
+      bodyText,
+      attachments: [],
+      type,
+      legacyAction: "sendEmail",
+    });
+    if (logId) {
+      try {
+        await db.emailLog.updateMany({
+          where: { id: logId },
+          data: {
+            provider: result.provider,
+            ...(result.ok ? {} : { status: "failed", error: result.error ?? "delivery failed" }),
+          },
+        });
+      } catch {}
+    }
+    if (!result.ok) {
+      console.error(`[notify:${type}] delivery failed:`, result.error);
+      return { ok: false, error: result.error };
+    }
+    return { ok: true };
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "delivery failed";
+    console.error(`[notify:${type}] delivery threw:`, msg);
+    return { ok: false, error: msg };
+  }
+}

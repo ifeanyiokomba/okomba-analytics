@@ -487,3 +487,9 @@ export function readTimeFor(content: string): string {
   const mins = Math.max(1, Math.round(words / 200));
   return `${mins} min read`;
 }
+
+/* ── BATCH 10 (§33–36): calendar / events ──────────────────────
+   Row types live in events-shared.ts (client-safe, shared with
+   the public section); re-exported here so the admin portal keeps
+   its single `./types` import surface. */
+export type { CalendarEventRow, EventRegistrationRow, EventStats, PublicEvent } from "@/lib/events-shared";

@@ -603,6 +603,43 @@ exports.Prisma.AdRequestScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.CalendarEventScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  description: 'description',
+  type: 'type',
+  startAt: 'startAt',
+  endAt: 'endAt',
+  allDay: 'allDay',
+  location: 'location',
+  meetingUrl: 'meetingUrl',
+  isPublic: 'isPublic',
+  capacity: 'capacity',
+  customerId: 'customerId',
+  invoiceId: 'invoiceId',
+  status: 'status',
+  reminderOffsets: 'reminderOffsets',
+  remindersSent: 'remindersSent',
+  createdBy: 'createdBy',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.EventRegistrationScalarFieldEnum = {
+  id: 'id',
+  eventId: 'eventId',
+  firstName: 'firstName',
+  lastName: 'lastName',
+  email: 'email',
+  phone: 'phone',
+  countryCode: 'countryCode',
+  consent: 'consent',
+  consentAt: 'consentAt',
+  status: 'status',
+  reminderStates: 'reminderStates',
+  createdAt: 'createdAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -662,7 +699,9 @@ exports.Prisma.ModelName = {
   CustomerNote: 'CustomerNote',
   CustomerMessage: 'CustomerMessage',
   ImportJob: 'ImportJob',
-  AdRequest: 'AdRequest'
+  AdRequest: 'AdRequest',
+  CalendarEvent: 'CalendarEvent',
+  EventRegistration: 'EventRegistration'
 };
 
 /**

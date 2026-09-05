@@ -18,6 +18,7 @@ import { WhySection } from "@/components/site/why-section";
 import { ProcessSection } from "@/components/site/process-section";
 import { TestimonialsSection } from "@/components/site/testimonials-section";
 import { InsightsSection } from "@/components/site/insights-section";
+import { EventsSection } from "@/components/site/events-section";
 import { AdvertiseSection } from "@/components/site/advertise-section";
 import { SponsoredSlot } from "@/components/site/sponsored-slot";
 import { AboutSection } from "@/components/site/about-section";
@@ -161,6 +162,8 @@ export default function Home() {
         <ProcessSection onGetStarted={() => openInquiry(null)} />
         <TestimonialsSection />
         <InsightsSection />
+        {/* §34 — public events & webinars with open registration */}
+        <EventsSection />
         {/* §37 Advertise With Us — public ad request workflow */}
         <AdvertiseSection />
         <NewsletterSection />

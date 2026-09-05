@@ -807,3 +807,66 @@ model AdRequest {
   @@index([placement])
   @@index([startAt, endAt])
 }
+
+/* ── BATCH 10 (§33–36): Appointment calendar + event registration ──
+   CalendarEvent carries the six §33 entry kinds (appointment |
+   meeting | webinar | event | deadline | task) — invoice due
+   dates are DERIVED client-side from unpaid invoices (no rows),
+   so the calendar is always in sync with payments.
+   reminderOffsets: minutes BEFORE start; negative = after start
+   (post-event follow-up, §34). remindersSent is a batch-level
+   marker { "<offsetMinutes>": ISO }; EventRegistration keeps a
+   per-registrant reminderStates map for re-registration resets.
+   Times are stored UTC; every render/interpret uses Africa/Lagos
+   (no DST, fixed +60) — see lagosInputValueToUtc in events.ts. */
+model CalendarEvent {
+  id            String    @id @default(cuid())
+  title         String
+  description   String?
+  type          String // appointment | meeting | webinar | event | deadline | task
+  startAt       DateTime
+  endAt         DateTime?
+  allDay        Boolean   @default(false)
+  location      String?
+  meetingUrl    String?
+  isPublic      Boolean   @default(false)
+  capacity      Int? // registration cap for public webinars/events
+  customerId    String?
+  invoiceId     String?
+  status        String    @default("scheduled") // scheduled | completed | cancelled
+  reminderOffsets Json    @default("[1440, 0, -1440]") // minutes before start; negative = after
+  remindersSent  Json    @default("{}") // { "<offsetMinutes>": ISO } batch-level dedup
+  createdBy      String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  registrations  EventRegistration[]
+
+  @@index([startAt])
+  @@index([status, startAt])
+  @@index([type])
+  @@index([isPublic, status])
+}
+
+/* §34 — public event/webinar registration. One live row per
+   (event, email): cancelling then re-registering REACTIVATES the
+   row with a fresh reminderStates map. Consent (reminders +
+   confirmations) is explicit and timestamped. */
+model EventRegistration {
+  id             String   @id @default(cuid())
+  eventId        String
+  event          CalendarEvent @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  firstName      String
+  lastName       String
+  email          String
+  phone          String?
+  countryCode    String? // ISO-2 (countries.ts)
+  consent        Boolean  @default(false)
+  consentAt      DateTime?
+  status         String   @default("registered") // registered | attended | cancelled
+  reminderStates Json     @default("{}") // { "<offsetMinutes>": ISO } per-registrant dedup
+  createdAt      DateTime @default(now())
+
+  @@unique([eventId, email])
+  @@index([eventId])
+  @@index([email])
+}

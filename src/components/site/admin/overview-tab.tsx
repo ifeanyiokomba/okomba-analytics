@@ -63,6 +63,7 @@ export function OverviewTab({
   outstandingInvoices,
   liveAds,
   pendingComments,
+  upcomingEvents,
   can,
   onNavigate,
   onQuickAction,
@@ -75,8 +76,9 @@ export function OverviewTab({
   outstandingInvoices: number;
   liveAds: number;
   pendingComments: number;
+  upcomingEvents: number;
   can: (perm: string) => boolean;
-  onNavigate: (tab: "inquiries" | "customers" | "payments" | "posts" | "comments" | "ads" | "subscribers" | "email", filter?: string) => void;
+  onNavigate: (tab: "inquiries" | "customers" | "payments" | "posts" | "comments" | "ads" | "events" | "subscribers" | "email", filter?: string) => void;
   onQuickAction: (action: QuickActionId) => void;
 }) {
   const cards: {
@@ -86,7 +88,7 @@ export function OverviewTab({
     icon: typeof Inbox;
     accent: string;
     bg: string;
-    target: "inquiries" | "customers" | "payments" | "posts" | "comments" | "ads" | "subscribers" | "email";
+    target: "inquiries" | "customers" | "payments" | "posts" | "comments" | "ads" | "events" | "subscribers" | "email";
     filter?: string;
   }[] = stats
     ? [
@@ -99,6 +101,7 @@ export function OverviewTab({
         { label: "Pending comments", value: pendingComments, sub: "Awaiting moderation", icon: MessageSquare, accent: "text-gold-light", bg: "border-gold-light/25 bg-gold-light/10", target: "comments" },
         { label: "Published posts", value: stats.postsPublished, sub: `${stats.postsDraft} drafts`, icon: FileText, accent: "text-gold", bg: "border-gold/25 bg-gold-dim", target: "posts" },
         { label: "Live campaigns", value: liveAds, sub: "Ads running now", icon: Megaphone, accent: "text-gold-light", bg: "border-gold-light/25 bg-gold-light/10", target: "ads" },
+        { label: "Upcoming events", value: upcomingEvents, sub: "Next 7 days", icon: CalendarDays, accent: "text-teal", bg: "border-teal/25 bg-teal-dim", target: "events" },
         { label: "Emails sent", value: stats.emailsSent, sub: `${stats.emailsLast7Days} this week`, icon: Mail, accent: "text-gold", bg: "border-gold/25 bg-gold-dim", target: "email" },
       ]
     : [];
@@ -111,7 +114,7 @@ export function OverviewTab({
     { id: "new-post", label: "New post", icon: FileText, enabled: can("manage_posts") },
     { id: "broadcast", label: "Broadcast", icon: Send, enabled: can("broadcast_subscribers") },
     { id: "new-ad", label: "New ad campaign", icon: Megaphone, enabled: can("manage_ads") },
-    { id: "new-event", label: "New event", icon: CalendarDays, enabled: false, note: "Calendar ships in Batch 10" },
+    { id: "new-event", label: "New event", icon: CalendarDays, enabled: can("manage_events") },
     { id: "invite-admin", label: "Invite admin", icon: UserPlus, enabled: can("manage_admins") },
     { id: "review-drafts", label: "Review AI drafts", icon: Sparkles, enabled: can("create_invoices") },
   ];

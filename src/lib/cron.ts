@@ -14,6 +14,10 @@ import cron from "node-cron";
  *   2. Payment reminders (Phase-2 Module 5) — daily 09:00 Africa/Lagos.
  *      Nudges customers 3 days before due, on the due date, and 1 day
  *      overdue — email + WhatsApp, PDF re-attached every time.
+ *      BATCH 10 (§36): event/appointment reminders run in the SAME
+ *      09:00 job, chained after the invoice scan (sequential + logged
+ *      + isolated). A lazy scan on GET /api/admin/events back-fills
+ *      whenever the daily cron misses.
  */
 
 let started = false;
@@ -57,10 +61,22 @@ export function startCronJobs(): void {
         } catch (err) {
           console.error("[cron] reminder scan failed:", err);
         }
+        /* §36 — event reminders chained AFTER the invoice scan
+           (sequential, logged, isolated: an event-scan failure can
+           never break the payment scan and vice-versa). */
+        try {
+          const { runEventReminderScan } = await import("@/lib/events");
+          const r = await runEventReminderScan({ trigger: "cron" });
+          console.log(
+            `[cron] event reminder scan — ${r.sentCount} sent, ${r.failed} failed, ${r.skipped} skipped (${r.scanned} events scanned, ${r.lagosToday})`
+          );
+        } catch (err) {
+          console.error("[cron] event reminder scan failed:", err);
+        }
       },
       { timezone: "Africa/Lagos" }
     );
-    console.log(`[cron] payment reminders scheduled (${expr} Africa/Lagos)`);
+    console.log(`[cron] payment + event reminders scheduled (${expr} Africa/Lagos)`);
   }
 
   /* ── Module 8B: daily 02:00 WAT database backup ── */

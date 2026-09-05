@@ -5,6 +5,7 @@ import {
   ArrowLeft,
   BarChart3,
   BellRing,
+  CalendarDays,
   CreditCard,
   FileSignature,
   FileText,
@@ -41,6 +42,8 @@ import { PostsTab } from "./posts-tab";
 import { CommentsTab, type AdminComment } from "./comments-tab";
 import { AdsTab, type AdRequestRow, type AdStats } from "./ads-tab";
 import { AdDetailDialog } from "./ad-detail-dialog";
+import { EventsTab } from "./events-tab";
+import type { EventSavePayload } from "./event-dialog";
 import { TestimonialsTab } from "./testimonials-tab";
 import { EmailLogTab } from "./email-log-tab";
 import { InvoicesTab } from "./invoices-tab";
@@ -52,6 +55,7 @@ import { SettingsTab } from "./settings-tab";
 import { AdminsTab } from "./admins-tab";
 import { QuickAddCustomerDialog } from "./quick-add-customer-dialog";
 import { ProposalComposerDialog } from "./proposal-composer-dialog";
+import type { CalendarEventRow, EventStats } from "@/lib/events-shared";
 import type {
   DraftProposalRow,
   EmailLog,
@@ -73,6 +77,7 @@ type Tab =
   | "posts"
   | "comments"
   | "ads"
+  | "events"
   | "admins"
   | "testimonials"
   | "whatsapp"
@@ -90,6 +95,7 @@ const TABS: { id: Tab; label: string; icon: typeof Inbox }[] = [
   { id: "posts", label: "Posts", icon: FileText },
   { id: "comments", label: "Comments", icon: MessageSquare },
   { id: "ads", label: "Ads", icon: Megaphone },
+  { id: "events", label: "Events", icon: CalendarDays },
   { id: "admins", label: "Admins", icon: ShieldCheck },
   { id: "testimonials", label: "Testimonials", icon: MessageSquareQuote },
   { id: "whatsapp", label: "WhatsApp", icon: MessageCircle },
@@ -119,6 +125,11 @@ export function AdminDashboard({
   const [adStats, setAdStats] = useState<AdStats | null>(null);
   const [detailAd, setDetailAd] = useState<AdRequestRow | null>(null);
   const [adBusy, setAdBusy] = useState(false);
+  /* ── BATCH 10 (§33–36): calendar / events ── */
+  const [events, setEvents] = useState<CalendarEventRow[]>([]);
+  const [eventStats, setEventStats] = useState<EventStats | null>(null);
+  const [eventCustomers, setEventCustomers] = useState<{ id: string; name: string; email: string }[]>([]);
+  const [eventCreateSignal, setEventCreateSignal] = useState(0);
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
   const [emailLogs, setEmailLogs] = useState<EmailLog[]>([]);
   const [invoices, setInvoices] = useState<Invoice[]>([]);
@@ -206,7 +217,10 @@ export function AdminDashboard({
   );
 
   const visibleTabs = useMemo(
-    () => TABS.filter((t) => (t.id === "admins" ? can("manage_admins") : true)),
+    () =>
+      TABS.filter((t) =>
+        t.id === "admins" ? can("manage_admins") : t.id === "events" ? can("manage_events") : true
+      ),
     [can]
   );
 
@@ -214,7 +228,7 @@ export function AdminDashboard({
   const load = useCallback(async () => {
     setError(null);
     try {
-      const [meRes, listRes, statsRes, subsRes, postsRes, logRes, testimonialsRes, invoicesRes, draftsRes, commentsRes, adsRes] = await Promise.all([
+      const [meRes, listRes, statsRes, subsRes, postsRes, logRes, testimonialsRes, invoicesRes, draftsRes, commentsRes, adsRes, eventsRes, customersRes] = await Promise.all([
         fetch("/api/admin/me"),
         fetch("/api/inquiries"),
         fetch("/api/inquiries?stats=1"),
@@ -226,6 +240,8 @@ export function AdminDashboard({
         fetch("/api/admin/proposal-drafts"),
         fetch("/api/admin/comments"),
         fetch("/api/admin/ads?stats=1"),
+        fetch("/api/admin/events"),
+        fetch("/api/admin/customers?limit=200"),
       ]);
       if (meRes.ok) {
         const m = (await meRes.json()) as { me?: {
@@ -260,6 +276,21 @@ export function AdminDashboard({
         const a = await adsRes.json();
         setAds(a.ads ?? []);
         setAdStats(a.stats ?? null);
+      }
+      if (eventsRes.ok) {
+        const ev = await eventsRes.json();
+        setEvents(ev.events ?? []);
+        setEventStats(ev.stats ?? null);
+      }
+      if (customersRes.ok) {
+        const cs = await customersRes.json();
+        setEventCustomers(
+          (cs.customers ?? []).map((c: { id: string; name: string; email: string }) => ({
+            id: c.id,
+            name: c.name,
+            email: c.email,
+          }))
+        );
       }
       if (logRes.ok) {
         const l = await logRes.json();
@@ -561,6 +592,100 @@ export function AdminDashboard({
       }
     },
     [refreshAds]
+  );
+
+  /* ── BATCH 10 (§33–36): calendar event handlers ─────────── */
+  const refreshEvents = useCallback(async () => {
+    try {
+      const res = await fetch("/api/admin/events");
+      if (!res.ok) return null;
+      const j = await res.json();
+      setEvents(j.events ?? []);
+      setEventStats(j.stats ?? null);
+      return j.events ?? [];
+    } catch {
+      return null;
+    }
+  }, []);
+
+  const saveEvent = useCallback(
+    async (payload: EventSavePayload, id?: string): Promise<void> => {
+      const res = await fetch(id ? `/api/admin/events/${id}` : "/api/admin/events", {
+        method: id ? "PATCH" : "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const j = await res.json().catch(() => null);
+      if (!res.ok || !j?.ok) {
+        const msg = j?.error ?? "Save failed";
+        setToast({ text: msg, type: "err" });
+        throw new Error(msg);
+      }
+      setToast({ text: id ? "Event updated" : "Event created", type: "ok" });
+      await refreshEvents();
+    },
+    [refreshEvents]
+  );
+
+  const cancelEvent = useCallback(
+    async (id: string): Promise<boolean> => {
+      try {
+        const res = await fetch(`/api/admin/events/${id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status: "cancelled" }),
+        });
+        const j = await res.json().catch(() => null);
+        if (!res.ok || !j?.ok) throw new Error(j?.error ?? "Cancel failed");
+        setToast({ text: "Event cancelled — reminders stopped", type: "ok" });
+        await refreshEvents();
+        return true;
+      } catch (err) {
+        setToast({ text: err instanceof Error ? err.message : "Cancel failed", type: "err" });
+        return false;
+      }
+    },
+    [refreshEvents]
+  );
+
+  const deleteEvent = useCallback(
+    async (id: string): Promise<boolean> => {
+      try {
+        const res = await fetch(`/api/admin/events/${id}`, { method: "DELETE" });
+        const j = await res.json().catch(() => null);
+        if (!res.ok || !j?.ok) throw new Error(j?.error ?? "Delete failed");
+        setToast({ text: "Event deleted (registrations removed)", type: "ok" });
+        await refreshEvents();
+        return true;
+      } catch (err) {
+        setToast({ text: err instanceof Error ? err.message : "Delete failed", type: "err" });
+        return false;
+      }
+    },
+    [refreshEvents]
+  );
+
+  const updateEventAttendance = useCallback(
+    async (eventId: string, registrationId: string, status: "attended" | "registered"): Promise<boolean> => {
+      try {
+        const res = await fetch(`/api/admin/events/${eventId}/registrations`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ registrationId, status }),
+        });
+        const j = await res.json().catch(() => null);
+        if (!res.ok || !j?.ok) throw new Error(j?.error ?? "Update failed");
+        setToast({
+          text: status === "attended" ? "Marked attended" : "Attendance reset to registered",
+          type: "ok",
+        });
+        return true;
+      } catch (err) {
+        setToast({ text: err instanceof Error ? err.message : "Update failed", type: "err" });
+        return false;
+      }
+    },
+    []
   );
 
   const deletePost = useCallback(
@@ -916,6 +1041,12 @@ export function AdminDashboard({
                 ).length}
                 liveAds={adStats?.active ?? ads.filter((a) => a.status === "active").length}
                 pendingComments={comments.filter((c) => c.status === "pending").length}
+                upcomingEvents={eventStats?.upcoming7d ?? events.filter(
+                  (e) =>
+                    e.status === "scheduled" &&
+                    new Date(e.startAt).getTime() >= Date.now() - 24 * 60 * 60 * 1000 &&
+                    new Date(e.startAt).getTime() <= Date.now() + 7 * 24 * 60 * 60 * 1000
+                ).length}
                 can={can}
                 onNavigate={(target, filter) => {
                   if (target === "inquiries" && filter) {
@@ -938,6 +1069,9 @@ export function AdminDashboard({
                     setTab("payments");
                   } else if (action === "new-ad") {
                     setTab("ads");
+                  } else if (action === "new-event") {
+                    setTab("events");
+                    setEventCreateSignal((s) => s + 1);
                   }
                 }}
               />
@@ -1009,6 +1143,19 @@ export function AdminDashboard({
             )}
             {tab === "ads" && (
               <AdsTab ads={ads} stats={adStats} loading={false} onOpen={(a) => setDetailAd(a)} />
+            )}
+            {tab === "events" && (
+              <EventsTab
+                events={events}
+                eventStats={eventStats}
+                invoices={invoices}
+                customers={eventCustomers}
+                openCreateSignal={eventCreateSignal}
+                onSave={saveEvent}
+                onCancelEvent={cancelEvent}
+                onDelete={deleteEvent}
+                onAttendance={updateEventAttendance}
+              />
             )}
             {tab === "admins" && (
               <AdminsTab

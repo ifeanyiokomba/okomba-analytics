@@ -5501,3 +5501,29 @@ Stage Summary:
 - Pattern bank: scripted whole-API guard migration (regex + per-method permission map + import swap) — reusable for any future route; permission-agnostic session probe (/api/admin/me) vs data probes; #/invite deep-link with mount+hashchange parsing.
 - NEXT BATCHES per directive order: Batch 10 (events/calendar §33 full UI + §46 Events card target) → Batch 11 (AI chat grounding §48–51) → Batch 12 (AI autonomy §52–57) → 13–15.
 - Push to origin still blocked pending founder credential via NON-IM channel (see Task 36/39 records).
+
+---
+Task ID: 45-B10
+Agent: main (orchestrator) + full-stack-developer (subagent)
+Task: BATCH 10 — CALENDAR / EVENTS / REMINDERS (directive §33–§36): full appointment calendar (month/week/day/agenda), public event + webinar registration with consent + confirmation emails, configurable pre/same-day/post reminders, attendance tracking, invoice due-date integration, §36 background-jobs audit.
+
+Work Log:
+- Implemented by full-stack-developer subagent (spec'd by orchestrator after Task 44; subagent hit its 200-turn limit after full implementation + E2E but before worklog/commit — orchestrator finished verification/cleanup/records):
+  • PRISMA 28 → 30 models (additive, Neon-safe): CalendarEvent (6 §33 types appointment/meeting/webinar/event/deadline/task; UTC storage + Lagos render; isPublic + capacity; reminderOffsets Json [minutes, negative=after]; remindersSent batch dedup) + EventRegistration (unique eventId+email, §34 identity fields, consent+consentAt, status registered/attended/cancelled, per-registrant reminderStates Json). Pushed to embedded PG.
+  • LIBS: events-shared.ts (client-safe types/colors/labels) + events.ts (zod schemas; registerForEvent w/ capacity + reactivate-on-reregister; runEventReminderScan ±3d/+30d window, per-registrant + batch dedup, 500-cap, dryRun report; runEventLifecycle lazy completed-flip; seedEventsIfEmpty = 2 public + 2 internal).
+  • EMAILS (notify.ts): event.registration registrant confirmation (incl. join link — registrant-only) + event.registration.admin alert + event.reminder pre/same-day/post — all via existing EmailLog pipeline.
+  • APIs: PUBLIC GET /api/events (sanitized: hasMeetingUrl boolean, NEVER the URL; registrationCount/spotsLeft) + POST /api/events/register (§92-style IP rate limit; 404/409/422/429 semantics; duplicate:true). ADMIN /api/admin/events GET(list+stats)/POST + [id] GET/PATCH(status transitions)/DELETE(cascade) + [id]/registrations GET + PATCH attendance — all authorizeAdmin(req,"manage_events").
+  • ADMIN UI: events-tab.tsx (Month 6×7 grid w/ today gold-ring + ≤3 chips + "+N more" + cell-click-create; Week 7-col; Day chronological; Agenda 60-day; type filter chips; prev/Today/next; 3 stat mini-cards) + event-dialog.tsx (create/edit, WAT↔UTC handling, public switch→capacity, reminder-offset chips, customer link) + event-detail-dialog.tsx (registrations table w/ attendance buttons, cancel/delete confirms). Invoice due dates derived as all-day deadline entries (always in sync with Payments).
+  • DASHBOARD: Events tab (manage_events-gated), quick action "New event" ENABLED (was disabled "Calendar ships in Batch 10"), KPI card "Upcoming events → open events" (§46), types.ts + wiring.
+  • PUBLIC UI: events-section.tsx (after Insights; cards w/ date block/type chip/WAT times/spots-left; hidden when empty) + event-registration-dialog.tsx (§34 fields + required consent; success/duplicate/429/422 states, aria-live).
+  • CRON §36: runEventReminderScan chained into the 09:00 WAT daily job + lazy trigger on GET /api/admin/events; docs/implementation-audit.md §33/34/35/36 flipped ✅ + NEW §36 background-jobs audit table (idempotent/retryable/observable/bounded per job).
+- ORCHESTRATOR VERIFICATION (independent, after subagent):
+  • tsc --noEmit → 0 errors; bun run lint → clean; dev.log → zero errors; /api/health/ready ok.
+  • BROWSER: public Events section renders (2 upcoming events + Register); registration dialog §34 fields verified live; 429 rate-limit error displayed correctly after prior-IP exhaustion (defense proven); admin login → Events tab + view switcher + 4 seeded chips in month grid; "Upcoming events" KPI card navigates to Events; "New event" quick action opens create dialog; mobile 390×844 zero horizontal overflow (admin calendar + public page) — screenshots e2e-shots/task45/12-13.
+  • API: POST register fresh IP → 201 {duplicate:false}; repeat → {duplicate:true}; EmailLog event.registration confirmation written; registration row w/ consent=true countryCode=NG.
+  • CLEANUP: subagent leftovers removed (Acme test event + 7 test emails) + orchestrator's test registration/email; FINAL: 4 seeded events, 0 registrations.
+
+Stage Summary:
+- BATCH 10 COMPLETE per directive §105/§113: §33 ✅ (full calendar UI w/ 4 views + 6 types + invoice due dates) · §34 ✅ (public registration + consent + confirmation + configurable reminders + attendance) · §35 ✅ (calendar integration; paid-stop + dedup already in engine) · §36 ✅ (audit table; scan in 09:00 cron + lazy). Models 30 total (additive-only).
+- All quality gates green; E2E verified independently by orchestrator (browser + curl + DB).
+- NEXT: Batch 11 (AI customer service §48–51 + §58–63) → Batch 12 (AI autonomy) → 13 (student portal) → 14 (ratings/trust/analytics) → 15 (final polish). Push + deploy handled by orchestrator this session.
