@@ -6,15 +6,27 @@ import { recordAnalyticsEvent, hasSessionEvent } from "@/lib/analytics-server";
 export const runtime = "nodejs";
 
 /* ------------------------------------------------------------------ */
-/* POST /api/ai/chat                                                   */
+/* POST /api/ai/chat — BATCH 11 §48–§51 + §58–§63 turn engine.         */
 /*                                                                     */
-/* AI Service Finder (Module 7). Body: { sessionId, messages:[...] }.  */
-/* Before calling z-ai the engine re-reads the live Services +         */
-/* Portfolio catalog so the AI only ever recommends what the site      */
-/* sells. Email capture → received_emails + inquiry + draft            */
-/* proposal (background). Rate-limited per IP.                          */
+/* Body (UNCHANGED from Module 7 — the widget is the only consumer):   */
+/*   { sessionId, messages: [{role, content}, ...] }                    */
+/*                                                                     */
+/* BACKWARD-COMPAT PERSISTENCE RULE: the widget sends the FULL         */
+/* history for LLM context, but the server already stored every        */
+/* earlier user/assistant turn on the requests that produced them.     */
+/* The engine therefore persists ONLY the LAST user message of the     */
+/* payload (the new tail) — never re-inserts history it already has.   */
+/*                                                                     */
+/* Engine (src/lib/ai-chat.ts): §49 reasoning order (conversation →    */
+/* customer context → configured knowledge → catalog → actions), §51   */
+/* figure guard (only configured prices), §58 ChatConversation/        */
+/* ChatMessage persistence, §60 escalation (model flag + keyword +     */
+/* low-confidence) → requestHandover, §61 human-owned queue (the       */
+/* engine returns humanOwned:true with reply "" — the visitor's        */
+/* message is stored for the agent, no model call, no assistant row),  */
+/* §60 holding text while a handover is pending. Rate-limited per IP.  */
 /* Module 8C: records an `ai_chat_start` analytics event on the first  */
-/* turn of a session (deduped by sessionId).                            */
+/* turn of a session (deduped by sessionId).                           */
 /* ------------------------------------------------------------------ */
 
 const schema = z.object({
@@ -85,4 +97,3 @@ export async function POST(req: Request) {
     );
   }
 }
-

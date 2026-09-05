@@ -1929,3 +1929,131 @@ async function sendEventEmail(
     return { ok: false, error: msg };
   }
 }
+
+/* ─────────────────────────────────────────────────────────────
+   BATCH 11 (§60/§62): AI → human handover requested. Sent when
+   the chat engine escalates a conversation AND an admin is
+   actually online (presence heartbeat within 90s — never promise
+   an immediate human response when nobody is available).
+   Follows the sendAdminAlertEmail pattern (cooldown per
+   conversation, branded HTML + EmailLog audit row + failover
+   delivery) with EmailLog type "ai.handoff". Never throws — the
+   caller (requestHandover) treats it as fire-and-forget.
+   ───────────────────────────────────────────────────────────── */
+export async function notifyAiHandoffRequested(p: {
+  customerName: string | null;
+  customerEmail: string | null;
+  sessionId: string;
+  conversationId: string;
+  reason: string;
+  lastMessage: string;
+}): Promise<{ ok: boolean; skipped?: boolean }> {
+  try {
+    if (!enabled) return { ok: false, skipped: true };
+
+    // Cooldown: one alert per conversation per hour (handover
+    // re-requests on the same conversation are idempotent anyway).
+    const key = `ai.handoff.${p.conversationId}`;
+    const last = alertLastSent.get(key) ?? 0;
+    if (Date.now() - last < ALERT_COOLDOWN_MS) return { ok: true, skipped: true };
+    alertLastSent.set(key, Date.now());
+
+    const preview =
+      p.lastMessage.length > 300 ? `${p.lastMessage.slice(0, 300)}…` : p.lastMessage || "(no visitor message)";
+    const subject = `[Okomba AI] Human handover requested`;
+
+    const bodyText = [
+      `A chat visitor asked for a human and the conversation was flagged for takeover.`,
+      ``,
+      `Conversation: ${p.sessionId} (${p.conversationId})`,
+      p.customerName ? `Visitor name: ${p.customerName}` : null,
+      p.customerEmail ? `Visitor email: ${p.customerEmail}` : "Visitor email: unknown (not captured)",
+      `Reason: ${p.reason}`,
+      `An admin is currently online — the visitor is waiting.`,
+      ``,
+      `Last visitor message:`,
+      preview,
+      ``,
+      `Open the AI Monitor tab in the admin dashboard to accept or decline.`,
+    ]
+      .filter((l): l is string => l !== null)
+      .join("\n");
+
+    const html = brandedEmailHtml({
+      title: subject,
+      preheader: `Chat handover requested — ${p.reason}`,
+      blocks: [
+        { kind: "text", text: "A chat visitor asked for a human and the conversation was flagged for takeover." },
+        {
+          kind: "kv",
+          rows: [
+            ["Conversation", p.sessionId],
+            ["Visitor", p.customerName ?? "Unknown name"],
+            ["Email", p.customerEmail ?? "Not captured"],
+            ["Reason", p.reason],
+          ],
+        },
+        { kind: "text", text: `Last visitor message:\n${preview}` },
+        { kind: "text", text: "Accept or decline in the admin dashboard — open the AI Monitor tab." },
+      ],
+      ctaText: "Open admin dashboard",
+      ctaUrl: `${BASE_URL}/#admin`,
+      footerNote: "AI chat handover alert from the Okomba Analytics platform.",
+    });
+
+    const to = adminAlertRecipient();
+
+    let logId: string | null = null;
+    try {
+      const created = await db.emailLog.create({
+        data: {
+          type: "ai.handoff",
+          recipientEmail: to,
+          subject,
+          status: "sent",
+          bodyText,
+          bodyHtml: html,
+        },
+        select: { id: true },
+      });
+      logId = created.id;
+    } catch (err) {
+      console.error("[notify:ai-handoff] log persist failed:", err);
+    }
+
+    try {
+      const result = await deliverWithFailover({
+        to,
+        subject,
+        bodyHtml: html,
+        bodyText,
+        attachments: [],
+        type: "ai.handoff",
+        legacyAction: "sendEmail",
+      });
+      if (logId) {
+        try {
+          await db.emailLog.updateMany({
+            where: { id: logId },
+            data: {
+              provider: result.provider,
+              ...(result.ok ? {} : { status: "failed", error: result.error ?? "delivery failed" }),
+            },
+          });
+        } catch {}
+      }
+      if (!result.ok) {
+        console.error("[notify:ai-handoff] delivery failed:", result.error);
+        return { ok: false };
+      }
+      return { ok: true };
+    } catch (err) {
+      console.error("[notify:ai-handoff] delivery threw:", err instanceof Error ? err.message : err);
+      return { ok: false };
+    }
+  } catch (err) {
+    // NEVER throws — escalation must not be blocked by email issues.
+    console.error("[notify:ai-handoff] failed:", err);
+    return { ok: false };
+  }
+}

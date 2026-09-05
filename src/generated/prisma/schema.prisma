@@ -122,6 +122,14 @@ model AdminSession {
   // backward-compatible with every existing cookie.
   userEmail String?
   isMaster  Boolean @default(false)
+
+  // ── Batch 11 (§62) real-time admin presence ────────────────────
+  // Heartbeat written by POST /api/admin/presence (admin dashboard).
+  // "online" counts only while presenceSeenAt is within 90s — the
+  // chat escalation gate (§60) and the widget's adminOnline flag
+  // read this. Stale rows are lazily flipped to "offline".
+  presenceStatus String    @default("offline") // online | away | offline
+  presenceSeenAt DateTime?
 }
 
 // ── Batch 7 (§44–47) — Multi-admin system + RBAC ──────────────────
@@ -903,4 +911,90 @@ model EventRegistration {
   @@unique([eventId, email])
   @@index([eventId])
   @@index([email])
+}
+
+/**
+ * ── Batch 11 (§50/§51) — Admin-configurable AI knowledge base ────
+ * SINGLETON row (id is always "singleton") holding the controlled
+ * business knowledge layer the chat AI reasons from (§49 step 3):
+ * profile, contact + hours, FAQ, policies, services & pricing,
+ * education. The AI may state ONLY figures present here (figure
+ * guard in ai-chat.ts) — anything unpriced gets "custom proposal".
+ * JSON columns keep default literals so an empty row still
+ * serializes cleanly (same convention as CalendarEvent).
+ */
+model AiKnowledge {
+  id              String   @id @default("singleton") // always "singleton"
+  businessProfile String? // markdown: what Okomba is, positioning
+  contactJson     Json     @default("{}") // { phone, whatsapp, email, address, hours, callbackEnabled }
+  faqJson         Json     @default("[]") // [{ q, a }]
+  policiesJson    Json     @default("{}") // { paymentPolicy, cancellationPolicy, depositPolicy, invoiceTerms, discounts }
+  servicesJson    Json     @default("[]") // [{ name, description, duration, priceMin, priceMax, currency }]
+  educationJson   Json     @default("[]") // [{ course, description, duration }]
+  updatedAt       DateTime @updatedAt
+}
+
+/**
+ * ── Batch 11 (§58) — AI conversation monitoring ──────────────────
+ * One row per widget sessionId. status: "ai" (bot answers) →
+ * "takeover_requested" (§60 escalation flagged; AI holds) →
+ * "human" (§59 accepted; AI silent, messages queue for the agent).
+ * §61 decline returns status to "ai" with contact alternatives.
+ * sentiment/urgency reflect the LATEST turn (LLM-labelled).
+ */
+model ChatConversation {
+  id                   String        @id @default(cuid())
+  sessionId            String        @unique
+  customerEmail        String?
+  customerName         String?
+  status               String        @default("ai") // ai | takeover_requested | human
+  agentEmail           String? // assigned human agent (master or AdminUser email)
+  agentName            String? // display name for the widget header
+  sentiment            String? // positive | neutral | negative (latest turn)
+  urgency              String? // low | normal | high (latest turn)
+  escalationReason     String?
+  escalationNotifiedAt DateTime?
+  lastMessageAt        DateTime      @default(now())
+  createdAt            DateTime      @default(now())
+  messages             ChatMessage[]
+
+  @@index([status, lastMessageAt])
+  @@index([lastMessageAt])
+}
+
+/**
+ * §58 — full transcript. role: user (visitor) | assistant (Okomba AI)
+ * | agent (human takeover) | system (handover/decline notices).
+ */
+model ChatMessage {
+  id             String           @id @default(cuid())
+  conversationId String
+  conversation   ChatConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  role           String // user | assistant | agent | system
+  content        String
+  authorLabel    String? // "Okomba AI" | agent display name | "System"
+  createdAt      DateTime         @default(now())
+
+  @@index([conversationId, createdAt])
+}
+
+/**
+ * ── Batch 11 (§63) — AI action audit trail ───────────────────────
+ * Every autonomous or semi-autonomous AI action gets a row:
+ * ai.handoff.requested / accepted / declined, ai.chat.escalated,
+ * ai.knowledge.updated, ai.proposal.created … Same never-throws
+ * convention as auditAdmin (admin-rbac.ts).
+ */
+model AiAuditLog {
+  id             String   @id @default(cuid())
+  action         String // ai.handoff.requested | ai.handoff.accepted | ai.handoff.declined | ai.chat.escalated | ai.email.drafted | ai.proposal.created ...
+  actor          String? // "system" | agent email
+  conversationId String?
+  targetId       String? // e.g. knowledge singleton id, inquiry id
+  meta           Json     @default("{}")
+  createdAt      DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([action])
+  @@index([conversationId])
 }

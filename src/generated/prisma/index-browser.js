@@ -182,7 +182,9 @@ exports.Prisma.AdminSessionScalarFieldEnum = {
   expiresAt: 'expiresAt',
   createdAt: 'createdAt',
   userEmail: 'userEmail',
-  isMaster: 'isMaster'
+  isMaster: 'isMaster',
+  presenceStatus: 'presenceStatus',
+  presenceSeenAt: 'presenceSeenAt'
 };
 
 exports.Prisma.AdminUserScalarFieldEnum = {
@@ -640,6 +642,52 @@ exports.Prisma.EventRegistrationScalarFieldEnum = {
   createdAt: 'createdAt'
 };
 
+exports.Prisma.AiKnowledgeScalarFieldEnum = {
+  id: 'id',
+  businessProfile: 'businessProfile',
+  contactJson: 'contactJson',
+  faqJson: 'faqJson',
+  policiesJson: 'policiesJson',
+  servicesJson: 'servicesJson',
+  educationJson: 'educationJson',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.ChatConversationScalarFieldEnum = {
+  id: 'id',
+  sessionId: 'sessionId',
+  customerEmail: 'customerEmail',
+  customerName: 'customerName',
+  status: 'status',
+  agentEmail: 'agentEmail',
+  agentName: 'agentName',
+  sentiment: 'sentiment',
+  urgency: 'urgency',
+  escalationReason: 'escalationReason',
+  escalationNotifiedAt: 'escalationNotifiedAt',
+  lastMessageAt: 'lastMessageAt',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.ChatMessageScalarFieldEnum = {
+  id: 'id',
+  conversationId: 'conversationId',
+  role: 'role',
+  content: 'content',
+  authorLabel: 'authorLabel',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.AiAuditLogScalarFieldEnum = {
+  id: 'id',
+  action: 'action',
+  actor: 'actor',
+  conversationId: 'conversationId',
+  targetId: 'targetId',
+  meta: 'meta',
+  createdAt: 'createdAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -701,7 +749,11 @@ exports.Prisma.ModelName = {
   ImportJob: 'ImportJob',
   AdRequest: 'AdRequest',
   CalendarEvent: 'CalendarEvent',
-  EventRegistration: 'EventRegistration'
+  EventRegistration: 'EventRegistration',
+  AiKnowledge: 'AiKnowledge',
+  ChatConversation: 'ChatConversation',
+  ChatMessage: 'ChatMessage',
+  AiAuditLog: 'AiAuditLog'
 };
 
 /**

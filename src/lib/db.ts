@@ -50,18 +50,37 @@ const globalForPrisma = globalThis as unknown as {
  * mid-development (e.g. new models added): if the key changes, a fresh
  * client is instantiated instead of reusing the outdated global one.
  */
-const PRISMA_CACHE_KEY = 'schema-v14-merged-dual-mode'
+const PRISMA_CACHE_KEY = 'schema-v15-b11-ai-chat'
 
 /* ── JSON bridge: the Json columns (see prisma/schema.prisma) ──── */
 
 const JSON_FIELD_NAMES = new Set([
   'draftJson',    // DraftProposal
   'result',       // WebhookLog
-  'payload',      // WebhookLog / EventRecord
+  'payload',      // WebhookLog / EventRecord / AdRequest
   'tags',         // Post / Customer
   'attachments',  // EmailLog
-  'meta',         // ReceivedEmail / AnalyticsEvent
+  'meta',         // ReceivedEmail / AnalyticsEvent / AdminAuditLog / ReceivedEmail.meta
   'proposalJson', // Invoice
+  // ── Batch 11 (sqlite-mode coverage completion): every remaining Json
+  // column in prisma/schema.prisma, so the local sqlite twin (String
+  // columns) writes/reads the same objects as postgres. Read side is
+  // parse-if-string (healing no-op for postgres objects); write side
+  // only activates in sqlite mode.
+  'permissions',      // AdminRole (string[] of permission keys)
+  'flagged',          // Comment (§92 spam-check trail)
+  'columnsDetected',  // ImportJob
+  'chunkStates',      // ImportJob
+  'rows',             // ImportJob (canonical mapped rows)
+  'statusHistory',    // ImportJob / AdRequest admin timeline
+  'reminderOffsets',  // CalendarEvent (Batch 10)
+  'remindersSent',    // CalendarEvent (Batch 10)
+  'reminderStates',   // EventRegistration (Batch 10)
+  'contactJson',      // AiKnowledge (Batch 11)
+  'faqJson',          // AiKnowledge (Batch 11)
+  'policiesJson',     // AiKnowledge (Batch 11)
+  'servicesJson',     // AiKnowledge (Batch 11)
+  'educationJson',    // AiKnowledge (Batch 11)
 ])
 
 const WRITE_OPERATIONS = new Set([
