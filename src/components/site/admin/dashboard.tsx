@@ -5,6 +5,7 @@ import {
   ArrowLeft,
   BarChart3,
   BellRing,
+  Bot,
   CalendarDays,
   CreditCard,
   FileSignature,
@@ -49,6 +50,8 @@ import { EmailLogTab } from "./email-log-tab";
 import { InvoicesTab } from "./invoices-tab";
 import { CustomersTab } from "./customers-tab";
 import { WhatsAppTab } from "./whatsapp-tab";
+import { AiMonitorTab } from "./ai-monitor-tab";
+import type { AdminPresenceResponse } from "@/lib/chat-shared";
 import { PaymentsTab } from "./payments-tab";
 import { AnalyticsTab } from "./analytics-tab";
 import { SettingsTab } from "./settings-tab";
@@ -81,6 +84,7 @@ type Tab =
   | "admins"
   | "testimonials"
   | "whatsapp"
+  | "ai"
   | "email"
   | "settings";
 
@@ -99,6 +103,7 @@ const TABS: { id: Tab; label: string; icon: typeof Inbox }[] = [
   { id: "admins", label: "Admins", icon: ShieldCheck },
   { id: "testimonials", label: "Testimonials", icon: MessageSquareQuote },
   { id: "whatsapp", label: "WhatsApp", icon: MessageCircle },
+  { id: "ai", label: "AI Monitor", icon: Bot },
   { id: "email", label: "Email log", icon: Mail },
   { id: "settings", label: "Settings", icon: Settings },
 ];
@@ -216,10 +221,90 @@ export function AdminDashboard({
     [me]
   );
 
+  /* ── BATCH 11 (§62): presence heartbeat + header indicator ──
+     POST /api/admin/presence {status:"online"} on mount, then every
+     30s (the server window is 90s). Hidden tab → "away", visible →
+     "online". The POST response carries {mine, anyOnline} — no
+     separate GET needed. */
+  const [presence, setPresence] = useState<{
+    status: string;
+    seenAt: string | null;
+    anyOnline: boolean;
+  } | null>(null);
+
+  const postPresence = useCallback(async (status: "online" | "away") => {
+    try {
+      const res = await fetch("/api/admin/presence", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status }),
+      });
+      if (!res.ok) return;
+      const j = (await res.json()) as AdminPresenceResponse;
+      if (j.ok) {
+        setPresence({ status: j.mine.status, seenAt: j.mine.seenAt, anyOnline: j.anyOnline });
+      }
+    } catch {
+      /* transient — heartbeat retries on the next tick */
+    }
+  }, []);
+
+  useEffect(() => {
+    void postPresence("online"); // heartbeat once logged in
+    const t = setInterval(() => void postPresence("online"), 30_000);
+    const onVisibility = () => {
+      if (document.visibilityState === "hidden") void postPresence("away");
+      else void postPresence("online");
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      clearInterval(t);
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
+  }, [postPresence]);
+
+  const togglePresence = useCallback(() => {
+    const next = presence?.status === "online" ? "away" : "online";
+    void postPresence(next);
+  }, [postPresence, presence?.status]);
+
+  /* ── BATCH 11 (§58): gold badge on the AI Monitor tab when
+     conversations wait in takeover_requested (light 20s poll). ── */
+  const [aiTakeoverCount, setAiTakeoverCount] = useState(0);
+  const canAccessAi = can("access_ai");
+  useEffect(() => {
+    if (!canAccessAi) return;
+    let alive = true;
+    const check = async () => {
+      try {
+        const res = await fetch("/api/admin/chat/conversations?status=takeover_requested&limit=200", {
+          cache: "no-store",
+        });
+        if (!res.ok) return;
+        const j = (await res.json()) as { ok: boolean; conversations?: unknown[] };
+        if (alive && j.ok) setAiTakeoverCount(j.conversations?.length ?? 0);
+      } catch {
+        /* transient */
+      }
+    };
+    void check();
+    const t = setInterval(check, 20_000);
+    return () => {
+      alive = false;
+      clearInterval(t);
+    };
+  }, [canAccessAi]);
+
   const visibleTabs = useMemo(
     () =>
       TABS.filter((t) =>
-        t.id === "admins" ? can("manage_admins") : t.id === "events" ? can("manage_events") : true
+        t.id === "admins"
+          ? can("manage_admins")
+          : t.id === "events"
+            ? can("manage_events")
+            : t.id === "ai"
+              ? can("access_ai")
+              : true
       ),
     [can]
   );
@@ -902,6 +987,40 @@ export function AdminDashboard({
                 <span className="text-gold">{me.roleLabel}</span>
               </span>
             )}
+            {/* §62 — presence indicator: toggles online/away; the
+                POST response drives widget adminOnline + §60 email */}
+            {me && (
+              <button
+                onClick={togglePresence}
+                aria-label={`Your presence: ${presence?.status ?? "offline"} — click to go ${
+                  presence?.status === "online" ? "away" : "online"
+                }`}
+                title={
+                  presence?.anyOnline
+                    ? "A team member is online — handover emails will be sent"
+                    : "Nobody online — handovers won’t promise an immediate reply"
+                }
+                className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-white/[0.09] bg-white/[0.03] px-2.5 py-1 text-[11px] font-medium text-muted-foreground transition-colors hover:border-gold/40 hover:text-gold"
+              >
+                <span
+                  className={cn(
+                    "h-1.5 w-1.5 rounded-full",
+                    presence?.status === "online"
+                      ? "animate-pulse bg-teal"
+                      : presence?.status === "away"
+                        ? "bg-gold"
+                        : "bg-white/30"
+                  )}
+                  aria-hidden="true"
+                />
+                <span className="hidden sm:inline">
+                  {presence?.status === "online" ? "Online" : presence?.status === "away" ? "Away" : "Offline"}
+                </span>
+                {presence?.anyOnline && (
+                  <span className="hidden text-teal lg:inline">· team online</span>
+                )}
+              </button>
+            )}
           </div>
           <div className="flex items-center gap-1.5 sm:gap-2.5">
             <button
@@ -950,7 +1069,9 @@ export function AdminDashboard({
                           ? (adStats?.awaitingAdmin ?? ads.filter((a) => a.status === "new").length)
                           : t.id === "testimonials"
                             ? testimonials.filter((t2) => t2.status === "draft").length
-                            : undefined;
+                            : t.id === "ai"
+                              ? aiTakeoverCount
+                              : undefined;
             const waDot =
               t.id === "whatsapp" ? (waStatus?.status ?? "unknown") : null;
             return (
@@ -987,7 +1108,11 @@ export function AdminDashboard({
                   <span
                     className={cn(
                       "rounded-full px-1.5 py-0.5 font-mono text-[9.5px] font-semibold",
-                      isActive ? "bg-gold/25 text-gold" : "bg-white/[0.06] text-muted-foreground"
+                      t.id === "ai"
+                        ? "bg-gold text-ink"
+                        : isActive
+                          ? "bg-gold/25 text-gold"
+                          : "bg-white/[0.06] text-muted-foreground"
                     )}
                   >
                     {badge}
@@ -1176,6 +1301,7 @@ export function AdminDashboard({
             {tab === "whatsapp" && (
               <WhatsAppTab notify={notify} onMessagesChanged={load} />
             )}
+            {tab === "ai" && <AiMonitorTab notify={notify} />}
             {tab === "email" && (
               <EmailLogTab logs={emailLogs} loading={false} total={emailLogs.length} />
             )}
