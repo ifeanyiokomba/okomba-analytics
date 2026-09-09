@@ -42,6 +42,8 @@ export function InquiriesTab({
   onOpenService,
   onClearFilters,
   onCreateProposal,
+  canRunAiWorkflow,
+  onRunAiWorkflow,
 }: {
   inquiries: Inquiry[];
   loading: boolean;
@@ -54,6 +56,9 @@ export function InquiriesTab({
   onOpenService: (svc: Service) => void;
   onClearFilters?: () => void;
   onCreateProposal: (i: Inquiry) => void;
+  /** BATCH 12 (§54): "AI workflow" run button — access_ai-gated. */
+  canRunAiWorkflow?: boolean;
+  onRunAiWorkflow?: (i: Inquiry) => void;
 }) {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>(initialStatus ?? "all");
@@ -358,15 +363,28 @@ export function InquiriesTab({
                     </select>
                   </td>
                   <td className="px-6 py-4">
-                    <button
-                      onClick={() => onCreateProposal(i)}
-                      title={`Create proposal for ${i.name}`}
-                      aria-label={`Create proposal for ${i.name}`}
-                      className="inline-flex items-center gap-1.5 rounded-lg border border-gold/30 bg-gold-dim px-3 py-1.5 text-[11px] font-semibold text-gold transition-colors hover:bg-gold/20"
-                    >
-                      <FileSignature size={12} aria-hidden="true" />
-                      <span className="hidden xl:inline">Propose</span>
-                    </button>
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      <button
+                        onClick={() => onCreateProposal(i)}
+                        title={`Create proposal for ${i.name}`}
+                        aria-label={`Create proposal for ${i.name}`}
+                        className="inline-flex items-center gap-1.5 rounded-lg border border-gold/30 bg-gold-dim px-3 py-1.5 text-[11px] font-semibold text-gold transition-colors hover:bg-gold/20"
+                      >
+                        <FileSignature size={12} aria-hidden="true" />
+                        <span className="hidden xl:inline">Propose</span>
+                      </button>
+                      {canRunAiWorkflow && (
+                        <button
+                          onClick={() => onRunAiWorkflow?.(i)}
+                          title={`Run AI workflow for ${i.name}`}
+                          aria-label={`Run AI workflow for ${i.name}`}
+                          className="inline-flex items-center gap-1.5 rounded-lg border border-purple-400/35 bg-purple-400/10 px-3 py-1.5 text-[11px] font-semibold text-purple-300 transition-colors hover:bg-purple-400/20"
+                        >
+                          <Sparkles size={12} aria-hidden="true" />
+                          <span className="hidden xl:inline">AI workflow</span>
+                        </button>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}

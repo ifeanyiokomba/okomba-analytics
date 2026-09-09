@@ -14,6 +14,7 @@ import {
   RefreshCw,
   Search,
   SendHorizontal,
+  SlidersHorizontal,
   User,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -30,6 +31,7 @@ import {
 import { timeAgo, formatTimestamp } from "./types";
 import { AiKnowledgeEditor } from "./ai-knowledge-editor";
 import { AiAuditTrail } from "./ai-audit-trail";
+import { AiAutonomyTab } from "./ai-autonomy-tab";
 
 /* ─────────────────────────────────────────────────────────────
    BATCH 11 (§58–§63) — AI Monitor tab.
@@ -44,12 +46,13 @@ import { AiAuditTrail } from "./ai-audit-trail";
    human → agent reply composer (Cmd/Ctrl+Enter to send).
    ───────────────────────────────────────────────────────────── */
 
-type SubTab = "conversations" | "knowledge" | "audit";
+type SubTab = "conversations" | "knowledge" | "audit" | "autonomy";
 
 const SUBTABS: { id: SubTab; label: string; icon: typeof Bot }[] = [
   { id: "conversations", label: "Conversations", icon: MessageSquare },
   { id: "knowledge", label: "Knowledge Base", icon: BookOpen },
   { id: "audit", label: "Audit Trail", icon: History },
+  { id: "autonomy", label: "Autonomy", icon: SlidersHorizontal },
 ];
 
 export function AiMonitorTab({ notify }: { notify: (text: string, type?: "ok" | "err") => void }) {
@@ -58,6 +61,7 @@ export function AiMonitorTab({ notify }: { notify: (text: string, type?: "ok" | 
     conversations: true,
     knowledge: false,
     audit: false,
+    autonomy: false,
   });
   /* Audit pre-filter arriving from a conversation's "View audit" */
   const [auditConversationId, setAuditConversationId] = useState<string | null>(null);
@@ -80,6 +84,12 @@ export function AiMonitorTab({ notify }: { notify: (text: string, type?: "ok" | 
   /** After an admin action, the audit trail (if visited) goes stale. */
   const notifyAuditStale = useCallback(() => setAuditSignal((s) => s + 1), []);
 
+  /** Autonomy → audit jump (no conversation filter). */
+  const openAuditAll = useCallback(() => {
+    setAuditConversationId(null);
+    switchSub("audit");
+  }, [switchSub]);
+
   return (
     <div className="flex flex-col gap-5">
       {/* ── Header strip ── */}
@@ -91,7 +101,7 @@ export function AiMonitorTab({ notify }: { notify: (text: string, type?: "ok" | 
           <div>
             <h2 className="text-[14.5px] font-semibold text-foreground">AI Monitor</h2>
             <p className="mt-0.5 text-[11.5px] text-muted-foreground">
-              Site chat conversations, handovers, knowledge base & audit trail
+              Chat conversations, knowledge base, audit trail & autonomy policy
             </p>
           </div>
         </div>
@@ -139,6 +149,9 @@ export function AiMonitorTab({ notify }: { notify: (text: string, type?: "ok" | 
           onClearFilter={() => setAuditConversationId(null)}
           refreshSignal={auditSignal}
         />
+      )}
+      {(subTab === "autonomy" || visited.autonomy) && (
+        <AiAutonomyTab notify={notify} active={subTab === "autonomy"} onOpenAudit={openAuditAll} />
       )}
     </div>
   );

@@ -51,6 +51,8 @@ import { InvoicesTab } from "./invoices-tab";
 import { CustomersTab } from "./customers-tab";
 import { WhatsAppTab } from "./whatsapp-tab";
 import { AiMonitorTab } from "./ai-monitor-tab";
+import { AiCampaignsTab } from "./ai-campaigns-tab";
+import { AiWorkflowDialog } from "./ai-workflow-dialog";
 import type { AdminPresenceResponse } from "@/lib/chat-shared";
 import { PaymentsTab } from "./payments-tab";
 import { AnalyticsTab } from "./analytics-tab";
@@ -85,6 +87,7 @@ type Tab =
   | "testimonials"
   | "whatsapp"
   | "ai"
+  | "campaigns"
   | "email"
   | "settings";
 
@@ -104,6 +107,7 @@ const TABS: { id: Tab; label: string; icon: typeof Inbox }[] = [
   { id: "testimonials", label: "Testimonials", icon: MessageSquareQuote },
   { id: "whatsapp", label: "WhatsApp", icon: MessageCircle },
   { id: "ai", label: "AI Monitor", icon: Bot },
+  { id: "campaigns", label: "Campaigns", icon: Megaphone },
   { id: "email", label: "Email log", icon: Mail },
   { id: "settings", label: "Settings", icon: Settings },
 ];
@@ -304,10 +308,15 @@ export function AdminDashboard({
             ? can("manage_events")
             : t.id === "ai"
               ? can("access_ai")
-              : true
+              : t.id === "campaigns"
+                ? can("broadcast_subscribers")
+                : true
       ),
     [can]
   );
+
+  /* ── BATCH 12 (§54): AI workflow dialog target inquiry ── */
+  const [workflowInquiry, setWorkflowInquiry] = useState<Inquiry | null>(null);
 
   /* ── Data loader ─────────────────────────────────────────── */
   const load = useCallback(async () => {
@@ -1217,6 +1226,8 @@ export function AdminDashboard({
                   setComposingDraft(null);
                   setComposing(i);
                 }}
+                canRunAiWorkflow={canAccessAi}
+                onRunAiWorkflow={(i) => setWorkflowInquiry(i)}
               />
             )}
             {tab === "customers" && <CustomersTab />}
@@ -1302,6 +1313,7 @@ export function AdminDashboard({
               <WhatsAppTab notify={notify} onMessagesChanged={load} />
             )}
             {tab === "ai" && <AiMonitorTab notify={notify} />}
+            {tab === "campaigns" && <AiCampaignsTab notify={notify} />}
             {tab === "email" && (
               <EmailLogTab logs={emailLogs} loading={false} total={emailLogs.length} />
             )}
@@ -1379,6 +1391,18 @@ export function AdminDashboard({
           onUpdate={updateAd}
           onUploadCreative={uploadAdCreative}
           onDelete={deleteAd}
+        />
+      )}
+      {/* ── BATCH 12 (§54): AI workflow report dialog ── */}
+      {workflowInquiry && (
+        <AiWorkflowDialog
+          inquiry={workflowInquiry}
+          notify={notify}
+          onOpenAiMonitor={() => {
+            setWorkflowInquiry(null);
+            setTab("ai");
+          }}
+          onClose={() => setWorkflowInquiry(null)}
         />
       )}
       <ProposalComposerDialog
