@@ -253,6 +253,24 @@ export async function POST(req: Request) {
       message: inquiry.message,
     }).catch(() => undefined);
 
+    // ── BATCH 12 (§54 auto-trigger): "Customer submits inquiry →
+    //    AI: understands need, checks CRM, drafts proposal…". The
+    //    §54 autonomous workflow runs fire-and-forget ONLY when the
+    //    §52 master switch is on — never blocks the response, never
+    //    throws. Dynamic imports keep the LLM out of the cold path. ──
+    try {
+      const { getAutonomyConfig } = await import("@/lib/ai-autonomy");
+      const cfg = await getAutonomyConfig();
+      if (cfg.enabled) {
+        const { runAutonomousWorkflow } = await import("@/lib/ai-workflow");
+        void runAutonomousWorkflow({ inquiryId: inquiry.id, trigger: "inquiry" }).catch(
+          (err) => console.error("[POST /api/inquiries] autonomous workflow failed:", err)
+        );
+      }
+    } catch (err) {
+      console.error("[POST /api/inquiries] autonomy check failed:", err);
+    }
+
     return NextResponse.json({ ok: true, id: inquiry.id, customerId }, { status: 201 });
   } catch (err) {
     console.error("[POST /api/inquiries]", err);

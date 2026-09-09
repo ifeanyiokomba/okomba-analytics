@@ -298,6 +298,41 @@ export type ChatMessage = $Result.DefaultSelection<Prisma.$ChatMessagePayload>
  *    convention as auditAdmin (admin-rbac.ts).
  */
 export type AiAuditLog = $Result.DefaultSelection<Prisma.$AiAuditLogPayload>
+/**
+ * Model AiAutonomyConfig
+ * ── Batch 12 (§52) — AI autonomy control center ──────────────────
+ *    Singleton config row (id="singleton", AiKnowledge pattern):
+ *    master switch, per-action approval levels (§53), daily email
+ *    budget, recipient/service allowlists, escalation rules and the
+ *    never-do list. SAFE defaults are seeded by src/lib/ai-autonomy.ts
+ *    (enabled=false — autonomy ships dark; every action "review").
+ */
+export type AiAutonomyConfig = $Result.DefaultSelection<Prisma.$AiAutonomyConfigPayload>
+/**
+ * Model AiActionLog
+ * ── Batch 12 (§54/§55) — AI action ledger ────────────────────────
+ *    Every (semi-)autonomous AI action gets one row: what it wanted to
+ *    do, who/what triggered it, the evaluated approval level, the
+ *    lifecycle status, the generated content snapshot (draftJson) and
+ *    the delivery result (resultJson). Pending rows are the admin's
+ *    approval queue (approve/decline routes).
+ */
+export type AiActionLog = $Result.DefaultSelection<Prisma.$AiActionLogPayload>
+/**
+ * Model AiCampaign
+ * ── Batch 12 (§56) — AI mass-email campaign ──────────────────────
+ *    Admin briefs a goal; the AI drafts subject/body templates with
+ *    §57 {{tokens}}; the admin previews per-recipient renders, edits,
+ *    approves, then sends (batched, rate-limited, budget-gated).
+ */
+export type AiCampaign = $Result.DefaultSelection<Prisma.$AiCampaignPayload>
+/**
+ * Model AiCampaignRecipient
+ * §57 — per-recipient materialization: each row is rendered ONLY
+ *    from that recipient's own CRM data (privacy rule: one recipient's
+ *    values never feed another's render).
+ */
+export type AiCampaignRecipient = $Result.DefaultSelection<Prisma.$AiCampaignRecipientPayload>
 
 /**
  * ##  Prisma Client ʲˢ
@@ -756,6 +791,46 @@ export class PrismaClient<
     * ```
     */
   get aiAuditLog(): Prisma.AiAuditLogDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.aiAutonomyConfig`: Exposes CRUD operations for the **AiAutonomyConfig** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more AiAutonomyConfigs
+    * const aiAutonomyConfigs = await prisma.aiAutonomyConfig.findMany()
+    * ```
+    */
+  get aiAutonomyConfig(): Prisma.AiAutonomyConfigDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.aiActionLog`: Exposes CRUD operations for the **AiActionLog** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more AiActionLogs
+    * const aiActionLogs = await prisma.aiActionLog.findMany()
+    * ```
+    */
+  get aiActionLog(): Prisma.AiActionLogDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.aiCampaign`: Exposes CRUD operations for the **AiCampaign** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more AiCampaigns
+    * const aiCampaigns = await prisma.aiCampaign.findMany()
+    * ```
+    */
+  get aiCampaign(): Prisma.AiCampaignDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.aiCampaignRecipient`: Exposes CRUD operations for the **AiCampaignRecipient** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more AiCampaignRecipients
+    * const aiCampaignRecipients = await prisma.aiCampaignRecipient.findMany()
+    * ```
+    */
+  get aiCampaignRecipient(): Prisma.AiCampaignRecipientDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -1230,7 +1305,11 @@ export namespace Prisma {
     AiKnowledge: 'AiKnowledge',
     ChatConversation: 'ChatConversation',
     ChatMessage: 'ChatMessage',
-    AiAuditLog: 'AiAuditLog'
+    AiAuditLog: 'AiAuditLog',
+    AiAutonomyConfig: 'AiAutonomyConfig',
+    AiActionLog: 'AiActionLog',
+    AiCampaign: 'AiCampaign',
+    AiCampaignRecipient: 'AiCampaignRecipient'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -1249,7 +1328,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "inquiry" | "draftProposal" | "webhookLog" | "adminSession" | "adminUser" | "adminRole" | "adminAuditLog" | "subscriber" | "post" | "postAuthor" | "comment" | "reaction" | "mediaAsset" | "testimonial" | "emailLog" | "emailProviderConfig" | "receivedEmail" | "invoice" | "payment" | "eventRecord" | "whatsAppMessage" | "analyticsEvent" | "backupLog" | "customer" | "customerNote" | "customerMessage" | "importJob" | "adRequest" | "calendarEvent" | "eventRegistration" | "aiKnowledge" | "chatConversation" | "chatMessage" | "aiAuditLog"
+      modelProps: "inquiry" | "draftProposal" | "webhookLog" | "adminSession" | "adminUser" | "adminRole" | "adminAuditLog" | "subscriber" | "post" | "postAuthor" | "comment" | "reaction" | "mediaAsset" | "testimonial" | "emailLog" | "emailProviderConfig" | "receivedEmail" | "invoice" | "payment" | "eventRecord" | "whatsAppMessage" | "analyticsEvent" | "backupLog" | "customer" | "customerNote" | "customerMessage" | "importJob" | "adRequest" | "calendarEvent" | "eventRegistration" | "aiKnowledge" | "chatConversation" | "chatMessage" | "aiAuditLog" | "aiAutonomyConfig" | "aiActionLog" | "aiCampaign" | "aiCampaignRecipient"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -3769,6 +3848,302 @@ export namespace Prisma {
           }
         }
       }
+      AiAutonomyConfig: {
+        payload: Prisma.$AiAutonomyConfigPayload<ExtArgs>
+        fields: Prisma.AiAutonomyConfigFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.AiAutonomyConfigFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiAutonomyConfigPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.AiAutonomyConfigFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiAutonomyConfigPayload>
+          }
+          findFirst: {
+            args: Prisma.AiAutonomyConfigFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiAutonomyConfigPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.AiAutonomyConfigFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiAutonomyConfigPayload>
+          }
+          findMany: {
+            args: Prisma.AiAutonomyConfigFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiAutonomyConfigPayload>[]
+          }
+          create: {
+            args: Prisma.AiAutonomyConfigCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiAutonomyConfigPayload>
+          }
+          createMany: {
+            args: Prisma.AiAutonomyConfigCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.AiAutonomyConfigCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiAutonomyConfigPayload>[]
+          }
+          delete: {
+            args: Prisma.AiAutonomyConfigDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiAutonomyConfigPayload>
+          }
+          update: {
+            args: Prisma.AiAutonomyConfigUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiAutonomyConfigPayload>
+          }
+          deleteMany: {
+            args: Prisma.AiAutonomyConfigDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.AiAutonomyConfigUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.AiAutonomyConfigUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiAutonomyConfigPayload>[]
+          }
+          upsert: {
+            args: Prisma.AiAutonomyConfigUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiAutonomyConfigPayload>
+          }
+          aggregate: {
+            args: Prisma.AiAutonomyConfigAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateAiAutonomyConfig>
+          }
+          groupBy: {
+            args: Prisma.AiAutonomyConfigGroupByArgs<ExtArgs>
+            result: $Utils.Optional<AiAutonomyConfigGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.AiAutonomyConfigCountArgs<ExtArgs>
+            result: $Utils.Optional<AiAutonomyConfigCountAggregateOutputType> | number
+          }
+        }
+      }
+      AiActionLog: {
+        payload: Prisma.$AiActionLogPayload<ExtArgs>
+        fields: Prisma.AiActionLogFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.AiActionLogFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiActionLogPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.AiActionLogFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiActionLogPayload>
+          }
+          findFirst: {
+            args: Prisma.AiActionLogFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiActionLogPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.AiActionLogFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiActionLogPayload>
+          }
+          findMany: {
+            args: Prisma.AiActionLogFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiActionLogPayload>[]
+          }
+          create: {
+            args: Prisma.AiActionLogCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiActionLogPayload>
+          }
+          createMany: {
+            args: Prisma.AiActionLogCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.AiActionLogCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiActionLogPayload>[]
+          }
+          delete: {
+            args: Prisma.AiActionLogDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiActionLogPayload>
+          }
+          update: {
+            args: Prisma.AiActionLogUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiActionLogPayload>
+          }
+          deleteMany: {
+            args: Prisma.AiActionLogDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.AiActionLogUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.AiActionLogUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiActionLogPayload>[]
+          }
+          upsert: {
+            args: Prisma.AiActionLogUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiActionLogPayload>
+          }
+          aggregate: {
+            args: Prisma.AiActionLogAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateAiActionLog>
+          }
+          groupBy: {
+            args: Prisma.AiActionLogGroupByArgs<ExtArgs>
+            result: $Utils.Optional<AiActionLogGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.AiActionLogCountArgs<ExtArgs>
+            result: $Utils.Optional<AiActionLogCountAggregateOutputType> | number
+          }
+        }
+      }
+      AiCampaign: {
+        payload: Prisma.$AiCampaignPayload<ExtArgs>
+        fields: Prisma.AiCampaignFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.AiCampaignFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiCampaignPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.AiCampaignFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiCampaignPayload>
+          }
+          findFirst: {
+            args: Prisma.AiCampaignFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiCampaignPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.AiCampaignFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiCampaignPayload>
+          }
+          findMany: {
+            args: Prisma.AiCampaignFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiCampaignPayload>[]
+          }
+          create: {
+            args: Prisma.AiCampaignCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiCampaignPayload>
+          }
+          createMany: {
+            args: Prisma.AiCampaignCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.AiCampaignCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiCampaignPayload>[]
+          }
+          delete: {
+            args: Prisma.AiCampaignDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiCampaignPayload>
+          }
+          update: {
+            args: Prisma.AiCampaignUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiCampaignPayload>
+          }
+          deleteMany: {
+            args: Prisma.AiCampaignDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.AiCampaignUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.AiCampaignUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiCampaignPayload>[]
+          }
+          upsert: {
+            args: Prisma.AiCampaignUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiCampaignPayload>
+          }
+          aggregate: {
+            args: Prisma.AiCampaignAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateAiCampaign>
+          }
+          groupBy: {
+            args: Prisma.AiCampaignGroupByArgs<ExtArgs>
+            result: $Utils.Optional<AiCampaignGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.AiCampaignCountArgs<ExtArgs>
+            result: $Utils.Optional<AiCampaignCountAggregateOutputType> | number
+          }
+        }
+      }
+      AiCampaignRecipient: {
+        payload: Prisma.$AiCampaignRecipientPayload<ExtArgs>
+        fields: Prisma.AiCampaignRecipientFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.AiCampaignRecipientFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiCampaignRecipientPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.AiCampaignRecipientFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiCampaignRecipientPayload>
+          }
+          findFirst: {
+            args: Prisma.AiCampaignRecipientFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiCampaignRecipientPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.AiCampaignRecipientFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiCampaignRecipientPayload>
+          }
+          findMany: {
+            args: Prisma.AiCampaignRecipientFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiCampaignRecipientPayload>[]
+          }
+          create: {
+            args: Prisma.AiCampaignRecipientCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiCampaignRecipientPayload>
+          }
+          createMany: {
+            args: Prisma.AiCampaignRecipientCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.AiCampaignRecipientCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiCampaignRecipientPayload>[]
+          }
+          delete: {
+            args: Prisma.AiCampaignRecipientDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiCampaignRecipientPayload>
+          }
+          update: {
+            args: Prisma.AiCampaignRecipientUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiCampaignRecipientPayload>
+          }
+          deleteMany: {
+            args: Prisma.AiCampaignRecipientDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.AiCampaignRecipientUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.AiCampaignRecipientUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiCampaignRecipientPayload>[]
+          }
+          upsert: {
+            args: Prisma.AiCampaignRecipientUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiCampaignRecipientPayload>
+          }
+          aggregate: {
+            args: Prisma.AiCampaignRecipientAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateAiCampaignRecipient>
+          }
+          groupBy: {
+            args: Prisma.AiCampaignRecipientGroupByArgs<ExtArgs>
+            result: $Utils.Optional<AiCampaignRecipientGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.AiCampaignRecipientCountArgs<ExtArgs>
+            result: $Utils.Optional<AiCampaignRecipientCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -3899,6 +4274,10 @@ export namespace Prisma {
     chatConversation?: ChatConversationOmit
     chatMessage?: ChatMessageOmit
     aiAuditLog?: AiAuditLogOmit
+    aiAutonomyConfig?: AiAutonomyConfigOmit
+    aiActionLog?: AiActionLogOmit
+    aiCampaign?: AiCampaignOmit
+    aiCampaignRecipient?: AiCampaignRecipientOmit
   }
 
   /* Types for Logging */
@@ -4246,6 +4625,37 @@ export namespace Prisma {
    */
   export type ChatConversationCountOutputTypeCountMessagesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: ChatMessageWhereInput
+  }
+
+
+  /**
+   * Count Type AiCampaignCountOutputType
+   */
+
+  export type AiCampaignCountOutputType = {
+    recipients: number
+  }
+
+  export type AiCampaignCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    recipients?: boolean | AiCampaignCountOutputTypeCountRecipientsArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * AiCampaignCountOutputType without action
+   */
+  export type AiCampaignCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiCampaignCountOutputType
+     */
+    select?: AiCampaignCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * AiCampaignCountOutputType without action
+   */
+  export type AiCampaignCountOutputTypeCountRecipientsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: AiCampaignRecipientWhereInput
   }
 
 
@@ -43557,6 +43967,4627 @@ export namespace Prisma {
 
 
   /**
+   * Model AiAutonomyConfig
+   */
+
+  export type AggregateAiAutonomyConfig = {
+    _count: AiAutonomyConfigCountAggregateOutputType | null
+    _avg: AiAutonomyConfigAvgAggregateOutputType | null
+    _sum: AiAutonomyConfigSumAggregateOutputType | null
+    _min: AiAutonomyConfigMinAggregateOutputType | null
+    _max: AiAutonomyConfigMaxAggregateOutputType | null
+  }
+
+  export type AiAutonomyConfigAvgAggregateOutputType = {
+    maxEmailsPerDay: number | null
+  }
+
+  export type AiAutonomyConfigSumAggregateOutputType = {
+    maxEmailsPerDay: number | null
+  }
+
+  export type AiAutonomyConfigMinAggregateOutputType = {
+    id: string | null
+    enabled: boolean | null
+    maxEmailsPerDay: number | null
+    updatedAt: Date | null
+  }
+
+  export type AiAutonomyConfigMaxAggregateOutputType = {
+    id: string | null
+    enabled: boolean | null
+    maxEmailsPerDay: number | null
+    updatedAt: Date | null
+  }
+
+  export type AiAutonomyConfigCountAggregateOutputType = {
+    id: number
+    enabled: number
+    levelsJson: number
+    maxEmailsPerDay: number
+    allowedRecipientsJson: number
+    allowedServicesJson: number
+    escalationRulesJson: number
+    prohibitedActionsJson: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type AiAutonomyConfigAvgAggregateInputType = {
+    maxEmailsPerDay?: true
+  }
+
+  export type AiAutonomyConfigSumAggregateInputType = {
+    maxEmailsPerDay?: true
+  }
+
+  export type AiAutonomyConfigMinAggregateInputType = {
+    id?: true
+    enabled?: true
+    maxEmailsPerDay?: true
+    updatedAt?: true
+  }
+
+  export type AiAutonomyConfigMaxAggregateInputType = {
+    id?: true
+    enabled?: true
+    maxEmailsPerDay?: true
+    updatedAt?: true
+  }
+
+  export type AiAutonomyConfigCountAggregateInputType = {
+    id?: true
+    enabled?: true
+    levelsJson?: true
+    maxEmailsPerDay?: true
+    allowedRecipientsJson?: true
+    allowedServicesJson?: true
+    escalationRulesJson?: true
+    prohibitedActionsJson?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type AiAutonomyConfigAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which AiAutonomyConfig to aggregate.
+     */
+    where?: AiAutonomyConfigWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AiAutonomyConfigs to fetch.
+     */
+    orderBy?: AiAutonomyConfigOrderByWithRelationInput | AiAutonomyConfigOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: AiAutonomyConfigWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AiAutonomyConfigs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AiAutonomyConfigs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned AiAutonomyConfigs
+    **/
+    _count?: true | AiAutonomyConfigCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: AiAutonomyConfigAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: AiAutonomyConfigSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: AiAutonomyConfigMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: AiAutonomyConfigMaxAggregateInputType
+  }
+
+  export type GetAiAutonomyConfigAggregateType<T extends AiAutonomyConfigAggregateArgs> = {
+        [P in keyof T & keyof AggregateAiAutonomyConfig]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateAiAutonomyConfig[P]>
+      : GetScalarType<T[P], AggregateAiAutonomyConfig[P]>
+  }
+
+
+
+
+  export type AiAutonomyConfigGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: AiAutonomyConfigWhereInput
+    orderBy?: AiAutonomyConfigOrderByWithAggregationInput | AiAutonomyConfigOrderByWithAggregationInput[]
+    by: AiAutonomyConfigScalarFieldEnum[] | AiAutonomyConfigScalarFieldEnum
+    having?: AiAutonomyConfigScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: AiAutonomyConfigCountAggregateInputType | true
+    _avg?: AiAutonomyConfigAvgAggregateInputType
+    _sum?: AiAutonomyConfigSumAggregateInputType
+    _min?: AiAutonomyConfigMinAggregateInputType
+    _max?: AiAutonomyConfigMaxAggregateInputType
+  }
+
+  export type AiAutonomyConfigGroupByOutputType = {
+    id: string
+    enabled: boolean
+    levelsJson: JsonValue
+    maxEmailsPerDay: number
+    allowedRecipientsJson: JsonValue
+    allowedServicesJson: JsonValue
+    escalationRulesJson: JsonValue
+    prohibitedActionsJson: JsonValue
+    updatedAt: Date
+    _count: AiAutonomyConfigCountAggregateOutputType | null
+    _avg: AiAutonomyConfigAvgAggregateOutputType | null
+    _sum: AiAutonomyConfigSumAggregateOutputType | null
+    _min: AiAutonomyConfigMinAggregateOutputType | null
+    _max: AiAutonomyConfigMaxAggregateOutputType | null
+  }
+
+  type GetAiAutonomyConfigGroupByPayload<T extends AiAutonomyConfigGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<AiAutonomyConfigGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof AiAutonomyConfigGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], AiAutonomyConfigGroupByOutputType[P]>
+            : GetScalarType<T[P], AiAutonomyConfigGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type AiAutonomyConfigSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    enabled?: boolean
+    levelsJson?: boolean
+    maxEmailsPerDay?: boolean
+    allowedRecipientsJson?: boolean
+    allowedServicesJson?: boolean
+    escalationRulesJson?: boolean
+    prohibitedActionsJson?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["aiAutonomyConfig"]>
+
+  export type AiAutonomyConfigSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    enabled?: boolean
+    levelsJson?: boolean
+    maxEmailsPerDay?: boolean
+    allowedRecipientsJson?: boolean
+    allowedServicesJson?: boolean
+    escalationRulesJson?: boolean
+    prohibitedActionsJson?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["aiAutonomyConfig"]>
+
+  export type AiAutonomyConfigSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    enabled?: boolean
+    levelsJson?: boolean
+    maxEmailsPerDay?: boolean
+    allowedRecipientsJson?: boolean
+    allowedServicesJson?: boolean
+    escalationRulesJson?: boolean
+    prohibitedActionsJson?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["aiAutonomyConfig"]>
+
+  export type AiAutonomyConfigSelectScalar = {
+    id?: boolean
+    enabled?: boolean
+    levelsJson?: boolean
+    maxEmailsPerDay?: boolean
+    allowedRecipientsJson?: boolean
+    allowedServicesJson?: boolean
+    escalationRulesJson?: boolean
+    prohibitedActionsJson?: boolean
+    updatedAt?: boolean
+  }
+
+  export type AiAutonomyConfigOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "enabled" | "levelsJson" | "maxEmailsPerDay" | "allowedRecipientsJson" | "allowedServicesJson" | "escalationRulesJson" | "prohibitedActionsJson" | "updatedAt", ExtArgs["result"]["aiAutonomyConfig"]>
+
+  export type $AiAutonomyConfigPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "AiAutonomyConfig"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      enabled: boolean
+      levelsJson: Prisma.JsonValue
+      maxEmailsPerDay: number
+      allowedRecipientsJson: Prisma.JsonValue
+      allowedServicesJson: Prisma.JsonValue
+      escalationRulesJson: Prisma.JsonValue
+      prohibitedActionsJson: Prisma.JsonValue
+      updatedAt: Date
+    }, ExtArgs["result"]["aiAutonomyConfig"]>
+    composites: {}
+  }
+
+  type AiAutonomyConfigGetPayload<S extends boolean | null | undefined | AiAutonomyConfigDefaultArgs> = $Result.GetResult<Prisma.$AiAutonomyConfigPayload, S>
+
+  type AiAutonomyConfigCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<AiAutonomyConfigFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: AiAutonomyConfigCountAggregateInputType | true
+    }
+
+  export interface AiAutonomyConfigDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['AiAutonomyConfig'], meta: { name: 'AiAutonomyConfig' } }
+    /**
+     * Find zero or one AiAutonomyConfig that matches the filter.
+     * @param {AiAutonomyConfigFindUniqueArgs} args - Arguments to find a AiAutonomyConfig
+     * @example
+     * // Get one AiAutonomyConfig
+     * const aiAutonomyConfig = await prisma.aiAutonomyConfig.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends AiAutonomyConfigFindUniqueArgs>(args: SelectSubset<T, AiAutonomyConfigFindUniqueArgs<ExtArgs>>): Prisma__AiAutonomyConfigClient<$Result.GetResult<Prisma.$AiAutonomyConfigPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one AiAutonomyConfig that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {AiAutonomyConfigFindUniqueOrThrowArgs} args - Arguments to find a AiAutonomyConfig
+     * @example
+     * // Get one AiAutonomyConfig
+     * const aiAutonomyConfig = await prisma.aiAutonomyConfig.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends AiAutonomyConfigFindUniqueOrThrowArgs>(args: SelectSubset<T, AiAutonomyConfigFindUniqueOrThrowArgs<ExtArgs>>): Prisma__AiAutonomyConfigClient<$Result.GetResult<Prisma.$AiAutonomyConfigPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first AiAutonomyConfig that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiAutonomyConfigFindFirstArgs} args - Arguments to find a AiAutonomyConfig
+     * @example
+     * // Get one AiAutonomyConfig
+     * const aiAutonomyConfig = await prisma.aiAutonomyConfig.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends AiAutonomyConfigFindFirstArgs>(args?: SelectSubset<T, AiAutonomyConfigFindFirstArgs<ExtArgs>>): Prisma__AiAutonomyConfigClient<$Result.GetResult<Prisma.$AiAutonomyConfigPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first AiAutonomyConfig that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiAutonomyConfigFindFirstOrThrowArgs} args - Arguments to find a AiAutonomyConfig
+     * @example
+     * // Get one AiAutonomyConfig
+     * const aiAutonomyConfig = await prisma.aiAutonomyConfig.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends AiAutonomyConfigFindFirstOrThrowArgs>(args?: SelectSubset<T, AiAutonomyConfigFindFirstOrThrowArgs<ExtArgs>>): Prisma__AiAutonomyConfigClient<$Result.GetResult<Prisma.$AiAutonomyConfigPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more AiAutonomyConfigs that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiAutonomyConfigFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all AiAutonomyConfigs
+     * const aiAutonomyConfigs = await prisma.aiAutonomyConfig.findMany()
+     * 
+     * // Get first 10 AiAutonomyConfigs
+     * const aiAutonomyConfigs = await prisma.aiAutonomyConfig.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const aiAutonomyConfigWithIdOnly = await prisma.aiAutonomyConfig.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends AiAutonomyConfigFindManyArgs>(args?: SelectSubset<T, AiAutonomyConfigFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AiAutonomyConfigPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a AiAutonomyConfig.
+     * @param {AiAutonomyConfigCreateArgs} args - Arguments to create a AiAutonomyConfig.
+     * @example
+     * // Create one AiAutonomyConfig
+     * const AiAutonomyConfig = await prisma.aiAutonomyConfig.create({
+     *   data: {
+     *     // ... data to create a AiAutonomyConfig
+     *   }
+     * })
+     * 
+     */
+    create<T extends AiAutonomyConfigCreateArgs>(args: SelectSubset<T, AiAutonomyConfigCreateArgs<ExtArgs>>): Prisma__AiAutonomyConfigClient<$Result.GetResult<Prisma.$AiAutonomyConfigPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many AiAutonomyConfigs.
+     * @param {AiAutonomyConfigCreateManyArgs} args - Arguments to create many AiAutonomyConfigs.
+     * @example
+     * // Create many AiAutonomyConfigs
+     * const aiAutonomyConfig = await prisma.aiAutonomyConfig.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends AiAutonomyConfigCreateManyArgs>(args?: SelectSubset<T, AiAutonomyConfigCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many AiAutonomyConfigs and returns the data saved in the database.
+     * @param {AiAutonomyConfigCreateManyAndReturnArgs} args - Arguments to create many AiAutonomyConfigs.
+     * @example
+     * // Create many AiAutonomyConfigs
+     * const aiAutonomyConfig = await prisma.aiAutonomyConfig.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many AiAutonomyConfigs and only return the `id`
+     * const aiAutonomyConfigWithIdOnly = await prisma.aiAutonomyConfig.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends AiAutonomyConfigCreateManyAndReturnArgs>(args?: SelectSubset<T, AiAutonomyConfigCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AiAutonomyConfigPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a AiAutonomyConfig.
+     * @param {AiAutonomyConfigDeleteArgs} args - Arguments to delete one AiAutonomyConfig.
+     * @example
+     * // Delete one AiAutonomyConfig
+     * const AiAutonomyConfig = await prisma.aiAutonomyConfig.delete({
+     *   where: {
+     *     // ... filter to delete one AiAutonomyConfig
+     *   }
+     * })
+     * 
+     */
+    delete<T extends AiAutonomyConfigDeleteArgs>(args: SelectSubset<T, AiAutonomyConfigDeleteArgs<ExtArgs>>): Prisma__AiAutonomyConfigClient<$Result.GetResult<Prisma.$AiAutonomyConfigPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one AiAutonomyConfig.
+     * @param {AiAutonomyConfigUpdateArgs} args - Arguments to update one AiAutonomyConfig.
+     * @example
+     * // Update one AiAutonomyConfig
+     * const aiAutonomyConfig = await prisma.aiAutonomyConfig.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends AiAutonomyConfigUpdateArgs>(args: SelectSubset<T, AiAutonomyConfigUpdateArgs<ExtArgs>>): Prisma__AiAutonomyConfigClient<$Result.GetResult<Prisma.$AiAutonomyConfigPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more AiAutonomyConfigs.
+     * @param {AiAutonomyConfigDeleteManyArgs} args - Arguments to filter AiAutonomyConfigs to delete.
+     * @example
+     * // Delete a few AiAutonomyConfigs
+     * const { count } = await prisma.aiAutonomyConfig.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends AiAutonomyConfigDeleteManyArgs>(args?: SelectSubset<T, AiAutonomyConfigDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more AiAutonomyConfigs.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiAutonomyConfigUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many AiAutonomyConfigs
+     * const aiAutonomyConfig = await prisma.aiAutonomyConfig.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends AiAutonomyConfigUpdateManyArgs>(args: SelectSubset<T, AiAutonomyConfigUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more AiAutonomyConfigs and returns the data updated in the database.
+     * @param {AiAutonomyConfigUpdateManyAndReturnArgs} args - Arguments to update many AiAutonomyConfigs.
+     * @example
+     * // Update many AiAutonomyConfigs
+     * const aiAutonomyConfig = await prisma.aiAutonomyConfig.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more AiAutonomyConfigs and only return the `id`
+     * const aiAutonomyConfigWithIdOnly = await prisma.aiAutonomyConfig.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends AiAutonomyConfigUpdateManyAndReturnArgs>(args: SelectSubset<T, AiAutonomyConfigUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AiAutonomyConfigPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one AiAutonomyConfig.
+     * @param {AiAutonomyConfigUpsertArgs} args - Arguments to update or create a AiAutonomyConfig.
+     * @example
+     * // Update or create a AiAutonomyConfig
+     * const aiAutonomyConfig = await prisma.aiAutonomyConfig.upsert({
+     *   create: {
+     *     // ... data to create a AiAutonomyConfig
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the AiAutonomyConfig we want to update
+     *   }
+     * })
+     */
+    upsert<T extends AiAutonomyConfigUpsertArgs>(args: SelectSubset<T, AiAutonomyConfigUpsertArgs<ExtArgs>>): Prisma__AiAutonomyConfigClient<$Result.GetResult<Prisma.$AiAutonomyConfigPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of AiAutonomyConfigs.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiAutonomyConfigCountArgs} args - Arguments to filter AiAutonomyConfigs to count.
+     * @example
+     * // Count the number of AiAutonomyConfigs
+     * const count = await prisma.aiAutonomyConfig.count({
+     *   where: {
+     *     // ... the filter for the AiAutonomyConfigs we want to count
+     *   }
+     * })
+    **/
+    count<T extends AiAutonomyConfigCountArgs>(
+      args?: Subset<T, AiAutonomyConfigCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], AiAutonomyConfigCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a AiAutonomyConfig.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiAutonomyConfigAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends AiAutonomyConfigAggregateArgs>(args: Subset<T, AiAutonomyConfigAggregateArgs>): Prisma.PrismaPromise<GetAiAutonomyConfigAggregateType<T>>
+
+    /**
+     * Group by AiAutonomyConfig.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiAutonomyConfigGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends AiAutonomyConfigGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: AiAutonomyConfigGroupByArgs['orderBy'] }
+        : { orderBy?: AiAutonomyConfigGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, AiAutonomyConfigGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetAiAutonomyConfigGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the AiAutonomyConfig model
+   */
+  readonly fields: AiAutonomyConfigFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for AiAutonomyConfig.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__AiAutonomyConfigClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the AiAutonomyConfig model
+   */
+  interface AiAutonomyConfigFieldRefs {
+    readonly id: FieldRef<"AiAutonomyConfig", 'String'>
+    readonly enabled: FieldRef<"AiAutonomyConfig", 'Boolean'>
+    readonly levelsJson: FieldRef<"AiAutonomyConfig", 'Json'>
+    readonly maxEmailsPerDay: FieldRef<"AiAutonomyConfig", 'Int'>
+    readonly allowedRecipientsJson: FieldRef<"AiAutonomyConfig", 'Json'>
+    readonly allowedServicesJson: FieldRef<"AiAutonomyConfig", 'Json'>
+    readonly escalationRulesJson: FieldRef<"AiAutonomyConfig", 'Json'>
+    readonly prohibitedActionsJson: FieldRef<"AiAutonomyConfig", 'Json'>
+    readonly updatedAt: FieldRef<"AiAutonomyConfig", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * AiAutonomyConfig findUnique
+   */
+  export type AiAutonomyConfigFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiAutonomyConfig
+     */
+    select?: AiAutonomyConfigSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiAutonomyConfig
+     */
+    omit?: AiAutonomyConfigOmit<ExtArgs> | null
+    /**
+     * Filter, which AiAutonomyConfig to fetch.
+     */
+    where: AiAutonomyConfigWhereUniqueInput
+  }
+
+  /**
+   * AiAutonomyConfig findUniqueOrThrow
+   */
+  export type AiAutonomyConfigFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiAutonomyConfig
+     */
+    select?: AiAutonomyConfigSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiAutonomyConfig
+     */
+    omit?: AiAutonomyConfigOmit<ExtArgs> | null
+    /**
+     * Filter, which AiAutonomyConfig to fetch.
+     */
+    where: AiAutonomyConfigWhereUniqueInput
+  }
+
+  /**
+   * AiAutonomyConfig findFirst
+   */
+  export type AiAutonomyConfigFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiAutonomyConfig
+     */
+    select?: AiAutonomyConfigSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiAutonomyConfig
+     */
+    omit?: AiAutonomyConfigOmit<ExtArgs> | null
+    /**
+     * Filter, which AiAutonomyConfig to fetch.
+     */
+    where?: AiAutonomyConfigWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AiAutonomyConfigs to fetch.
+     */
+    orderBy?: AiAutonomyConfigOrderByWithRelationInput | AiAutonomyConfigOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for AiAutonomyConfigs.
+     */
+    cursor?: AiAutonomyConfigWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AiAutonomyConfigs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AiAutonomyConfigs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of AiAutonomyConfigs.
+     */
+    distinct?: AiAutonomyConfigScalarFieldEnum | AiAutonomyConfigScalarFieldEnum[]
+  }
+
+  /**
+   * AiAutonomyConfig findFirstOrThrow
+   */
+  export type AiAutonomyConfigFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiAutonomyConfig
+     */
+    select?: AiAutonomyConfigSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiAutonomyConfig
+     */
+    omit?: AiAutonomyConfigOmit<ExtArgs> | null
+    /**
+     * Filter, which AiAutonomyConfig to fetch.
+     */
+    where?: AiAutonomyConfigWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AiAutonomyConfigs to fetch.
+     */
+    orderBy?: AiAutonomyConfigOrderByWithRelationInput | AiAutonomyConfigOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for AiAutonomyConfigs.
+     */
+    cursor?: AiAutonomyConfigWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AiAutonomyConfigs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AiAutonomyConfigs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of AiAutonomyConfigs.
+     */
+    distinct?: AiAutonomyConfigScalarFieldEnum | AiAutonomyConfigScalarFieldEnum[]
+  }
+
+  /**
+   * AiAutonomyConfig findMany
+   */
+  export type AiAutonomyConfigFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiAutonomyConfig
+     */
+    select?: AiAutonomyConfigSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiAutonomyConfig
+     */
+    omit?: AiAutonomyConfigOmit<ExtArgs> | null
+    /**
+     * Filter, which AiAutonomyConfigs to fetch.
+     */
+    where?: AiAutonomyConfigWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AiAutonomyConfigs to fetch.
+     */
+    orderBy?: AiAutonomyConfigOrderByWithRelationInput | AiAutonomyConfigOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing AiAutonomyConfigs.
+     */
+    cursor?: AiAutonomyConfigWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AiAutonomyConfigs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AiAutonomyConfigs.
+     */
+    skip?: number
+    distinct?: AiAutonomyConfigScalarFieldEnum | AiAutonomyConfigScalarFieldEnum[]
+  }
+
+  /**
+   * AiAutonomyConfig create
+   */
+  export type AiAutonomyConfigCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiAutonomyConfig
+     */
+    select?: AiAutonomyConfigSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiAutonomyConfig
+     */
+    omit?: AiAutonomyConfigOmit<ExtArgs> | null
+    /**
+     * The data needed to create a AiAutonomyConfig.
+     */
+    data: XOR<AiAutonomyConfigCreateInput, AiAutonomyConfigUncheckedCreateInput>
+  }
+
+  /**
+   * AiAutonomyConfig createMany
+   */
+  export type AiAutonomyConfigCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many AiAutonomyConfigs.
+     */
+    data: AiAutonomyConfigCreateManyInput | AiAutonomyConfigCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * AiAutonomyConfig createManyAndReturn
+   */
+  export type AiAutonomyConfigCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiAutonomyConfig
+     */
+    select?: AiAutonomyConfigSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiAutonomyConfig
+     */
+    omit?: AiAutonomyConfigOmit<ExtArgs> | null
+    /**
+     * The data used to create many AiAutonomyConfigs.
+     */
+    data: AiAutonomyConfigCreateManyInput | AiAutonomyConfigCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * AiAutonomyConfig update
+   */
+  export type AiAutonomyConfigUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiAutonomyConfig
+     */
+    select?: AiAutonomyConfigSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiAutonomyConfig
+     */
+    omit?: AiAutonomyConfigOmit<ExtArgs> | null
+    /**
+     * The data needed to update a AiAutonomyConfig.
+     */
+    data: XOR<AiAutonomyConfigUpdateInput, AiAutonomyConfigUncheckedUpdateInput>
+    /**
+     * Choose, which AiAutonomyConfig to update.
+     */
+    where: AiAutonomyConfigWhereUniqueInput
+  }
+
+  /**
+   * AiAutonomyConfig updateMany
+   */
+  export type AiAutonomyConfigUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update AiAutonomyConfigs.
+     */
+    data: XOR<AiAutonomyConfigUpdateManyMutationInput, AiAutonomyConfigUncheckedUpdateManyInput>
+    /**
+     * Filter which AiAutonomyConfigs to update
+     */
+    where?: AiAutonomyConfigWhereInput
+    /**
+     * Limit how many AiAutonomyConfigs to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * AiAutonomyConfig updateManyAndReturn
+   */
+  export type AiAutonomyConfigUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiAutonomyConfig
+     */
+    select?: AiAutonomyConfigSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiAutonomyConfig
+     */
+    omit?: AiAutonomyConfigOmit<ExtArgs> | null
+    /**
+     * The data used to update AiAutonomyConfigs.
+     */
+    data: XOR<AiAutonomyConfigUpdateManyMutationInput, AiAutonomyConfigUncheckedUpdateManyInput>
+    /**
+     * Filter which AiAutonomyConfigs to update
+     */
+    where?: AiAutonomyConfigWhereInput
+    /**
+     * Limit how many AiAutonomyConfigs to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * AiAutonomyConfig upsert
+   */
+  export type AiAutonomyConfigUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiAutonomyConfig
+     */
+    select?: AiAutonomyConfigSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiAutonomyConfig
+     */
+    omit?: AiAutonomyConfigOmit<ExtArgs> | null
+    /**
+     * The filter to search for the AiAutonomyConfig to update in case it exists.
+     */
+    where: AiAutonomyConfigWhereUniqueInput
+    /**
+     * In case the AiAutonomyConfig found by the `where` argument doesn't exist, create a new AiAutonomyConfig with this data.
+     */
+    create: XOR<AiAutonomyConfigCreateInput, AiAutonomyConfigUncheckedCreateInput>
+    /**
+     * In case the AiAutonomyConfig was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<AiAutonomyConfigUpdateInput, AiAutonomyConfigUncheckedUpdateInput>
+  }
+
+  /**
+   * AiAutonomyConfig delete
+   */
+  export type AiAutonomyConfigDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiAutonomyConfig
+     */
+    select?: AiAutonomyConfigSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiAutonomyConfig
+     */
+    omit?: AiAutonomyConfigOmit<ExtArgs> | null
+    /**
+     * Filter which AiAutonomyConfig to delete.
+     */
+    where: AiAutonomyConfigWhereUniqueInput
+  }
+
+  /**
+   * AiAutonomyConfig deleteMany
+   */
+  export type AiAutonomyConfigDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which AiAutonomyConfigs to delete
+     */
+    where?: AiAutonomyConfigWhereInput
+    /**
+     * Limit how many AiAutonomyConfigs to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * AiAutonomyConfig without action
+   */
+  export type AiAutonomyConfigDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiAutonomyConfig
+     */
+    select?: AiAutonomyConfigSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiAutonomyConfig
+     */
+    omit?: AiAutonomyConfigOmit<ExtArgs> | null
+  }
+
+
+  /**
+   * Model AiActionLog
+   */
+
+  export type AggregateAiActionLog = {
+    _count: AiActionLogCountAggregateOutputType | null
+    _min: AiActionLogMinAggregateOutputType | null
+    _max: AiActionLogMaxAggregateOutputType | null
+  }
+
+  export type AiActionLogMinAggregateOutputType = {
+    id: string | null
+    action: string | null
+    trigger: string | null
+    level: string | null
+    status: string | null
+    customerEmail: string | null
+    inquiryId: string | null
+    model: string | null
+    error: string | null
+    actor: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type AiActionLogMaxAggregateOutputType = {
+    id: string | null
+    action: string | null
+    trigger: string | null
+    level: string | null
+    status: string | null
+    customerEmail: string | null
+    inquiryId: string | null
+    model: string | null
+    error: string | null
+    actor: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type AiActionLogCountAggregateOutputType = {
+    id: number
+    action: number
+    trigger: number
+    level: number
+    status: number
+    customerEmail: number
+    inquiryId: number
+    draftJson: number
+    resultJson: number
+    model: number
+    error: number
+    actor: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type AiActionLogMinAggregateInputType = {
+    id?: true
+    action?: true
+    trigger?: true
+    level?: true
+    status?: true
+    customerEmail?: true
+    inquiryId?: true
+    model?: true
+    error?: true
+    actor?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type AiActionLogMaxAggregateInputType = {
+    id?: true
+    action?: true
+    trigger?: true
+    level?: true
+    status?: true
+    customerEmail?: true
+    inquiryId?: true
+    model?: true
+    error?: true
+    actor?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type AiActionLogCountAggregateInputType = {
+    id?: true
+    action?: true
+    trigger?: true
+    level?: true
+    status?: true
+    customerEmail?: true
+    inquiryId?: true
+    draftJson?: true
+    resultJson?: true
+    model?: true
+    error?: true
+    actor?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type AiActionLogAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which AiActionLog to aggregate.
+     */
+    where?: AiActionLogWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AiActionLogs to fetch.
+     */
+    orderBy?: AiActionLogOrderByWithRelationInput | AiActionLogOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: AiActionLogWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AiActionLogs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AiActionLogs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned AiActionLogs
+    **/
+    _count?: true | AiActionLogCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: AiActionLogMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: AiActionLogMaxAggregateInputType
+  }
+
+  export type GetAiActionLogAggregateType<T extends AiActionLogAggregateArgs> = {
+        [P in keyof T & keyof AggregateAiActionLog]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateAiActionLog[P]>
+      : GetScalarType<T[P], AggregateAiActionLog[P]>
+  }
+
+
+
+
+  export type AiActionLogGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: AiActionLogWhereInput
+    orderBy?: AiActionLogOrderByWithAggregationInput | AiActionLogOrderByWithAggregationInput[]
+    by: AiActionLogScalarFieldEnum[] | AiActionLogScalarFieldEnum
+    having?: AiActionLogScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: AiActionLogCountAggregateInputType | true
+    _min?: AiActionLogMinAggregateInputType
+    _max?: AiActionLogMaxAggregateInputType
+  }
+
+  export type AiActionLogGroupByOutputType = {
+    id: string
+    action: string
+    trigger: string
+    level: string
+    status: string
+    customerEmail: string | null
+    inquiryId: string | null
+    draftJson: JsonValue | null
+    resultJson: JsonValue | null
+    model: string | null
+    error: string | null
+    actor: string | null
+    createdAt: Date
+    updatedAt: Date
+    _count: AiActionLogCountAggregateOutputType | null
+    _min: AiActionLogMinAggregateOutputType | null
+    _max: AiActionLogMaxAggregateOutputType | null
+  }
+
+  type GetAiActionLogGroupByPayload<T extends AiActionLogGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<AiActionLogGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof AiActionLogGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], AiActionLogGroupByOutputType[P]>
+            : GetScalarType<T[P], AiActionLogGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type AiActionLogSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    action?: boolean
+    trigger?: boolean
+    level?: boolean
+    status?: boolean
+    customerEmail?: boolean
+    inquiryId?: boolean
+    draftJson?: boolean
+    resultJson?: boolean
+    model?: boolean
+    error?: boolean
+    actor?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["aiActionLog"]>
+
+  export type AiActionLogSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    action?: boolean
+    trigger?: boolean
+    level?: boolean
+    status?: boolean
+    customerEmail?: boolean
+    inquiryId?: boolean
+    draftJson?: boolean
+    resultJson?: boolean
+    model?: boolean
+    error?: boolean
+    actor?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["aiActionLog"]>
+
+  export type AiActionLogSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    action?: boolean
+    trigger?: boolean
+    level?: boolean
+    status?: boolean
+    customerEmail?: boolean
+    inquiryId?: boolean
+    draftJson?: boolean
+    resultJson?: boolean
+    model?: boolean
+    error?: boolean
+    actor?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["aiActionLog"]>
+
+  export type AiActionLogSelectScalar = {
+    id?: boolean
+    action?: boolean
+    trigger?: boolean
+    level?: boolean
+    status?: boolean
+    customerEmail?: boolean
+    inquiryId?: boolean
+    draftJson?: boolean
+    resultJson?: boolean
+    model?: boolean
+    error?: boolean
+    actor?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type AiActionLogOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "action" | "trigger" | "level" | "status" | "customerEmail" | "inquiryId" | "draftJson" | "resultJson" | "model" | "error" | "actor" | "createdAt" | "updatedAt", ExtArgs["result"]["aiActionLog"]>
+
+  export type $AiActionLogPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "AiActionLog"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      action: string
+      trigger: string
+      level: string
+      status: string
+      customerEmail: string | null
+      inquiryId: string | null
+      draftJson: Prisma.JsonValue | null
+      resultJson: Prisma.JsonValue | null
+      model: string | null
+      error: string | null
+      actor: string | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["aiActionLog"]>
+    composites: {}
+  }
+
+  type AiActionLogGetPayload<S extends boolean | null | undefined | AiActionLogDefaultArgs> = $Result.GetResult<Prisma.$AiActionLogPayload, S>
+
+  type AiActionLogCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<AiActionLogFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: AiActionLogCountAggregateInputType | true
+    }
+
+  export interface AiActionLogDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['AiActionLog'], meta: { name: 'AiActionLog' } }
+    /**
+     * Find zero or one AiActionLog that matches the filter.
+     * @param {AiActionLogFindUniqueArgs} args - Arguments to find a AiActionLog
+     * @example
+     * // Get one AiActionLog
+     * const aiActionLog = await prisma.aiActionLog.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends AiActionLogFindUniqueArgs>(args: SelectSubset<T, AiActionLogFindUniqueArgs<ExtArgs>>): Prisma__AiActionLogClient<$Result.GetResult<Prisma.$AiActionLogPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one AiActionLog that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {AiActionLogFindUniqueOrThrowArgs} args - Arguments to find a AiActionLog
+     * @example
+     * // Get one AiActionLog
+     * const aiActionLog = await prisma.aiActionLog.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends AiActionLogFindUniqueOrThrowArgs>(args: SelectSubset<T, AiActionLogFindUniqueOrThrowArgs<ExtArgs>>): Prisma__AiActionLogClient<$Result.GetResult<Prisma.$AiActionLogPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first AiActionLog that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiActionLogFindFirstArgs} args - Arguments to find a AiActionLog
+     * @example
+     * // Get one AiActionLog
+     * const aiActionLog = await prisma.aiActionLog.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends AiActionLogFindFirstArgs>(args?: SelectSubset<T, AiActionLogFindFirstArgs<ExtArgs>>): Prisma__AiActionLogClient<$Result.GetResult<Prisma.$AiActionLogPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first AiActionLog that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiActionLogFindFirstOrThrowArgs} args - Arguments to find a AiActionLog
+     * @example
+     * // Get one AiActionLog
+     * const aiActionLog = await prisma.aiActionLog.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends AiActionLogFindFirstOrThrowArgs>(args?: SelectSubset<T, AiActionLogFindFirstOrThrowArgs<ExtArgs>>): Prisma__AiActionLogClient<$Result.GetResult<Prisma.$AiActionLogPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more AiActionLogs that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiActionLogFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all AiActionLogs
+     * const aiActionLogs = await prisma.aiActionLog.findMany()
+     * 
+     * // Get first 10 AiActionLogs
+     * const aiActionLogs = await prisma.aiActionLog.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const aiActionLogWithIdOnly = await prisma.aiActionLog.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends AiActionLogFindManyArgs>(args?: SelectSubset<T, AiActionLogFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AiActionLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a AiActionLog.
+     * @param {AiActionLogCreateArgs} args - Arguments to create a AiActionLog.
+     * @example
+     * // Create one AiActionLog
+     * const AiActionLog = await prisma.aiActionLog.create({
+     *   data: {
+     *     // ... data to create a AiActionLog
+     *   }
+     * })
+     * 
+     */
+    create<T extends AiActionLogCreateArgs>(args: SelectSubset<T, AiActionLogCreateArgs<ExtArgs>>): Prisma__AiActionLogClient<$Result.GetResult<Prisma.$AiActionLogPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many AiActionLogs.
+     * @param {AiActionLogCreateManyArgs} args - Arguments to create many AiActionLogs.
+     * @example
+     * // Create many AiActionLogs
+     * const aiActionLog = await prisma.aiActionLog.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends AiActionLogCreateManyArgs>(args?: SelectSubset<T, AiActionLogCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many AiActionLogs and returns the data saved in the database.
+     * @param {AiActionLogCreateManyAndReturnArgs} args - Arguments to create many AiActionLogs.
+     * @example
+     * // Create many AiActionLogs
+     * const aiActionLog = await prisma.aiActionLog.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many AiActionLogs and only return the `id`
+     * const aiActionLogWithIdOnly = await prisma.aiActionLog.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends AiActionLogCreateManyAndReturnArgs>(args?: SelectSubset<T, AiActionLogCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AiActionLogPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a AiActionLog.
+     * @param {AiActionLogDeleteArgs} args - Arguments to delete one AiActionLog.
+     * @example
+     * // Delete one AiActionLog
+     * const AiActionLog = await prisma.aiActionLog.delete({
+     *   where: {
+     *     // ... filter to delete one AiActionLog
+     *   }
+     * })
+     * 
+     */
+    delete<T extends AiActionLogDeleteArgs>(args: SelectSubset<T, AiActionLogDeleteArgs<ExtArgs>>): Prisma__AiActionLogClient<$Result.GetResult<Prisma.$AiActionLogPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one AiActionLog.
+     * @param {AiActionLogUpdateArgs} args - Arguments to update one AiActionLog.
+     * @example
+     * // Update one AiActionLog
+     * const aiActionLog = await prisma.aiActionLog.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends AiActionLogUpdateArgs>(args: SelectSubset<T, AiActionLogUpdateArgs<ExtArgs>>): Prisma__AiActionLogClient<$Result.GetResult<Prisma.$AiActionLogPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more AiActionLogs.
+     * @param {AiActionLogDeleteManyArgs} args - Arguments to filter AiActionLogs to delete.
+     * @example
+     * // Delete a few AiActionLogs
+     * const { count } = await prisma.aiActionLog.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends AiActionLogDeleteManyArgs>(args?: SelectSubset<T, AiActionLogDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more AiActionLogs.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiActionLogUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many AiActionLogs
+     * const aiActionLog = await prisma.aiActionLog.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends AiActionLogUpdateManyArgs>(args: SelectSubset<T, AiActionLogUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more AiActionLogs and returns the data updated in the database.
+     * @param {AiActionLogUpdateManyAndReturnArgs} args - Arguments to update many AiActionLogs.
+     * @example
+     * // Update many AiActionLogs
+     * const aiActionLog = await prisma.aiActionLog.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more AiActionLogs and only return the `id`
+     * const aiActionLogWithIdOnly = await prisma.aiActionLog.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends AiActionLogUpdateManyAndReturnArgs>(args: SelectSubset<T, AiActionLogUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AiActionLogPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one AiActionLog.
+     * @param {AiActionLogUpsertArgs} args - Arguments to update or create a AiActionLog.
+     * @example
+     * // Update or create a AiActionLog
+     * const aiActionLog = await prisma.aiActionLog.upsert({
+     *   create: {
+     *     // ... data to create a AiActionLog
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the AiActionLog we want to update
+     *   }
+     * })
+     */
+    upsert<T extends AiActionLogUpsertArgs>(args: SelectSubset<T, AiActionLogUpsertArgs<ExtArgs>>): Prisma__AiActionLogClient<$Result.GetResult<Prisma.$AiActionLogPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of AiActionLogs.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiActionLogCountArgs} args - Arguments to filter AiActionLogs to count.
+     * @example
+     * // Count the number of AiActionLogs
+     * const count = await prisma.aiActionLog.count({
+     *   where: {
+     *     // ... the filter for the AiActionLogs we want to count
+     *   }
+     * })
+    **/
+    count<T extends AiActionLogCountArgs>(
+      args?: Subset<T, AiActionLogCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], AiActionLogCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a AiActionLog.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiActionLogAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends AiActionLogAggregateArgs>(args: Subset<T, AiActionLogAggregateArgs>): Prisma.PrismaPromise<GetAiActionLogAggregateType<T>>
+
+    /**
+     * Group by AiActionLog.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiActionLogGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends AiActionLogGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: AiActionLogGroupByArgs['orderBy'] }
+        : { orderBy?: AiActionLogGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, AiActionLogGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetAiActionLogGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the AiActionLog model
+   */
+  readonly fields: AiActionLogFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for AiActionLog.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__AiActionLogClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the AiActionLog model
+   */
+  interface AiActionLogFieldRefs {
+    readonly id: FieldRef<"AiActionLog", 'String'>
+    readonly action: FieldRef<"AiActionLog", 'String'>
+    readonly trigger: FieldRef<"AiActionLog", 'String'>
+    readonly level: FieldRef<"AiActionLog", 'String'>
+    readonly status: FieldRef<"AiActionLog", 'String'>
+    readonly customerEmail: FieldRef<"AiActionLog", 'String'>
+    readonly inquiryId: FieldRef<"AiActionLog", 'String'>
+    readonly draftJson: FieldRef<"AiActionLog", 'Json'>
+    readonly resultJson: FieldRef<"AiActionLog", 'Json'>
+    readonly model: FieldRef<"AiActionLog", 'String'>
+    readonly error: FieldRef<"AiActionLog", 'String'>
+    readonly actor: FieldRef<"AiActionLog", 'String'>
+    readonly createdAt: FieldRef<"AiActionLog", 'DateTime'>
+    readonly updatedAt: FieldRef<"AiActionLog", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * AiActionLog findUnique
+   */
+  export type AiActionLogFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiActionLog
+     */
+    select?: AiActionLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiActionLog
+     */
+    omit?: AiActionLogOmit<ExtArgs> | null
+    /**
+     * Filter, which AiActionLog to fetch.
+     */
+    where: AiActionLogWhereUniqueInput
+  }
+
+  /**
+   * AiActionLog findUniqueOrThrow
+   */
+  export type AiActionLogFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiActionLog
+     */
+    select?: AiActionLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiActionLog
+     */
+    omit?: AiActionLogOmit<ExtArgs> | null
+    /**
+     * Filter, which AiActionLog to fetch.
+     */
+    where: AiActionLogWhereUniqueInput
+  }
+
+  /**
+   * AiActionLog findFirst
+   */
+  export type AiActionLogFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiActionLog
+     */
+    select?: AiActionLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiActionLog
+     */
+    omit?: AiActionLogOmit<ExtArgs> | null
+    /**
+     * Filter, which AiActionLog to fetch.
+     */
+    where?: AiActionLogWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AiActionLogs to fetch.
+     */
+    orderBy?: AiActionLogOrderByWithRelationInput | AiActionLogOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for AiActionLogs.
+     */
+    cursor?: AiActionLogWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AiActionLogs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AiActionLogs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of AiActionLogs.
+     */
+    distinct?: AiActionLogScalarFieldEnum | AiActionLogScalarFieldEnum[]
+  }
+
+  /**
+   * AiActionLog findFirstOrThrow
+   */
+  export type AiActionLogFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiActionLog
+     */
+    select?: AiActionLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiActionLog
+     */
+    omit?: AiActionLogOmit<ExtArgs> | null
+    /**
+     * Filter, which AiActionLog to fetch.
+     */
+    where?: AiActionLogWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AiActionLogs to fetch.
+     */
+    orderBy?: AiActionLogOrderByWithRelationInput | AiActionLogOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for AiActionLogs.
+     */
+    cursor?: AiActionLogWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AiActionLogs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AiActionLogs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of AiActionLogs.
+     */
+    distinct?: AiActionLogScalarFieldEnum | AiActionLogScalarFieldEnum[]
+  }
+
+  /**
+   * AiActionLog findMany
+   */
+  export type AiActionLogFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiActionLog
+     */
+    select?: AiActionLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiActionLog
+     */
+    omit?: AiActionLogOmit<ExtArgs> | null
+    /**
+     * Filter, which AiActionLogs to fetch.
+     */
+    where?: AiActionLogWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AiActionLogs to fetch.
+     */
+    orderBy?: AiActionLogOrderByWithRelationInput | AiActionLogOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing AiActionLogs.
+     */
+    cursor?: AiActionLogWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AiActionLogs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AiActionLogs.
+     */
+    skip?: number
+    distinct?: AiActionLogScalarFieldEnum | AiActionLogScalarFieldEnum[]
+  }
+
+  /**
+   * AiActionLog create
+   */
+  export type AiActionLogCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiActionLog
+     */
+    select?: AiActionLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiActionLog
+     */
+    omit?: AiActionLogOmit<ExtArgs> | null
+    /**
+     * The data needed to create a AiActionLog.
+     */
+    data: XOR<AiActionLogCreateInput, AiActionLogUncheckedCreateInput>
+  }
+
+  /**
+   * AiActionLog createMany
+   */
+  export type AiActionLogCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many AiActionLogs.
+     */
+    data: AiActionLogCreateManyInput | AiActionLogCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * AiActionLog createManyAndReturn
+   */
+  export type AiActionLogCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiActionLog
+     */
+    select?: AiActionLogSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiActionLog
+     */
+    omit?: AiActionLogOmit<ExtArgs> | null
+    /**
+     * The data used to create many AiActionLogs.
+     */
+    data: AiActionLogCreateManyInput | AiActionLogCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * AiActionLog update
+   */
+  export type AiActionLogUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiActionLog
+     */
+    select?: AiActionLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiActionLog
+     */
+    omit?: AiActionLogOmit<ExtArgs> | null
+    /**
+     * The data needed to update a AiActionLog.
+     */
+    data: XOR<AiActionLogUpdateInput, AiActionLogUncheckedUpdateInput>
+    /**
+     * Choose, which AiActionLog to update.
+     */
+    where: AiActionLogWhereUniqueInput
+  }
+
+  /**
+   * AiActionLog updateMany
+   */
+  export type AiActionLogUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update AiActionLogs.
+     */
+    data: XOR<AiActionLogUpdateManyMutationInput, AiActionLogUncheckedUpdateManyInput>
+    /**
+     * Filter which AiActionLogs to update
+     */
+    where?: AiActionLogWhereInput
+    /**
+     * Limit how many AiActionLogs to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * AiActionLog updateManyAndReturn
+   */
+  export type AiActionLogUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiActionLog
+     */
+    select?: AiActionLogSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiActionLog
+     */
+    omit?: AiActionLogOmit<ExtArgs> | null
+    /**
+     * The data used to update AiActionLogs.
+     */
+    data: XOR<AiActionLogUpdateManyMutationInput, AiActionLogUncheckedUpdateManyInput>
+    /**
+     * Filter which AiActionLogs to update
+     */
+    where?: AiActionLogWhereInput
+    /**
+     * Limit how many AiActionLogs to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * AiActionLog upsert
+   */
+  export type AiActionLogUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiActionLog
+     */
+    select?: AiActionLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiActionLog
+     */
+    omit?: AiActionLogOmit<ExtArgs> | null
+    /**
+     * The filter to search for the AiActionLog to update in case it exists.
+     */
+    where: AiActionLogWhereUniqueInput
+    /**
+     * In case the AiActionLog found by the `where` argument doesn't exist, create a new AiActionLog with this data.
+     */
+    create: XOR<AiActionLogCreateInput, AiActionLogUncheckedCreateInput>
+    /**
+     * In case the AiActionLog was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<AiActionLogUpdateInput, AiActionLogUncheckedUpdateInput>
+  }
+
+  /**
+   * AiActionLog delete
+   */
+  export type AiActionLogDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiActionLog
+     */
+    select?: AiActionLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiActionLog
+     */
+    omit?: AiActionLogOmit<ExtArgs> | null
+    /**
+     * Filter which AiActionLog to delete.
+     */
+    where: AiActionLogWhereUniqueInput
+  }
+
+  /**
+   * AiActionLog deleteMany
+   */
+  export type AiActionLogDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which AiActionLogs to delete
+     */
+    where?: AiActionLogWhereInput
+    /**
+     * Limit how many AiActionLogs to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * AiActionLog without action
+   */
+  export type AiActionLogDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiActionLog
+     */
+    select?: AiActionLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiActionLog
+     */
+    omit?: AiActionLogOmit<ExtArgs> | null
+  }
+
+
+  /**
+   * Model AiCampaign
+   */
+
+  export type AggregateAiCampaign = {
+    _count: AiCampaignCountAggregateOutputType | null
+    _avg: AiCampaignAvgAggregateOutputType | null
+    _sum: AiCampaignSumAggregateOutputType | null
+    _min: AiCampaignMinAggregateOutputType | null
+    _max: AiCampaignMaxAggregateOutputType | null
+  }
+
+  export type AiCampaignAvgAggregateOutputType = {
+    recipientCount: number | null
+    sentCount: number | null
+    failedCount: number | null
+    skippedCount: number | null
+  }
+
+  export type AiCampaignSumAggregateOutputType = {
+    recipientCount: number | null
+    sentCount: number | null
+    failedCount: number | null
+    skippedCount: number | null
+  }
+
+  export type AiCampaignMinAggregateOutputType = {
+    id: string | null
+    name: string | null
+    goal: string | null
+    subjectTemplate: string | null
+    bodyTemplate: string | null
+    ctaLabel: string | null
+    ctaUrl: string | null
+    status: string | null
+    recipientCount: number | null
+    sentCount: number | null
+    failedCount: number | null
+    skippedCount: number | null
+    generatedBy: string | null
+    usedFallback: boolean | null
+    approvedBy: string | null
+    approvedAt: Date | null
+    sentAt: Date | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type AiCampaignMaxAggregateOutputType = {
+    id: string | null
+    name: string | null
+    goal: string | null
+    subjectTemplate: string | null
+    bodyTemplate: string | null
+    ctaLabel: string | null
+    ctaUrl: string | null
+    status: string | null
+    recipientCount: number | null
+    sentCount: number | null
+    failedCount: number | null
+    skippedCount: number | null
+    generatedBy: string | null
+    usedFallback: boolean | null
+    approvedBy: string | null
+    approvedAt: Date | null
+    sentAt: Date | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type AiCampaignCountAggregateOutputType = {
+    id: number
+    name: number
+    goal: number
+    audienceJson: number
+    subjectTemplate: number
+    bodyTemplate: number
+    ctaLabel: number
+    ctaUrl: number
+    status: number
+    recipientCount: number
+    sentCount: number
+    failedCount: number
+    skippedCount: number
+    generatedBy: number
+    usedFallback: number
+    approvedBy: number
+    approvedAt: number
+    sentAt: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type AiCampaignAvgAggregateInputType = {
+    recipientCount?: true
+    sentCount?: true
+    failedCount?: true
+    skippedCount?: true
+  }
+
+  export type AiCampaignSumAggregateInputType = {
+    recipientCount?: true
+    sentCount?: true
+    failedCount?: true
+    skippedCount?: true
+  }
+
+  export type AiCampaignMinAggregateInputType = {
+    id?: true
+    name?: true
+    goal?: true
+    subjectTemplate?: true
+    bodyTemplate?: true
+    ctaLabel?: true
+    ctaUrl?: true
+    status?: true
+    recipientCount?: true
+    sentCount?: true
+    failedCount?: true
+    skippedCount?: true
+    generatedBy?: true
+    usedFallback?: true
+    approvedBy?: true
+    approvedAt?: true
+    sentAt?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type AiCampaignMaxAggregateInputType = {
+    id?: true
+    name?: true
+    goal?: true
+    subjectTemplate?: true
+    bodyTemplate?: true
+    ctaLabel?: true
+    ctaUrl?: true
+    status?: true
+    recipientCount?: true
+    sentCount?: true
+    failedCount?: true
+    skippedCount?: true
+    generatedBy?: true
+    usedFallback?: true
+    approvedBy?: true
+    approvedAt?: true
+    sentAt?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type AiCampaignCountAggregateInputType = {
+    id?: true
+    name?: true
+    goal?: true
+    audienceJson?: true
+    subjectTemplate?: true
+    bodyTemplate?: true
+    ctaLabel?: true
+    ctaUrl?: true
+    status?: true
+    recipientCount?: true
+    sentCount?: true
+    failedCount?: true
+    skippedCount?: true
+    generatedBy?: true
+    usedFallback?: true
+    approvedBy?: true
+    approvedAt?: true
+    sentAt?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type AiCampaignAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which AiCampaign to aggregate.
+     */
+    where?: AiCampaignWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AiCampaigns to fetch.
+     */
+    orderBy?: AiCampaignOrderByWithRelationInput | AiCampaignOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: AiCampaignWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AiCampaigns from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AiCampaigns.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned AiCampaigns
+    **/
+    _count?: true | AiCampaignCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: AiCampaignAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: AiCampaignSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: AiCampaignMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: AiCampaignMaxAggregateInputType
+  }
+
+  export type GetAiCampaignAggregateType<T extends AiCampaignAggregateArgs> = {
+        [P in keyof T & keyof AggregateAiCampaign]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateAiCampaign[P]>
+      : GetScalarType<T[P], AggregateAiCampaign[P]>
+  }
+
+
+
+
+  export type AiCampaignGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: AiCampaignWhereInput
+    orderBy?: AiCampaignOrderByWithAggregationInput | AiCampaignOrderByWithAggregationInput[]
+    by: AiCampaignScalarFieldEnum[] | AiCampaignScalarFieldEnum
+    having?: AiCampaignScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: AiCampaignCountAggregateInputType | true
+    _avg?: AiCampaignAvgAggregateInputType
+    _sum?: AiCampaignSumAggregateInputType
+    _min?: AiCampaignMinAggregateInputType
+    _max?: AiCampaignMaxAggregateInputType
+  }
+
+  export type AiCampaignGroupByOutputType = {
+    id: string
+    name: string
+    goal: string | null
+    audienceJson: JsonValue
+    subjectTemplate: string
+    bodyTemplate: string
+    ctaLabel: string | null
+    ctaUrl: string | null
+    status: string
+    recipientCount: number
+    sentCount: number
+    failedCount: number
+    skippedCount: number
+    generatedBy: string
+    usedFallback: boolean
+    approvedBy: string | null
+    approvedAt: Date | null
+    sentAt: Date | null
+    createdAt: Date
+    updatedAt: Date
+    _count: AiCampaignCountAggregateOutputType | null
+    _avg: AiCampaignAvgAggregateOutputType | null
+    _sum: AiCampaignSumAggregateOutputType | null
+    _min: AiCampaignMinAggregateOutputType | null
+    _max: AiCampaignMaxAggregateOutputType | null
+  }
+
+  type GetAiCampaignGroupByPayload<T extends AiCampaignGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<AiCampaignGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof AiCampaignGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], AiCampaignGroupByOutputType[P]>
+            : GetScalarType<T[P], AiCampaignGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type AiCampaignSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    name?: boolean
+    goal?: boolean
+    audienceJson?: boolean
+    subjectTemplate?: boolean
+    bodyTemplate?: boolean
+    ctaLabel?: boolean
+    ctaUrl?: boolean
+    status?: boolean
+    recipientCount?: boolean
+    sentCount?: boolean
+    failedCount?: boolean
+    skippedCount?: boolean
+    generatedBy?: boolean
+    usedFallback?: boolean
+    approvedBy?: boolean
+    approvedAt?: boolean
+    sentAt?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    recipients?: boolean | AiCampaign$recipientsArgs<ExtArgs>
+    _count?: boolean | AiCampaignCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["aiCampaign"]>
+
+  export type AiCampaignSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    name?: boolean
+    goal?: boolean
+    audienceJson?: boolean
+    subjectTemplate?: boolean
+    bodyTemplate?: boolean
+    ctaLabel?: boolean
+    ctaUrl?: boolean
+    status?: boolean
+    recipientCount?: boolean
+    sentCount?: boolean
+    failedCount?: boolean
+    skippedCount?: boolean
+    generatedBy?: boolean
+    usedFallback?: boolean
+    approvedBy?: boolean
+    approvedAt?: boolean
+    sentAt?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["aiCampaign"]>
+
+  export type AiCampaignSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    name?: boolean
+    goal?: boolean
+    audienceJson?: boolean
+    subjectTemplate?: boolean
+    bodyTemplate?: boolean
+    ctaLabel?: boolean
+    ctaUrl?: boolean
+    status?: boolean
+    recipientCount?: boolean
+    sentCount?: boolean
+    failedCount?: boolean
+    skippedCount?: boolean
+    generatedBy?: boolean
+    usedFallback?: boolean
+    approvedBy?: boolean
+    approvedAt?: boolean
+    sentAt?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["aiCampaign"]>
+
+  export type AiCampaignSelectScalar = {
+    id?: boolean
+    name?: boolean
+    goal?: boolean
+    audienceJson?: boolean
+    subjectTemplate?: boolean
+    bodyTemplate?: boolean
+    ctaLabel?: boolean
+    ctaUrl?: boolean
+    status?: boolean
+    recipientCount?: boolean
+    sentCount?: boolean
+    failedCount?: boolean
+    skippedCount?: boolean
+    generatedBy?: boolean
+    usedFallback?: boolean
+    approvedBy?: boolean
+    approvedAt?: boolean
+    sentAt?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type AiCampaignOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "goal" | "audienceJson" | "subjectTemplate" | "bodyTemplate" | "ctaLabel" | "ctaUrl" | "status" | "recipientCount" | "sentCount" | "failedCount" | "skippedCount" | "generatedBy" | "usedFallback" | "approvedBy" | "approvedAt" | "sentAt" | "createdAt" | "updatedAt", ExtArgs["result"]["aiCampaign"]>
+  export type AiCampaignInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    recipients?: boolean | AiCampaign$recipientsArgs<ExtArgs>
+    _count?: boolean | AiCampaignCountOutputTypeDefaultArgs<ExtArgs>
+  }
+  export type AiCampaignIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+  export type AiCampaignIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+
+  export type $AiCampaignPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "AiCampaign"
+    objects: {
+      recipients: Prisma.$AiCampaignRecipientPayload<ExtArgs>[]
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      name: string
+      goal: string | null
+      audienceJson: Prisma.JsonValue
+      subjectTemplate: string
+      bodyTemplate: string
+      ctaLabel: string | null
+      ctaUrl: string | null
+      status: string
+      recipientCount: number
+      sentCount: number
+      failedCount: number
+      skippedCount: number
+      generatedBy: string
+      usedFallback: boolean
+      approvedBy: string | null
+      approvedAt: Date | null
+      sentAt: Date | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["aiCampaign"]>
+    composites: {}
+  }
+
+  type AiCampaignGetPayload<S extends boolean | null | undefined | AiCampaignDefaultArgs> = $Result.GetResult<Prisma.$AiCampaignPayload, S>
+
+  type AiCampaignCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<AiCampaignFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: AiCampaignCountAggregateInputType | true
+    }
+
+  export interface AiCampaignDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['AiCampaign'], meta: { name: 'AiCampaign' } }
+    /**
+     * Find zero or one AiCampaign that matches the filter.
+     * @param {AiCampaignFindUniqueArgs} args - Arguments to find a AiCampaign
+     * @example
+     * // Get one AiCampaign
+     * const aiCampaign = await prisma.aiCampaign.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends AiCampaignFindUniqueArgs>(args: SelectSubset<T, AiCampaignFindUniqueArgs<ExtArgs>>): Prisma__AiCampaignClient<$Result.GetResult<Prisma.$AiCampaignPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one AiCampaign that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {AiCampaignFindUniqueOrThrowArgs} args - Arguments to find a AiCampaign
+     * @example
+     * // Get one AiCampaign
+     * const aiCampaign = await prisma.aiCampaign.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends AiCampaignFindUniqueOrThrowArgs>(args: SelectSubset<T, AiCampaignFindUniqueOrThrowArgs<ExtArgs>>): Prisma__AiCampaignClient<$Result.GetResult<Prisma.$AiCampaignPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first AiCampaign that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiCampaignFindFirstArgs} args - Arguments to find a AiCampaign
+     * @example
+     * // Get one AiCampaign
+     * const aiCampaign = await prisma.aiCampaign.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends AiCampaignFindFirstArgs>(args?: SelectSubset<T, AiCampaignFindFirstArgs<ExtArgs>>): Prisma__AiCampaignClient<$Result.GetResult<Prisma.$AiCampaignPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first AiCampaign that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiCampaignFindFirstOrThrowArgs} args - Arguments to find a AiCampaign
+     * @example
+     * // Get one AiCampaign
+     * const aiCampaign = await prisma.aiCampaign.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends AiCampaignFindFirstOrThrowArgs>(args?: SelectSubset<T, AiCampaignFindFirstOrThrowArgs<ExtArgs>>): Prisma__AiCampaignClient<$Result.GetResult<Prisma.$AiCampaignPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more AiCampaigns that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiCampaignFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all AiCampaigns
+     * const aiCampaigns = await prisma.aiCampaign.findMany()
+     * 
+     * // Get first 10 AiCampaigns
+     * const aiCampaigns = await prisma.aiCampaign.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const aiCampaignWithIdOnly = await prisma.aiCampaign.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends AiCampaignFindManyArgs>(args?: SelectSubset<T, AiCampaignFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AiCampaignPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a AiCampaign.
+     * @param {AiCampaignCreateArgs} args - Arguments to create a AiCampaign.
+     * @example
+     * // Create one AiCampaign
+     * const AiCampaign = await prisma.aiCampaign.create({
+     *   data: {
+     *     // ... data to create a AiCampaign
+     *   }
+     * })
+     * 
+     */
+    create<T extends AiCampaignCreateArgs>(args: SelectSubset<T, AiCampaignCreateArgs<ExtArgs>>): Prisma__AiCampaignClient<$Result.GetResult<Prisma.$AiCampaignPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many AiCampaigns.
+     * @param {AiCampaignCreateManyArgs} args - Arguments to create many AiCampaigns.
+     * @example
+     * // Create many AiCampaigns
+     * const aiCampaign = await prisma.aiCampaign.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends AiCampaignCreateManyArgs>(args?: SelectSubset<T, AiCampaignCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many AiCampaigns and returns the data saved in the database.
+     * @param {AiCampaignCreateManyAndReturnArgs} args - Arguments to create many AiCampaigns.
+     * @example
+     * // Create many AiCampaigns
+     * const aiCampaign = await prisma.aiCampaign.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many AiCampaigns and only return the `id`
+     * const aiCampaignWithIdOnly = await prisma.aiCampaign.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends AiCampaignCreateManyAndReturnArgs>(args?: SelectSubset<T, AiCampaignCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AiCampaignPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a AiCampaign.
+     * @param {AiCampaignDeleteArgs} args - Arguments to delete one AiCampaign.
+     * @example
+     * // Delete one AiCampaign
+     * const AiCampaign = await prisma.aiCampaign.delete({
+     *   where: {
+     *     // ... filter to delete one AiCampaign
+     *   }
+     * })
+     * 
+     */
+    delete<T extends AiCampaignDeleteArgs>(args: SelectSubset<T, AiCampaignDeleteArgs<ExtArgs>>): Prisma__AiCampaignClient<$Result.GetResult<Prisma.$AiCampaignPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one AiCampaign.
+     * @param {AiCampaignUpdateArgs} args - Arguments to update one AiCampaign.
+     * @example
+     * // Update one AiCampaign
+     * const aiCampaign = await prisma.aiCampaign.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends AiCampaignUpdateArgs>(args: SelectSubset<T, AiCampaignUpdateArgs<ExtArgs>>): Prisma__AiCampaignClient<$Result.GetResult<Prisma.$AiCampaignPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more AiCampaigns.
+     * @param {AiCampaignDeleteManyArgs} args - Arguments to filter AiCampaigns to delete.
+     * @example
+     * // Delete a few AiCampaigns
+     * const { count } = await prisma.aiCampaign.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends AiCampaignDeleteManyArgs>(args?: SelectSubset<T, AiCampaignDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more AiCampaigns.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiCampaignUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many AiCampaigns
+     * const aiCampaign = await prisma.aiCampaign.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends AiCampaignUpdateManyArgs>(args: SelectSubset<T, AiCampaignUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more AiCampaigns and returns the data updated in the database.
+     * @param {AiCampaignUpdateManyAndReturnArgs} args - Arguments to update many AiCampaigns.
+     * @example
+     * // Update many AiCampaigns
+     * const aiCampaign = await prisma.aiCampaign.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more AiCampaigns and only return the `id`
+     * const aiCampaignWithIdOnly = await prisma.aiCampaign.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends AiCampaignUpdateManyAndReturnArgs>(args: SelectSubset<T, AiCampaignUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AiCampaignPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one AiCampaign.
+     * @param {AiCampaignUpsertArgs} args - Arguments to update or create a AiCampaign.
+     * @example
+     * // Update or create a AiCampaign
+     * const aiCampaign = await prisma.aiCampaign.upsert({
+     *   create: {
+     *     // ... data to create a AiCampaign
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the AiCampaign we want to update
+     *   }
+     * })
+     */
+    upsert<T extends AiCampaignUpsertArgs>(args: SelectSubset<T, AiCampaignUpsertArgs<ExtArgs>>): Prisma__AiCampaignClient<$Result.GetResult<Prisma.$AiCampaignPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of AiCampaigns.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiCampaignCountArgs} args - Arguments to filter AiCampaigns to count.
+     * @example
+     * // Count the number of AiCampaigns
+     * const count = await prisma.aiCampaign.count({
+     *   where: {
+     *     // ... the filter for the AiCampaigns we want to count
+     *   }
+     * })
+    **/
+    count<T extends AiCampaignCountArgs>(
+      args?: Subset<T, AiCampaignCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], AiCampaignCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a AiCampaign.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiCampaignAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends AiCampaignAggregateArgs>(args: Subset<T, AiCampaignAggregateArgs>): Prisma.PrismaPromise<GetAiCampaignAggregateType<T>>
+
+    /**
+     * Group by AiCampaign.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiCampaignGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends AiCampaignGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: AiCampaignGroupByArgs['orderBy'] }
+        : { orderBy?: AiCampaignGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, AiCampaignGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetAiCampaignGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the AiCampaign model
+   */
+  readonly fields: AiCampaignFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for AiCampaign.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__AiCampaignClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    recipients<T extends AiCampaign$recipientsArgs<ExtArgs> = {}>(args?: Subset<T, AiCampaign$recipientsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AiCampaignRecipientPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the AiCampaign model
+   */
+  interface AiCampaignFieldRefs {
+    readonly id: FieldRef<"AiCampaign", 'String'>
+    readonly name: FieldRef<"AiCampaign", 'String'>
+    readonly goal: FieldRef<"AiCampaign", 'String'>
+    readonly audienceJson: FieldRef<"AiCampaign", 'Json'>
+    readonly subjectTemplate: FieldRef<"AiCampaign", 'String'>
+    readonly bodyTemplate: FieldRef<"AiCampaign", 'String'>
+    readonly ctaLabel: FieldRef<"AiCampaign", 'String'>
+    readonly ctaUrl: FieldRef<"AiCampaign", 'String'>
+    readonly status: FieldRef<"AiCampaign", 'String'>
+    readonly recipientCount: FieldRef<"AiCampaign", 'Int'>
+    readonly sentCount: FieldRef<"AiCampaign", 'Int'>
+    readonly failedCount: FieldRef<"AiCampaign", 'Int'>
+    readonly skippedCount: FieldRef<"AiCampaign", 'Int'>
+    readonly generatedBy: FieldRef<"AiCampaign", 'String'>
+    readonly usedFallback: FieldRef<"AiCampaign", 'Boolean'>
+    readonly approvedBy: FieldRef<"AiCampaign", 'String'>
+    readonly approvedAt: FieldRef<"AiCampaign", 'DateTime'>
+    readonly sentAt: FieldRef<"AiCampaign", 'DateTime'>
+    readonly createdAt: FieldRef<"AiCampaign", 'DateTime'>
+    readonly updatedAt: FieldRef<"AiCampaign", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * AiCampaign findUnique
+   */
+  export type AiCampaignFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiCampaign
+     */
+    select?: AiCampaignSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiCampaign
+     */
+    omit?: AiCampaignOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiCampaignInclude<ExtArgs> | null
+    /**
+     * Filter, which AiCampaign to fetch.
+     */
+    where: AiCampaignWhereUniqueInput
+  }
+
+  /**
+   * AiCampaign findUniqueOrThrow
+   */
+  export type AiCampaignFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiCampaign
+     */
+    select?: AiCampaignSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiCampaign
+     */
+    omit?: AiCampaignOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiCampaignInclude<ExtArgs> | null
+    /**
+     * Filter, which AiCampaign to fetch.
+     */
+    where: AiCampaignWhereUniqueInput
+  }
+
+  /**
+   * AiCampaign findFirst
+   */
+  export type AiCampaignFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiCampaign
+     */
+    select?: AiCampaignSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiCampaign
+     */
+    omit?: AiCampaignOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiCampaignInclude<ExtArgs> | null
+    /**
+     * Filter, which AiCampaign to fetch.
+     */
+    where?: AiCampaignWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AiCampaigns to fetch.
+     */
+    orderBy?: AiCampaignOrderByWithRelationInput | AiCampaignOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for AiCampaigns.
+     */
+    cursor?: AiCampaignWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AiCampaigns from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AiCampaigns.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of AiCampaigns.
+     */
+    distinct?: AiCampaignScalarFieldEnum | AiCampaignScalarFieldEnum[]
+  }
+
+  /**
+   * AiCampaign findFirstOrThrow
+   */
+  export type AiCampaignFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiCampaign
+     */
+    select?: AiCampaignSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiCampaign
+     */
+    omit?: AiCampaignOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiCampaignInclude<ExtArgs> | null
+    /**
+     * Filter, which AiCampaign to fetch.
+     */
+    where?: AiCampaignWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AiCampaigns to fetch.
+     */
+    orderBy?: AiCampaignOrderByWithRelationInput | AiCampaignOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for AiCampaigns.
+     */
+    cursor?: AiCampaignWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AiCampaigns from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AiCampaigns.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of AiCampaigns.
+     */
+    distinct?: AiCampaignScalarFieldEnum | AiCampaignScalarFieldEnum[]
+  }
+
+  /**
+   * AiCampaign findMany
+   */
+  export type AiCampaignFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiCampaign
+     */
+    select?: AiCampaignSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiCampaign
+     */
+    omit?: AiCampaignOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiCampaignInclude<ExtArgs> | null
+    /**
+     * Filter, which AiCampaigns to fetch.
+     */
+    where?: AiCampaignWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AiCampaigns to fetch.
+     */
+    orderBy?: AiCampaignOrderByWithRelationInput | AiCampaignOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing AiCampaigns.
+     */
+    cursor?: AiCampaignWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AiCampaigns from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AiCampaigns.
+     */
+    skip?: number
+    distinct?: AiCampaignScalarFieldEnum | AiCampaignScalarFieldEnum[]
+  }
+
+  /**
+   * AiCampaign create
+   */
+  export type AiCampaignCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiCampaign
+     */
+    select?: AiCampaignSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiCampaign
+     */
+    omit?: AiCampaignOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiCampaignInclude<ExtArgs> | null
+    /**
+     * The data needed to create a AiCampaign.
+     */
+    data: XOR<AiCampaignCreateInput, AiCampaignUncheckedCreateInput>
+  }
+
+  /**
+   * AiCampaign createMany
+   */
+  export type AiCampaignCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many AiCampaigns.
+     */
+    data: AiCampaignCreateManyInput | AiCampaignCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * AiCampaign createManyAndReturn
+   */
+  export type AiCampaignCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiCampaign
+     */
+    select?: AiCampaignSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiCampaign
+     */
+    omit?: AiCampaignOmit<ExtArgs> | null
+    /**
+     * The data used to create many AiCampaigns.
+     */
+    data: AiCampaignCreateManyInput | AiCampaignCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * AiCampaign update
+   */
+  export type AiCampaignUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiCampaign
+     */
+    select?: AiCampaignSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiCampaign
+     */
+    omit?: AiCampaignOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiCampaignInclude<ExtArgs> | null
+    /**
+     * The data needed to update a AiCampaign.
+     */
+    data: XOR<AiCampaignUpdateInput, AiCampaignUncheckedUpdateInput>
+    /**
+     * Choose, which AiCampaign to update.
+     */
+    where: AiCampaignWhereUniqueInput
+  }
+
+  /**
+   * AiCampaign updateMany
+   */
+  export type AiCampaignUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update AiCampaigns.
+     */
+    data: XOR<AiCampaignUpdateManyMutationInput, AiCampaignUncheckedUpdateManyInput>
+    /**
+     * Filter which AiCampaigns to update
+     */
+    where?: AiCampaignWhereInput
+    /**
+     * Limit how many AiCampaigns to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * AiCampaign updateManyAndReturn
+   */
+  export type AiCampaignUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiCampaign
+     */
+    select?: AiCampaignSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiCampaign
+     */
+    omit?: AiCampaignOmit<ExtArgs> | null
+    /**
+     * The data used to update AiCampaigns.
+     */
+    data: XOR<AiCampaignUpdateManyMutationInput, AiCampaignUncheckedUpdateManyInput>
+    /**
+     * Filter which AiCampaigns to update
+     */
+    where?: AiCampaignWhereInput
+    /**
+     * Limit how many AiCampaigns to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * AiCampaign upsert
+   */
+  export type AiCampaignUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiCampaign
+     */
+    select?: AiCampaignSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiCampaign
+     */
+    omit?: AiCampaignOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiCampaignInclude<ExtArgs> | null
+    /**
+     * The filter to search for the AiCampaign to update in case it exists.
+     */
+    where: AiCampaignWhereUniqueInput
+    /**
+     * In case the AiCampaign found by the `where` argument doesn't exist, create a new AiCampaign with this data.
+     */
+    create: XOR<AiCampaignCreateInput, AiCampaignUncheckedCreateInput>
+    /**
+     * In case the AiCampaign was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<AiCampaignUpdateInput, AiCampaignUncheckedUpdateInput>
+  }
+
+  /**
+   * AiCampaign delete
+   */
+  export type AiCampaignDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiCampaign
+     */
+    select?: AiCampaignSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiCampaign
+     */
+    omit?: AiCampaignOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiCampaignInclude<ExtArgs> | null
+    /**
+     * Filter which AiCampaign to delete.
+     */
+    where: AiCampaignWhereUniqueInput
+  }
+
+  /**
+   * AiCampaign deleteMany
+   */
+  export type AiCampaignDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which AiCampaigns to delete
+     */
+    where?: AiCampaignWhereInput
+    /**
+     * Limit how many AiCampaigns to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * AiCampaign.recipients
+   */
+  export type AiCampaign$recipientsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiCampaignRecipient
+     */
+    select?: AiCampaignRecipientSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiCampaignRecipient
+     */
+    omit?: AiCampaignRecipientOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiCampaignRecipientInclude<ExtArgs> | null
+    where?: AiCampaignRecipientWhereInput
+    orderBy?: AiCampaignRecipientOrderByWithRelationInput | AiCampaignRecipientOrderByWithRelationInput[]
+    cursor?: AiCampaignRecipientWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: AiCampaignRecipientScalarFieldEnum | AiCampaignRecipientScalarFieldEnum[]
+  }
+
+  /**
+   * AiCampaign without action
+   */
+  export type AiCampaignDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiCampaign
+     */
+    select?: AiCampaignSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiCampaign
+     */
+    omit?: AiCampaignOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiCampaignInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model AiCampaignRecipient
+   */
+
+  export type AggregateAiCampaignRecipient = {
+    _count: AiCampaignRecipientCountAggregateOutputType | null
+    _min: AiCampaignRecipientMinAggregateOutputType | null
+    _max: AiCampaignRecipientMaxAggregateOutputType | null
+  }
+
+  export type AiCampaignRecipientMinAggregateOutputType = {
+    id: string | null
+    campaignId: string | null
+    customerId: string | null
+    email: string | null
+    firstName: string | null
+    subjectRendered: string | null
+    bodyRendered: string | null
+    status: string | null
+    emailLogId: string | null
+    error: string | null
+    sentAt: Date | null
+    createdAt: Date | null
+  }
+
+  export type AiCampaignRecipientMaxAggregateOutputType = {
+    id: string | null
+    campaignId: string | null
+    customerId: string | null
+    email: string | null
+    firstName: string | null
+    subjectRendered: string | null
+    bodyRendered: string | null
+    status: string | null
+    emailLogId: string | null
+    error: string | null
+    sentAt: Date | null
+    createdAt: Date | null
+  }
+
+  export type AiCampaignRecipientCountAggregateOutputType = {
+    id: number
+    campaignId: number
+    customerId: number
+    email: number
+    firstName: number
+    subjectRendered: number
+    bodyRendered: number
+    status: number
+    emailLogId: number
+    error: number
+    sentAt: number
+    createdAt: number
+    _all: number
+  }
+
+
+  export type AiCampaignRecipientMinAggregateInputType = {
+    id?: true
+    campaignId?: true
+    customerId?: true
+    email?: true
+    firstName?: true
+    subjectRendered?: true
+    bodyRendered?: true
+    status?: true
+    emailLogId?: true
+    error?: true
+    sentAt?: true
+    createdAt?: true
+  }
+
+  export type AiCampaignRecipientMaxAggregateInputType = {
+    id?: true
+    campaignId?: true
+    customerId?: true
+    email?: true
+    firstName?: true
+    subjectRendered?: true
+    bodyRendered?: true
+    status?: true
+    emailLogId?: true
+    error?: true
+    sentAt?: true
+    createdAt?: true
+  }
+
+  export type AiCampaignRecipientCountAggregateInputType = {
+    id?: true
+    campaignId?: true
+    customerId?: true
+    email?: true
+    firstName?: true
+    subjectRendered?: true
+    bodyRendered?: true
+    status?: true
+    emailLogId?: true
+    error?: true
+    sentAt?: true
+    createdAt?: true
+    _all?: true
+  }
+
+  export type AiCampaignRecipientAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which AiCampaignRecipient to aggregate.
+     */
+    where?: AiCampaignRecipientWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AiCampaignRecipients to fetch.
+     */
+    orderBy?: AiCampaignRecipientOrderByWithRelationInput | AiCampaignRecipientOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: AiCampaignRecipientWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AiCampaignRecipients from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AiCampaignRecipients.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned AiCampaignRecipients
+    **/
+    _count?: true | AiCampaignRecipientCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: AiCampaignRecipientMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: AiCampaignRecipientMaxAggregateInputType
+  }
+
+  export type GetAiCampaignRecipientAggregateType<T extends AiCampaignRecipientAggregateArgs> = {
+        [P in keyof T & keyof AggregateAiCampaignRecipient]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateAiCampaignRecipient[P]>
+      : GetScalarType<T[P], AggregateAiCampaignRecipient[P]>
+  }
+
+
+
+
+  export type AiCampaignRecipientGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: AiCampaignRecipientWhereInput
+    orderBy?: AiCampaignRecipientOrderByWithAggregationInput | AiCampaignRecipientOrderByWithAggregationInput[]
+    by: AiCampaignRecipientScalarFieldEnum[] | AiCampaignRecipientScalarFieldEnum
+    having?: AiCampaignRecipientScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: AiCampaignRecipientCountAggregateInputType | true
+    _min?: AiCampaignRecipientMinAggregateInputType
+    _max?: AiCampaignRecipientMaxAggregateInputType
+  }
+
+  export type AiCampaignRecipientGroupByOutputType = {
+    id: string
+    campaignId: string
+    customerId: string | null
+    email: string
+    firstName: string | null
+    subjectRendered: string | null
+    bodyRendered: string | null
+    status: string
+    emailLogId: string | null
+    error: string | null
+    sentAt: Date | null
+    createdAt: Date
+    _count: AiCampaignRecipientCountAggregateOutputType | null
+    _min: AiCampaignRecipientMinAggregateOutputType | null
+    _max: AiCampaignRecipientMaxAggregateOutputType | null
+  }
+
+  type GetAiCampaignRecipientGroupByPayload<T extends AiCampaignRecipientGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<AiCampaignRecipientGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof AiCampaignRecipientGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], AiCampaignRecipientGroupByOutputType[P]>
+            : GetScalarType<T[P], AiCampaignRecipientGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type AiCampaignRecipientSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    campaignId?: boolean
+    customerId?: boolean
+    email?: boolean
+    firstName?: boolean
+    subjectRendered?: boolean
+    bodyRendered?: boolean
+    status?: boolean
+    emailLogId?: boolean
+    error?: boolean
+    sentAt?: boolean
+    createdAt?: boolean
+    campaign?: boolean | AiCampaignDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["aiCampaignRecipient"]>
+
+  export type AiCampaignRecipientSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    campaignId?: boolean
+    customerId?: boolean
+    email?: boolean
+    firstName?: boolean
+    subjectRendered?: boolean
+    bodyRendered?: boolean
+    status?: boolean
+    emailLogId?: boolean
+    error?: boolean
+    sentAt?: boolean
+    createdAt?: boolean
+    campaign?: boolean | AiCampaignDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["aiCampaignRecipient"]>
+
+  export type AiCampaignRecipientSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    campaignId?: boolean
+    customerId?: boolean
+    email?: boolean
+    firstName?: boolean
+    subjectRendered?: boolean
+    bodyRendered?: boolean
+    status?: boolean
+    emailLogId?: boolean
+    error?: boolean
+    sentAt?: boolean
+    createdAt?: boolean
+    campaign?: boolean | AiCampaignDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["aiCampaignRecipient"]>
+
+  export type AiCampaignRecipientSelectScalar = {
+    id?: boolean
+    campaignId?: boolean
+    customerId?: boolean
+    email?: boolean
+    firstName?: boolean
+    subjectRendered?: boolean
+    bodyRendered?: boolean
+    status?: boolean
+    emailLogId?: boolean
+    error?: boolean
+    sentAt?: boolean
+    createdAt?: boolean
+  }
+
+  export type AiCampaignRecipientOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "campaignId" | "customerId" | "email" | "firstName" | "subjectRendered" | "bodyRendered" | "status" | "emailLogId" | "error" | "sentAt" | "createdAt", ExtArgs["result"]["aiCampaignRecipient"]>
+  export type AiCampaignRecipientInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    campaign?: boolean | AiCampaignDefaultArgs<ExtArgs>
+  }
+  export type AiCampaignRecipientIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    campaign?: boolean | AiCampaignDefaultArgs<ExtArgs>
+  }
+  export type AiCampaignRecipientIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    campaign?: boolean | AiCampaignDefaultArgs<ExtArgs>
+  }
+
+  export type $AiCampaignRecipientPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "AiCampaignRecipient"
+    objects: {
+      campaign: Prisma.$AiCampaignPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      campaignId: string
+      customerId: string | null
+      email: string
+      firstName: string | null
+      subjectRendered: string | null
+      bodyRendered: string | null
+      status: string
+      emailLogId: string | null
+      error: string | null
+      sentAt: Date | null
+      createdAt: Date
+    }, ExtArgs["result"]["aiCampaignRecipient"]>
+    composites: {}
+  }
+
+  type AiCampaignRecipientGetPayload<S extends boolean | null | undefined | AiCampaignRecipientDefaultArgs> = $Result.GetResult<Prisma.$AiCampaignRecipientPayload, S>
+
+  type AiCampaignRecipientCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<AiCampaignRecipientFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: AiCampaignRecipientCountAggregateInputType | true
+    }
+
+  export interface AiCampaignRecipientDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['AiCampaignRecipient'], meta: { name: 'AiCampaignRecipient' } }
+    /**
+     * Find zero or one AiCampaignRecipient that matches the filter.
+     * @param {AiCampaignRecipientFindUniqueArgs} args - Arguments to find a AiCampaignRecipient
+     * @example
+     * // Get one AiCampaignRecipient
+     * const aiCampaignRecipient = await prisma.aiCampaignRecipient.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends AiCampaignRecipientFindUniqueArgs>(args: SelectSubset<T, AiCampaignRecipientFindUniqueArgs<ExtArgs>>): Prisma__AiCampaignRecipientClient<$Result.GetResult<Prisma.$AiCampaignRecipientPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one AiCampaignRecipient that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {AiCampaignRecipientFindUniqueOrThrowArgs} args - Arguments to find a AiCampaignRecipient
+     * @example
+     * // Get one AiCampaignRecipient
+     * const aiCampaignRecipient = await prisma.aiCampaignRecipient.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends AiCampaignRecipientFindUniqueOrThrowArgs>(args: SelectSubset<T, AiCampaignRecipientFindUniqueOrThrowArgs<ExtArgs>>): Prisma__AiCampaignRecipientClient<$Result.GetResult<Prisma.$AiCampaignRecipientPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first AiCampaignRecipient that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiCampaignRecipientFindFirstArgs} args - Arguments to find a AiCampaignRecipient
+     * @example
+     * // Get one AiCampaignRecipient
+     * const aiCampaignRecipient = await prisma.aiCampaignRecipient.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends AiCampaignRecipientFindFirstArgs>(args?: SelectSubset<T, AiCampaignRecipientFindFirstArgs<ExtArgs>>): Prisma__AiCampaignRecipientClient<$Result.GetResult<Prisma.$AiCampaignRecipientPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first AiCampaignRecipient that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiCampaignRecipientFindFirstOrThrowArgs} args - Arguments to find a AiCampaignRecipient
+     * @example
+     * // Get one AiCampaignRecipient
+     * const aiCampaignRecipient = await prisma.aiCampaignRecipient.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends AiCampaignRecipientFindFirstOrThrowArgs>(args?: SelectSubset<T, AiCampaignRecipientFindFirstOrThrowArgs<ExtArgs>>): Prisma__AiCampaignRecipientClient<$Result.GetResult<Prisma.$AiCampaignRecipientPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more AiCampaignRecipients that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiCampaignRecipientFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all AiCampaignRecipients
+     * const aiCampaignRecipients = await prisma.aiCampaignRecipient.findMany()
+     * 
+     * // Get first 10 AiCampaignRecipients
+     * const aiCampaignRecipients = await prisma.aiCampaignRecipient.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const aiCampaignRecipientWithIdOnly = await prisma.aiCampaignRecipient.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends AiCampaignRecipientFindManyArgs>(args?: SelectSubset<T, AiCampaignRecipientFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AiCampaignRecipientPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a AiCampaignRecipient.
+     * @param {AiCampaignRecipientCreateArgs} args - Arguments to create a AiCampaignRecipient.
+     * @example
+     * // Create one AiCampaignRecipient
+     * const AiCampaignRecipient = await prisma.aiCampaignRecipient.create({
+     *   data: {
+     *     // ... data to create a AiCampaignRecipient
+     *   }
+     * })
+     * 
+     */
+    create<T extends AiCampaignRecipientCreateArgs>(args: SelectSubset<T, AiCampaignRecipientCreateArgs<ExtArgs>>): Prisma__AiCampaignRecipientClient<$Result.GetResult<Prisma.$AiCampaignRecipientPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many AiCampaignRecipients.
+     * @param {AiCampaignRecipientCreateManyArgs} args - Arguments to create many AiCampaignRecipients.
+     * @example
+     * // Create many AiCampaignRecipients
+     * const aiCampaignRecipient = await prisma.aiCampaignRecipient.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends AiCampaignRecipientCreateManyArgs>(args?: SelectSubset<T, AiCampaignRecipientCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many AiCampaignRecipients and returns the data saved in the database.
+     * @param {AiCampaignRecipientCreateManyAndReturnArgs} args - Arguments to create many AiCampaignRecipients.
+     * @example
+     * // Create many AiCampaignRecipients
+     * const aiCampaignRecipient = await prisma.aiCampaignRecipient.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many AiCampaignRecipients and only return the `id`
+     * const aiCampaignRecipientWithIdOnly = await prisma.aiCampaignRecipient.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends AiCampaignRecipientCreateManyAndReturnArgs>(args?: SelectSubset<T, AiCampaignRecipientCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AiCampaignRecipientPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a AiCampaignRecipient.
+     * @param {AiCampaignRecipientDeleteArgs} args - Arguments to delete one AiCampaignRecipient.
+     * @example
+     * // Delete one AiCampaignRecipient
+     * const AiCampaignRecipient = await prisma.aiCampaignRecipient.delete({
+     *   where: {
+     *     // ... filter to delete one AiCampaignRecipient
+     *   }
+     * })
+     * 
+     */
+    delete<T extends AiCampaignRecipientDeleteArgs>(args: SelectSubset<T, AiCampaignRecipientDeleteArgs<ExtArgs>>): Prisma__AiCampaignRecipientClient<$Result.GetResult<Prisma.$AiCampaignRecipientPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one AiCampaignRecipient.
+     * @param {AiCampaignRecipientUpdateArgs} args - Arguments to update one AiCampaignRecipient.
+     * @example
+     * // Update one AiCampaignRecipient
+     * const aiCampaignRecipient = await prisma.aiCampaignRecipient.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends AiCampaignRecipientUpdateArgs>(args: SelectSubset<T, AiCampaignRecipientUpdateArgs<ExtArgs>>): Prisma__AiCampaignRecipientClient<$Result.GetResult<Prisma.$AiCampaignRecipientPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more AiCampaignRecipients.
+     * @param {AiCampaignRecipientDeleteManyArgs} args - Arguments to filter AiCampaignRecipients to delete.
+     * @example
+     * // Delete a few AiCampaignRecipients
+     * const { count } = await prisma.aiCampaignRecipient.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends AiCampaignRecipientDeleteManyArgs>(args?: SelectSubset<T, AiCampaignRecipientDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more AiCampaignRecipients.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiCampaignRecipientUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many AiCampaignRecipients
+     * const aiCampaignRecipient = await prisma.aiCampaignRecipient.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends AiCampaignRecipientUpdateManyArgs>(args: SelectSubset<T, AiCampaignRecipientUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more AiCampaignRecipients and returns the data updated in the database.
+     * @param {AiCampaignRecipientUpdateManyAndReturnArgs} args - Arguments to update many AiCampaignRecipients.
+     * @example
+     * // Update many AiCampaignRecipients
+     * const aiCampaignRecipient = await prisma.aiCampaignRecipient.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more AiCampaignRecipients and only return the `id`
+     * const aiCampaignRecipientWithIdOnly = await prisma.aiCampaignRecipient.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends AiCampaignRecipientUpdateManyAndReturnArgs>(args: SelectSubset<T, AiCampaignRecipientUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AiCampaignRecipientPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one AiCampaignRecipient.
+     * @param {AiCampaignRecipientUpsertArgs} args - Arguments to update or create a AiCampaignRecipient.
+     * @example
+     * // Update or create a AiCampaignRecipient
+     * const aiCampaignRecipient = await prisma.aiCampaignRecipient.upsert({
+     *   create: {
+     *     // ... data to create a AiCampaignRecipient
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the AiCampaignRecipient we want to update
+     *   }
+     * })
+     */
+    upsert<T extends AiCampaignRecipientUpsertArgs>(args: SelectSubset<T, AiCampaignRecipientUpsertArgs<ExtArgs>>): Prisma__AiCampaignRecipientClient<$Result.GetResult<Prisma.$AiCampaignRecipientPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of AiCampaignRecipients.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiCampaignRecipientCountArgs} args - Arguments to filter AiCampaignRecipients to count.
+     * @example
+     * // Count the number of AiCampaignRecipients
+     * const count = await prisma.aiCampaignRecipient.count({
+     *   where: {
+     *     // ... the filter for the AiCampaignRecipients we want to count
+     *   }
+     * })
+    **/
+    count<T extends AiCampaignRecipientCountArgs>(
+      args?: Subset<T, AiCampaignRecipientCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], AiCampaignRecipientCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a AiCampaignRecipient.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiCampaignRecipientAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends AiCampaignRecipientAggregateArgs>(args: Subset<T, AiCampaignRecipientAggregateArgs>): Prisma.PrismaPromise<GetAiCampaignRecipientAggregateType<T>>
+
+    /**
+     * Group by AiCampaignRecipient.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiCampaignRecipientGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends AiCampaignRecipientGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: AiCampaignRecipientGroupByArgs['orderBy'] }
+        : { orderBy?: AiCampaignRecipientGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, AiCampaignRecipientGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetAiCampaignRecipientGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the AiCampaignRecipient model
+   */
+  readonly fields: AiCampaignRecipientFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for AiCampaignRecipient.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__AiCampaignRecipientClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    campaign<T extends AiCampaignDefaultArgs<ExtArgs> = {}>(args?: Subset<T, AiCampaignDefaultArgs<ExtArgs>>): Prisma__AiCampaignClient<$Result.GetResult<Prisma.$AiCampaignPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the AiCampaignRecipient model
+   */
+  interface AiCampaignRecipientFieldRefs {
+    readonly id: FieldRef<"AiCampaignRecipient", 'String'>
+    readonly campaignId: FieldRef<"AiCampaignRecipient", 'String'>
+    readonly customerId: FieldRef<"AiCampaignRecipient", 'String'>
+    readonly email: FieldRef<"AiCampaignRecipient", 'String'>
+    readonly firstName: FieldRef<"AiCampaignRecipient", 'String'>
+    readonly subjectRendered: FieldRef<"AiCampaignRecipient", 'String'>
+    readonly bodyRendered: FieldRef<"AiCampaignRecipient", 'String'>
+    readonly status: FieldRef<"AiCampaignRecipient", 'String'>
+    readonly emailLogId: FieldRef<"AiCampaignRecipient", 'String'>
+    readonly error: FieldRef<"AiCampaignRecipient", 'String'>
+    readonly sentAt: FieldRef<"AiCampaignRecipient", 'DateTime'>
+    readonly createdAt: FieldRef<"AiCampaignRecipient", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * AiCampaignRecipient findUnique
+   */
+  export type AiCampaignRecipientFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiCampaignRecipient
+     */
+    select?: AiCampaignRecipientSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiCampaignRecipient
+     */
+    omit?: AiCampaignRecipientOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiCampaignRecipientInclude<ExtArgs> | null
+    /**
+     * Filter, which AiCampaignRecipient to fetch.
+     */
+    where: AiCampaignRecipientWhereUniqueInput
+  }
+
+  /**
+   * AiCampaignRecipient findUniqueOrThrow
+   */
+  export type AiCampaignRecipientFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiCampaignRecipient
+     */
+    select?: AiCampaignRecipientSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiCampaignRecipient
+     */
+    omit?: AiCampaignRecipientOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiCampaignRecipientInclude<ExtArgs> | null
+    /**
+     * Filter, which AiCampaignRecipient to fetch.
+     */
+    where: AiCampaignRecipientWhereUniqueInput
+  }
+
+  /**
+   * AiCampaignRecipient findFirst
+   */
+  export type AiCampaignRecipientFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiCampaignRecipient
+     */
+    select?: AiCampaignRecipientSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiCampaignRecipient
+     */
+    omit?: AiCampaignRecipientOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiCampaignRecipientInclude<ExtArgs> | null
+    /**
+     * Filter, which AiCampaignRecipient to fetch.
+     */
+    where?: AiCampaignRecipientWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AiCampaignRecipients to fetch.
+     */
+    orderBy?: AiCampaignRecipientOrderByWithRelationInput | AiCampaignRecipientOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for AiCampaignRecipients.
+     */
+    cursor?: AiCampaignRecipientWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AiCampaignRecipients from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AiCampaignRecipients.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of AiCampaignRecipients.
+     */
+    distinct?: AiCampaignRecipientScalarFieldEnum | AiCampaignRecipientScalarFieldEnum[]
+  }
+
+  /**
+   * AiCampaignRecipient findFirstOrThrow
+   */
+  export type AiCampaignRecipientFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiCampaignRecipient
+     */
+    select?: AiCampaignRecipientSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiCampaignRecipient
+     */
+    omit?: AiCampaignRecipientOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiCampaignRecipientInclude<ExtArgs> | null
+    /**
+     * Filter, which AiCampaignRecipient to fetch.
+     */
+    where?: AiCampaignRecipientWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AiCampaignRecipients to fetch.
+     */
+    orderBy?: AiCampaignRecipientOrderByWithRelationInput | AiCampaignRecipientOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for AiCampaignRecipients.
+     */
+    cursor?: AiCampaignRecipientWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AiCampaignRecipients from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AiCampaignRecipients.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of AiCampaignRecipients.
+     */
+    distinct?: AiCampaignRecipientScalarFieldEnum | AiCampaignRecipientScalarFieldEnum[]
+  }
+
+  /**
+   * AiCampaignRecipient findMany
+   */
+  export type AiCampaignRecipientFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiCampaignRecipient
+     */
+    select?: AiCampaignRecipientSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiCampaignRecipient
+     */
+    omit?: AiCampaignRecipientOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiCampaignRecipientInclude<ExtArgs> | null
+    /**
+     * Filter, which AiCampaignRecipients to fetch.
+     */
+    where?: AiCampaignRecipientWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AiCampaignRecipients to fetch.
+     */
+    orderBy?: AiCampaignRecipientOrderByWithRelationInput | AiCampaignRecipientOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing AiCampaignRecipients.
+     */
+    cursor?: AiCampaignRecipientWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AiCampaignRecipients from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AiCampaignRecipients.
+     */
+    skip?: number
+    distinct?: AiCampaignRecipientScalarFieldEnum | AiCampaignRecipientScalarFieldEnum[]
+  }
+
+  /**
+   * AiCampaignRecipient create
+   */
+  export type AiCampaignRecipientCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiCampaignRecipient
+     */
+    select?: AiCampaignRecipientSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiCampaignRecipient
+     */
+    omit?: AiCampaignRecipientOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiCampaignRecipientInclude<ExtArgs> | null
+    /**
+     * The data needed to create a AiCampaignRecipient.
+     */
+    data: XOR<AiCampaignRecipientCreateInput, AiCampaignRecipientUncheckedCreateInput>
+  }
+
+  /**
+   * AiCampaignRecipient createMany
+   */
+  export type AiCampaignRecipientCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many AiCampaignRecipients.
+     */
+    data: AiCampaignRecipientCreateManyInput | AiCampaignRecipientCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * AiCampaignRecipient createManyAndReturn
+   */
+  export type AiCampaignRecipientCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiCampaignRecipient
+     */
+    select?: AiCampaignRecipientSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiCampaignRecipient
+     */
+    omit?: AiCampaignRecipientOmit<ExtArgs> | null
+    /**
+     * The data used to create many AiCampaignRecipients.
+     */
+    data: AiCampaignRecipientCreateManyInput | AiCampaignRecipientCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiCampaignRecipientIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * AiCampaignRecipient update
+   */
+  export type AiCampaignRecipientUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiCampaignRecipient
+     */
+    select?: AiCampaignRecipientSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiCampaignRecipient
+     */
+    omit?: AiCampaignRecipientOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiCampaignRecipientInclude<ExtArgs> | null
+    /**
+     * The data needed to update a AiCampaignRecipient.
+     */
+    data: XOR<AiCampaignRecipientUpdateInput, AiCampaignRecipientUncheckedUpdateInput>
+    /**
+     * Choose, which AiCampaignRecipient to update.
+     */
+    where: AiCampaignRecipientWhereUniqueInput
+  }
+
+  /**
+   * AiCampaignRecipient updateMany
+   */
+  export type AiCampaignRecipientUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update AiCampaignRecipients.
+     */
+    data: XOR<AiCampaignRecipientUpdateManyMutationInput, AiCampaignRecipientUncheckedUpdateManyInput>
+    /**
+     * Filter which AiCampaignRecipients to update
+     */
+    where?: AiCampaignRecipientWhereInput
+    /**
+     * Limit how many AiCampaignRecipients to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * AiCampaignRecipient updateManyAndReturn
+   */
+  export type AiCampaignRecipientUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiCampaignRecipient
+     */
+    select?: AiCampaignRecipientSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiCampaignRecipient
+     */
+    omit?: AiCampaignRecipientOmit<ExtArgs> | null
+    /**
+     * The data used to update AiCampaignRecipients.
+     */
+    data: XOR<AiCampaignRecipientUpdateManyMutationInput, AiCampaignRecipientUncheckedUpdateManyInput>
+    /**
+     * Filter which AiCampaignRecipients to update
+     */
+    where?: AiCampaignRecipientWhereInput
+    /**
+     * Limit how many AiCampaignRecipients to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiCampaignRecipientIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * AiCampaignRecipient upsert
+   */
+  export type AiCampaignRecipientUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiCampaignRecipient
+     */
+    select?: AiCampaignRecipientSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiCampaignRecipient
+     */
+    omit?: AiCampaignRecipientOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiCampaignRecipientInclude<ExtArgs> | null
+    /**
+     * The filter to search for the AiCampaignRecipient to update in case it exists.
+     */
+    where: AiCampaignRecipientWhereUniqueInput
+    /**
+     * In case the AiCampaignRecipient found by the `where` argument doesn't exist, create a new AiCampaignRecipient with this data.
+     */
+    create: XOR<AiCampaignRecipientCreateInput, AiCampaignRecipientUncheckedCreateInput>
+    /**
+     * In case the AiCampaignRecipient was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<AiCampaignRecipientUpdateInput, AiCampaignRecipientUncheckedUpdateInput>
+  }
+
+  /**
+   * AiCampaignRecipient delete
+   */
+  export type AiCampaignRecipientDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiCampaignRecipient
+     */
+    select?: AiCampaignRecipientSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiCampaignRecipient
+     */
+    omit?: AiCampaignRecipientOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiCampaignRecipientInclude<ExtArgs> | null
+    /**
+     * Filter which AiCampaignRecipient to delete.
+     */
+    where: AiCampaignRecipientWhereUniqueInput
+  }
+
+  /**
+   * AiCampaignRecipient deleteMany
+   */
+  export type AiCampaignRecipientDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which AiCampaignRecipients to delete
+     */
+    where?: AiCampaignRecipientWhereInput
+    /**
+     * Limit how many AiCampaignRecipients to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * AiCampaignRecipient without action
+   */
+  export type AiCampaignRecipientDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiCampaignRecipient
+     */
+    select?: AiCampaignRecipientSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiCampaignRecipient
+     */
+    omit?: AiCampaignRecipientOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiCampaignRecipientInclude<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -44237,6 +49268,85 @@ export namespace Prisma {
   };
 
   export type AiAuditLogScalarFieldEnum = (typeof AiAuditLogScalarFieldEnum)[keyof typeof AiAuditLogScalarFieldEnum]
+
+
+  export const AiAutonomyConfigScalarFieldEnum: {
+    id: 'id',
+    enabled: 'enabled',
+    levelsJson: 'levelsJson',
+    maxEmailsPerDay: 'maxEmailsPerDay',
+    allowedRecipientsJson: 'allowedRecipientsJson',
+    allowedServicesJson: 'allowedServicesJson',
+    escalationRulesJson: 'escalationRulesJson',
+    prohibitedActionsJson: 'prohibitedActionsJson',
+    updatedAt: 'updatedAt'
+  };
+
+  export type AiAutonomyConfigScalarFieldEnum = (typeof AiAutonomyConfigScalarFieldEnum)[keyof typeof AiAutonomyConfigScalarFieldEnum]
+
+
+  export const AiActionLogScalarFieldEnum: {
+    id: 'id',
+    action: 'action',
+    trigger: 'trigger',
+    level: 'level',
+    status: 'status',
+    customerEmail: 'customerEmail',
+    inquiryId: 'inquiryId',
+    draftJson: 'draftJson',
+    resultJson: 'resultJson',
+    model: 'model',
+    error: 'error',
+    actor: 'actor',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type AiActionLogScalarFieldEnum = (typeof AiActionLogScalarFieldEnum)[keyof typeof AiActionLogScalarFieldEnum]
+
+
+  export const AiCampaignScalarFieldEnum: {
+    id: 'id',
+    name: 'name',
+    goal: 'goal',
+    audienceJson: 'audienceJson',
+    subjectTemplate: 'subjectTemplate',
+    bodyTemplate: 'bodyTemplate',
+    ctaLabel: 'ctaLabel',
+    ctaUrl: 'ctaUrl',
+    status: 'status',
+    recipientCount: 'recipientCount',
+    sentCount: 'sentCount',
+    failedCount: 'failedCount',
+    skippedCount: 'skippedCount',
+    generatedBy: 'generatedBy',
+    usedFallback: 'usedFallback',
+    approvedBy: 'approvedBy',
+    approvedAt: 'approvedAt',
+    sentAt: 'sentAt',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type AiCampaignScalarFieldEnum = (typeof AiCampaignScalarFieldEnum)[keyof typeof AiCampaignScalarFieldEnum]
+
+
+  export const AiCampaignRecipientScalarFieldEnum: {
+    id: 'id',
+    campaignId: 'campaignId',
+    customerId: 'customerId',
+    email: 'email',
+    firstName: 'firstName',
+    subjectRendered: 'subjectRendered',
+    bodyRendered: 'bodyRendered',
+    status: 'status',
+    emailLogId: 'emailLogId',
+    error: 'error',
+    sentAt: 'sentAt',
+    createdAt: 'createdAt'
+  };
+
+  export type AiCampaignRecipientScalarFieldEnum = (typeof AiCampaignRecipientScalarFieldEnum)[keyof typeof AiCampaignRecipientScalarFieldEnum]
 
 
   export const SortOrder: {
@@ -47724,6 +52834,400 @@ export namespace Prisma {
     targetId?: StringNullableWithAggregatesFilter<"AiAuditLog"> | string | null
     meta?: JsonWithAggregatesFilter<"AiAuditLog">
     createdAt?: DateTimeWithAggregatesFilter<"AiAuditLog"> | Date | string
+  }
+
+  export type AiAutonomyConfigWhereInput = {
+    AND?: AiAutonomyConfigWhereInput | AiAutonomyConfigWhereInput[]
+    OR?: AiAutonomyConfigWhereInput[]
+    NOT?: AiAutonomyConfigWhereInput | AiAutonomyConfigWhereInput[]
+    id?: StringFilter<"AiAutonomyConfig"> | string
+    enabled?: BoolFilter<"AiAutonomyConfig"> | boolean
+    levelsJson?: JsonFilter<"AiAutonomyConfig">
+    maxEmailsPerDay?: IntFilter<"AiAutonomyConfig"> | number
+    allowedRecipientsJson?: JsonFilter<"AiAutonomyConfig">
+    allowedServicesJson?: JsonFilter<"AiAutonomyConfig">
+    escalationRulesJson?: JsonFilter<"AiAutonomyConfig">
+    prohibitedActionsJson?: JsonFilter<"AiAutonomyConfig">
+    updatedAt?: DateTimeFilter<"AiAutonomyConfig"> | Date | string
+  }
+
+  export type AiAutonomyConfigOrderByWithRelationInput = {
+    id?: SortOrder
+    enabled?: SortOrder
+    levelsJson?: SortOrder
+    maxEmailsPerDay?: SortOrder
+    allowedRecipientsJson?: SortOrder
+    allowedServicesJson?: SortOrder
+    escalationRulesJson?: SortOrder
+    prohibitedActionsJson?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type AiAutonomyConfigWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: AiAutonomyConfigWhereInput | AiAutonomyConfigWhereInput[]
+    OR?: AiAutonomyConfigWhereInput[]
+    NOT?: AiAutonomyConfigWhereInput | AiAutonomyConfigWhereInput[]
+    enabled?: BoolFilter<"AiAutonomyConfig"> | boolean
+    levelsJson?: JsonFilter<"AiAutonomyConfig">
+    maxEmailsPerDay?: IntFilter<"AiAutonomyConfig"> | number
+    allowedRecipientsJson?: JsonFilter<"AiAutonomyConfig">
+    allowedServicesJson?: JsonFilter<"AiAutonomyConfig">
+    escalationRulesJson?: JsonFilter<"AiAutonomyConfig">
+    prohibitedActionsJson?: JsonFilter<"AiAutonomyConfig">
+    updatedAt?: DateTimeFilter<"AiAutonomyConfig"> | Date | string
+  }, "id">
+
+  export type AiAutonomyConfigOrderByWithAggregationInput = {
+    id?: SortOrder
+    enabled?: SortOrder
+    levelsJson?: SortOrder
+    maxEmailsPerDay?: SortOrder
+    allowedRecipientsJson?: SortOrder
+    allowedServicesJson?: SortOrder
+    escalationRulesJson?: SortOrder
+    prohibitedActionsJson?: SortOrder
+    updatedAt?: SortOrder
+    _count?: AiAutonomyConfigCountOrderByAggregateInput
+    _avg?: AiAutonomyConfigAvgOrderByAggregateInput
+    _max?: AiAutonomyConfigMaxOrderByAggregateInput
+    _min?: AiAutonomyConfigMinOrderByAggregateInput
+    _sum?: AiAutonomyConfigSumOrderByAggregateInput
+  }
+
+  export type AiAutonomyConfigScalarWhereWithAggregatesInput = {
+    AND?: AiAutonomyConfigScalarWhereWithAggregatesInput | AiAutonomyConfigScalarWhereWithAggregatesInput[]
+    OR?: AiAutonomyConfigScalarWhereWithAggregatesInput[]
+    NOT?: AiAutonomyConfigScalarWhereWithAggregatesInput | AiAutonomyConfigScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"AiAutonomyConfig"> | string
+    enabled?: BoolWithAggregatesFilter<"AiAutonomyConfig"> | boolean
+    levelsJson?: JsonWithAggregatesFilter<"AiAutonomyConfig">
+    maxEmailsPerDay?: IntWithAggregatesFilter<"AiAutonomyConfig"> | number
+    allowedRecipientsJson?: JsonWithAggregatesFilter<"AiAutonomyConfig">
+    allowedServicesJson?: JsonWithAggregatesFilter<"AiAutonomyConfig">
+    escalationRulesJson?: JsonWithAggregatesFilter<"AiAutonomyConfig">
+    prohibitedActionsJson?: JsonWithAggregatesFilter<"AiAutonomyConfig">
+    updatedAt?: DateTimeWithAggregatesFilter<"AiAutonomyConfig"> | Date | string
+  }
+
+  export type AiActionLogWhereInput = {
+    AND?: AiActionLogWhereInput | AiActionLogWhereInput[]
+    OR?: AiActionLogWhereInput[]
+    NOT?: AiActionLogWhereInput | AiActionLogWhereInput[]
+    id?: StringFilter<"AiActionLog"> | string
+    action?: StringFilter<"AiActionLog"> | string
+    trigger?: StringFilter<"AiActionLog"> | string
+    level?: StringFilter<"AiActionLog"> | string
+    status?: StringFilter<"AiActionLog"> | string
+    customerEmail?: StringNullableFilter<"AiActionLog"> | string | null
+    inquiryId?: StringNullableFilter<"AiActionLog"> | string | null
+    draftJson?: JsonNullableFilter<"AiActionLog">
+    resultJson?: JsonNullableFilter<"AiActionLog">
+    model?: StringNullableFilter<"AiActionLog"> | string | null
+    error?: StringNullableFilter<"AiActionLog"> | string | null
+    actor?: StringNullableFilter<"AiActionLog"> | string | null
+    createdAt?: DateTimeFilter<"AiActionLog"> | Date | string
+    updatedAt?: DateTimeFilter<"AiActionLog"> | Date | string
+  }
+
+  export type AiActionLogOrderByWithRelationInput = {
+    id?: SortOrder
+    action?: SortOrder
+    trigger?: SortOrder
+    level?: SortOrder
+    status?: SortOrder
+    customerEmail?: SortOrderInput | SortOrder
+    inquiryId?: SortOrderInput | SortOrder
+    draftJson?: SortOrderInput | SortOrder
+    resultJson?: SortOrderInput | SortOrder
+    model?: SortOrderInput | SortOrder
+    error?: SortOrderInput | SortOrder
+    actor?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type AiActionLogWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: AiActionLogWhereInput | AiActionLogWhereInput[]
+    OR?: AiActionLogWhereInput[]
+    NOT?: AiActionLogWhereInput | AiActionLogWhereInput[]
+    action?: StringFilter<"AiActionLog"> | string
+    trigger?: StringFilter<"AiActionLog"> | string
+    level?: StringFilter<"AiActionLog"> | string
+    status?: StringFilter<"AiActionLog"> | string
+    customerEmail?: StringNullableFilter<"AiActionLog"> | string | null
+    inquiryId?: StringNullableFilter<"AiActionLog"> | string | null
+    draftJson?: JsonNullableFilter<"AiActionLog">
+    resultJson?: JsonNullableFilter<"AiActionLog">
+    model?: StringNullableFilter<"AiActionLog"> | string | null
+    error?: StringNullableFilter<"AiActionLog"> | string | null
+    actor?: StringNullableFilter<"AiActionLog"> | string | null
+    createdAt?: DateTimeFilter<"AiActionLog"> | Date | string
+    updatedAt?: DateTimeFilter<"AiActionLog"> | Date | string
+  }, "id">
+
+  export type AiActionLogOrderByWithAggregationInput = {
+    id?: SortOrder
+    action?: SortOrder
+    trigger?: SortOrder
+    level?: SortOrder
+    status?: SortOrder
+    customerEmail?: SortOrderInput | SortOrder
+    inquiryId?: SortOrderInput | SortOrder
+    draftJson?: SortOrderInput | SortOrder
+    resultJson?: SortOrderInput | SortOrder
+    model?: SortOrderInput | SortOrder
+    error?: SortOrderInput | SortOrder
+    actor?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: AiActionLogCountOrderByAggregateInput
+    _max?: AiActionLogMaxOrderByAggregateInput
+    _min?: AiActionLogMinOrderByAggregateInput
+  }
+
+  export type AiActionLogScalarWhereWithAggregatesInput = {
+    AND?: AiActionLogScalarWhereWithAggregatesInput | AiActionLogScalarWhereWithAggregatesInput[]
+    OR?: AiActionLogScalarWhereWithAggregatesInput[]
+    NOT?: AiActionLogScalarWhereWithAggregatesInput | AiActionLogScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"AiActionLog"> | string
+    action?: StringWithAggregatesFilter<"AiActionLog"> | string
+    trigger?: StringWithAggregatesFilter<"AiActionLog"> | string
+    level?: StringWithAggregatesFilter<"AiActionLog"> | string
+    status?: StringWithAggregatesFilter<"AiActionLog"> | string
+    customerEmail?: StringNullableWithAggregatesFilter<"AiActionLog"> | string | null
+    inquiryId?: StringNullableWithAggregatesFilter<"AiActionLog"> | string | null
+    draftJson?: JsonNullableWithAggregatesFilter<"AiActionLog">
+    resultJson?: JsonNullableWithAggregatesFilter<"AiActionLog">
+    model?: StringNullableWithAggregatesFilter<"AiActionLog"> | string | null
+    error?: StringNullableWithAggregatesFilter<"AiActionLog"> | string | null
+    actor?: StringNullableWithAggregatesFilter<"AiActionLog"> | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"AiActionLog"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"AiActionLog"> | Date | string
+  }
+
+  export type AiCampaignWhereInput = {
+    AND?: AiCampaignWhereInput | AiCampaignWhereInput[]
+    OR?: AiCampaignWhereInput[]
+    NOT?: AiCampaignWhereInput | AiCampaignWhereInput[]
+    id?: StringFilter<"AiCampaign"> | string
+    name?: StringFilter<"AiCampaign"> | string
+    goal?: StringNullableFilter<"AiCampaign"> | string | null
+    audienceJson?: JsonFilter<"AiCampaign">
+    subjectTemplate?: StringFilter<"AiCampaign"> | string
+    bodyTemplate?: StringFilter<"AiCampaign"> | string
+    ctaLabel?: StringNullableFilter<"AiCampaign"> | string | null
+    ctaUrl?: StringNullableFilter<"AiCampaign"> | string | null
+    status?: StringFilter<"AiCampaign"> | string
+    recipientCount?: IntFilter<"AiCampaign"> | number
+    sentCount?: IntFilter<"AiCampaign"> | number
+    failedCount?: IntFilter<"AiCampaign"> | number
+    skippedCount?: IntFilter<"AiCampaign"> | number
+    generatedBy?: StringFilter<"AiCampaign"> | string
+    usedFallback?: BoolFilter<"AiCampaign"> | boolean
+    approvedBy?: StringNullableFilter<"AiCampaign"> | string | null
+    approvedAt?: DateTimeNullableFilter<"AiCampaign"> | Date | string | null
+    sentAt?: DateTimeNullableFilter<"AiCampaign"> | Date | string | null
+    createdAt?: DateTimeFilter<"AiCampaign"> | Date | string
+    updatedAt?: DateTimeFilter<"AiCampaign"> | Date | string
+    recipients?: AiCampaignRecipientListRelationFilter
+  }
+
+  export type AiCampaignOrderByWithRelationInput = {
+    id?: SortOrder
+    name?: SortOrder
+    goal?: SortOrderInput | SortOrder
+    audienceJson?: SortOrder
+    subjectTemplate?: SortOrder
+    bodyTemplate?: SortOrder
+    ctaLabel?: SortOrderInput | SortOrder
+    ctaUrl?: SortOrderInput | SortOrder
+    status?: SortOrder
+    recipientCount?: SortOrder
+    sentCount?: SortOrder
+    failedCount?: SortOrder
+    skippedCount?: SortOrder
+    generatedBy?: SortOrder
+    usedFallback?: SortOrder
+    approvedBy?: SortOrderInput | SortOrder
+    approvedAt?: SortOrderInput | SortOrder
+    sentAt?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    recipients?: AiCampaignRecipientOrderByRelationAggregateInput
+  }
+
+  export type AiCampaignWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: AiCampaignWhereInput | AiCampaignWhereInput[]
+    OR?: AiCampaignWhereInput[]
+    NOT?: AiCampaignWhereInput | AiCampaignWhereInput[]
+    name?: StringFilter<"AiCampaign"> | string
+    goal?: StringNullableFilter<"AiCampaign"> | string | null
+    audienceJson?: JsonFilter<"AiCampaign">
+    subjectTemplate?: StringFilter<"AiCampaign"> | string
+    bodyTemplate?: StringFilter<"AiCampaign"> | string
+    ctaLabel?: StringNullableFilter<"AiCampaign"> | string | null
+    ctaUrl?: StringNullableFilter<"AiCampaign"> | string | null
+    status?: StringFilter<"AiCampaign"> | string
+    recipientCount?: IntFilter<"AiCampaign"> | number
+    sentCount?: IntFilter<"AiCampaign"> | number
+    failedCount?: IntFilter<"AiCampaign"> | number
+    skippedCount?: IntFilter<"AiCampaign"> | number
+    generatedBy?: StringFilter<"AiCampaign"> | string
+    usedFallback?: BoolFilter<"AiCampaign"> | boolean
+    approvedBy?: StringNullableFilter<"AiCampaign"> | string | null
+    approvedAt?: DateTimeNullableFilter<"AiCampaign"> | Date | string | null
+    sentAt?: DateTimeNullableFilter<"AiCampaign"> | Date | string | null
+    createdAt?: DateTimeFilter<"AiCampaign"> | Date | string
+    updatedAt?: DateTimeFilter<"AiCampaign"> | Date | string
+    recipients?: AiCampaignRecipientListRelationFilter
+  }, "id">
+
+  export type AiCampaignOrderByWithAggregationInput = {
+    id?: SortOrder
+    name?: SortOrder
+    goal?: SortOrderInput | SortOrder
+    audienceJson?: SortOrder
+    subjectTemplate?: SortOrder
+    bodyTemplate?: SortOrder
+    ctaLabel?: SortOrderInput | SortOrder
+    ctaUrl?: SortOrderInput | SortOrder
+    status?: SortOrder
+    recipientCount?: SortOrder
+    sentCount?: SortOrder
+    failedCount?: SortOrder
+    skippedCount?: SortOrder
+    generatedBy?: SortOrder
+    usedFallback?: SortOrder
+    approvedBy?: SortOrderInput | SortOrder
+    approvedAt?: SortOrderInput | SortOrder
+    sentAt?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: AiCampaignCountOrderByAggregateInput
+    _avg?: AiCampaignAvgOrderByAggregateInput
+    _max?: AiCampaignMaxOrderByAggregateInput
+    _min?: AiCampaignMinOrderByAggregateInput
+    _sum?: AiCampaignSumOrderByAggregateInput
+  }
+
+  export type AiCampaignScalarWhereWithAggregatesInput = {
+    AND?: AiCampaignScalarWhereWithAggregatesInput | AiCampaignScalarWhereWithAggregatesInput[]
+    OR?: AiCampaignScalarWhereWithAggregatesInput[]
+    NOT?: AiCampaignScalarWhereWithAggregatesInput | AiCampaignScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"AiCampaign"> | string
+    name?: StringWithAggregatesFilter<"AiCampaign"> | string
+    goal?: StringNullableWithAggregatesFilter<"AiCampaign"> | string | null
+    audienceJson?: JsonWithAggregatesFilter<"AiCampaign">
+    subjectTemplate?: StringWithAggregatesFilter<"AiCampaign"> | string
+    bodyTemplate?: StringWithAggregatesFilter<"AiCampaign"> | string
+    ctaLabel?: StringNullableWithAggregatesFilter<"AiCampaign"> | string | null
+    ctaUrl?: StringNullableWithAggregatesFilter<"AiCampaign"> | string | null
+    status?: StringWithAggregatesFilter<"AiCampaign"> | string
+    recipientCount?: IntWithAggregatesFilter<"AiCampaign"> | number
+    sentCount?: IntWithAggregatesFilter<"AiCampaign"> | number
+    failedCount?: IntWithAggregatesFilter<"AiCampaign"> | number
+    skippedCount?: IntWithAggregatesFilter<"AiCampaign"> | number
+    generatedBy?: StringWithAggregatesFilter<"AiCampaign"> | string
+    usedFallback?: BoolWithAggregatesFilter<"AiCampaign"> | boolean
+    approvedBy?: StringNullableWithAggregatesFilter<"AiCampaign"> | string | null
+    approvedAt?: DateTimeNullableWithAggregatesFilter<"AiCampaign"> | Date | string | null
+    sentAt?: DateTimeNullableWithAggregatesFilter<"AiCampaign"> | Date | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"AiCampaign"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"AiCampaign"> | Date | string
+  }
+
+  export type AiCampaignRecipientWhereInput = {
+    AND?: AiCampaignRecipientWhereInput | AiCampaignRecipientWhereInput[]
+    OR?: AiCampaignRecipientWhereInput[]
+    NOT?: AiCampaignRecipientWhereInput | AiCampaignRecipientWhereInput[]
+    id?: StringFilter<"AiCampaignRecipient"> | string
+    campaignId?: StringFilter<"AiCampaignRecipient"> | string
+    customerId?: StringNullableFilter<"AiCampaignRecipient"> | string | null
+    email?: StringFilter<"AiCampaignRecipient"> | string
+    firstName?: StringNullableFilter<"AiCampaignRecipient"> | string | null
+    subjectRendered?: StringNullableFilter<"AiCampaignRecipient"> | string | null
+    bodyRendered?: StringNullableFilter<"AiCampaignRecipient"> | string | null
+    status?: StringFilter<"AiCampaignRecipient"> | string
+    emailLogId?: StringNullableFilter<"AiCampaignRecipient"> | string | null
+    error?: StringNullableFilter<"AiCampaignRecipient"> | string | null
+    sentAt?: DateTimeNullableFilter<"AiCampaignRecipient"> | Date | string | null
+    createdAt?: DateTimeFilter<"AiCampaignRecipient"> | Date | string
+    campaign?: XOR<AiCampaignScalarRelationFilter, AiCampaignWhereInput>
+  }
+
+  export type AiCampaignRecipientOrderByWithRelationInput = {
+    id?: SortOrder
+    campaignId?: SortOrder
+    customerId?: SortOrderInput | SortOrder
+    email?: SortOrder
+    firstName?: SortOrderInput | SortOrder
+    subjectRendered?: SortOrderInput | SortOrder
+    bodyRendered?: SortOrderInput | SortOrder
+    status?: SortOrder
+    emailLogId?: SortOrderInput | SortOrder
+    error?: SortOrderInput | SortOrder
+    sentAt?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    campaign?: AiCampaignOrderByWithRelationInput
+  }
+
+  export type AiCampaignRecipientWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    campaignId_email?: AiCampaignRecipientCampaignIdEmailCompoundUniqueInput
+    AND?: AiCampaignRecipientWhereInput | AiCampaignRecipientWhereInput[]
+    OR?: AiCampaignRecipientWhereInput[]
+    NOT?: AiCampaignRecipientWhereInput | AiCampaignRecipientWhereInput[]
+    campaignId?: StringFilter<"AiCampaignRecipient"> | string
+    customerId?: StringNullableFilter<"AiCampaignRecipient"> | string | null
+    email?: StringFilter<"AiCampaignRecipient"> | string
+    firstName?: StringNullableFilter<"AiCampaignRecipient"> | string | null
+    subjectRendered?: StringNullableFilter<"AiCampaignRecipient"> | string | null
+    bodyRendered?: StringNullableFilter<"AiCampaignRecipient"> | string | null
+    status?: StringFilter<"AiCampaignRecipient"> | string
+    emailLogId?: StringNullableFilter<"AiCampaignRecipient"> | string | null
+    error?: StringNullableFilter<"AiCampaignRecipient"> | string | null
+    sentAt?: DateTimeNullableFilter<"AiCampaignRecipient"> | Date | string | null
+    createdAt?: DateTimeFilter<"AiCampaignRecipient"> | Date | string
+    campaign?: XOR<AiCampaignScalarRelationFilter, AiCampaignWhereInput>
+  }, "id" | "campaignId_email">
+
+  export type AiCampaignRecipientOrderByWithAggregationInput = {
+    id?: SortOrder
+    campaignId?: SortOrder
+    customerId?: SortOrderInput | SortOrder
+    email?: SortOrder
+    firstName?: SortOrderInput | SortOrder
+    subjectRendered?: SortOrderInput | SortOrder
+    bodyRendered?: SortOrderInput | SortOrder
+    status?: SortOrder
+    emailLogId?: SortOrderInput | SortOrder
+    error?: SortOrderInput | SortOrder
+    sentAt?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    _count?: AiCampaignRecipientCountOrderByAggregateInput
+    _max?: AiCampaignRecipientMaxOrderByAggregateInput
+    _min?: AiCampaignRecipientMinOrderByAggregateInput
+  }
+
+  export type AiCampaignRecipientScalarWhereWithAggregatesInput = {
+    AND?: AiCampaignRecipientScalarWhereWithAggregatesInput | AiCampaignRecipientScalarWhereWithAggregatesInput[]
+    OR?: AiCampaignRecipientScalarWhereWithAggregatesInput[]
+    NOT?: AiCampaignRecipientScalarWhereWithAggregatesInput | AiCampaignRecipientScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"AiCampaignRecipient"> | string
+    campaignId?: StringWithAggregatesFilter<"AiCampaignRecipient"> | string
+    customerId?: StringNullableWithAggregatesFilter<"AiCampaignRecipient"> | string | null
+    email?: StringWithAggregatesFilter<"AiCampaignRecipient"> | string
+    firstName?: StringNullableWithAggregatesFilter<"AiCampaignRecipient"> | string | null
+    subjectRendered?: StringNullableWithAggregatesFilter<"AiCampaignRecipient"> | string | null
+    bodyRendered?: StringNullableWithAggregatesFilter<"AiCampaignRecipient"> | string | null
+    status?: StringWithAggregatesFilter<"AiCampaignRecipient"> | string
+    emailLogId?: StringNullableWithAggregatesFilter<"AiCampaignRecipient"> | string | null
+    error?: StringNullableWithAggregatesFilter<"AiCampaignRecipient"> | string | null
+    sentAt?: DateTimeNullableWithAggregatesFilter<"AiCampaignRecipient"> | Date | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"AiCampaignRecipient"> | Date | string
   }
 
   export type InquiryCreateInput = {
@@ -51728,6 +57232,478 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type AiAutonomyConfigCreateInput = {
+    id?: string
+    enabled?: boolean
+    levelsJson?: JsonNullValueInput | InputJsonValue
+    maxEmailsPerDay?: number
+    allowedRecipientsJson?: JsonNullValueInput | InputJsonValue
+    allowedServicesJson?: JsonNullValueInput | InputJsonValue
+    escalationRulesJson?: JsonNullValueInput | InputJsonValue
+    prohibitedActionsJson?: JsonNullValueInput | InputJsonValue
+    updatedAt?: Date | string
+  }
+
+  export type AiAutonomyConfigUncheckedCreateInput = {
+    id?: string
+    enabled?: boolean
+    levelsJson?: JsonNullValueInput | InputJsonValue
+    maxEmailsPerDay?: number
+    allowedRecipientsJson?: JsonNullValueInput | InputJsonValue
+    allowedServicesJson?: JsonNullValueInput | InputJsonValue
+    escalationRulesJson?: JsonNullValueInput | InputJsonValue
+    prohibitedActionsJson?: JsonNullValueInput | InputJsonValue
+    updatedAt?: Date | string
+  }
+
+  export type AiAutonomyConfigUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    enabled?: BoolFieldUpdateOperationsInput | boolean
+    levelsJson?: JsonNullValueInput | InputJsonValue
+    maxEmailsPerDay?: IntFieldUpdateOperationsInput | number
+    allowedRecipientsJson?: JsonNullValueInput | InputJsonValue
+    allowedServicesJson?: JsonNullValueInput | InputJsonValue
+    escalationRulesJson?: JsonNullValueInput | InputJsonValue
+    prohibitedActionsJson?: JsonNullValueInput | InputJsonValue
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AiAutonomyConfigUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    enabled?: BoolFieldUpdateOperationsInput | boolean
+    levelsJson?: JsonNullValueInput | InputJsonValue
+    maxEmailsPerDay?: IntFieldUpdateOperationsInput | number
+    allowedRecipientsJson?: JsonNullValueInput | InputJsonValue
+    allowedServicesJson?: JsonNullValueInput | InputJsonValue
+    escalationRulesJson?: JsonNullValueInput | InputJsonValue
+    prohibitedActionsJson?: JsonNullValueInput | InputJsonValue
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AiAutonomyConfigCreateManyInput = {
+    id?: string
+    enabled?: boolean
+    levelsJson?: JsonNullValueInput | InputJsonValue
+    maxEmailsPerDay?: number
+    allowedRecipientsJson?: JsonNullValueInput | InputJsonValue
+    allowedServicesJson?: JsonNullValueInput | InputJsonValue
+    escalationRulesJson?: JsonNullValueInput | InputJsonValue
+    prohibitedActionsJson?: JsonNullValueInput | InputJsonValue
+    updatedAt?: Date | string
+  }
+
+  export type AiAutonomyConfigUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    enabled?: BoolFieldUpdateOperationsInput | boolean
+    levelsJson?: JsonNullValueInput | InputJsonValue
+    maxEmailsPerDay?: IntFieldUpdateOperationsInput | number
+    allowedRecipientsJson?: JsonNullValueInput | InputJsonValue
+    allowedServicesJson?: JsonNullValueInput | InputJsonValue
+    escalationRulesJson?: JsonNullValueInput | InputJsonValue
+    prohibitedActionsJson?: JsonNullValueInput | InputJsonValue
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AiAutonomyConfigUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    enabled?: BoolFieldUpdateOperationsInput | boolean
+    levelsJson?: JsonNullValueInput | InputJsonValue
+    maxEmailsPerDay?: IntFieldUpdateOperationsInput | number
+    allowedRecipientsJson?: JsonNullValueInput | InputJsonValue
+    allowedServicesJson?: JsonNullValueInput | InputJsonValue
+    escalationRulesJson?: JsonNullValueInput | InputJsonValue
+    prohibitedActionsJson?: JsonNullValueInput | InputJsonValue
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AiActionLogCreateInput = {
+    id?: string
+    action: string
+    trigger: string
+    level: string
+    status: string
+    customerEmail?: string | null
+    inquiryId?: string | null
+    draftJson?: NullableJsonNullValueInput | InputJsonValue
+    resultJson?: NullableJsonNullValueInput | InputJsonValue
+    model?: string | null
+    error?: string | null
+    actor?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type AiActionLogUncheckedCreateInput = {
+    id?: string
+    action: string
+    trigger: string
+    level: string
+    status: string
+    customerEmail?: string | null
+    inquiryId?: string | null
+    draftJson?: NullableJsonNullValueInput | InputJsonValue
+    resultJson?: NullableJsonNullValueInput | InputJsonValue
+    model?: string | null
+    error?: string | null
+    actor?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type AiActionLogUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    action?: StringFieldUpdateOperationsInput | string
+    trigger?: StringFieldUpdateOperationsInput | string
+    level?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    customerEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    inquiryId?: NullableStringFieldUpdateOperationsInput | string | null
+    draftJson?: NullableJsonNullValueInput | InputJsonValue
+    resultJson?: NullableJsonNullValueInput | InputJsonValue
+    model?: NullableStringFieldUpdateOperationsInput | string | null
+    error?: NullableStringFieldUpdateOperationsInput | string | null
+    actor?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AiActionLogUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    action?: StringFieldUpdateOperationsInput | string
+    trigger?: StringFieldUpdateOperationsInput | string
+    level?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    customerEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    inquiryId?: NullableStringFieldUpdateOperationsInput | string | null
+    draftJson?: NullableJsonNullValueInput | InputJsonValue
+    resultJson?: NullableJsonNullValueInput | InputJsonValue
+    model?: NullableStringFieldUpdateOperationsInput | string | null
+    error?: NullableStringFieldUpdateOperationsInput | string | null
+    actor?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AiActionLogCreateManyInput = {
+    id?: string
+    action: string
+    trigger: string
+    level: string
+    status: string
+    customerEmail?: string | null
+    inquiryId?: string | null
+    draftJson?: NullableJsonNullValueInput | InputJsonValue
+    resultJson?: NullableJsonNullValueInput | InputJsonValue
+    model?: string | null
+    error?: string | null
+    actor?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type AiActionLogUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    action?: StringFieldUpdateOperationsInput | string
+    trigger?: StringFieldUpdateOperationsInput | string
+    level?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    customerEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    inquiryId?: NullableStringFieldUpdateOperationsInput | string | null
+    draftJson?: NullableJsonNullValueInput | InputJsonValue
+    resultJson?: NullableJsonNullValueInput | InputJsonValue
+    model?: NullableStringFieldUpdateOperationsInput | string | null
+    error?: NullableStringFieldUpdateOperationsInput | string | null
+    actor?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AiActionLogUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    action?: StringFieldUpdateOperationsInput | string
+    trigger?: StringFieldUpdateOperationsInput | string
+    level?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    customerEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    inquiryId?: NullableStringFieldUpdateOperationsInput | string | null
+    draftJson?: NullableJsonNullValueInput | InputJsonValue
+    resultJson?: NullableJsonNullValueInput | InputJsonValue
+    model?: NullableStringFieldUpdateOperationsInput | string | null
+    error?: NullableStringFieldUpdateOperationsInput | string | null
+    actor?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AiCampaignCreateInput = {
+    id?: string
+    name: string
+    goal?: string | null
+    audienceJson: JsonNullValueInput | InputJsonValue
+    subjectTemplate: string
+    bodyTemplate: string
+    ctaLabel?: string | null
+    ctaUrl?: string | null
+    status?: string
+    recipientCount?: number
+    sentCount?: number
+    failedCount?: number
+    skippedCount?: number
+    generatedBy?: string
+    usedFallback?: boolean
+    approvedBy?: string | null
+    approvedAt?: Date | string | null
+    sentAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    recipients?: AiCampaignRecipientCreateNestedManyWithoutCampaignInput
+  }
+
+  export type AiCampaignUncheckedCreateInput = {
+    id?: string
+    name: string
+    goal?: string | null
+    audienceJson: JsonNullValueInput | InputJsonValue
+    subjectTemplate: string
+    bodyTemplate: string
+    ctaLabel?: string | null
+    ctaUrl?: string | null
+    status?: string
+    recipientCount?: number
+    sentCount?: number
+    failedCount?: number
+    skippedCount?: number
+    generatedBy?: string
+    usedFallback?: boolean
+    approvedBy?: string | null
+    approvedAt?: Date | string | null
+    sentAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    recipients?: AiCampaignRecipientUncheckedCreateNestedManyWithoutCampaignInput
+  }
+
+  export type AiCampaignUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    goal?: NullableStringFieldUpdateOperationsInput | string | null
+    audienceJson?: JsonNullValueInput | InputJsonValue
+    subjectTemplate?: StringFieldUpdateOperationsInput | string
+    bodyTemplate?: StringFieldUpdateOperationsInput | string
+    ctaLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    ctaUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    recipientCount?: IntFieldUpdateOperationsInput | number
+    sentCount?: IntFieldUpdateOperationsInput | number
+    failedCount?: IntFieldUpdateOperationsInput | number
+    skippedCount?: IntFieldUpdateOperationsInput | number
+    generatedBy?: StringFieldUpdateOperationsInput | string
+    usedFallback?: BoolFieldUpdateOperationsInput | boolean
+    approvedBy?: NullableStringFieldUpdateOperationsInput | string | null
+    approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    sentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    recipients?: AiCampaignRecipientUpdateManyWithoutCampaignNestedInput
+  }
+
+  export type AiCampaignUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    goal?: NullableStringFieldUpdateOperationsInput | string | null
+    audienceJson?: JsonNullValueInput | InputJsonValue
+    subjectTemplate?: StringFieldUpdateOperationsInput | string
+    bodyTemplate?: StringFieldUpdateOperationsInput | string
+    ctaLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    ctaUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    recipientCount?: IntFieldUpdateOperationsInput | number
+    sentCount?: IntFieldUpdateOperationsInput | number
+    failedCount?: IntFieldUpdateOperationsInput | number
+    skippedCount?: IntFieldUpdateOperationsInput | number
+    generatedBy?: StringFieldUpdateOperationsInput | string
+    usedFallback?: BoolFieldUpdateOperationsInput | boolean
+    approvedBy?: NullableStringFieldUpdateOperationsInput | string | null
+    approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    sentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    recipients?: AiCampaignRecipientUncheckedUpdateManyWithoutCampaignNestedInput
+  }
+
+  export type AiCampaignCreateManyInput = {
+    id?: string
+    name: string
+    goal?: string | null
+    audienceJson: JsonNullValueInput | InputJsonValue
+    subjectTemplate: string
+    bodyTemplate: string
+    ctaLabel?: string | null
+    ctaUrl?: string | null
+    status?: string
+    recipientCount?: number
+    sentCount?: number
+    failedCount?: number
+    skippedCount?: number
+    generatedBy?: string
+    usedFallback?: boolean
+    approvedBy?: string | null
+    approvedAt?: Date | string | null
+    sentAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type AiCampaignUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    goal?: NullableStringFieldUpdateOperationsInput | string | null
+    audienceJson?: JsonNullValueInput | InputJsonValue
+    subjectTemplate?: StringFieldUpdateOperationsInput | string
+    bodyTemplate?: StringFieldUpdateOperationsInput | string
+    ctaLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    ctaUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    recipientCount?: IntFieldUpdateOperationsInput | number
+    sentCount?: IntFieldUpdateOperationsInput | number
+    failedCount?: IntFieldUpdateOperationsInput | number
+    skippedCount?: IntFieldUpdateOperationsInput | number
+    generatedBy?: StringFieldUpdateOperationsInput | string
+    usedFallback?: BoolFieldUpdateOperationsInput | boolean
+    approvedBy?: NullableStringFieldUpdateOperationsInput | string | null
+    approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    sentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AiCampaignUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    goal?: NullableStringFieldUpdateOperationsInput | string | null
+    audienceJson?: JsonNullValueInput | InputJsonValue
+    subjectTemplate?: StringFieldUpdateOperationsInput | string
+    bodyTemplate?: StringFieldUpdateOperationsInput | string
+    ctaLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    ctaUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    recipientCount?: IntFieldUpdateOperationsInput | number
+    sentCount?: IntFieldUpdateOperationsInput | number
+    failedCount?: IntFieldUpdateOperationsInput | number
+    skippedCount?: IntFieldUpdateOperationsInput | number
+    generatedBy?: StringFieldUpdateOperationsInput | string
+    usedFallback?: BoolFieldUpdateOperationsInput | boolean
+    approvedBy?: NullableStringFieldUpdateOperationsInput | string | null
+    approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    sentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AiCampaignRecipientCreateInput = {
+    id?: string
+    customerId?: string | null
+    email: string
+    firstName?: string | null
+    subjectRendered?: string | null
+    bodyRendered?: string | null
+    status?: string
+    emailLogId?: string | null
+    error?: string | null
+    sentAt?: Date | string | null
+    createdAt?: Date | string
+    campaign: AiCampaignCreateNestedOneWithoutRecipientsInput
+  }
+
+  export type AiCampaignRecipientUncheckedCreateInput = {
+    id?: string
+    campaignId: string
+    customerId?: string | null
+    email: string
+    firstName?: string | null
+    subjectRendered?: string | null
+    bodyRendered?: string | null
+    status?: string
+    emailLogId?: string | null
+    error?: string | null
+    sentAt?: Date | string | null
+    createdAt?: Date | string
+  }
+
+  export type AiCampaignRecipientUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    customerId?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: StringFieldUpdateOperationsInput | string
+    firstName?: NullableStringFieldUpdateOperationsInput | string | null
+    subjectRendered?: NullableStringFieldUpdateOperationsInput | string | null
+    bodyRendered?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    emailLogId?: NullableStringFieldUpdateOperationsInput | string | null
+    error?: NullableStringFieldUpdateOperationsInput | string | null
+    sentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    campaign?: AiCampaignUpdateOneRequiredWithoutRecipientsNestedInput
+  }
+
+  export type AiCampaignRecipientUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    campaignId?: StringFieldUpdateOperationsInput | string
+    customerId?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: StringFieldUpdateOperationsInput | string
+    firstName?: NullableStringFieldUpdateOperationsInput | string | null
+    subjectRendered?: NullableStringFieldUpdateOperationsInput | string | null
+    bodyRendered?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    emailLogId?: NullableStringFieldUpdateOperationsInput | string | null
+    error?: NullableStringFieldUpdateOperationsInput | string | null
+    sentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AiCampaignRecipientCreateManyInput = {
+    id?: string
+    campaignId: string
+    customerId?: string | null
+    email: string
+    firstName?: string | null
+    subjectRendered?: string | null
+    bodyRendered?: string | null
+    status?: string
+    emailLogId?: string | null
+    error?: string | null
+    sentAt?: Date | string | null
+    createdAt?: Date | string
+  }
+
+  export type AiCampaignRecipientUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    customerId?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: StringFieldUpdateOperationsInput | string
+    firstName?: NullableStringFieldUpdateOperationsInput | string | null
+    subjectRendered?: NullableStringFieldUpdateOperationsInput | string | null
+    bodyRendered?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    emailLogId?: NullableStringFieldUpdateOperationsInput | string | null
+    error?: NullableStringFieldUpdateOperationsInput | string | null
+    sentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AiCampaignRecipientUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    campaignId?: StringFieldUpdateOperationsInput | string
+    customerId?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: StringFieldUpdateOperationsInput | string
+    firstName?: NullableStringFieldUpdateOperationsInput | string | null
+    subjectRendered?: NullableStringFieldUpdateOperationsInput | string | null
+    bodyRendered?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    emailLogId?: NullableStringFieldUpdateOperationsInput | string | null
+    error?: NullableStringFieldUpdateOperationsInput | string | null
+    sentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type StringFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel>
     in?: string[] | ListStringFieldRefInput<$PrismaModel>
@@ -53967,6 +59943,233 @@ export namespace Prisma {
     createdAt?: SortOrder
   }
 
+  export type AiAutonomyConfigCountOrderByAggregateInput = {
+    id?: SortOrder
+    enabled?: SortOrder
+    levelsJson?: SortOrder
+    maxEmailsPerDay?: SortOrder
+    allowedRecipientsJson?: SortOrder
+    allowedServicesJson?: SortOrder
+    escalationRulesJson?: SortOrder
+    prohibitedActionsJson?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type AiAutonomyConfigAvgOrderByAggregateInput = {
+    maxEmailsPerDay?: SortOrder
+  }
+
+  export type AiAutonomyConfigMaxOrderByAggregateInput = {
+    id?: SortOrder
+    enabled?: SortOrder
+    maxEmailsPerDay?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type AiAutonomyConfigMinOrderByAggregateInput = {
+    id?: SortOrder
+    enabled?: SortOrder
+    maxEmailsPerDay?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type AiAutonomyConfigSumOrderByAggregateInput = {
+    maxEmailsPerDay?: SortOrder
+  }
+
+  export type AiActionLogCountOrderByAggregateInput = {
+    id?: SortOrder
+    action?: SortOrder
+    trigger?: SortOrder
+    level?: SortOrder
+    status?: SortOrder
+    customerEmail?: SortOrder
+    inquiryId?: SortOrder
+    draftJson?: SortOrder
+    resultJson?: SortOrder
+    model?: SortOrder
+    error?: SortOrder
+    actor?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type AiActionLogMaxOrderByAggregateInput = {
+    id?: SortOrder
+    action?: SortOrder
+    trigger?: SortOrder
+    level?: SortOrder
+    status?: SortOrder
+    customerEmail?: SortOrder
+    inquiryId?: SortOrder
+    model?: SortOrder
+    error?: SortOrder
+    actor?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type AiActionLogMinOrderByAggregateInput = {
+    id?: SortOrder
+    action?: SortOrder
+    trigger?: SortOrder
+    level?: SortOrder
+    status?: SortOrder
+    customerEmail?: SortOrder
+    inquiryId?: SortOrder
+    model?: SortOrder
+    error?: SortOrder
+    actor?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type AiCampaignRecipientListRelationFilter = {
+    every?: AiCampaignRecipientWhereInput
+    some?: AiCampaignRecipientWhereInput
+    none?: AiCampaignRecipientWhereInput
+  }
+
+  export type AiCampaignRecipientOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type AiCampaignCountOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+    goal?: SortOrder
+    audienceJson?: SortOrder
+    subjectTemplate?: SortOrder
+    bodyTemplate?: SortOrder
+    ctaLabel?: SortOrder
+    ctaUrl?: SortOrder
+    status?: SortOrder
+    recipientCount?: SortOrder
+    sentCount?: SortOrder
+    failedCount?: SortOrder
+    skippedCount?: SortOrder
+    generatedBy?: SortOrder
+    usedFallback?: SortOrder
+    approvedBy?: SortOrder
+    approvedAt?: SortOrder
+    sentAt?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type AiCampaignAvgOrderByAggregateInput = {
+    recipientCount?: SortOrder
+    sentCount?: SortOrder
+    failedCount?: SortOrder
+    skippedCount?: SortOrder
+  }
+
+  export type AiCampaignMaxOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+    goal?: SortOrder
+    subjectTemplate?: SortOrder
+    bodyTemplate?: SortOrder
+    ctaLabel?: SortOrder
+    ctaUrl?: SortOrder
+    status?: SortOrder
+    recipientCount?: SortOrder
+    sentCount?: SortOrder
+    failedCount?: SortOrder
+    skippedCount?: SortOrder
+    generatedBy?: SortOrder
+    usedFallback?: SortOrder
+    approvedBy?: SortOrder
+    approvedAt?: SortOrder
+    sentAt?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type AiCampaignMinOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+    goal?: SortOrder
+    subjectTemplate?: SortOrder
+    bodyTemplate?: SortOrder
+    ctaLabel?: SortOrder
+    ctaUrl?: SortOrder
+    status?: SortOrder
+    recipientCount?: SortOrder
+    sentCount?: SortOrder
+    failedCount?: SortOrder
+    skippedCount?: SortOrder
+    generatedBy?: SortOrder
+    usedFallback?: SortOrder
+    approvedBy?: SortOrder
+    approvedAt?: SortOrder
+    sentAt?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type AiCampaignSumOrderByAggregateInput = {
+    recipientCount?: SortOrder
+    sentCount?: SortOrder
+    failedCount?: SortOrder
+    skippedCount?: SortOrder
+  }
+
+  export type AiCampaignScalarRelationFilter = {
+    is?: AiCampaignWhereInput
+    isNot?: AiCampaignWhereInput
+  }
+
+  export type AiCampaignRecipientCampaignIdEmailCompoundUniqueInput = {
+    campaignId: string
+    email: string
+  }
+
+  export type AiCampaignRecipientCountOrderByAggregateInput = {
+    id?: SortOrder
+    campaignId?: SortOrder
+    customerId?: SortOrder
+    email?: SortOrder
+    firstName?: SortOrder
+    subjectRendered?: SortOrder
+    bodyRendered?: SortOrder
+    status?: SortOrder
+    emailLogId?: SortOrder
+    error?: SortOrder
+    sentAt?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type AiCampaignRecipientMaxOrderByAggregateInput = {
+    id?: SortOrder
+    campaignId?: SortOrder
+    customerId?: SortOrder
+    email?: SortOrder
+    firstName?: SortOrder
+    subjectRendered?: SortOrder
+    bodyRendered?: SortOrder
+    status?: SortOrder
+    emailLogId?: SortOrder
+    error?: SortOrder
+    sentAt?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type AiCampaignRecipientMinOrderByAggregateInput = {
+    id?: SortOrder
+    campaignId?: SortOrder
+    customerId?: SortOrder
+    email?: SortOrder
+    firstName?: SortOrder
+    subjectRendered?: SortOrder
+    bodyRendered?: SortOrder
+    status?: SortOrder
+    emailLogId?: SortOrder
+    error?: SortOrder
+    sentAt?: SortOrder
+    createdAt?: SortOrder
+  }
+
   export type StringFieldUpdateOperationsInput = {
     set?: string
   }
@@ -54639,6 +60842,62 @@ export namespace Prisma {
     upsert?: ChatConversationUpsertWithoutMessagesInput
     connect?: ChatConversationWhereUniqueInput
     update?: XOR<XOR<ChatConversationUpdateToOneWithWhereWithoutMessagesInput, ChatConversationUpdateWithoutMessagesInput>, ChatConversationUncheckedUpdateWithoutMessagesInput>
+  }
+
+  export type AiCampaignRecipientCreateNestedManyWithoutCampaignInput = {
+    create?: XOR<AiCampaignRecipientCreateWithoutCampaignInput, AiCampaignRecipientUncheckedCreateWithoutCampaignInput> | AiCampaignRecipientCreateWithoutCampaignInput[] | AiCampaignRecipientUncheckedCreateWithoutCampaignInput[]
+    connectOrCreate?: AiCampaignRecipientCreateOrConnectWithoutCampaignInput | AiCampaignRecipientCreateOrConnectWithoutCampaignInput[]
+    createMany?: AiCampaignRecipientCreateManyCampaignInputEnvelope
+    connect?: AiCampaignRecipientWhereUniqueInput | AiCampaignRecipientWhereUniqueInput[]
+  }
+
+  export type AiCampaignRecipientUncheckedCreateNestedManyWithoutCampaignInput = {
+    create?: XOR<AiCampaignRecipientCreateWithoutCampaignInput, AiCampaignRecipientUncheckedCreateWithoutCampaignInput> | AiCampaignRecipientCreateWithoutCampaignInput[] | AiCampaignRecipientUncheckedCreateWithoutCampaignInput[]
+    connectOrCreate?: AiCampaignRecipientCreateOrConnectWithoutCampaignInput | AiCampaignRecipientCreateOrConnectWithoutCampaignInput[]
+    createMany?: AiCampaignRecipientCreateManyCampaignInputEnvelope
+    connect?: AiCampaignRecipientWhereUniqueInput | AiCampaignRecipientWhereUniqueInput[]
+  }
+
+  export type AiCampaignRecipientUpdateManyWithoutCampaignNestedInput = {
+    create?: XOR<AiCampaignRecipientCreateWithoutCampaignInput, AiCampaignRecipientUncheckedCreateWithoutCampaignInput> | AiCampaignRecipientCreateWithoutCampaignInput[] | AiCampaignRecipientUncheckedCreateWithoutCampaignInput[]
+    connectOrCreate?: AiCampaignRecipientCreateOrConnectWithoutCampaignInput | AiCampaignRecipientCreateOrConnectWithoutCampaignInput[]
+    upsert?: AiCampaignRecipientUpsertWithWhereUniqueWithoutCampaignInput | AiCampaignRecipientUpsertWithWhereUniqueWithoutCampaignInput[]
+    createMany?: AiCampaignRecipientCreateManyCampaignInputEnvelope
+    set?: AiCampaignRecipientWhereUniqueInput | AiCampaignRecipientWhereUniqueInput[]
+    disconnect?: AiCampaignRecipientWhereUniqueInput | AiCampaignRecipientWhereUniqueInput[]
+    delete?: AiCampaignRecipientWhereUniqueInput | AiCampaignRecipientWhereUniqueInput[]
+    connect?: AiCampaignRecipientWhereUniqueInput | AiCampaignRecipientWhereUniqueInput[]
+    update?: AiCampaignRecipientUpdateWithWhereUniqueWithoutCampaignInput | AiCampaignRecipientUpdateWithWhereUniqueWithoutCampaignInput[]
+    updateMany?: AiCampaignRecipientUpdateManyWithWhereWithoutCampaignInput | AiCampaignRecipientUpdateManyWithWhereWithoutCampaignInput[]
+    deleteMany?: AiCampaignRecipientScalarWhereInput | AiCampaignRecipientScalarWhereInput[]
+  }
+
+  export type AiCampaignRecipientUncheckedUpdateManyWithoutCampaignNestedInput = {
+    create?: XOR<AiCampaignRecipientCreateWithoutCampaignInput, AiCampaignRecipientUncheckedCreateWithoutCampaignInput> | AiCampaignRecipientCreateWithoutCampaignInput[] | AiCampaignRecipientUncheckedCreateWithoutCampaignInput[]
+    connectOrCreate?: AiCampaignRecipientCreateOrConnectWithoutCampaignInput | AiCampaignRecipientCreateOrConnectWithoutCampaignInput[]
+    upsert?: AiCampaignRecipientUpsertWithWhereUniqueWithoutCampaignInput | AiCampaignRecipientUpsertWithWhereUniqueWithoutCampaignInput[]
+    createMany?: AiCampaignRecipientCreateManyCampaignInputEnvelope
+    set?: AiCampaignRecipientWhereUniqueInput | AiCampaignRecipientWhereUniqueInput[]
+    disconnect?: AiCampaignRecipientWhereUniqueInput | AiCampaignRecipientWhereUniqueInput[]
+    delete?: AiCampaignRecipientWhereUniqueInput | AiCampaignRecipientWhereUniqueInput[]
+    connect?: AiCampaignRecipientWhereUniqueInput | AiCampaignRecipientWhereUniqueInput[]
+    update?: AiCampaignRecipientUpdateWithWhereUniqueWithoutCampaignInput | AiCampaignRecipientUpdateWithWhereUniqueWithoutCampaignInput[]
+    updateMany?: AiCampaignRecipientUpdateManyWithWhereWithoutCampaignInput | AiCampaignRecipientUpdateManyWithWhereWithoutCampaignInput[]
+    deleteMany?: AiCampaignRecipientScalarWhereInput | AiCampaignRecipientScalarWhereInput[]
+  }
+
+  export type AiCampaignCreateNestedOneWithoutRecipientsInput = {
+    create?: XOR<AiCampaignCreateWithoutRecipientsInput, AiCampaignUncheckedCreateWithoutRecipientsInput>
+    connectOrCreate?: AiCampaignCreateOrConnectWithoutRecipientsInput
+    connect?: AiCampaignWhereUniqueInput
+  }
+
+  export type AiCampaignUpdateOneRequiredWithoutRecipientsNestedInput = {
+    create?: XOR<AiCampaignCreateWithoutRecipientsInput, AiCampaignUncheckedCreateWithoutRecipientsInput>
+    connectOrCreate?: AiCampaignCreateOrConnectWithoutRecipientsInput
+    upsert?: AiCampaignUpsertWithoutRecipientsInput
+    connect?: AiCampaignWhereUniqueInput
+    update?: XOR<XOR<AiCampaignUpdateToOneWithWhereWithoutRecipientsInput, AiCampaignUpdateWithoutRecipientsInput>, AiCampaignUncheckedUpdateWithoutRecipientsInput>
   }
 
   export type NestedStringFilter<$PrismaModel = never> = {
@@ -57097,6 +63356,186 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type AiCampaignRecipientCreateWithoutCampaignInput = {
+    id?: string
+    customerId?: string | null
+    email: string
+    firstName?: string | null
+    subjectRendered?: string | null
+    bodyRendered?: string | null
+    status?: string
+    emailLogId?: string | null
+    error?: string | null
+    sentAt?: Date | string | null
+    createdAt?: Date | string
+  }
+
+  export type AiCampaignRecipientUncheckedCreateWithoutCampaignInput = {
+    id?: string
+    customerId?: string | null
+    email: string
+    firstName?: string | null
+    subjectRendered?: string | null
+    bodyRendered?: string | null
+    status?: string
+    emailLogId?: string | null
+    error?: string | null
+    sentAt?: Date | string | null
+    createdAt?: Date | string
+  }
+
+  export type AiCampaignRecipientCreateOrConnectWithoutCampaignInput = {
+    where: AiCampaignRecipientWhereUniqueInput
+    create: XOR<AiCampaignRecipientCreateWithoutCampaignInput, AiCampaignRecipientUncheckedCreateWithoutCampaignInput>
+  }
+
+  export type AiCampaignRecipientCreateManyCampaignInputEnvelope = {
+    data: AiCampaignRecipientCreateManyCampaignInput | AiCampaignRecipientCreateManyCampaignInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type AiCampaignRecipientUpsertWithWhereUniqueWithoutCampaignInput = {
+    where: AiCampaignRecipientWhereUniqueInput
+    update: XOR<AiCampaignRecipientUpdateWithoutCampaignInput, AiCampaignRecipientUncheckedUpdateWithoutCampaignInput>
+    create: XOR<AiCampaignRecipientCreateWithoutCampaignInput, AiCampaignRecipientUncheckedCreateWithoutCampaignInput>
+  }
+
+  export type AiCampaignRecipientUpdateWithWhereUniqueWithoutCampaignInput = {
+    where: AiCampaignRecipientWhereUniqueInput
+    data: XOR<AiCampaignRecipientUpdateWithoutCampaignInput, AiCampaignRecipientUncheckedUpdateWithoutCampaignInput>
+  }
+
+  export type AiCampaignRecipientUpdateManyWithWhereWithoutCampaignInput = {
+    where: AiCampaignRecipientScalarWhereInput
+    data: XOR<AiCampaignRecipientUpdateManyMutationInput, AiCampaignRecipientUncheckedUpdateManyWithoutCampaignInput>
+  }
+
+  export type AiCampaignRecipientScalarWhereInput = {
+    AND?: AiCampaignRecipientScalarWhereInput | AiCampaignRecipientScalarWhereInput[]
+    OR?: AiCampaignRecipientScalarWhereInput[]
+    NOT?: AiCampaignRecipientScalarWhereInput | AiCampaignRecipientScalarWhereInput[]
+    id?: StringFilter<"AiCampaignRecipient"> | string
+    campaignId?: StringFilter<"AiCampaignRecipient"> | string
+    customerId?: StringNullableFilter<"AiCampaignRecipient"> | string | null
+    email?: StringFilter<"AiCampaignRecipient"> | string
+    firstName?: StringNullableFilter<"AiCampaignRecipient"> | string | null
+    subjectRendered?: StringNullableFilter<"AiCampaignRecipient"> | string | null
+    bodyRendered?: StringNullableFilter<"AiCampaignRecipient"> | string | null
+    status?: StringFilter<"AiCampaignRecipient"> | string
+    emailLogId?: StringNullableFilter<"AiCampaignRecipient"> | string | null
+    error?: StringNullableFilter<"AiCampaignRecipient"> | string | null
+    sentAt?: DateTimeNullableFilter<"AiCampaignRecipient"> | Date | string | null
+    createdAt?: DateTimeFilter<"AiCampaignRecipient"> | Date | string
+  }
+
+  export type AiCampaignCreateWithoutRecipientsInput = {
+    id?: string
+    name: string
+    goal?: string | null
+    audienceJson: JsonNullValueInput | InputJsonValue
+    subjectTemplate: string
+    bodyTemplate: string
+    ctaLabel?: string | null
+    ctaUrl?: string | null
+    status?: string
+    recipientCount?: number
+    sentCount?: number
+    failedCount?: number
+    skippedCount?: number
+    generatedBy?: string
+    usedFallback?: boolean
+    approvedBy?: string | null
+    approvedAt?: Date | string | null
+    sentAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type AiCampaignUncheckedCreateWithoutRecipientsInput = {
+    id?: string
+    name: string
+    goal?: string | null
+    audienceJson: JsonNullValueInput | InputJsonValue
+    subjectTemplate: string
+    bodyTemplate: string
+    ctaLabel?: string | null
+    ctaUrl?: string | null
+    status?: string
+    recipientCount?: number
+    sentCount?: number
+    failedCount?: number
+    skippedCount?: number
+    generatedBy?: string
+    usedFallback?: boolean
+    approvedBy?: string | null
+    approvedAt?: Date | string | null
+    sentAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type AiCampaignCreateOrConnectWithoutRecipientsInput = {
+    where: AiCampaignWhereUniqueInput
+    create: XOR<AiCampaignCreateWithoutRecipientsInput, AiCampaignUncheckedCreateWithoutRecipientsInput>
+  }
+
+  export type AiCampaignUpsertWithoutRecipientsInput = {
+    update: XOR<AiCampaignUpdateWithoutRecipientsInput, AiCampaignUncheckedUpdateWithoutRecipientsInput>
+    create: XOR<AiCampaignCreateWithoutRecipientsInput, AiCampaignUncheckedCreateWithoutRecipientsInput>
+    where?: AiCampaignWhereInput
+  }
+
+  export type AiCampaignUpdateToOneWithWhereWithoutRecipientsInput = {
+    where?: AiCampaignWhereInput
+    data: XOR<AiCampaignUpdateWithoutRecipientsInput, AiCampaignUncheckedUpdateWithoutRecipientsInput>
+  }
+
+  export type AiCampaignUpdateWithoutRecipientsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    goal?: NullableStringFieldUpdateOperationsInput | string | null
+    audienceJson?: JsonNullValueInput | InputJsonValue
+    subjectTemplate?: StringFieldUpdateOperationsInput | string
+    bodyTemplate?: StringFieldUpdateOperationsInput | string
+    ctaLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    ctaUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    recipientCount?: IntFieldUpdateOperationsInput | number
+    sentCount?: IntFieldUpdateOperationsInput | number
+    failedCount?: IntFieldUpdateOperationsInput | number
+    skippedCount?: IntFieldUpdateOperationsInput | number
+    generatedBy?: StringFieldUpdateOperationsInput | string
+    usedFallback?: BoolFieldUpdateOperationsInput | boolean
+    approvedBy?: NullableStringFieldUpdateOperationsInput | string | null
+    approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    sentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AiCampaignUncheckedUpdateWithoutRecipientsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    goal?: NullableStringFieldUpdateOperationsInput | string | null
+    audienceJson?: JsonNullValueInput | InputJsonValue
+    subjectTemplate?: StringFieldUpdateOperationsInput | string
+    bodyTemplate?: StringFieldUpdateOperationsInput | string
+    ctaLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    ctaUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    recipientCount?: IntFieldUpdateOperationsInput | number
+    sentCount?: IntFieldUpdateOperationsInput | number
+    failedCount?: IntFieldUpdateOperationsInput | number
+    skippedCount?: IntFieldUpdateOperationsInput | number
+    generatedBy?: StringFieldUpdateOperationsInput | string
+    usedFallback?: BoolFieldUpdateOperationsInput | boolean
+    approvedBy?: NullableStringFieldUpdateOperationsInput | string | null
+    approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    sentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type CommentCreateManyPostInput = {
     id?: string
     parentId?: string | null
@@ -58072,6 +64511,62 @@ export namespace Prisma {
     role?: StringFieldUpdateOperationsInput | string
     content?: StringFieldUpdateOperationsInput | string
     authorLabel?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AiCampaignRecipientCreateManyCampaignInput = {
+    id?: string
+    customerId?: string | null
+    email: string
+    firstName?: string | null
+    subjectRendered?: string | null
+    bodyRendered?: string | null
+    status?: string
+    emailLogId?: string | null
+    error?: string | null
+    sentAt?: Date | string | null
+    createdAt?: Date | string
+  }
+
+  export type AiCampaignRecipientUpdateWithoutCampaignInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    customerId?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: StringFieldUpdateOperationsInput | string
+    firstName?: NullableStringFieldUpdateOperationsInput | string | null
+    subjectRendered?: NullableStringFieldUpdateOperationsInput | string | null
+    bodyRendered?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    emailLogId?: NullableStringFieldUpdateOperationsInput | string | null
+    error?: NullableStringFieldUpdateOperationsInput | string | null
+    sentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AiCampaignRecipientUncheckedUpdateWithoutCampaignInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    customerId?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: StringFieldUpdateOperationsInput | string
+    firstName?: NullableStringFieldUpdateOperationsInput | string | null
+    subjectRendered?: NullableStringFieldUpdateOperationsInput | string | null
+    bodyRendered?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    emailLogId?: NullableStringFieldUpdateOperationsInput | string | null
+    error?: NullableStringFieldUpdateOperationsInput | string | null
+    sentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AiCampaignRecipientUncheckedUpdateManyWithoutCampaignInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    customerId?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: StringFieldUpdateOperationsInput | string
+    firstName?: NullableStringFieldUpdateOperationsInput | string | null
+    subjectRendered?: NullableStringFieldUpdateOperationsInput | string | null
+    bodyRendered?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    emailLogId?: NullableStringFieldUpdateOperationsInput | string | null
+    error?: NullableStringFieldUpdateOperationsInput | string | null
+    sentAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 

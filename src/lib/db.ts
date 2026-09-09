@@ -50,7 +50,7 @@ const globalForPrisma = globalThis as unknown as {
  * mid-development (e.g. new models added): if the key changes, a fresh
  * client is instantiated instead of reusing the outdated global one.
  */
-const PRISMA_CACHE_KEY = 'schema-v15-b11-ai-chat'
+const PRISMA_CACHE_KEY = 'schema-v16-b12-ai-autonomy'
 
 /* ── JSON bridge: the Json columns (see prisma/schema.prisma) ──── */
 
@@ -81,6 +81,17 @@ const JSON_FIELD_NAMES = new Set([
   'policiesJson',     // AiKnowledge (Batch 11)
   'servicesJson',     // AiKnowledge (Batch 11)
   'educationJson',    // AiKnowledge (Batch 11)
+  // ── Batch 12 (AI autonomy §52–§57): the AiAutonomyConfig map /
+  // allowlist columns, AiActionLog snapshots and the AiCampaign
+  // audience filter — same bridge contract, sqlite twin writes
+  // would silently fail without them.
+  'levelsJson',             // AiAutonomyConfig (§53 action → level)
+  'allowedRecipientsJson',  // AiAutonomyConfig (§52)
+  'allowedServicesJson',    // AiAutonomyConfig (§52)
+  'escalationRulesJson',    // AiAutonomyConfig (§52)
+  'prohibitedActionsJson',  // AiAutonomyConfig (§52)
+  'resultJson',       // AiActionLog (§55 delivery result)
+  'audienceJson',     // AiCampaign (§56 filter snapshot)
 ])
 
 const WRITE_OPERATIONS = new Set([

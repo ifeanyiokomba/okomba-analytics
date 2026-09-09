@@ -688,6 +688,73 @@ exports.Prisma.AiAuditLogScalarFieldEnum = {
   createdAt: 'createdAt'
 };
 
+exports.Prisma.AiAutonomyConfigScalarFieldEnum = {
+  id: 'id',
+  enabled: 'enabled',
+  levelsJson: 'levelsJson',
+  maxEmailsPerDay: 'maxEmailsPerDay',
+  allowedRecipientsJson: 'allowedRecipientsJson',
+  allowedServicesJson: 'allowedServicesJson',
+  escalationRulesJson: 'escalationRulesJson',
+  prohibitedActionsJson: 'prohibitedActionsJson',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.AiActionLogScalarFieldEnum = {
+  id: 'id',
+  action: 'action',
+  trigger: 'trigger',
+  level: 'level',
+  status: 'status',
+  customerEmail: 'customerEmail',
+  inquiryId: 'inquiryId',
+  draftJson: 'draftJson',
+  resultJson: 'resultJson',
+  model: 'model',
+  error: 'error',
+  actor: 'actor',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.AiCampaignScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  goal: 'goal',
+  audienceJson: 'audienceJson',
+  subjectTemplate: 'subjectTemplate',
+  bodyTemplate: 'bodyTemplate',
+  ctaLabel: 'ctaLabel',
+  ctaUrl: 'ctaUrl',
+  status: 'status',
+  recipientCount: 'recipientCount',
+  sentCount: 'sentCount',
+  failedCount: 'failedCount',
+  skippedCount: 'skippedCount',
+  generatedBy: 'generatedBy',
+  usedFallback: 'usedFallback',
+  approvedBy: 'approvedBy',
+  approvedAt: 'approvedAt',
+  sentAt: 'sentAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.AiCampaignRecipientScalarFieldEnum = {
+  id: 'id',
+  campaignId: 'campaignId',
+  customerId: 'customerId',
+  email: 'email',
+  firstName: 'firstName',
+  subjectRendered: 'subjectRendered',
+  bodyRendered: 'bodyRendered',
+  status: 'status',
+  emailLogId: 'emailLogId',
+  error: 'error',
+  sentAt: 'sentAt',
+  createdAt: 'createdAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -753,7 +820,11 @@ exports.Prisma.ModelName = {
   AiKnowledge: 'AiKnowledge',
   ChatConversation: 'ChatConversation',
   ChatMessage: 'ChatMessage',
-  AiAuditLog: 'AiAuditLog'
+  AiAuditLog: 'AiAuditLog',
+  AiAutonomyConfig: 'AiAutonomyConfig',
+  AiActionLog: 'AiActionLog',
+  AiCampaign: 'AiCampaign',
+  AiCampaignRecipient: 'AiCampaignRecipient'
 };
 
 /**

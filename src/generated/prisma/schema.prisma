@@ -998,3 +998,107 @@ model AiAuditLog {
   @@index([action])
   @@index([conversationId])
 }
+
+/**
+ * ── Batch 12 (§52) — AI autonomy control center ──────────────────
+ * Singleton config row (id="singleton", AiKnowledge pattern):
+ * master switch, per-action approval levels (§53), daily email
+ * budget, recipient/service allowlists, escalation rules and the
+ * never-do list. SAFE defaults are seeded by src/lib/ai-autonomy.ts
+ * (enabled=false — autonomy ships dark; every action "review").
+ */
+model AiAutonomyConfig {
+  id                    String   @id @default("singleton")
+  enabled               Boolean  @default(false) // §52 master switch
+  levelsJson            Json     @default("{}") // §53 action → level map
+  maxEmailsPerDay       Int      @default(50) // §52 budget
+  allowedRecipientsJson Json     @default("[]") // §52 email/domain allowlist (empty = all)
+  allowedServicesJson   Json     @default("[]") // §52 service allowlist (empty = all)
+  escalationRulesJson   Json     @default("{}") // §52 escalate conditions
+  prohibitedActionsJson Json     @default("[]") // §52 never-do
+  updatedAt             DateTime @updatedAt
+}
+
+/**
+ * ── Batch 12 (§54/§55) — AI action ledger ────────────────────────
+ * Every (semi-)autonomous AI action gets one row: what it wanted to
+ * do, who/what triggered it, the evaluated approval level, the
+ * lifecycle status, the generated content snapshot (draftJson) and
+ * the delivery result (resultJson). Pending rows are the admin's
+ * approval queue (approve/decline routes).
+ */
+model AiActionLog {
+  id            String   @id @default(cuid())
+  action        String // proposal.draft | proposal.send | email.followup | campaign.send | followup.schedule
+  trigger       String // inquiry | admin | cron | chat
+  level         String // suggest | review | semi_autonomous | autonomous (evaluated)
+  status        String // suggested | pending_approval | executing | executed | declined | blocked | failed
+  customerEmail String?
+  inquiryId     String?
+  draftJson     Json? // §55 generated content snapshot (subject/body/amount/service/proposalPreview…)
+  resultJson    Json? // §55 delivery result (invoiceNumber/emailLogId/sentCount/error…)
+  model         String? // generator identity ("zai-chat" | "fallback-template")
+  error         String?
+  actor         String? // approver email on approve/decline
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([status, createdAt])
+  @@index([action, createdAt])
+}
+
+/**
+ * ── Batch 12 (§56) — AI mass-email campaign ──────────────────────
+ * Admin briefs a goal; the AI drafts subject/body templates with
+ * §57 {{tokens}}; the admin previews per-recipient renders, edits,
+ * approves, then sends (batched, rate-limited, budget-gated).
+ */
+model AiCampaign {
+  id              String                @id @default(cuid())
+  name            String
+  goal            String? // admin's brief for the AI
+  audienceJson    Json // §56 filter snapshot
+  subjectTemplate String
+  bodyTemplate    String // §57 {{tokens}}
+  ctaLabel        String?
+  ctaUrl          String?
+  status          String                @default("draft") // draft | pending_approval | approved | sending | sent | partial | failed
+  recipientCount  Int                   @default(0)
+  sentCount       Int                   @default(0)
+  failedCount     Int                   @default(0)
+  skippedCount    Int                   @default(0)
+  generatedBy     String                @default("ai")
+  usedFallback    Boolean               @default(false)
+  approvedBy      String?
+  approvedAt      DateTime?
+  sentAt          DateTime?
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @updatedAt
+  recipients      AiCampaignRecipient[]
+
+  @@index([status, createdAt])
+}
+
+/**
+ * §57 — per-recipient materialization: each row is rendered ONLY
+ * from that recipient's own CRM data (privacy rule: one recipient's
+ * values never feed another's render).
+ */
+model AiCampaignRecipient {
+  id              String     @id @default(cuid())
+  campaignId      String
+  campaign        AiCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  customerId      String?
+  email           String
+  firstName       String?
+  subjectRendered String?
+  bodyRendered    String? // §57 per-recipient render
+  status          String     @default("queued") // queued | sent | failed | skipped
+  emailLogId      String?
+  error           String?
+  sentAt          DateTime?
+  createdAt       DateTime   @default(now())
+
+  @@unique([campaignId, email])
+  @@index([campaignId, status])
+}

@@ -73,6 +73,18 @@ export function startCronJobs(): void {
         } catch (err) {
           console.error("[cron] event reminder scan failed:", err);
         }
+        /* BATCH 12 (§55) — AI follow-up autonomy chained last (same
+           isolated dynamic-import pattern): processes EventRecord rows
+           of type "ai.followup" through the §53 policy gate. */
+        try {
+          const { runAiFollowupScan } = await import("@/lib/ai-email");
+          const r = await runAiFollowupScan({ trigger: "cron" });
+          console.log(
+            `[cron] AI followup scan — ${r.sent} sent, ${r.parked} parked, ${r.blocked} blocked, ${r.failed} failed (${r.scanned} due)`
+          );
+        } catch (err) {
+          console.error("[cron] AI followup scan failed:", err);
+        }
       },
       { timezone: "Africa/Lagos" }
     );
