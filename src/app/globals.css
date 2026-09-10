@@ -509,6 +509,22 @@
   from { width: 0%; }
   to { width: 100%; }
 }
+/* ── Batch 13 · Okomba Learning student portal (§64–67) ── */
+@keyframes lp-toast-in {
+  from { transform: translateY(16px) scale(0.97); opacity: 0; }
+  to { transform: translateY(0) scale(1); opacity: 1; }
+}
+@keyframes lp-fade-up {
+  from { transform: translateY(10px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+@keyframes lp-pop {
+  0% { transform: scale(0.8); opacity: 0; }
+  70% { transform: scale(1.04); }
+  100% { transform: scale(1); opacity: 1; }
+}
+.lp-anim-fade-up { animation: lp-fade-up 0.45s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.lp-anim-pop { animation: lp-pop 0.5s cubic-bezier(0.22, 1, 0.36, 1) both; }
 
 .animate-float-slow { animation: float-slow 7s ease-in-out infinite; }
 .animate-float-med { animation: float-med 5.5s ease-in-out infinite; }

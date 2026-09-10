@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ArrowRight, Mail, Menu, Phone, X } from "lucide-react";
+import { ArrowRight, GraduationCap, Mail, Menu, Phone, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { CONTACT } from "@/lib/content";
 import { OkombaNavLogo } from "./logo";
@@ -81,6 +81,13 @@ export function Navbar({ onGetStarted }: NavbarProps) {
     });
   };
 
+  // §64–67 — Okomba Learning student portal entry (hash route).
+  const goLearning = () => {
+    setOpen(false);
+    if (window.location.hash.startsWith("#/learning")) return;
+    window.location.hash = "#/learning";
+  };
+
   return (
     <>
       <header
@@ -136,6 +143,16 @@ export function Navbar({ onGetStarted }: NavbarProps) {
           </ul>
 
           <div className="flex items-center gap-3">
+            {/* §64–67 — Okomba Learning entry (before the WhatsApp pill) */}
+            <button
+              onClick={goLearning}
+              aria-label="Okomba Learning — free courses"
+              className="hidden items-center gap-2 rounded-full border border-gold/30 bg-gold-dim px-4 py-2 text-[13px] font-semibold text-gold-dark transition-all hover:border-gold/60 hover:bg-gold-dim/70 focus-visible:outline-2 focus-visible:outline-gold md:inline-flex"
+            >
+              <GraduationCap size={15} aria-hidden="true" />
+              Learning
+            </button>
+
             <a
               href={CONTACT.whatsapp}
               target="_blank"
@@ -181,6 +198,23 @@ export function Navbar({ onGetStarted }: NavbarProps) {
         aria-label="Mobile navigation"
       >
         <div className="container-xl flex h-full flex-col overflow-y-auto pb-10 pt-[104px]">
+          {/* §64–67 — Learning portal (highlighted first entry) */}
+          <button
+            onClick={goLearning}
+            className="mb-2 flex w-full items-center justify-between rounded-2xl border border-gold/40 bg-gradient-to-r from-gold-dim to-teal-dim px-5 py-4 text-left transition-all duration-300 hover:border-gold/60"
+          >
+            <span className="flex items-center gap-3">
+              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-gold-light to-gold text-ink shadow-gold">
+                <GraduationCap size={20} aria-hidden="true" />
+              </span>
+              <span>
+                <span className="block text-[17px] font-semibold text-foreground">Okomba Learning</span>
+                <span className="block text-[12px] text-muted-foreground">Free courses · learn at your pace</span>
+              </span>
+            </span>
+            <ArrowRight size={17} className="text-gold" aria-hidden="true" />
+          </button>
+
           <ul className="flex flex-col gap-1.5">
             {NAV_LINKS.map((l, i) => (
               <li key={l.id}>

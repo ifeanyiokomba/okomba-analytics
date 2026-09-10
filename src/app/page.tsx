@@ -53,11 +53,18 @@ const ClientPortal = dynamic(
   >,
   { ssr: false, loading: () => <div className="flex min-h-screen items-center justify-center bg-[#0B0F1A]" aria-label="Loading client portal"><div className="h-8 w-8 animate-spin rounded-full border-2 border-gold border-t-transparent" /></div> }
 );
+/* §64–67 — Okomba Learning student portal (hash-routed, lazy) */
+const LearningPortal = dynamic(
+  () => import("@/components/site/learning/learning-portal").then((m) => m.LearningPortal) as Promise<
+    React.ComponentType<{ onExit: () => void }>
+  >,
+  { ssr: false, loading: () => <div className="flex min-h-screen items-center justify-center bg-background" aria-label="Loading Okomba Learning"><div className="h-8 w-8 animate-spin rounded-full border-2 border-gold border-t-transparent" /></div> }
+);
 
 type ToastData = { msg: string };
 
 export default function Home() {
-  const [route, setRoute] = useState<"home" | "admin" | { portal: string }>("home");
+  const [route, setRoute] = useState<"home" | "admin" | "learning" | { portal: string }>("home");
   const [modalService, setModalService] = useState<Service | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [showcaseOpen, setShowcaseOpen] = useState(false);
@@ -77,6 +84,10 @@ export default function Home() {
         // §44 — invite acceptance links (/#/invite/<token>) render the
         // admin portal in activation mode (see portal.tsx).
         setRoute("admin");
+      } else if (h === "#/learning" || h.startsWith("#/learning/")) {
+        // §64–67 — Okomba Learning student portal; internal view state
+        // is managed inside the portal component itself.
+        setRoute("learning");
       } else {
         setRoute("home");
       }
@@ -119,6 +130,11 @@ export default function Home() {
   // ── Admin portal view ──
   if (route === "admin") {
     return <AdminPortal onExit={() => (window.location.hash = "")} />;
+  }
+
+  // ── Okomba Learning student portal (§64–67) ──
+  if (route === "learning") {
+    return <LearningPortal onExit={() => (window.location.hash = "")} />;
   }
 
   // ── Client portal view (Module 8A — hash routing for sandbox preview) ──

@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowUp, Cookie, Mail, MapPin, Phone } from "lucide-react";
+import { ArrowUp, Cookie, GraduationCap, Mail, MapPin, Phone } from "lucide-react";
 import { CONTACT, PRODUCTS, SERVICES } from "@/lib/content";
 import { OkombaLogo, OkombaMark } from "./logo";
 
@@ -97,6 +97,17 @@ export function Footer({ onNavigate, onGetStarted }: FooterProps) {
                 </li>
               ))}
             </ul>
+            {/* §64–67 — Okomba Learning entry */}
+            <button
+              onClick={() => {
+                if (window.location.hash.startsWith("#/learning")) return;
+                window.location.hash = "#/learning";
+              }}
+              className="mt-5 inline-flex items-center gap-2 rounded-full border border-gold/30 bg-gold-dim px-3.5 py-1.5 text-[12px] font-semibold text-gold transition-colors hover:border-gold/60 focus-visible:outline-2 focus-visible:outline-gold"
+            >
+              <GraduationCap size={13} aria-hidden="true" />
+              Okomba Learning — free courses
+            </button>
             <h3 className="eyebrow mt-8 text-[10px] text-muted-foreground">Company</h3>
             <ul className="mt-5 space-y-2.5">
               {companyLinks.slice(3).map((l) => (
