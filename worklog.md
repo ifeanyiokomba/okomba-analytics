@@ -6232,3 +6232,20 @@ Stage Summary:
 - BATCH 13 (§64–§67) COMPLETE: backend (49-A) + student portal (49-B) + admin education-tools UI (49-C). Every /api/admin/learning/* route now has UI coverage.
 - The admin tab gives Okomba full course authoring (course → modules → lessons → quizzes/resources), student lifecycle (search/suspend/reactivate) and §67 announcements from one place.
 - DEVIATIONS: announcements DELETE uses /api/admin/learning/announcements/[id] (the task brief said /api/admin/announcements/[id] — the real route location wins). One commit as specced.
+
+---
+Task ID: 49-CLOSE (orchestrator)
+Agent: orchestrator
+Task: Batch 13 closeout — audit matrix flip §64–67 + independent E2E + push
+
+Work Log:
+- ORCHESTRATOR INDEPENDENT E2E (screenshots e2e-shots/task49b/01–15 + admin spot-check): #/learning portal renders (title "Okomba Learning — learn free, forever"); anonymous catalogue (2 courses w/ module/lesson/minutes meta); course detail public view (5-module curriculum, Preview badge only on first HTML lesson); signed-in course view (progressbar 25%, "You're enrolled" chip); lesson viewer (module breadcrumb, content w/ inline code chips, Lesson-complete state, Next-lesson CTA, Course outline side panel w/ all 8 lessons); quiz runner (one question per screen, radio options, question nav dots, prev/skip) → submit → results (score ring 100%, "You passed! 🎉", per-question review); §67 dashboard (Welcome back, Continue learning ×2 w/ Resume, Your progress 17% overall + per-course bars, Recent activity, Announcements global+course); sign-out → signed-out state; fresh signup (Orch Tester) → auto-login → dashboard; mobile 390×844 scrollWidth=390 on dashboard AND course detail (zero overflow); navbar "Learning" button → #/learning hash confirmed; admin → Learning tab → Overview (2 courses, 0 students, §64–67 blurb) → Courses table (both seeded courses, Published chips, Open/Edit/Unpublish/Delete actions).
+- 49-A/49-B context recovery: 49-A subagent hit context-deadline after writing all backend files (orchestrator finished: timestamps on child models, sqlite twin re-derive/regen/RESTART — remember: `bun run db:push` does NOT re-derive schema.sqlite.prisma when it already exists; must node scripts/make-sqlite-schema.mjs + bunx prisma db push --schema prisma/schema.sqlite.prisma + regen twin + restart dev server because createRequire caches the twin per process; also generated src/generated/prisma must stay DIRTY and be committed WITH schema changes). 49-B subagent also hit a network deadline AFTER writing all 8 components + wiring (tsc 0/lint clean on arrival) — orchestrator completed its E2E + cleanup + commit (8ec9200). 49-C subagent completed fully (fdcf8f6, 25 shots).
+- Audit matrix docs/implementation-audit.md line 49 §64–67 flipped ✅ with full §-by-§ record.
+- Cleanup verified: DB = 2 seeded courses, 0 students, 2 announcements (welcome + course-scoped quiz note). Gates at each commit: tsc 0 · lint clean · dev.log clean · health ok.
+- COMMITS this session: b547010 (SEO okomba.com) · 5744ee5 (49-A backend) · 8ec9200 (49-B student portal) · fdcf8f6 (49-C admin Learning tab) + this closeout commit.
+
+Stage Summary:
+- BATCH 13 (§64–67) COMPLETE: Okomba Learning live end-to-end — student portal (#/learning), 12 models/27 routes, seeded catalogue, admin Learning tab (manage_students-gated).
+- okomba.com SEO fixed & upgraded (robots 500 → clean crawl contract on production domain; sitemap; manifest; JSON-LD; canonical; portal noindex; true PNG OG image) — pre-empts the Batch 15 SEO audit line.
+- REMAINING DIRECTIVE WORK: Batch 14 (§22b + §85–87 ratings/trust/analytics/conversion) → Batch 15 (final polish audits incl. responsive/a11y/perf/security/SEO/db/API/email/payment/AI/storage). NEXT SESSION START: read §22b/§85–87, then backend-first as usual.
