@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter, Space_Grotesk, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
+import { JsonLd } from "@/components/site/json-ld";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -91,6 +92,11 @@ export const metadata: Metadata = {
     index: true,
     follow: true,
   },
+  // Canonical: all crawl signals resolve to the production domain.
+  alternates: {
+    canonical: siteUrl,
+  },
+  category: "technology",
 };
 
 export const viewport: Viewport = {
@@ -110,6 +116,8 @@ export default function RootLayout({
         className={`${inter.variable} ${spaceGrotesk.variable} ${jetbrainsMono.variable} antialiased bg-background text-foreground`}
       >
         {children}
+        {/* schema.org structured data — Organization + WebSite + FAQPage */}
+        <JsonLd />
         <Toaster />
         {/*
           Google Analytics 4 (Module 8C) is NOT loaded here unconditionally.
