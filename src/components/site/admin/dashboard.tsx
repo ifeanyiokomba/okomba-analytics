@@ -10,6 +10,7 @@ import {
   CreditCard,
   FileSignature,
   FileText,
+  GraduationCap,
   Inbox,
   LayoutDashboard,
   Loader2,
@@ -52,6 +53,7 @@ import { CustomersTab } from "./customers-tab";
 import { WhatsAppTab } from "./whatsapp-tab";
 import { AiMonitorTab } from "./ai-monitor-tab";
 import { AiCampaignsTab } from "./ai-campaigns-tab";
+import { LearningAdminTab } from "./learning-admin-tab";
 import { AiWorkflowDialog } from "./ai-workflow-dialog";
 import type { AdminPresenceResponse } from "@/lib/chat-shared";
 import { PaymentsTab } from "./payments-tab";
@@ -88,6 +90,7 @@ type Tab =
   | "whatsapp"
   | "ai"
   | "campaigns"
+  | "learning"
   | "email"
   | "settings";
 
@@ -108,6 +111,7 @@ const TABS: { id: Tab; label: string; icon: typeof Inbox }[] = [
   { id: "whatsapp", label: "WhatsApp", icon: MessageCircle },
   { id: "ai", label: "AI Monitor", icon: Bot },
   { id: "campaigns", label: "Campaigns", icon: Megaphone },
+  { id: "learning", label: "Learning", icon: GraduationCap },
   { id: "email", label: "Email log", icon: Mail },
   { id: "settings", label: "Settings", icon: Settings },
 ];
@@ -310,7 +314,9 @@ export function AdminDashboard({
               ? can("access_ai")
               : t.id === "campaigns"
                 ? can("broadcast_subscribers")
-                : true
+                : t.id === "learning"
+                  ? can("manage_students")
+                  : true
       ),
     [can]
   );
@@ -1314,6 +1320,7 @@ export function AdminDashboard({
             )}
             {tab === "ai" && <AiMonitorTab notify={notify} />}
             {tab === "campaigns" && <AiCampaignsTab notify={notify} />}
+            {tab === "learning" && <LearningAdminTab notify={notify} />}
             {tab === "email" && (
               <EmailLogTab logs={emailLogs} loading={false} total={emailLogs.length} />
             )}
