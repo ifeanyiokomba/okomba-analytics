@@ -50,7 +50,7 @@ const globalForPrisma = globalThis as unknown as {
  * mid-development (e.g. new models added): if the key changes, a fresh
  * client is instantiated instead of reusing the outdated global one.
  */
-const PRISMA_CACHE_KEY = 'schema-v16-b12-ai-autonomy'
+const PRISMA_CACHE_KEY = 'schema-v17-b13-learning'
 
 /* ── JSON bridge: the Json columns (see prisma/schema.prisma) ──── */
 
@@ -92,6 +92,11 @@ const JSON_FIELD_NAMES = new Set([
   'prohibitedActionsJson',  // AiAutonomyConfig (§52)
   'resultJson',       // AiActionLog (§55 delivery result)
   'audienceJson',     // AiCampaign (§56 filter snapshot)
+  // ── Batch 13 (§64–67 learning): quiz question options + attempt
+  // answer sheets — same bridge contract so the sqlite twin reads
+  // the same arrays/objects as postgres.
+  'options',       // QuizQuestion (§64 quiz options array)
+  'answers',       // QuizAttempt (§64 graded answer sheet)
 ])
 
 const WRITE_OPERATIONS = new Set([

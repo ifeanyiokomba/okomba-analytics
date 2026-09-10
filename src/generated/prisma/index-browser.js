@@ -755,6 +755,138 @@ exports.Prisma.AiCampaignRecipientScalarFieldEnum = {
   createdAt: 'createdAt'
 };
 
+exports.Prisma.StudentScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  email: 'email',
+  phone: 'phone',
+  country: 'country',
+  avatarUrl: 'avatarUrl',
+  passwordHash: 'passwordHash',
+  passwordSalt: 'passwordSalt',
+  status: 'status',
+  linkedCustomerEmail: 'linkedCustomerEmail',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.StudentSessionScalarFieldEnum = {
+  id: 'id',
+  token: 'token',
+  studentId: 'studentId',
+  expiresAt: 'expiresAt',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.CourseScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  slug: 'slug',
+  summary: 'summary',
+  description: 'description',
+  level: 'level',
+  coverEmoji: 'coverEmoji',
+  coverUrl: 'coverUrl',
+  priceNgn: 'priceNgn',
+  published: 'published',
+  sortOrder: 'sortOrder',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.ModuleScalarFieldEnum = {
+  id: 'id',
+  courseId: 'courseId',
+  title: 'title',
+  summary: 'summary',
+  sortOrder: 'sortOrder',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.LessonScalarFieldEnum = {
+  id: 'id',
+  moduleId: 'moduleId',
+  title: 'title',
+  kind: 'kind',
+  content: 'content',
+  videoUrl: 'videoUrl',
+  durationMinutes: 'durationMinutes',
+  isPreview: 'isPreview',
+  sortOrder: 'sortOrder',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.LessonResourceScalarFieldEnum = {
+  id: 'id',
+  lessonId: 'lessonId',
+  title: 'title',
+  url: 'url',
+  kind: 'kind',
+  sortOrder: 'sortOrder',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.QuizScalarFieldEnum = {
+  id: 'id',
+  lessonId: 'lessonId',
+  title: 'title',
+  passScore: 'passScore',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.QuizQuestionScalarFieldEnum = {
+  id: 'id',
+  quizId: 'quizId',
+  prompt: 'prompt',
+  options: 'options',
+  correctOptionId: 'correctOptionId',
+  explanation: 'explanation',
+  sortOrder: 'sortOrder',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.QuizAttemptScalarFieldEnum = {
+  id: 'id',
+  quizId: 'quizId',
+  studentId: 'studentId',
+  answers: 'answers',
+  scorePercent: 'scorePercent',
+  passed: 'passed',
+  submittedAt: 'submittedAt'
+};
+
+exports.Prisma.EnrollmentScalarFieldEnum = {
+  id: 'id',
+  studentId: 'studentId',
+  courseId: 'courseId',
+  status: 'status',
+  enrolledAt: 'enrolledAt',
+  completedAt: 'completedAt'
+};
+
+exports.Prisma.LessonProgressScalarFieldEnum = {
+  id: 'id',
+  studentId: 'studentId',
+  lessonId: 'lessonId',
+  status: 'status',
+  secondsSpent: 'secondsSpent',
+  completedAt: 'completedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.AnnouncementScalarFieldEnum = {
+  id: 'id',
+  audience: 'audience',
+  courseId: 'courseId',
+  title: 'title',
+  body: 'body',
+  createdAt: 'createdAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -824,7 +956,19 @@ exports.Prisma.ModelName = {
   AiAutonomyConfig: 'AiAutonomyConfig',
   AiActionLog: 'AiActionLog',
   AiCampaign: 'AiCampaign',
-  AiCampaignRecipient: 'AiCampaignRecipient'
+  AiCampaignRecipient: 'AiCampaignRecipient',
+  Student: 'Student',
+  StudentSession: 'StudentSession',
+  Course: 'Course',
+  Module: 'Module',
+  Lesson: 'Lesson',
+  LessonResource: 'LessonResource',
+  Quiz: 'Quiz',
+  QuizQuestion: 'QuizQuestion',
+  QuizAttempt: 'QuizAttempt',
+  Enrollment: 'Enrollment',
+  LessonProgress: 'LessonProgress',
+  Announcement: 'Announcement'
 };
 
 /**

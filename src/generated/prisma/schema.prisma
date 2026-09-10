@@ -1102,3 +1102,266 @@ model AiCampaignRecipient {
   @@unique([campaignId, email])
   @@index([campaignId, status])
 }
+
+/**
+ * ══════════════════════════════════════════════════════════════════
+ * BATCH 13 (§64–§67) — OKOMBA LEARNING STUDENT PORTAL
+ * ══════════════════════════════════════════════════════════════════
+ * §64 A separate educational area ("Okomba Learning") inside the
+ * same platform. §65 education accounts are LOGICALLY SEPARATED from
+ * public CRM data (no FK to Customer — controlled linkage later;
+ * at most a plain linkedCustomerEmail string). §66 course structure:
+ * Course → Module → Lesson → Resources → Quiz → Progress.
+ * All enums are lowercase strings (house convention — no native
+ * enums for portability across the sqlite twin).
+ * ══════════════════════════════════════════════════════════════════
+ */
+
+/**
+ * §65 — student account. passwordHash/passwordSalt follow the
+ * AdminUser scrypt split (admin-rbac.ts hashPassword/verifyPassword
+ * are reused verbatim — one crypto convention platform-wide).
+ */
+model Student {
+  id                  String   @id @default(cuid())
+  name                String
+  email               String   @unique // stored lowercase
+  phone               String?
+  country             String   @default("NG") // ISO-2
+  avatarUrl           String?
+  passwordHash        String
+  passwordSalt        String
+  status              String   @default("active") // active | suspended
+  linkedCustomerEmail String? // §65 controlled linkage LATER — plain string, NO relation
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  sessions     StudentSession[]
+  enrollments  Enrollment[]
+  progress     LessonProgress[]
+  quizAttempts QuizAttempt[]
+
+  @@index([status])
+  @@index([createdAt])
+  @@index([linkedCustomerEmail])
+}
+
+/**
+ * §65 — student session. Same audit-hardened convention as
+ * AdminSession: the DB stores the SHA-256 HASH of the raw token;
+ * the httpOnly cookie `okomba_student_session` carries the raw
+ * 256-bit hex token (32+ hex chars). 30-day expiry.
+ */
+model StudentSession {
+  id        String   @id @default(cuid())
+  token     String   @unique // sha256(raw cookie token)
+  studentId String
+  student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([studentId])
+  @@index([expiresAt])
+}
+
+/**
+ * §66 — course (catalogue root). priceNgn Int (free courses for
+ * now); published gates the public catalogue.
+ */
+model Course {
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  summary     String? // short card blurb
+  description String? // full-page body
+  level       String   @default("beginner") // beginner | intermediate | advanced
+  coverEmoji  String   @default("📘")
+  coverUrl    String?
+  priceNgn    Int      @default(0)
+  published   Boolean  @default(false)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  modules       Module[]
+  enrollments   Enrollment[]
+  announcements Announcement[]
+
+  @@index([published, sortOrder])
+}
+
+/**
+ * §66 — module inside a course (HTML → CSS → JavaScript …).
+ */
+model Module {
+  id        String   @id @default(cuid())
+  courseId  String
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  title     String
+  summary   String?
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  lessons Lesson[]
+
+  @@index([courseId, sortOrder])
+}
+
+/**
+ * §66 — lesson. kind text|video; content = markdown body;
+ * isPreview flags free-preview lessons (content visible to
+ * non-enrolled visitors per the course-detail gating rule).
+ */
+model Lesson {
+  id              String   @id @default(cuid())
+  moduleId        String
+  module          Module   @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  title           String
+  kind            String   @default("text") // text | video
+  content         String? // markdown body (text lessons)
+  videoUrl        String? // video lessons
+  durationMinutes Int      @default(10)
+  isPreview       Boolean  @default(false)
+  sortOrder       Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @default(now()) @updatedAt
+
+  resources LessonResource[]
+  quiz      Quiz?
+  progress  LessonProgress[]
+
+  @@index([moduleId, sortOrder])
+}
+
+/**
+ * §64 — downloadable materials. kind pdf|link|slide|exercise.
+ */
+model LessonResource {
+  id        String   @id @default(cuid())
+  lessonId  String
+  lesson    Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  title     String
+  url       String
+  kind      String   @default("link") // pdf | link | slide | exercise
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@index([lessonId, sortOrder])
+}
+
+/**
+ * §64 — quiz, one per lesson (lessonId unique). passScore is a
+ * percent (default 70).
+ */
+model Quiz {
+  id        String   @id @default(cuid())
+  lessonId  String   @unique
+  lesson    Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  title     String
+  passScore Int      @default(70)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  questions QuizQuestion[]
+  attempts  QuizAttempt[]
+
+  @@index([lessonId])
+}
+
+/**
+ * §64 — quiz question. options is a Json ARRAY of {id, text}
+ * (Prisma primitive lists are not allowed → Json).
+ */
+model QuizQuestion {
+  id              String   @id @default(cuid())
+  quizId          String
+  quiz            Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  prompt          String
+  options         Json     @default("[]") // [{id: string, text: string}]
+  correctOptionId String
+  explanation     String?
+  sortOrder       Int      @default(0)
+  createdAt       DateTime @default(now())
+
+  @@index([quizId, sortOrder])
+}
+
+/**
+ * §64 — quiz attempt, server-graded. All attempts kept
+ * (multiple retakes allowed). answers Json [{questionId, optionId}].
+ */
+model QuizAttempt {
+  id           String   @id @default(cuid())
+  quizId       String
+  quiz         Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  studentId    String
+  student      Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  answers      Json     @default("[]") // [{questionId, optionId}]
+  scorePercent Int
+  passed       Boolean
+  submittedAt  DateTime @default(now())
+
+  @@index([quizId, studentId, submittedAt])
+  @@index([studentId, submittedAt])
+}
+
+/**
+ * §64 — enrollment. unique(studentId, courseId) → idempotent
+ * re-enroll returns the existing row. status flips to completed
+ * automatically when every lesson is completed.
+ */
+model Enrollment {
+  id          String    @id @default(cuid())
+  studentId   String
+  student     Student   @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  courseId    String
+  course      Course    @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  status      String    @default("active") // active | completed
+  enrolledAt  DateTime  @default(now())
+  completedAt DateTime?
+
+  @@unique([studentId, courseId])
+  @@index([studentId])
+  @@index([courseId])
+  @@index([status])
+}
+
+/**
+ * §64 — progress tracking per lesson per student.
+ * unique(studentId, lessonId) → upsert. secondsSpent accumulates
+ * watch-time pings.
+ */
+model LessonProgress {
+  id           String    @id @default(cuid())
+  studentId    String
+  student      Student   @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  lessonId     String
+  lesson       Lesson    @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  status       String    @default("not_started") // not_started | in_progress | completed
+  secondsSpent Int       @default(0)
+  completedAt  DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@unique([studentId, lessonId])
+  @@index([studentId, updatedAt])
+  @@index([lessonId])
+}
+
+/**
+ * §64 — admin-posted announcements. audience all|course;
+ * students see audience=all + their enrolled courses.
+ */
+model Announcement {
+  id        String   @id @default(cuid())
+  audience  String   @default("all") // all | course
+  courseId  String?
+  course    Course?  @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  title     String
+  body      String
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([courseId])
+}
